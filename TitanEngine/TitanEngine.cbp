@@ -58,6 +58,7 @@
 		<Unit filename="TitanEngine.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="definitions.h" />
 		<Unit filename="dllmain.cpp" />
 		<Unit filename="resource.h" />
 		<Unit filename="stdafx.cpp" />

@@ -15,7 +15,7 @@
 #include <Winternl.h>
 
 #if !defined(_WIN64)
-	#include "aplib.h"
+#include "aplib.h"
 #endif
 #include "LzmaDec.h"
 
@@ -52,199 +52,219 @@
 #define UE_OPTION_IMPORTER_RETURN_NEAREST_APINAME 12
 #define UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER 13
 
-typedef struct{
-	char PluginName[64];
-	DWORD PluginMajorVersion;
-	DWORD PluginMinorVersion;
-	HMODULE PluginBaseAddress;
-	void* TitanDebuggingCallBack;
-	void* TitanRegisterPlugin;
-	void* TitanReleasePlugin;
-	void* TitanResetPlugin;
-	bool PluginDisabled;
-}PluginInformation, *PPluginInformation;
+typedef struct
+{
+    char PluginName[64];
+    DWORD PluginMajorVersion;
+    DWORD PluginMinorVersion;
+    HMODULE PluginBaseAddress;
+    void* TitanDebuggingCallBack;
+    void* TitanRegisterPlugin;
+    void* TitanReleasePlugin;
+    void* TitanResetPlugin;
+    bool PluginDisabled;
+} PluginInformation, *PPluginInformation;
 
-typedef struct{
-	ULONG_PTR BreakPointAddress;
-	ULONG_PTR Parameter1;
-	ULONG_PTR Parameter2;
-	int SnapShotNumber;
-	bool SingleBreak;
-}UnpackerInformation, *PUnpackerInformation;
+typedef struct
+{
+    ULONG_PTR BreakPointAddress;
+    ULONG_PTR Parameter1;
+    ULONG_PTR Parameter2;
+    int SnapShotNumber;
+    bool SingleBreak;
+} UnpackerInformation, *PUnpackerInformation;
 
-typedef struct{
-	bool ExpertModeActive;
-	wchar_t* szFileName;
-	bool ReserveModuleBase;
-	wchar_t* szCommandLine;
-	wchar_t* szCurrentFolder;
-	LPVOID EntryCallBack;
-}ExpertDebug, *PExpertDebug;
+typedef struct
+{
+    bool ExpertModeActive;
+    wchar_t* szFileName;
+    bool ReserveModuleBase;
+    wchar_t* szCommandLine;
+    wchar_t* szCurrentFolder;
+    LPVOID EntryCallBack;
+} ExpertDebug, *PExpertDebug;
 
-typedef struct{
-	ULONG_PTR fLoadLibrary;
-	ULONG_PTR fFreeLibrary;
-	ULONG_PTR fGetModuleHandle;
-	ULONG_PTR fGetProcAddress;
-	ULONG_PTR fVirtualFree;
-	ULONG_PTR fExitProcess;
-	HMODULE fFreeLibraryHandle;
-	DWORD fExitProcessCode;
-}InjectCodeData, *PInjectCodeData;
+typedef struct
+{
+    ULONG_PTR fLoadLibrary;
+    ULONG_PTR fFreeLibrary;
+    ULONG_PTR fGetModuleHandle;
+    ULONG_PTR fGetProcAddress;
+    ULONG_PTR fVirtualFree;
+    ULONG_PTR fExitProcess;
+    HMODULE fFreeLibraryHandle;
+    DWORD fExitProcessCode;
+} InjectCodeData, *PInjectCodeData;
 
-typedef struct{
-	ULONG_PTR fTrace;
-	ULONG_PTR fCreateFileA;
-	ULONG_PTR fCloseHandle;
-	ULONG_PTR fCreateFileMappingA;
-	ULONG_PTR AddressToTrace;
-}InjectImpRecCodeData, *PInjectImpRecCodeData;
+typedef struct
+{
+    ULONG_PTR fTrace;
+    ULONG_PTR fCreateFileA;
+    ULONG_PTR fCloseHandle;
+    ULONG_PTR fCreateFileMappingA;
+    ULONG_PTR AddressToTrace;
+} InjectImpRecCodeData, *PInjectImpRecCodeData;
 
 #define UE_MAX_BREAKPOINT_SIZE 2
 #define UE_BREAKPOINT_INT3 1
 #define UE_BREAKPOINT_LONG_INT3 2
 #define UE_BREAKPOINT_UD2 3
 
-typedef struct{
-	BYTE BreakPointActive;
-	ULONG_PTR BreakPointAddress;
-	DWORD BreakPointSize;
-	BYTE OriginalByte[10];
-	int BreakPointType;
-	int AdvancedBreakPointType;
-	int MemoryBpxRestoreOnHit;
-	DWORD NumberOfExecutions;
-	DWORD CmpRegister;
-	int CmpCondition;
-	ULONG_PTR CmpValue;
-	ULONG_PTR ExecuteCallBack;
-	ULONG_PTR CompareCallBack;
-	ULONG_PTR RemoveCallBack;
-	DWORD UniqueLinkId;
-}BreakPointDetail, *PBreakPointDetail;
+typedef struct
+{
+    BYTE BreakPointActive;
+    ULONG_PTR BreakPointAddress;
+    DWORD BreakPointSize;
+    BYTE OriginalByte[10];
+    int BreakPointType;
+    int AdvancedBreakPointType;
+    int MemoryBpxRestoreOnHit;
+    DWORD NumberOfExecutions;
+    DWORD CmpRegister;
+    int CmpCondition;
+    ULONG_PTR CmpValue;
+    ULONG_PTR ExecuteCallBack;
+    ULONG_PTR CompareCallBack;
+    ULONG_PTR RemoveCallBack;
+    DWORD UniqueLinkId;
+} BreakPointDetail, *PBreakPointDetail;
 
-typedef struct{
-	bool DrxEnabled;
-	bool DrxExecution;
-	DWORD DrxBreakPointType;
-	DWORD DrxBreakPointSize;
-	ULONG_PTR DrxBreakAddress;
-	ULONG_PTR DrxCallBack;
-}HARDWARE_DATA, *PHARDWARE_DATA;
+typedef struct
+{
+    bool DrxEnabled;
+    bool DrxExecution;
+    DWORD DrxBreakPointType;
+    DWORD DrxBreakPointSize;
+    ULONG_PTR DrxBreakAddress;
+    ULONG_PTR DrxCallBack;
+} HARDWARE_DATA, *PHARDWARE_DATA;
 
-typedef struct{
-	ULONG_PTR chBreakPoint;
-	ULONG_PTR chSingleStep;
-	ULONG_PTR chAccessViolation;
-	ULONG_PTR chIllegalInstruction;
-	ULONG_PTR chNonContinuableException;
-	ULONG_PTR chArrayBoundsException;
-	ULONG_PTR chFloatDenormalOperand;
-	ULONG_PTR chFloatDevideByZero;
-	ULONG_PTR chIntegerDevideByZero;
-	ULONG_PTR chIntegerOverflow;
-	ULONG_PTR chPrivilegedInstruction;
-	ULONG_PTR chPageGuard;
-	ULONG_PTR chEverythingElse;
-	ULONG_PTR chCreateThread;
-	ULONG_PTR chExitThread;
-	ULONG_PTR chCreateProcess;
-	ULONG_PTR chExitProcess;
-	ULONG_PTR chLoadDll;
-	ULONG_PTR chUnloadDll;
-	ULONG_PTR chOutputDebugString;
-	ULONG_PTR chAfterException;
-	ULONG_PTR chSystemBreakpoint;
-	ULONG_PTR chUnhandledException;
-	ULONG_PTR chAfterUnhandledException;
-}CustomHandler, *PCustomHandler;
+typedef struct
+{
+    ULONG_PTR chBreakPoint;
+    ULONG_PTR chSingleStep;
+    ULONG_PTR chAccessViolation;
+    ULONG_PTR chIllegalInstruction;
+    ULONG_PTR chNonContinuableException;
+    ULONG_PTR chArrayBoundsException;
+    ULONG_PTR chFloatDenormalOperand;
+    ULONG_PTR chFloatDevideByZero;
+    ULONG_PTR chIntegerDevideByZero;
+    ULONG_PTR chIntegerOverflow;
+    ULONG_PTR chPrivilegedInstruction;
+    ULONG_PTR chPageGuard;
+    ULONG_PTR chEverythingElse;
+    ULONG_PTR chCreateThread;
+    ULONG_PTR chExitThread;
+    ULONG_PTR chCreateProcess;
+    ULONG_PTR chExitProcess;
+    ULONG_PTR chLoadDll;
+    ULONG_PTR chUnloadDll;
+    ULONG_PTR chOutputDebugString;
+    ULONG_PTR chAfterException;
+    ULONG_PTR chSystemBreakpoint;
+    ULONG_PTR chUnhandledException;
+    ULONG_PTR chAfterUnhandledException;
+} CustomHandler, *PCustomHandler;
 
-typedef struct{
-	DWORD OrdinalBase;
-	DWORD NumberOfExportFunctions;
-	char FileName[512];
-}EXPORT_DATA, *PEXPORT_DATA;
+typedef struct
+{
+    DWORD OrdinalBase;
+    DWORD NumberOfExportFunctions;
+    char FileName[512];
+} EXPORT_DATA, *PEXPORT_DATA;
 
-typedef struct{
-	DWORD ExportedItem;
-}EXPORTED_DATA, *PEXPORTED_DATA;
+typedef struct
+{
+    DWORD ExportedItem;
+} EXPORTED_DATA, *PEXPORTED_DATA;
 
-typedef struct{
-	WORD OrdinalNumber;
-}EXPORTED_DATA_WORD, *PEXPORTED_DATA_WORD;
+typedef struct
+{
+    WORD OrdinalNumber;
+} EXPORTED_DATA_WORD, *PEXPORTED_DATA_WORD;
 
-typedef struct{
-	BYTE DataByte[50];
-}MEMORY_CMP_HANDLER, *PMEMORY_CMP_HANDLER;
+typedef struct
+{
+    BYTE DataByte[50];
+} MEMORY_CMP_HANDLER, *PMEMORY_CMP_HANDLER;
 
-typedef struct{
-	BYTE DataByte;
-}MEMORY_CMP_BYTE_HANDLER, *PMEMORY_CMP_BYTE_HANDLER;
+typedef struct
+{
+    BYTE DataByte;
+} MEMORY_CMP_BYTE_HANDLER, *PMEMORY_CMP_BYTE_HANDLER;
 
-typedef struct MEMORY_COMPARE_HANDLER{
-	union {
-		BYTE bArrayEntry[1];
-		WORD wArrayEntry[1];
-		DWORD dwArrayEntry[1];
-		DWORD64 qwArrayEntry[1];
-	} Array;
-}MEMORY_COMPARE_HANDLER, *PMEMORY_COMPARE_HANDLER;
+typedef struct MEMORY_COMPARE_HANDLER
+{
+    union
+    {
+        BYTE bArrayEntry[1];
+        WORD wArrayEntry[1];
+        DWORD dwArrayEntry[1];
+        DWORD64 qwArrayEntry[1];
+    } Array;
+} MEMORY_COMPARE_HANDLER, *PMEMORY_COMPARE_HANDLER;
 
 #define MAX_DEBUG_DATA 512
 
-typedef struct{
-	HANDLE hThread;
-	DWORD dwThreadId;
-	void* ThreadStartAddress;
-	void* ThreadLocalBase;
-}THREAD_ITEM_DATA, *PTHREAD_ITEM_DATA;
+typedef struct
+{
+    HANDLE hThread;
+    DWORD dwThreadId;
+    void* ThreadStartAddress;
+    void* ThreadLocalBase;
+} THREAD_ITEM_DATA, *PTHREAD_ITEM_DATA;
 
-typedef struct{
-	HANDLE hProcess;
-	DWORD dwProcessId;
-	HANDLE hThread;
-	DWORD dwThreadId;
-	HANDLE hFile;
-	void* BaseOfImage;
-	void* ThreadStartAddress;
-	void* ThreadLocalBase;
-}PROCESS_ITEM_DATA, *PPROCESS_ITEM_DATA;
-
-typedef struct{
+typedef struct
+{
+    HANDLE hProcess;
+    DWORD dwProcessId;
+    HANDLE hThread;
+    DWORD dwThreadId;
     HANDLE hFile;
-	void* BaseOfDll;
-	HANDLE hFileMapping;
-	void* hFileMappingView;
-	char szLibraryPath[MAX_PATH];
-	char szLibraryName[MAX_PATH];
-}LIBRARY_ITEM_DATA, *PLIBRARY_ITEM_DATA;
+    void* BaseOfImage;
+    void* ThreadStartAddress;
+    void* ThreadLocalBase;
+} PROCESS_ITEM_DATA, *PPROCESS_ITEM_DATA;
 
-typedef struct{
+typedef struct
+{
     HANDLE hFile;
-	void* BaseOfDll;
-	HANDLE hFileMapping;
-	void* hFileMappingView;
-	wchar_t szLibraryPath[MAX_PATH];
-	wchar_t szLibraryName[MAX_PATH];
-}LIBRARY_ITEM_DATAW, *PLIBRARY_ITEM_DATAW;
+    void* BaseOfDll;
+    HANDLE hFileMapping;
+    void* hFileMappingView;
+    char szLibraryPath[MAX_PATH];
+    char szLibraryName[MAX_PATH];
+} LIBRARY_ITEM_DATA, *PLIBRARY_ITEM_DATA;
+
+typedef struct
+{
+    HANDLE hFile;
+    void* BaseOfDll;
+    HANDLE hFileMapping;
+    void* hFileMappingView;
+    wchar_t szLibraryPath[MAX_PATH];
+    wchar_t szLibraryName[MAX_PATH];
+} LIBRARY_ITEM_DATAW, *PLIBRARY_ITEM_DATAW;
 
 #define MAX_LIBRARY_BPX 64
 #define UE_ON_LIB_LOAD 1
 #define UE_ON_LIB_UNLOAD 2
 #define UE_ON_LIB_ALL 3
 
-typedef struct{
-	char szLibraryName[128];
-	void* bpxCallBack;
-	bool bpxSingleShoot;
-	int bpxType;
-}LIBRARY_BREAK_DATA, *PLIBRARY_BREAK_DATA;
+typedef struct
+{
+    char szLibraryName[128];
+    void* bpxCallBack;
+    bool bpxSingleShoot;
+    int bpxType;
+} LIBRARY_BREAK_DATA, *PLIBRARY_BREAK_DATA;
 
 #define TEE_MAXIMUM_HOOK_SIZE 14
 #if defined(_WIN64)
-	#define TEE_MAXIMUM_HOOK_INSERT_SIZE 14
+#define TEE_MAXIMUM_HOOK_INSERT_SIZE 14
 #else
-	#define TEE_MAXIMUM_HOOK_INSERT_SIZE 5
+#define TEE_MAXIMUM_HOOK_INSERT_SIZE 5
 #endif
 
 #define TEE_HOOK_NRM_JUMP 1
@@ -252,22 +272,23 @@ typedef struct{
 #define TEE_HOOK_IAT 5
 #define TEE_MAXIMUM_HOOK_RELOCS 7
 
-typedef struct HOOK_ENTRY{
-	bool IATHook;
-	BYTE HookType;
-	DWORD HookSize;
-	void* HookAddress;
-	void* RedirectionAddress;
-	BYTE HookBytes[TEE_MAXIMUM_HOOK_SIZE];
-	BYTE OriginalBytes[TEE_MAXIMUM_HOOK_SIZE];
-	void* IATHookModuleBase;
-	DWORD IATHookNameHash;
-	bool HookIsEnabled;
-	bool HookIsRemote;
-	void* PatchedEntry;
-	DWORD RelocationInfo[TEE_MAXIMUM_HOOK_RELOCS];
-	int RelocationCount;
-}HOOK_ENTRY, *PHOOK_ENTRY;
+typedef struct HOOK_ENTRY
+{
+    bool IATHook;
+    BYTE HookType;
+    DWORD HookSize;
+    void* HookAddress;
+    void* RedirectionAddress;
+    BYTE HookBytes[TEE_MAXIMUM_HOOK_SIZE];
+    BYTE OriginalBytes[TEE_MAXIMUM_HOOK_SIZE];
+    void* IATHookModuleBase;
+    DWORD IATHookNameHash;
+    bool HookIsEnabled;
+    bool HookIsRemote;
+    void* PatchedEntry;
+    DWORD RelocationInfo[TEE_MAXIMUM_HOOK_RELOCS];
+    int RelocationCount;
+} HOOK_ENTRY, *PHOOK_ENTRY;
 
 // Engine.External:
 #define UE_ACCESS_READ 0
@@ -378,10 +399,11 @@ typedef struct HOOK_ENTRY{
 #define UE_OPTION_HANDLER_RETURN_TYPENAME 4
 #define UE_OPTION_HANDLER_RETURN_TYPENAME_UNICODE 5
 
-typedef struct{
-	ULONG ProcessId;
-	HANDLE hHandle;
-}HandlerArray, *PHandlerArray;
+typedef struct
+{
+    ULONG ProcessId;
+    HANDLE hHandle;
+} HandlerArray, *PHandlerArray;
 
 #define UE_BPXREMOVED 0
 #define UE_BPXACTIVE 1
@@ -487,17 +509,18 @@ typedef struct{
 #define UE_SEG_CS 41
 #define UE_SEG_SS 42
 
-typedef struct{
-	DWORD PE32Offset;
-	DWORD ImageBase;
+typedef struct
+{
+    DWORD PE32Offset;
+    DWORD ImageBase;
     DWORD OriginalEntryPoint;
     DWORD NtSizeOfImage;
     DWORD NtSizeOfHeaders;
     WORD SizeOfOptionalHeaders;
-	DWORD FileAlignment;
+    DWORD FileAlignment;
     DWORD SectionAligment;
     DWORD ImportTableAddress;
-	DWORD ImportTableSize;
+    DWORD ImportTableSize;
     DWORD ResourceTableAddress;
     DWORD ResourceTableSize;
     DWORD ExportTableAddress;
@@ -509,22 +532,23 @@ typedef struct{
     DWORD TimeDateStamp;
     WORD SectionNumber;
     DWORD CheckSum;
-	WORD SubSystem;
-	WORD Characteristics;
-	DWORD NumberOfRvaAndSizes;
-}PE32Struct, *PPE32Struct;
+    WORD SubSystem;
+    WORD Characteristics;
+    DWORD NumberOfRvaAndSizes;
+} PE32Struct, *PPE32Struct;
 
-typedef struct{
-	DWORD PE64Offset;
-	DWORD64 ImageBase;
+typedef struct
+{
+    DWORD PE64Offset;
+    DWORD64 ImageBase;
     DWORD OriginalEntryPoint;
     DWORD NtSizeOfImage;
     DWORD NtSizeOfHeaders;
     WORD SizeOfOptionalHeaders;
-	DWORD FileAlignment;
+    DWORD FileAlignment;
     DWORD SectionAligment;
     DWORD ImportTableAddress;
-	DWORD ImportTableSize;
+    DWORD ImportTableSize;
     DWORD ResourceTableAddress;
     DWORD ResourceTableSize;
     DWORD ExportTableAddress;
@@ -536,20 +560,21 @@ typedef struct{
     DWORD TimeDateStamp;
     WORD SectionNumber;
     DWORD CheckSum;
-	WORD SubSystem;
-	WORD Characteristics;
-	DWORD NumberOfRvaAndSizes;
-}PE64Struct, *PPE64Struct;
+    WORD SubSystem;
+    WORD Characteristics;
+    DWORD NumberOfRvaAndSizes;
+} PE64Struct, *PPE64Struct;
 
-typedef struct{
-	bool NewDll;
-	int NumberOfImports;
-	ULONG_PTR ImageBase;
-	ULONG_PTR BaseImportThunk;
-	ULONG_PTR ImportThunk;
-	char* APIName;
-	char* DLLName;
-}ImportEnumData, *PImportEnumData;
+typedef struct
+{
+    bool NewDll;
+    int NumberOfImports;
+    ULONG_PTR ImageBase;
+    ULONG_PTR BaseImportThunk;
+    ULONG_PTR ImportThunk;
+    char* APIName;
+    char* DLLName;
+} ImportEnumData, *PImportEnumData;
 
 #define UE_DEPTH_SURFACE 0
 #define UE_DEPTH_DEEP 1
@@ -577,101 +602,105 @@ typedef struct{
 #define UE_RESULT_FILE_INVALID_AND_NON_FIXABLE 12
 #define UE_RESULT_FILE_INVALID_FORMAT 13
 
-typedef struct{
-	BYTE OveralEvaluation;
-	bool EvaluationTerminatedByException;
-	bool FileIs64Bit;
-	bool FileIsDLL;
-	bool FileIsConsole;
-	bool MissingDependencies;
-	bool MissingDeclaredAPIs;
-	BYTE SignatureMZ;
-	BYTE SignaturePE;
-	BYTE EntryPoint;
-	BYTE ImageBase;
-	BYTE SizeOfImage;
-	BYTE FileAlignment;
-	BYTE SectionAlignment;
-	BYTE ExportTable;
-	BYTE RelocationTable;
-	BYTE ImportTable;
-	BYTE ImportTableSection;
-	BYTE ImportTableData;
-	BYTE IATTable;
-	BYTE TLSTable;
-	BYTE LoadConfigTable;
-	BYTE BoundImportTable;
-	BYTE COMHeaderTable;
-	BYTE ResourceTable;
-	BYTE ResourceData;
-	BYTE SectionTable;
-}FILE_STATUS_INFO, *PFILE_STATUS_INFO;
+typedef struct
+{
+    BYTE OveralEvaluation;
+    bool EvaluationTerminatedByException;
+    bool FileIs64Bit;
+    bool FileIsDLL;
+    bool FileIsConsole;
+    bool MissingDependencies;
+    bool MissingDeclaredAPIs;
+    BYTE SignatureMZ;
+    BYTE SignaturePE;
+    BYTE EntryPoint;
+    BYTE ImageBase;
+    BYTE SizeOfImage;
+    BYTE FileAlignment;
+    BYTE SectionAlignment;
+    BYTE ExportTable;
+    BYTE RelocationTable;
+    BYTE ImportTable;
+    BYTE ImportTableSection;
+    BYTE ImportTableData;
+    BYTE IATTable;
+    BYTE TLSTable;
+    BYTE LoadConfigTable;
+    BYTE BoundImportTable;
+    BYTE COMHeaderTable;
+    BYTE ResourceTable;
+    BYTE ResourceData;
+    BYTE SectionTable;
+} FILE_STATUS_INFO, *PFILE_STATUS_INFO;
 
-typedef struct{
-	BYTE OveralEvaluation;
-	bool FixingTerminatedByException;
-	bool FileFixPerformed;
-	bool StrippedRelocation;
-	bool DontFixRelocations;
-	DWORD OriginalRelocationTableAddress;
-	DWORD OriginalRelocationTableSize;
-	bool StrippedExports;
-	bool DontFixExports;
-	DWORD OriginalExportTableAddress;
-	DWORD OriginalExportTableSize;
-	bool StrippedResources;
-	bool DontFixResources;
-	DWORD OriginalResourceTableAddress;
-	DWORD OriginalResourceTableSize;
-	bool StrippedTLS;
-	bool DontFixTLS;
-	DWORD OriginalTLSTableAddress;
-	DWORD OriginalTLSTableSize;
-	bool StrippedLoadConfig;
-	bool DontFixLoadConfig;
-	DWORD OriginalLoadConfigTableAddress;
-	DWORD OriginalLoadConfigTableSize;
-	bool StrippedBoundImports;
-	bool DontFixBoundImports;
-	DWORD OriginalBoundImportTableAddress;
-	DWORD OriginalBoundImportTableSize;
-	bool StrippedIAT;
-	bool DontFixIAT;
-	DWORD OriginalImportAddressTableAddress;
-	DWORD OriginalImportAddressTableSize;
-	bool StrippedCOM;
-	bool DontFixCOM;
-	DWORD OriginalCOMTableAddress;
-	DWORD OriginalCOMTableSize;
-}FILE_FIX_INFO, *PFILE_FIX_INFO;
+typedef struct
+{
+    BYTE OveralEvaluation;
+    bool FixingTerminatedByException;
+    bool FileFixPerformed;
+    bool StrippedRelocation;
+    bool DontFixRelocations;
+    DWORD OriginalRelocationTableAddress;
+    DWORD OriginalRelocationTableSize;
+    bool StrippedExports;
+    bool DontFixExports;
+    DWORD OriginalExportTableAddress;
+    DWORD OriginalExportTableSize;
+    bool StrippedResources;
+    bool DontFixResources;
+    DWORD OriginalResourceTableAddress;
+    DWORD OriginalResourceTableSize;
+    bool StrippedTLS;
+    bool DontFixTLS;
+    DWORD OriginalTLSTableAddress;
+    DWORD OriginalTLSTableSize;
+    bool StrippedLoadConfig;
+    bool DontFixLoadConfig;
+    DWORD OriginalLoadConfigTableAddress;
+    DWORD OriginalLoadConfigTableSize;
+    bool StrippedBoundImports;
+    bool DontFixBoundImports;
+    DWORD OriginalBoundImportTableAddress;
+    DWORD OriginalBoundImportTableSize;
+    bool StrippedIAT;
+    bool DontFixIAT;
+    DWORD OriginalImportAddressTableAddress;
+    DWORD OriginalImportAddressTableSize;
+    bool StrippedCOM;
+    bool DontFixCOM;
+    DWORD OriginalCOMTableAddress;
+    DWORD OriginalCOMTableSize;
+} FILE_FIX_INFO, *PFILE_FIX_INFO;
 
-typedef struct{
-	void* AllocatedSection;
-	DWORD SectionVirtualOffset;
-	DWORD SectionVirtualSize;
-	DWORD SectionAttributes;
-	DWORD SectionDataHash;
-	bool AccessedAlready;
-	bool WriteCheckMode;
-}TracerSectionData, *PTracerSectionData;
+typedef struct
+{
+    void* AllocatedSection;
+    DWORD SectionVirtualOffset;
+    DWORD SectionVirtualSize;
+    DWORD SectionAttributes;
+    DWORD SectionDataHash;
+    bool AccessedAlready;
+    bool WriteCheckMode;
+} TracerSectionData, *PTracerSectionData;
 
-typedef struct{
-	int SectionNumber;
-	TracerSectionData SectionData[MAXIMUM_SECTION_NUMBER];
-	int OriginalEntryPointNum;
-	ULONG_PTR OriginalImageBase;
-	ULONG_PTR OriginalEntryPoint;
-	ULONG_PTR LoadedImageBase;
-	ULONG_PTR SizeOfImage;
-	ULONG_PTR CurrentIntructionPointer;
-	ULONG_PTR MemoryAccessedFrom;
-	ULONG_PTR MemoryAccessed;
-	ULONG_PTR AccessType;
-	void* InitCallBack;
-	void* EPCallBack;
-	bool FileIsDLL;
-	bool FileIs64bit;
-}GenericOEPTracerData, *PGenericOEPTracerData;
+typedef struct
+{
+    int SectionNumber;
+    TracerSectionData SectionData[MAXIMUM_SECTION_NUMBER];
+    int OriginalEntryPointNum;
+    ULONG_PTR OriginalImageBase;
+    ULONG_PTR OriginalEntryPoint;
+    ULONG_PTR LoadedImageBase;
+    ULONG_PTR SizeOfImage;
+    ULONG_PTR CurrentIntructionPointer;
+    ULONG_PTR MemoryAccessedFrom;
+    ULONG_PTR MemoryAccessed;
+    ULONG_PTR AccessType;
+    void* InitCallBack;
+    void* EPCallBack;
+    bool FileIsDLL;
+    bool FileIs64bit;
+} GenericOEPTracerData, *PGenericOEPTracerData;
 
 // UnpackEngine.Handler:
 
@@ -698,14 +727,15 @@ typedef struct{
 	NonPagedPoolCacheAlignedMustSSession
 } POOL_TYPE;*/
 
-typedef struct{
-	ULONG ProcessId;
-	UCHAR ObjectTypeNumber;
-	UCHAR Flags; // 0x01 = PROTECT_FROM_CLOSE, 0x02 = INHERIT
-	USHORT hHandle;
-	PVOID Object;
-	ACCESS_MASK GrantedAccess;
-}NTDLL_QUERY_HANDLE_INFO, *PNTDLL_QUERY_HANDLE_INFO;
+typedef struct
+{
+    ULONG ProcessId;
+    UCHAR ObjectTypeNumber;
+    UCHAR Flags; // 0x01 = PROTECT_FROM_CLOSE, 0x02 = INHERIT
+    USHORT hHandle;
+    PVOID Object;
+    ACCESS_MASK GrantedAccess;
+} NTDLL_QUERY_HANDLE_INFO, *PNTDLL_QUERY_HANDLE_INFO;
 
 /*typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
 	ULONG Attributes;
@@ -721,8 +751,9 @@ typedef struct{
 	LARGE_INTEGER CreateTime;
 } PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;*/
 
-typedef struct _PUBLIC_OBJECT_NAME_INFORMATION { // Information Class 1
-	UNICODE_STRING Name;
+typedef struct _PUBLIC_OBJECT_NAME_INFORMATION   // Information Class 1
+{
+    UNICODE_STRING Name;
 } PUBLIC_OBJECT_NAME_INFORMATION, *PPUBLIC_OBJECT_NAME_INFORMATION;
 
 /*typedef struct _PUBLIC_OBJECT_TYPE_INFORMATION { // Information Class 2
@@ -744,7 +775,7 @@ typedef struct _PUBLIC_OBJECT_NAME_INFORMATION { // Information Class 1
 } PUBLIC_OBJECT_TYPE_INFORMATION, *PPUBLIC_OBJECT_TYPE_INFORMATION;*/
 
 typedef void (*PPEBLOCKROUTINE)(
-	PVOID PebLock
+    PVOID PebLock
 );
 
 /*typedef struct _PEB_LDR_DATA {
@@ -795,59 +826,60 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
   RTL_DRIVE_LETTER_CURDIR DLCurrentDirectory[0x20];
 } RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;*/
 
-typedef struct _NTPEB {
-  BOOLEAN                 InheritedAddressSpace;
-  BOOLEAN                 ReadImageFileExecOptions;
-  BOOLEAN                 BeingDebugged;
-  BOOLEAN                 Spare;
-  HANDLE                  Mutant;
-  PVOID                   ImageBaseAddress;
-  PPEB_LDR_DATA           LoaderData;
-  PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-  PVOID                   SubSystemData;
-  PVOID                   ProcessHeap;
-  PVOID                   FastPebLock;
-  void*					  FastPebLockRoutine;
-  void*					  FastPebUnlockRoutine;
-  ULONG                   EnvironmentUpdateCount;
-  PVOID*                  KernelCallbackTable;
-  PVOID                   EventLogSection;
-  PVOID                   EventLog;
-  void*					  FreeList;
-  ULONG                   TlsExpansionCounter;
-  PVOID                   TlsBitmap;
-  ULONG                   TlsBitmapBits[0x2];
-  PVOID                   ReadOnlySharedMemoryBase;
-  PVOID                   ReadOnlySharedMemoryHeap;
-  PVOID*                  ReadOnlyStaticServerData;
-  PVOID                   AnsiCodePageData;
-  PVOID                   OemCodePageData;
-  PVOID                   UnicodeCaseTableData;
-  ULONG                   NumberOfProcessors;
-  ULONG                   NtGlobalFlag;
-  BYTE                    Spare2[0x4];
-  LARGE_INTEGER           CriticalSectionTimeout;
-  ULONG                   HeapSegmentReserve;
-  ULONG                   HeapSegmentCommit;
-  ULONG                   HeapDeCommitTotalFreeThreshold;
-  ULONG                   HeapDeCommitFreeBlockThreshold;
-  ULONG                   NumberOfHeaps;
-  ULONG                   MaximumNumberOfHeaps;
-  PVOID*                  *ProcessHeaps;
-  PVOID                   GdiSharedHandleTable;
-  PVOID                   ProcessStarterHelper;
-  PVOID                   GdiDCAttributeList;
-  PVOID                   LoaderLock;
-  ULONG                   OSMajorVersion;
-  ULONG                   OSMinorVersion;
-  ULONG                   OSBuildNumber;
-  ULONG                   OSPlatformId;
-  ULONG                   ImageSubSystem;
-  ULONG                   ImageSubSystemMajorVersion;
-  ULONG                   ImageSubSystemMinorVersion;
-  ULONG                   GdiHandleBuffer[0x22];
-  ULONG                   PostProcessInitRoutine;
-  ULONG                   TlsExpansionBitmap;
-  BYTE                    TlsExpansionBitmapBits[0x80];
-  ULONG                   SessionId;
+typedef struct _NTPEB
+{
+    BOOLEAN                 InheritedAddressSpace;
+    BOOLEAN                 ReadImageFileExecOptions;
+    BOOLEAN                 BeingDebugged;
+    BOOLEAN                 Spare;
+    HANDLE                  Mutant;
+    PVOID                   ImageBaseAddress;
+    PPEB_LDR_DATA           LoaderData;
+    PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
+    PVOID                   SubSystemData;
+    PVOID                   ProcessHeap;
+    PVOID                   FastPebLock;
+    void*					  FastPebLockRoutine;
+    void*					  FastPebUnlockRoutine;
+    ULONG                   EnvironmentUpdateCount;
+    PVOID*                  KernelCallbackTable;
+    PVOID                   EventLogSection;
+    PVOID                   EventLog;
+    void*					  FreeList;
+    ULONG                   TlsExpansionCounter;
+    PVOID                   TlsBitmap;
+    ULONG                   TlsBitmapBits[0x2];
+    PVOID                   ReadOnlySharedMemoryBase;
+    PVOID                   ReadOnlySharedMemoryHeap;
+    PVOID*                  ReadOnlyStaticServerData;
+    PVOID                   AnsiCodePageData;
+    PVOID                   OemCodePageData;
+    PVOID                   UnicodeCaseTableData;
+    ULONG                   NumberOfProcessors;
+    ULONG                   NtGlobalFlag;
+    BYTE                    Spare2[0x4];
+    LARGE_INTEGER           CriticalSectionTimeout;
+    ULONG                   HeapSegmentReserve;
+    ULONG                   HeapSegmentCommit;
+    ULONG                   HeapDeCommitTotalFreeThreshold;
+    ULONG                   HeapDeCommitFreeBlockThreshold;
+    ULONG                   NumberOfHeaps;
+    ULONG                   MaximumNumberOfHeaps;
+    PVOID*                  *ProcessHeaps;
+    PVOID                   GdiSharedHandleTable;
+    PVOID                   ProcessStarterHelper;
+    PVOID                   GdiDCAttributeList;
+    PVOID                   LoaderLock;
+    ULONG                   OSMajorVersion;
+    ULONG                   OSMinorVersion;
+    ULONG                   OSBuildNumber;
+    ULONG                   OSPlatformId;
+    ULONG                   ImageSubSystem;
+    ULONG                   ImageSubSystemMajorVersion;
+    ULONG                   ImageSubSystemMinorVersion;
+    ULONG                   GdiHandleBuffer[0x22];
+    ULONG                   PostProcessInitRoutine;
+    ULONG                   TlsExpansionBitmap;
+    BYTE                    TlsExpansionBitmapBits[0x80];
+    ULONG                   SessionId;
 } NTPEB, *PNTPEB;

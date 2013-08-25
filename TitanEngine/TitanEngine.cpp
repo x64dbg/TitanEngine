@@ -364,7 +364,7 @@ void EngineGlobalTestFunction()
 void EngineExecutePluginReleaseCallBack()
 {
 
-    typedef void(__stdcall *fPluginReleaseExec)();
+    typedef void(*fPluginReleaseExec)();
     fPluginReleaseExec myPluginReleaseExec;
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -386,7 +386,7 @@ void EngineExecutePluginReleaseCallBack()
 void EngineExecutePluginResetCallBack()
 {
 
-    typedef void(__stdcall *fPluginResetExec)();
+    typedef void(*fPluginResetExec)();
     fPluginResetExec myPluginResetExec;
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -408,7 +408,7 @@ void EngineExecutePluginResetCallBack()
 void EngineExecutePluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReason)
 {
 
-    typedef void(__stdcall *fPluginDebugExec)(LPDEBUG_EVENT debugEvent, int CallReason);
+    typedef void(*fPluginDebugExec)(LPDEBUG_EVENT debugEvent, int CallReason);
     fPluginDebugExec myPluginDebugExec;
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -2541,7 +2541,7 @@ void EngineCrc32PartialCRC(unsigned long *ulCRC, const unsigned char *sData, uns
     }
 }
 // TitanEngine.Dumper.functions:
-__declspec(dllexport) bool __stdcall DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
+__declspec(dllexport) bool DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
 {
 
     wchar_t uniDumpFileName[MAX_PATH] = {};
@@ -2556,7 +2556,7 @@ __declspec(dllexport) bool __stdcall DumpProcess(HANDLE hProcess, LPVOID ImageBa
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpProcessW(HANDLE hProcess, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint)
+__declspec(dllexport) bool DumpProcessW(HANDLE hProcess, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint)
 {
 
     int i = 0;
@@ -2867,7 +2867,7 @@ __declspec(dllexport) bool __stdcall DumpProcessW(HANDLE hProcess, LPVOID ImageB
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DumpProcessEx(DWORD ProcessId, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
+__declspec(dllexport) bool DumpProcessEx(DWORD ProcessId, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
 {
 
     wchar_t uniDumpFileName[MAX_PATH] = {};
@@ -2882,7 +2882,7 @@ __declspec(dllexport) bool __stdcall DumpProcessEx(DWORD ProcessId, LPVOID Image
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpProcessExW(DWORD ProcessId, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint)
+__declspec(dllexport) bool DumpProcessExW(DWORD ProcessId, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint)
 {
 
     HANDLE hProcess = 0;
@@ -2907,7 +2907,7 @@ __declspec(dllexport) bool __stdcall DumpProcessExW(DWORD ProcessId, LPVOID Imag
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpMemory(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
+__declspec(dllexport) bool DumpMemory(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
 {
 
     wchar_t uniDumpFileName[MAX_PATH] = {};
@@ -2922,7 +2922,7 @@ __declspec(dllexport) bool __stdcall DumpMemory(HANDLE hProcess, LPVOID MemorySt
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpMemoryW(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
+__declspec(dllexport) bool DumpMemoryW(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
 {
 
     ULONG_PTR ueNumberOfBytesRead = 0;
@@ -2981,7 +2981,7 @@ __declspec(dllexport) bool __stdcall DumpMemoryW(HANDLE hProcess, LPVOID MemoryS
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall DumpMemoryEx(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
+__declspec(dllexport) bool DumpMemoryEx(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
 {
 
     wchar_t uniDumpFileName[MAX_PATH] = {};
@@ -2996,7 +2996,7 @@ __declspec(dllexport) bool __stdcall DumpMemoryEx(DWORD ProcessId, LPVOID Memory
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpMemoryExW(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
+__declspec(dllexport) bool DumpMemoryExW(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
 {
 
     HANDLE hProcess = 0;
@@ -3021,7 +3021,7 @@ __declspec(dllexport) bool __stdcall DumpMemoryExW(DWORD ProcessId, LPVOID Memor
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpRegions(HANDLE hProcess, char* szDumpFolder, bool DumpAboveImageBaseOnly)
+__declspec(dllexport) bool DumpRegions(HANDLE hProcess, char* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
 
     wchar_t uniDumpFolder[MAX_PATH] = {};
@@ -3036,7 +3036,7 @@ __declspec(dllexport) bool __stdcall DumpRegions(HANDLE hProcess, char* szDumpFo
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpRegionsW(HANDLE hProcess, wchar_t* szDumpFolder, bool DumpAboveImageBaseOnly)
+__declspec(dllexport) bool DumpRegionsW(HANDLE hProcess, wchar_t* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
 
     int i;
@@ -3088,7 +3088,7 @@ __declspec(dllexport) bool __stdcall DumpRegionsW(HANDLE hProcess, wchar_t* szDu
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DumpRegionsEx(DWORD ProcessId, char* szDumpFolder, bool DumpAboveImageBaseOnly)
+__declspec(dllexport) bool DumpRegionsEx(DWORD ProcessId, char* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
 
     wchar_t uniDumpFolder[MAX_PATH] = {};
@@ -3103,7 +3103,7 @@ __declspec(dllexport) bool __stdcall DumpRegionsEx(DWORD ProcessId, char* szDump
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpRegionsExW(DWORD ProcessId, wchar_t* szDumpFolder, bool DumpAboveImageBaseOnly)
+__declspec(dllexport) bool DumpRegionsExW(DWORD ProcessId, wchar_t* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
 
     HANDLE hProcess = 0;
@@ -3128,7 +3128,7 @@ __declspec(dllexport) bool __stdcall DumpRegionsExW(DWORD ProcessId, wchar_t* sz
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpModule(HANDLE hProcess, LPVOID ModuleBase, char* szDumpFileName)
+__declspec(dllexport) bool DumpModule(HANDLE hProcess, LPVOID ModuleBase, char* szDumpFileName)
 {
 
     wchar_t uniDumpFileName[MAX_PATH] = {};
@@ -3143,7 +3143,7 @@ __declspec(dllexport) bool __stdcall DumpModule(HANDLE hProcess, LPVOID ModuleBa
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpModuleW(HANDLE hProcess, LPVOID ModuleBase, wchar_t* szDumpFileName)
+__declspec(dllexport) bool DumpModuleW(HANDLE hProcess, LPVOID ModuleBase, wchar_t* szDumpFileName)
 {
 
     int i;
@@ -3164,7 +3164,7 @@ __declspec(dllexport) bool __stdcall DumpModuleW(HANDLE hProcess, LPVOID ModuleB
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DumpModuleEx(DWORD ProcessId, LPVOID ModuleBase, char* szDumpFileName)
+__declspec(dllexport) bool DumpModuleEx(DWORD ProcessId, LPVOID ModuleBase, char* szDumpFileName)
 {
 
     wchar_t uniDumpFileName[MAX_PATH] = {};
@@ -3179,7 +3179,7 @@ __declspec(dllexport) bool __stdcall DumpModuleEx(DWORD ProcessId, LPVOID Module
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DumpModuleExW(DWORD ProcessId, LPVOID ModuleBase, wchar_t* szDumpFileName)
+__declspec(dllexport) bool DumpModuleExW(DWORD ProcessId, LPVOID ModuleBase, wchar_t* szDumpFileName)
 {
 
     HANDLE hProcess = 0;
@@ -3204,7 +3204,7 @@ __declspec(dllexport) bool __stdcall DumpModuleExW(DWORD ProcessId, LPVOID Modul
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall PastePEHeader(HANDLE hProcess, LPVOID ImageBase, char* szDebuggedFileName)
+__declspec(dllexport) bool PastePEHeader(HANDLE hProcess, LPVOID ImageBase, char* szDebuggedFileName)
 {
 
     wchar_t uniDebuggedFileName[MAX_PATH] = {};
@@ -3219,7 +3219,7 @@ __declspec(dllexport) bool __stdcall PastePEHeader(HANDLE hProcess, LPVOID Image
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall PastePEHeaderW(HANDLE hProcess, LPVOID ImageBase, wchar_t* szDebuggedFileName)
+__declspec(dllexport) bool PastePEHeaderW(HANDLE hProcess, LPVOID ImageBase, wchar_t* szDebuggedFileName)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -3367,7 +3367,7 @@ __declspec(dllexport) bool __stdcall PastePEHeaderW(HANDLE hProcess, LPVOID Imag
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExtractSection(char* szFileName, char* szDumpFileName, DWORD SectionNumber)
+__declspec(dllexport) bool ExtractSection(char* szFileName, char* szDumpFileName, DWORD SectionNumber)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -3384,7 +3384,7 @@ __declspec(dllexport) bool __stdcall ExtractSection(char* szFileName, char* szDu
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ExtractSectionW(wchar_t* szFileName, wchar_t* szDumpFileName, DWORD SectionNumber)
+__declspec(dllexport) bool ExtractSectionW(wchar_t* szFileName, wchar_t* szDumpFileName, DWORD SectionNumber)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -3490,7 +3490,7 @@ __declspec(dllexport) bool __stdcall ExtractSectionW(wchar_t* szFileName, wchar_
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ResortFileSections(char* szFileName)
+__declspec(dllexport) bool ResortFileSections(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -3505,7 +3505,7 @@ __declspec(dllexport) bool __stdcall ResortFileSections(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ResortFileSectionsW(wchar_t* szFileName)
+__declspec(dllexport) bool ResortFileSectionsW(wchar_t* szFileName)
 {
 
     int i = 0;
@@ -3709,7 +3709,7 @@ __declspec(dllexport) bool __stdcall ResortFileSectionsW(wchar_t* szFileName)
     RemoveGarbageItem(szBackupItem, true);
     return(false);
 }
-__declspec(dllexport) bool __stdcall FindOverlay(char* szFileName, LPDWORD OverlayStart, LPDWORD OverlaySize)
+__declspec(dllexport) bool FindOverlay(char* szFileName, LPDWORD OverlayStart, LPDWORD OverlaySize)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -3724,7 +3724,7 @@ __declspec(dllexport) bool __stdcall FindOverlay(char* szFileName, LPDWORD Overl
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall FindOverlayW(wchar_t* szFileName, LPDWORD OverlayStart, LPDWORD OverlaySize)
+__declspec(dllexport) bool FindOverlayW(wchar_t* szFileName, LPDWORD OverlayStart, LPDWORD OverlaySize)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -3849,7 +3849,7 @@ __declspec(dllexport) bool __stdcall FindOverlayW(wchar_t* szFileName, LPDWORD O
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExtractOverlay(char* szFileName, char* szExtactedFileName)
+__declspec(dllexport) bool ExtractOverlay(char* szFileName, char* szExtactedFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -3866,7 +3866,7 @@ __declspec(dllexport) bool __stdcall ExtractOverlay(char* szFileName, char* szEx
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ExtractOverlayW(wchar_t* szFileName, wchar_t* szExtactedFileName)
+__declspec(dllexport) bool ExtractOverlayW(wchar_t* szFileName, wchar_t* szExtactedFileName)
 {
 
     HANDLE hFile = 0;
@@ -3923,7 +3923,7 @@ __declspec(dllexport) bool __stdcall ExtractOverlayW(wchar_t* szFileName, wchar_
     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
     return(false);
 }
-__declspec(dllexport) bool __stdcall AddOverlay(char* szFileName, char* szOverlayFileName)
+__declspec(dllexport) bool AddOverlay(char* szFileName, char* szOverlayFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -3940,7 +3940,7 @@ __declspec(dllexport) bool __stdcall AddOverlay(char* szFileName, char* szOverla
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall AddOverlayW(wchar_t* szFileName, wchar_t* szOverlayFileName)
+__declspec(dllexport) bool AddOverlayW(wchar_t* szFileName, wchar_t* szOverlayFileName)
 {
 
     HANDLE hFile = 0;
@@ -3989,7 +3989,7 @@ __declspec(dllexport) bool __stdcall AddOverlayW(wchar_t* szFileName, wchar_t* s
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall CopyOverlay(char* szInFileName, char* szOutFileName)
+__declspec(dllexport) bool CopyOverlay(char* szInFileName, char* szOutFileName)
 {
 
     wchar_t uniInFileName[MAX_PATH] = {};
@@ -4006,7 +4006,7 @@ __declspec(dllexport) bool __stdcall CopyOverlay(char* szInFileName, char* szOut
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall CopyOverlayW(wchar_t* szInFileName, wchar_t* szOutFileName)
+__declspec(dllexport) bool CopyOverlayW(wchar_t* szInFileName, wchar_t* szOutFileName)
 {
 
     wchar_t szTempName[MAX_PATH] = {};
@@ -4026,7 +4026,7 @@ __declspec(dllexport) bool __stdcall CopyOverlayW(wchar_t* szInFileName, wchar_t
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RemoveOverlay(char* szFileName)
+__declspec(dllexport) bool RemoveOverlay(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -4041,7 +4041,7 @@ __declspec(dllexport) bool __stdcall RemoveOverlay(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RemoveOverlayW(wchar_t* szFileName)
+__declspec(dllexport) bool RemoveOverlayW(wchar_t* szFileName)
 {
 
     HANDLE FileHandle;
@@ -4062,7 +4062,7 @@ __declspec(dllexport) bool __stdcall RemoveOverlayW(wchar_t* szFileName)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall MakeAllSectionsRWE(char* szFileName)
+__declspec(dllexport) bool MakeAllSectionsRWE(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -4077,7 +4077,7 @@ __declspec(dllexport) bool __stdcall MakeAllSectionsRWE(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall MakeAllSectionsRWEW(wchar_t* szFileName)
+__declspec(dllexport) bool MakeAllSectionsRWEW(wchar_t* szFileName)
 {
 
     wchar_t szBackupFile[MAX_PATH] = {};
@@ -4216,7 +4216,7 @@ __declspec(dllexport) bool __stdcall MakeAllSectionsRWEW(wchar_t* szFileName)
     RemoveGarbageItem(szBackupItem, true);
     return(false);
 }
-__declspec(dllexport) long __stdcall AddNewSectionEx(char* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
+__declspec(dllexport) long AddNewSectionEx(char* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -4231,7 +4231,7 @@ __declspec(dllexport) long __stdcall AddNewSectionEx(char* szFileName, char* szS
         return(NULL);
     }
 }
-__declspec(dllexport) long __stdcall AddNewSectionExW(wchar_t* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
+__declspec(dllexport) long AddNewSectionExW(wchar_t* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
 {
 
     bool OverlayHasBeenRemoved = false;
@@ -4589,15 +4589,15 @@ __declspec(dllexport) long __stdcall AddNewSectionExW(wchar_t* szFileName, char*
     RemoveGarbageItem(szBackupItem, true);
     return(0);
 }
-__declspec(dllexport) long __stdcall AddNewSection(char* szFileName, char* szSectionName, DWORD SectionSize)
+__declspec(dllexport) long AddNewSection(char* szFileName, char* szSectionName, DWORD SectionSize)
 {
     return(AddNewSectionEx(szFileName, szSectionName, SectionSize, NULL, NULL, NULL));
 }
-__declspec(dllexport) long __stdcall AddNewSectionW(wchar_t* szFileName, char* szSectionName, DWORD SectionSize)
+__declspec(dllexport) long AddNewSectionW(wchar_t* szFileName, char* szSectionName, DWORD SectionSize)
 {
     return(AddNewSectionExW(szFileName, szSectionName, SectionSize, NULL, NULL, NULL));
 }
-__declspec(dllexport) bool __stdcall ResizeLastSection(char* szFileName, DWORD NumberOfExpandBytes, bool AlignResizeData)
+__declspec(dllexport) bool ResizeLastSection(char* szFileName, DWORD NumberOfExpandBytes, bool AlignResizeData)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -4612,7 +4612,7 @@ __declspec(dllexport) bool __stdcall ResizeLastSection(char* szFileName, DWORD N
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ResizeLastSectionW(wchar_t* szFileName, DWORD NumberOfExpandBytes, bool AlignResizeData)
+__declspec(dllexport) bool ResizeLastSectionW(wchar_t* szFileName, DWORD NumberOfExpandBytes, bool AlignResizeData)
 {
 
     wchar_t szBackupFile[MAX_PATH] = {};
@@ -4816,23 +4816,23 @@ __declspec(dllexport) bool __stdcall ResizeLastSectionW(wchar_t* szFileName, DWO
     RemoveGarbageItem(szBackupItem, true);
     return(false);
 }
-__declspec(dllexport) void __stdcall SetSharedOverlay(char* szFileName)
+__declspec(dllexport) void SetSharedOverlay(char* szFileName)
 {
     szSharedOverlay = szFileName;
 }
-__declspec(dllexport) void __stdcall SetSharedOverlayW(wchar_t* szFileName)
+__declspec(dllexport) void SetSharedOverlayW(wchar_t* szFileName)
 {
     szSharedOverlayW = szFileName;
 }
-__declspec(dllexport) char* __stdcall GetSharedOverlay()
+__declspec(dllexport) char* GetSharedOverlay()
 {
     return(szSharedOverlay);
 }
-__declspec(dllexport) wchar_t* __stdcall GetSharedOverlayW()
+__declspec(dllexport) wchar_t* GetSharedOverlayW()
 {
     return(szSharedOverlayW);
 }
-__declspec(dllexport) bool __stdcall DeleteLastSection(char* szFileName)
+__declspec(dllexport) bool DeleteLastSection(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -4847,7 +4847,7 @@ __declspec(dllexport) bool __stdcall DeleteLastSection(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DeleteLastSectionW(wchar_t* szFileName)
+__declspec(dllexport) bool DeleteLastSectionW(wchar_t* szFileName)
 {
 
     wchar_t szBackupFile[MAX_PATH] = {};
@@ -5000,7 +5000,7 @@ __declspec(dllexport) bool __stdcall DeleteLastSectionW(wchar_t* szFileName)
     RemoveGarbageItem(szBackupItem, true);
     return(false);
 }
-__declspec(dllexport) bool __stdcall DeleteLastSectionEx(char* szFileName, DWORD NumberOfSections)
+__declspec(dllexport) bool DeleteLastSectionEx(char* szFileName, DWORD NumberOfSections)
 {
 
     while(NumberOfSections > 0)
@@ -5010,7 +5010,7 @@ __declspec(dllexport) bool __stdcall DeleteLastSectionEx(char* szFileName, DWORD
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall DeleteLastSectionExW(wchar_t* szFileName, DWORD NumberOfSections)
+__declspec(dllexport) bool DeleteLastSectionExW(wchar_t* szFileName, DWORD NumberOfSections)
 {
 
     while(NumberOfSections > 0)
@@ -5020,7 +5020,7 @@ __declspec(dllexport) bool __stdcall DeleteLastSectionExW(wchar_t* szFileName, D
     }
     return(true);
 }
-__declspec(dllexport) long long __stdcall GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) long long GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -5337,7 +5337,7 @@ __declspec(dllexport) long long __stdcall GetPE32DataFromMappedFile(ULONG_PTR Fi
     }
     return(0);
 }
-__declspec(dllexport) long long __stdcall GetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) long long GetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData)
 {
 
     HANDLE FileHandle;
@@ -5357,7 +5357,7 @@ __declspec(dllexport) long long __stdcall GetPE32Data(char* szFileName, DWORD Wh
         return(0);
     }
 }
-__declspec(dllexport) long long __stdcall GetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) long long GetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData)
 {
 
     HANDLE FileHandle;
@@ -5377,7 +5377,7 @@ __declspec(dllexport) long long __stdcall GetPE32DataW(wchar_t* szFileName, DWOR
         return(0);
     }
 }
-__declspec(dllexport) bool __stdcall GetPE32DataFromMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage)
+__declspec(dllexport) bool GetPE32DataFromMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -5470,7 +5470,7 @@ __declspec(dllexport) bool __stdcall GetPE32DataFromMappedFileEx(ULONG_PTR FileM
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall GetPE32DataEx(char* szFileName, LPVOID DataStorage)
+__declspec(dllexport) bool GetPE32DataEx(char* szFileName, LPVOID DataStorage)
 {
 
     HANDLE FileHandle;
@@ -5497,7 +5497,7 @@ __declspec(dllexport) bool __stdcall GetPE32DataEx(char* szFileName, LPVOID Data
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall GetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
+__declspec(dllexport) bool GetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
 {
 
     HANDLE FileHandle;
@@ -5524,7 +5524,7 @@ __declspec(dllexport) bool __stdcall GetPE32DataExW(wchar_t* szFileName, LPVOID 
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall SetPE32DataForMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
+__declspec(dllexport) bool SetPE32DataForMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -5911,7 +5911,7 @@ __declspec(dllexport) bool __stdcall SetPE32DataForMappedFile(ULONG_PTR FileMapV
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall SetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
+__declspec(dllexport) bool SetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
 {
 
     HANDLE FileHandle;
@@ -5938,7 +5938,7 @@ __declspec(dllexport) bool __stdcall SetPE32Data(char* szFileName, DWORD WhichSe
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall SetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
+__declspec(dllexport) bool SetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
 {
 
     HANDLE FileHandle;
@@ -5965,7 +5965,7 @@ __declspec(dllexport) bool __stdcall SetPE32DataW(wchar_t* szFileName, DWORD Whi
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall SetPE32DataForMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage)
+__declspec(dllexport) bool SetPE32DataForMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -6072,7 +6072,7 @@ __declspec(dllexport) bool __stdcall SetPE32DataForMappedFileEx(ULONG_PTR FileMa
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall SetPE32DataEx(char* szFileName, LPVOID DataStorage)
+__declspec(dllexport) bool SetPE32DataEx(char* szFileName, LPVOID DataStorage)
 {
 
     HANDLE FileHandle;
@@ -6100,7 +6100,7 @@ __declspec(dllexport) bool __stdcall SetPE32DataEx(char* szFileName, LPVOID Data
     }
 }
 
-__declspec(dllexport) bool __stdcall SetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
+__declspec(dllexport) bool SetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
 {
 
     HANDLE FileHandle;
@@ -6128,7 +6128,7 @@ __declspec(dllexport) bool __stdcall SetPE32DataExW(wchar_t* szFileName, LPVOID 
     }
 }
 
-__declspec(dllexport) long __stdcall GetPE32SectionNumberFromVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert)
+__declspec(dllexport) long GetPE32SectionNumberFromVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -6213,7 +6213,7 @@ __declspec(dllexport) long __stdcall GetPE32SectionNumberFromVA(ULONG_PTR FileMa
     }
     return(-2);
 }
-__declspec(dllexport) long long __stdcall ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
+__declspec(dllexport) long long ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -6334,7 +6334,7 @@ __declspec(dllexport) long long __stdcall ConvertVAtoFileOffset(ULONG_PTR FileMa
     }
     return(0);
 }
-__declspec(dllexport) long long __stdcall ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType)
+__declspec(dllexport) long long ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -6517,7 +6517,7 @@ __declspec(dllexport) long long __stdcall ConvertVAtoFileOffsetEx(ULONG_PTR File
     }
     return(0);
 }
-__declspec(dllexport) long long __stdcall ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
+__declspec(dllexport) long long ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -6632,7 +6632,7 @@ __declspec(dllexport) long long __stdcall ConvertFileOffsetToVA(ULONG_PTR FileMa
     }
     return(0);
 }
-__declspec(dllexport) long long __stdcall ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType)
+__declspec(dllexport) long long ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType)
 {
 
     ULONG_PTR ConvertedAddress = NULL;
@@ -6699,7 +6699,7 @@ void SetOverallFileStatus(PFILE_STATUS_INFO myFileInfo, BYTE FiledStatus, bool F
     }
 }
 // TitanEngine.Realigner.functions:
-__declspec(dllexport) bool __stdcall FixHeaderCheckSum(char* szFileName)
+__declspec(dllexport) bool FixHeaderCheckSum(char* szFileName)
 {
 
     DWORD HeaderSum = NULL;
@@ -6715,7 +6715,7 @@ __declspec(dllexport) bool __stdcall FixHeaderCheckSum(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall FixHeaderCheckSumW(wchar_t* szFileName)
+__declspec(dllexport) bool FixHeaderCheckSumW(wchar_t* szFileName)
 {
 
     DWORD HeaderSum = NULL;
@@ -6731,7 +6731,7 @@ __declspec(dllexport) bool __stdcall FixHeaderCheckSumW(wchar_t* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) long __stdcall RealignPE(ULONG_PTR FileMapVA, DWORD FileSize, DWORD RealingMode)
+__declspec(dllexport) long RealignPE(ULONG_PTR FileMapVA, DWORD FileSize, DWORD RealingMode)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -6903,7 +6903,7 @@ __declspec(dllexport) long __stdcall RealignPE(ULONG_PTR FileMapVA, DWORD FileSi
     }
     return(-1);
 }
-__declspec(dllexport) long __stdcall RealignPEEx(char* szFileName, DWORD RealingFileSize, DWORD ForcedFileAlignment)
+__declspec(dllexport) long RealignPEEx(char* szFileName, DWORD RealingFileSize, DWORD ForcedFileAlignment)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -6918,7 +6918,7 @@ __declspec(dllexport) long __stdcall RealignPEEx(char* szFileName, DWORD Realing
         return(-1);
     }
 }
-__declspec(dllexport) long __stdcall RealignPEExW(wchar_t* szFileName, DWORD RealingFileSize, DWORD ForcedFileAlignment)
+__declspec(dllexport) long RealignPEExW(wchar_t* szFileName, DWORD RealingFileSize, DWORD ForcedFileAlignment)
 {
 
     wchar_t szBackupFile[MAX_PATH] = {};
@@ -7166,7 +7166,7 @@ __declspec(dllexport) long __stdcall RealignPEExW(wchar_t* szFileName, DWORD Rea
     RemoveGarbageItem(szBackupItem, true);
     return(-1);
 }
-__declspec(dllexport) bool __stdcall WipeSection(char* szFileName, int WipeSectionNumber, bool RemovePhysically)
+__declspec(dllexport) bool WipeSection(char* szFileName, int WipeSectionNumber, bool RemovePhysically)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -7181,7 +7181,7 @@ __declspec(dllexport) bool __stdcall WipeSection(char* szFileName, int WipeSecti
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall WipeSectionW(wchar_t* szFileName, int WipeSectionNumber, bool RemovePhysically)
+__declspec(dllexport) bool WipeSectionW(wchar_t* szFileName, int WipeSectionNumber, bool RemovePhysically)
 {
 
     wchar_t szBackupFile[MAX_PATH] = {};
@@ -7415,7 +7415,7 @@ __declspec(dllexport) bool __stdcall WipeSectionW(wchar_t* szFileName, int WipeS
     RemoveGarbageItem(szBackupItem, true);
     return(false);
 }
-__declspec(dllexport) bool __stdcall IsPE32FileValidEx(char* szFileName, DWORD CheckDepth, LPVOID FileStatusInfo)
+__declspec(dllexport) bool IsPE32FileValidEx(char* szFileName, DWORD CheckDepth, LPVOID FileStatusInfo)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -7430,7 +7430,7 @@ __declspec(dllexport) bool __stdcall IsPE32FileValidEx(char* szFileName, DWORD C
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall IsPE32FileValidExW(wchar_t* szFileName, DWORD CheckDepth, LPVOID FileStatusInfo)
+__declspec(dllexport) bool IsPE32FileValidExW(wchar_t* szFileName, DWORD CheckDepth, LPVOID FileStatusInfo)
 {
 
     unsigned int i;
@@ -8995,7 +8995,7 @@ __declspec(dllexport) bool __stdcall IsPE32FileValidExW(wchar_t* szFileName, DWO
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall FixBrokenPE32FileEx(char* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
+__declspec(dllexport) bool FixBrokenPE32FileEx(char* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -9010,7 +9010,7 @@ __declspec(dllexport) bool __stdcall FixBrokenPE32FileEx(char* szFileName, LPVOI
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall FixBrokenPE32FileExW(wchar_t* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
+__declspec(dllexport) bool FixBrokenPE32FileExW(wchar_t* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
 {
 
     DWORD ReadData = NULL;
@@ -10416,7 +10416,7 @@ __declspec(dllexport) bool __stdcall FixBrokenPE32FileExW(wchar_t* szFileName, L
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall IsFileDLL(char* szFileName, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool IsFileDLL(char* szFileName, ULONG_PTR FileMapVA)
 {
 
     if(szFileName != NULL)
@@ -10435,7 +10435,7 @@ __declspec(dllexport) bool __stdcall IsFileDLL(char* szFileName, ULONG_PTR FileM
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall IsFileDLLW(wchar_t* szFileName, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool IsFileDLLW(wchar_t* szFileName, ULONG_PTR FileMapVA)
 {
 
     if(szFileName != NULL)
@@ -10538,13 +10538,13 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
     return(false);
 }
 // TitanEngine.Hider.functions:
-__declspec(dllexport) void* __stdcall GetPEBLocation(HANDLE hProcess)
+__declspec(dllexport) void* GetPEBLocation(HANDLE hProcess)
 {
 
     ULONG RequiredLen = NULL;
     PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+    typedef NTSTATUS(*fZwQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 #else
     typedef NTSTATUS(__fastcall *fZwQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 #endif
@@ -10567,16 +10567,16 @@ __declspec(dllexport) void* __stdcall GetPEBLocation(HANDLE hProcess)
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall HideDebugger(HANDLE hProcess, DWORD PatchAPILevel)
+__declspec(dllexport) bool HideDebugger(HANDLE hProcess, DWORD PatchAPILevel)
 {
     return(ChangeHideDebuggerState(hProcess, PatchAPILevel, true));
 }
-__declspec(dllexport) bool __stdcall UnHideDebugger(HANDLE hProcess, DWORD PatchAPILevel)
+__declspec(dllexport) bool UnHideDebugger(HANDLE hProcess, DWORD PatchAPILevel)
 {
     return(ChangeHideDebuggerState(hProcess, PatchAPILevel, false));
 }
 // TitanEngine.Relocater.functions:
-__declspec(dllexport) void __stdcall RelocaterCleanup()
+__declspec(dllexport) void RelocaterCleanup()
 {
 
     if(RelocationData != NULL)
@@ -10589,7 +10589,7 @@ __declspec(dllexport) void __stdcall RelocaterCleanup()
         RelocationNewImageBase = NULL;
     }
 }
-__declspec(dllexport) void __stdcall RelocaterInit(DWORD MemorySize, ULONG_PTR OldImageBase, ULONG_PTR NewImageBase)
+__declspec(dllexport) void RelocaterInit(DWORD MemorySize, ULONG_PTR OldImageBase, ULONG_PTR NewImageBase)
 {
 
     if(RelocationData != NULL)
@@ -10603,7 +10603,7 @@ __declspec(dllexport) void __stdcall RelocaterInit(DWORD MemorySize, ULONG_PTR O
     RelocationOldImageBase = OldImageBase;
     RelocationNewImageBase = NewImageBase;
 }
-__declspec(dllexport) void __stdcall RelocaterAddNewRelocation(HANDLE hProcess, ULONG_PTR RelocateAddress, DWORD RelocateState)
+__declspec(dllexport) void RelocaterAddNewRelocation(HANDLE hProcess, ULONG_PTR RelocateAddress, DWORD RelocateState)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -10655,11 +10655,11 @@ __declspec(dllexport) void __stdcall RelocaterAddNewRelocation(HANDLE hProcess, 
     RtlMoveMemory(RelocationWritePosition, &CopyDummy, 2);
     RelocationWritePosition = (LPVOID)((ULONG_PTR)RelocationWritePosition + 2);
 }
-__declspec(dllexport) long __stdcall RelocaterEstimatedSize()
+__declspec(dllexport) long RelocaterEstimatedSize()
 {
     return((DWORD)((ULONG_PTR)RelocationWritePosition - (ULONG_PTR)RelocationData + 8));
 }
-__declspec(dllexport) bool __stdcall RelocaterExportRelocation(ULONG_PTR StorePlace, DWORD StorePlaceRVA, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool RelocaterExportRelocation(ULONG_PTR StorePlace, DWORD StorePlaceRVA, ULONG_PTR FileMapVA)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -10737,7 +10737,7 @@ __declspec(dllexport) bool __stdcall RelocaterExportRelocation(ULONG_PTR StorePl
     RelocationData = NULL;
     return(false);
 }
-__declspec(dllexport) bool __stdcall RelocaterExportRelocationEx(char* szFileName, char* szSectionName)
+__declspec(dllexport) bool RelocaterExportRelocationEx(char* szFileName, char* szSectionName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -10752,7 +10752,7 @@ __declspec(dllexport) bool __stdcall RelocaterExportRelocationEx(char* szFileNam
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RelocaterExportRelocationExW(wchar_t* szFileName, char* szSectionName)
+__declspec(dllexport) bool RelocaterExportRelocationExW(wchar_t* szFileName, char* szSectionName)
 {
 
     HANDLE FileHandle;
@@ -10790,7 +10790,7 @@ __declspec(dllexport) bool __stdcall RelocaterExportRelocationExW(wchar_t* szFil
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RelocaterGrabRelocationTable(HANDLE hProcess, ULONG_PTR MemoryStart, DWORD MemorySize)
+__declspec(dllexport) bool RelocaterGrabRelocationTable(HANDLE hProcess, ULONG_PTR MemoryStart, DWORD MemorySize)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -10811,7 +10811,7 @@ __declspec(dllexport) bool __stdcall RelocaterGrabRelocationTable(HANDLE hProces
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RelocaterGrabRelocationTableEx(HANDLE hProcess, ULONG_PTR MemoryStart, ULONG_PTR MemorySize, DWORD NtSizeOfImage)
+__declspec(dllexport) bool RelocaterGrabRelocationTableEx(HANDLE hProcess, ULONG_PTR MemoryStart, ULONG_PTR MemorySize, DWORD NtSizeOfImage)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -10857,15 +10857,15 @@ __declspec(dllexport) bool __stdcall RelocaterGrabRelocationTableEx(HANDLE hProc
     return(false);
 }
 
-__declspec(dllexport) bool __stdcall RelocaterMakeSnapshot(HANDLE hProcess, char* szSaveFileName, LPVOID MemoryStart, ULONG_PTR MemorySize)
+__declspec(dllexport) bool RelocaterMakeSnapshot(HANDLE hProcess, char* szSaveFileName, LPVOID MemoryStart, ULONG_PTR MemorySize)
 {
     return(DumpMemory(hProcess, MemoryStart, MemorySize, szSaveFileName));
 }
-__declspec(dllexport) bool __stdcall RelocaterMakeSnapshotW(HANDLE hProcess, wchar_t* szSaveFileName, LPVOID MemoryStart, ULONG_PTR MemorySize)
+__declspec(dllexport) bool RelocaterMakeSnapshotW(HANDLE hProcess, wchar_t* szSaveFileName, LPVOID MemoryStart, ULONG_PTR MemorySize)
 {
     return(DumpMemoryW(hProcess, MemoryStart, MemorySize, szSaveFileName));
 }
-__declspec(dllexport) bool __stdcall RelocaterCompareTwoSnapshots(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, char* szDumpFile1, char* szDumpFile2, ULONG_PTR MemStart)
+__declspec(dllexport) bool RelocaterCompareTwoSnapshots(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, char* szDumpFile1, char* szDumpFile2, ULONG_PTR MemStart)
 {
 
     wchar_t uniDumpFile1[MAX_PATH] = {};
@@ -10882,7 +10882,7 @@ __declspec(dllexport) bool __stdcall RelocaterCompareTwoSnapshots(HANDLE hProces
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RelocaterCompareTwoSnapshotsW(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, wchar_t* szDumpFile1, wchar_t* szDumpFile2, ULONG_PTR MemStart)
+__declspec(dllexport) bool RelocaterCompareTwoSnapshotsW(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, wchar_t* szDumpFile1, wchar_t* szDumpFile2, ULONG_PTR MemStart)
 {
 
     int i = NULL;
@@ -10995,7 +10995,7 @@ __declspec(dllexport) bool __stdcall RelocaterCompareTwoSnapshotsW(HANDLE hProce
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RelocaterChangeFileBase(char* szFileName, ULONG_PTR NewImageBase)
+__declspec(dllexport) bool RelocaterChangeFileBase(char* szFileName, ULONG_PTR NewImageBase)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -11010,7 +11010,7 @@ __declspec(dllexport) bool __stdcall RelocaterChangeFileBase(char* szFileName, U
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RelocaterChangeFileBaseW(wchar_t* szFileName, ULONG_PTR NewImageBase)
+__declspec(dllexport) bool RelocaterChangeFileBaseW(wchar_t* szFileName, ULONG_PTR NewImageBase)
 {
 
     DWORD RelocSize;
@@ -11169,7 +11169,7 @@ __declspec(dllexport) bool __stdcall RelocaterChangeFileBaseW(wchar_t* szFileNam
     RemoveGarbageItem(szBackupItem, true);
     return(false);
 }
-__declspec(dllexport) bool __stdcall RelocaterRelocateMemoryBlock(ULONG_PTR FileMapVA, ULONG_PTR MemoryLocation, void* RelocateMemory, DWORD RelocateMemorySize, ULONG_PTR CurrentLoadedBase, ULONG_PTR RelocateBase)
+__declspec(dllexport) bool RelocaterRelocateMemoryBlock(ULONG_PTR FileMapVA, ULONG_PTR MemoryLocation, void* RelocateMemory, DWORD RelocateMemorySize, ULONG_PTR CurrentLoadedBase, ULONG_PTR RelocateBase)
 {
 
     BOOL FileIs64;
@@ -11275,7 +11275,7 @@ __declspec(dllexport) bool __stdcall RelocaterRelocateMemoryBlock(ULONG_PTR File
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RelocaterWipeRelocationTable(char* szFileName)
+__declspec(dllexport) bool RelocaterWipeRelocationTable(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -11290,7 +11290,7 @@ __declspec(dllexport) bool __stdcall RelocaterWipeRelocationTable(char* szFileNa
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RelocaterWipeRelocationTableW(wchar_t* szFileName)
+__declspec(dllexport) bool RelocaterWipeRelocationTableW(wchar_t* szFileName)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -11351,15 +11351,15 @@ __declspec(dllexport) bool __stdcall RelocaterWipeRelocationTableW(wchar_t* szFi
     return(false);
 }
 // TitanEngine.Resourcer.functions:
-__declspec(dllexport) long long __stdcall ResourcerLoadFileForResourceUse(char* szFileName)
+__declspec(dllexport) long long ResourcerLoadFileForResourceUse(char* szFileName)
 {
     return((ULONG_PTR)EngineSimulateNtLoader(szFileName));
 }
-__declspec(dllexport) long long __stdcall ResourcerLoadFileForResourceUseW(wchar_t* szFileName)
+__declspec(dllexport) long long ResourcerLoadFileForResourceUseW(wchar_t* szFileName)
 {
     return((ULONG_PTR)EngineSimulateNtLoaderW(szFileName));
 }
-__declspec(dllexport) bool __stdcall ResourcerFreeLoadedFile(LPVOID LoadedFileBase)
+__declspec(dllexport) bool ResourcerFreeLoadedFile(LPVOID LoadedFileBase)
 {
     if(VirtualFree(LoadedFileBase, NULL, MEM_RELEASE))
     {
@@ -11370,7 +11370,7 @@ __declspec(dllexport) bool __stdcall ResourcerFreeLoadedFile(LPVOID LoadedFileBa
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ResourcerExtractResourceFromFileEx(ULONG_PTR FileMapVA, char* szResourceType, char* szResourceName, char* szExtractedFileName)
+__declspec(dllexport) bool ResourcerExtractResourceFromFileEx(ULONG_PTR FileMapVA, char* szResourceType, char* szResourceName, char* szExtractedFileName)
 {
 
     HRSRC hResource;
@@ -11406,7 +11406,7 @@ __declspec(dllexport) bool __stdcall ResourcerExtractResourceFromFileEx(ULONG_PT
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ResourcerExtractResourceFromFile(char* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
+__declspec(dllexport) bool ResourcerExtractResourceFromFile(char* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
 {
 
     HANDLE FileHandle;
@@ -11426,7 +11426,7 @@ __declspec(dllexport) bool __stdcall ResourcerExtractResourceFromFile(char* szFi
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ResourcerExtractResourceFromFileW(wchar_t* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
+__declspec(dllexport) bool ResourcerExtractResourceFromFileW(wchar_t* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
 {
 
     HANDLE FileHandle;
@@ -11446,7 +11446,7 @@ __declspec(dllexport) bool __stdcall ResourcerExtractResourceFromFileW(wchar_t* 
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ResourcerFindResource(char* szFileName, char* szResourceType, DWORD ResourceType, char* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
+__declspec(dllexport) bool ResourcerFindResource(char* szFileName, char* szResourceType, DWORD ResourceType, char* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -11481,7 +11481,7 @@ __declspec(dllexport) bool __stdcall ResourcerFindResource(char* szFileName, cha
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ResourcerFindResourceW(wchar_t* szFileName, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
+__declspec(dllexport) bool ResourcerFindResourceW(wchar_t* szFileName, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
 {
 
     bool ReturnValue;
@@ -11505,7 +11505,7 @@ __declspec(dllexport) bool __stdcall ResourcerFindResourceW(wchar_t* szFileName,
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ResourcerFindResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
+__declspec(dllexport) bool ResourcerFindResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
 {
 
     int i,j,n;
@@ -11587,7 +11587,7 @@ __declspec(dllexport) bool __stdcall ResourcerFindResourceEx(ULONG_PTR FileMapVA
     }
     return(false);
 }
-__declspec(dllexport) void __stdcall ResourcerEnumerateResource(char* szFileName, void* CallBack)
+__declspec(dllexport) void ResourcerEnumerateResource(char* szFileName, void* CallBack)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -11598,7 +11598,7 @@ __declspec(dllexport) void __stdcall ResourcerEnumerateResource(char* szFileName
         ResourcerEnumerateResourceW(uniFileName, CallBack);
     }
 }
-__declspec(dllexport) void __stdcall ResourcerEnumerateResourceW(wchar_t* szFileName, void* CallBack)
+__declspec(dllexport) void ResourcerEnumerateResourceW(wchar_t* szFileName, void* CallBack)
 {
 
     ULONG_PTR FileMapVA;
@@ -11612,7 +11612,7 @@ __declspec(dllexport) void __stdcall ResourcerEnumerateResourceW(wchar_t* szFile
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     }
 }
-__declspec(dllexport) void __stdcall ResourcerEnumerateResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, void* CallBack)
+__declspec(dllexport) void ResourcerEnumerateResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, void* CallBack)
 {
 
     int i,j,n;
@@ -11626,7 +11626,7 @@ __declspec(dllexport) void __stdcall ResourcerEnumerateResourceEx(ULONG_PTR File
     PIMAGE_RESOURCE_DIRECTORY PESubResourcePtr2;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY PEResourceDir2;
     PIMAGE_RESOURCE_DATA_ENTRY PEResourceItem;
-    typedef bool(__stdcall *fResourceEnumerator)(wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, DWORD ResourceData, DWORD ResourceSize);
+    typedef bool(*fResourceEnumerator)(wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, DWORD ResourceData, DWORD ResourceSize);
     fResourceEnumerator myResourceEnumerator = (fResourceEnumerator)CallBack;
 
     __try
@@ -11693,7 +11693,7 @@ __declspec(dllexport) void __stdcall ResourcerEnumerateResourceEx(ULONG_PTR File
     }
 }
 // TitanEngine.Threader.functions:
-__declspec(dllexport) bool __stdcall ThreaderImportRunningThreadData(DWORD ProcessId)
+__declspec(dllexport) bool ThreaderImportRunningThreadData(DWORD ProcessId)
 {
 
     HANDLE hSnapShot;
@@ -11734,7 +11734,7 @@ __declspec(dllexport) bool __stdcall ThreaderImportRunningThreadData(DWORD Proce
     }
     return(false);
 }
-__declspec(dllexport) void* __stdcall ThreaderGetThreadInfo(HANDLE hThread, DWORD ThreadId)
+__declspec(dllexport) void* ThreaderGetThreadInfo(HANDLE hThread, DWORD ThreadId)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -11766,11 +11766,11 @@ __declspec(dllexport) void* __stdcall ThreaderGetThreadInfo(HANDLE hThread, DWOR
     }
     return(NULL);
 }
-__declspec(dllexport) void __stdcall ThreaderEnumThreadInfo(void* EnumCallBack)
+__declspec(dllexport) void ThreaderEnumThreadInfo(void* EnumCallBack)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-    typedef void(__stdcall *fEnumCallBack)(LPVOID fThreadDetail);
+    typedef void(*fEnumCallBack)(LPVOID fThreadDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
 
     if(hListThreadPtr != NULL)
@@ -11792,7 +11792,7 @@ __declspec(dllexport) void __stdcall ThreaderEnumThreadInfo(void* EnumCallBack)
         }
     }
 }
-__declspec(dllexport) bool __stdcall ThreaderPauseThread(HANDLE hThread)
+__declspec(dllexport) bool ThreaderPauseThread(HANDLE hThread)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -11824,7 +11824,7 @@ __declspec(dllexport) bool __stdcall ThreaderPauseThread(HANDLE hThread)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderResumeThread(HANDLE hThread)
+__declspec(dllexport) bool ThreaderResumeThread(HANDLE hThread)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -11856,7 +11856,7 @@ __declspec(dllexport) bool __stdcall ThreaderResumeThread(HANDLE hThread)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderTerminateThread(HANDLE hThread, DWORD ThreadExitCode)
+__declspec(dllexport) bool ThreaderTerminateThread(HANDLE hThread, DWORD ThreadExitCode)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -11892,7 +11892,7 @@ __declspec(dllexport) bool __stdcall ThreaderTerminateThread(HANDLE hThread, DWO
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderPauseAllThreads(bool LeaveMainRunning)
+__declspec(dllexport) bool ThreaderPauseAllThreads(bool LeaveMainRunning)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -11918,7 +11918,7 @@ __declspec(dllexport) bool __stdcall ThreaderPauseAllThreads(bool LeaveMainRunni
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderResumeAllThreads(bool LeaveMainPaused)
+__declspec(dllexport) bool ThreaderResumeAllThreads(bool LeaveMainPaused)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -11944,15 +11944,15 @@ __declspec(dllexport) bool __stdcall ThreaderResumeAllThreads(bool LeaveMainPaus
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderPauseProcess()
+__declspec(dllexport) bool ThreaderPauseProcess()
 {
     return(ThreaderPauseAllThreads(false));
 }
-__declspec(dllexport) bool __stdcall ThreaderResumeProcess()
+__declspec(dllexport) bool ThreaderResumeProcess()
 {
     return(ThreaderResumeAllThreads(false));
 }
-__declspec(dllexport) long long __stdcall ThreaderCreateRemoteThread(ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
+__declspec(dllexport) long long ThreaderCreateRemoteThread(ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
 {
 
     HANDLE myThread;
@@ -11972,7 +11972,7 @@ __declspec(dllexport) long long __stdcall ThreaderCreateRemoteThread(ULONG_PTR T
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall ThreaderInjectAndExecuteCode(LPVOID InjectCode, DWORD StartDelta, DWORD InjectSize)
+__declspec(dllexport) bool ThreaderInjectAndExecuteCode(LPVOID InjectCode, DWORD StartDelta, DWORD InjectSize)
 {
 
     LPVOID ThreadBase = 0;
@@ -11993,7 +11993,7 @@ __declspec(dllexport) bool __stdcall ThreaderInjectAndExecuteCode(LPVOID InjectC
     }
     return(false);
 }
-__declspec(dllexport) long long __stdcall ThreaderCreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
+__declspec(dllexport) long long ThreaderCreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
 {
 
     HANDLE myThread;
@@ -12013,7 +12013,7 @@ __declspec(dllexport) long long __stdcall ThreaderCreateRemoteThreadEx(HANDLE hP
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall ThreaderInjectAndExecuteCodeEx(HANDLE hProcess, LPVOID InjectCode, DWORD StartDelta, DWORD InjectSize)
+__declspec(dllexport) bool ThreaderInjectAndExecuteCodeEx(HANDLE hProcess, LPVOID InjectCode, DWORD StartDelta, DWORD InjectSize)
 {
 
     LPVOID ThreadBase = 0;
@@ -12034,11 +12034,11 @@ __declspec(dllexport) bool __stdcall ThreaderInjectAndExecuteCodeEx(HANDLE hProc
     }
     return(false);
 }
-__declspec(dllexport) void __stdcall ThreaderSetCallBackForNextExitThreadEvent(LPVOID exitThreadCallBack)
+__declspec(dllexport) void ThreaderSetCallBackForNextExitThreadEvent(LPVOID exitThreadCallBack)
 {
     engineExitThreadOneShootCallBack = exitThreadCallBack;
 }
-__declspec(dllexport) bool __stdcall ThreaderIsThreadStillRunning(HANDLE hThread)
+__declspec(dllexport) bool ThreaderIsThreadStillRunning(HANDLE hThread)
 {
 
     CONTEXT myDBGContext;
@@ -12054,7 +12054,7 @@ __declspec(dllexport) bool __stdcall ThreaderIsThreadStillRunning(HANDLE hThread
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ThreaderIsThreadActive(HANDLE hThread)
+__declspec(dllexport) bool ThreaderIsThreadActive(HANDLE hThread)
 {
 
     if(SuspendThread(hThread) < 0)
@@ -12064,7 +12064,7 @@ __declspec(dllexport) bool __stdcall ThreaderIsThreadActive(HANDLE hThread)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderIsAnyThreadActive()
+__declspec(dllexport) bool ThreaderIsAnyThreadActive()
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -12085,7 +12085,7 @@ __declspec(dllexport) bool __stdcall ThreaderIsAnyThreadActive()
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ThreaderExecuteOnlyInjectedThreads()
+__declspec(dllexport) bool ThreaderExecuteOnlyInjectedThreads()
 {
 
     if(ThreaderPauseProcess())
@@ -12095,7 +12095,7 @@ __declspec(dllexport) bool __stdcall ThreaderExecuteOnlyInjectedThreads()
     }
     return(false);
 }
-__declspec(dllexport) long long __stdcall ThreaderGetOpenHandleForThread(DWORD ThreadId)
+__declspec(dllexport) long long ThreaderGetOpenHandleForThread(DWORD ThreadId)
 {
 
     PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
@@ -12113,11 +12113,11 @@ __declspec(dllexport) long long __stdcall ThreaderGetOpenHandleForThread(DWORD T
     }
     return(NULL);
 }
-__declspec(dllexport) void* __stdcall ThreaderGetThreadData()
+__declspec(dllexport) void* ThreaderGetThreadData()
 {
     return(hListThread);
 }
-__declspec(dllexport) bool __stdcall ThreaderIsExceptionInMainThread()
+__declspec(dllexport) bool ThreaderIsExceptionInMainThread()
 {
 
     LPDEBUG_EVENT myDBGEvent;
@@ -12159,7 +12159,7 @@ void DebuggerReset()
     }
 }
 // TitanEngine.Debugger.functions:
-__declspec(dllexport) void* __stdcall StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress)
+__declspec(dllexport) void* StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress)
 {
     _DecodeResult DecodingResult;
     _DecodedInst engineDecodedInstructions[MAX_DECODE_INSTRUCTIONS];
@@ -12203,11 +12203,11 @@ __declspec(dllexport) void* __stdcall StaticDisassembleEx(ULONG_PTR DisassmStart
         return(NULL);
     }
 }
-__declspec(dllexport) void* __stdcall StaticDisassemble(LPVOID DisassmAddress)
+__declspec(dllexport) void* StaticDisassemble(LPVOID DisassmAddress)
 {
     return(StaticDisassembleEx((ULONG_PTR)DisassmAddress, DisassmAddress));
 }
-__declspec(dllexport) void* __stdcall DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType)
+__declspec(dllexport) void* DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType)
 {
 
     _DecodeResult DecodingResult;
@@ -12285,11 +12285,11 @@ __declspec(dllexport) void* __stdcall DisassembleEx(HANDLE hProcess, LPVOID Disa
         return(NULL);
     }
 }
-__declspec(dllexport) void* __stdcall Disassemble(LPVOID DisassmAddress)
+__declspec(dllexport) void* Disassemble(LPVOID DisassmAddress)
 {
     return(DisassembleEx(dbgProcessInformation.hProcess, DisassmAddress, false));
 }
-__declspec(dllexport) long __stdcall StaticLengthDisassemble(LPVOID DisassmAddress)
+__declspec(dllexport) long StaticLengthDisassemble(LPVOID DisassmAddress)
 {
 
     _DecodeResult DecodingResult;
@@ -12327,7 +12327,7 @@ __declspec(dllexport) long __stdcall StaticLengthDisassemble(LPVOID DisassmAddre
         return(NULL);
     }
 }
-__declspec(dllexport) long __stdcall LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
+__declspec(dllexport) long LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
 {
 
     _DecodeResult DecodingResult;
@@ -12384,11 +12384,11 @@ __declspec(dllexport) long __stdcall LengthDisassembleEx(HANDLE hProcess, LPVOID
         return(-1);
     }
 }
-__declspec(dllexport) long __stdcall LengthDisassemble(LPVOID DisassmAddress)
+__declspec(dllexport) long LengthDisassemble(LPVOID DisassmAddress)
 {
     return(LengthDisassembleEx(dbgProcessInformation.hProcess, DisassmAddress));
 }
-__declspec(dllexport) void* __stdcall InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder)
+__declspec(dllexport) void* InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder)
 {
 
     wchar_t* PtrUniFileName = NULL;
@@ -12422,7 +12422,7 @@ __declspec(dllexport) void* __stdcall InitDebug(char* szFileName, char* szComman
         return(false);
     }
 }
-__declspec(dllexport) void* __stdcall InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
+__declspec(dllexport) void* InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
 {
 
     wchar_t szCreateWithCmdLine[1024];
@@ -12467,17 +12467,17 @@ __declspec(dllexport) void* __stdcall InitDebugW(wchar_t* szFileName, wchar_t* s
         }
     }
 }
-__declspec(dllexport) void* __stdcall InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
+__declspec(dllexport) void* InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
 {
     DebugExeFileEntryPointCallBack = EntryCallBack;
     return(InitDebug(szFileName, szCommandLine, szCurrentFolder));
 }
-__declspec(dllexport) void* __stdcall InitDebugExW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
+__declspec(dllexport) void* InitDebugExW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
 {
     DebugExeFileEntryPointCallBack = EntryCallBack;
     return(InitDebugW(szFileName, szCommandLine, szCurrentFolder));
 }
-__declspec(dllexport) void* __stdcall InitDLLDebug(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
+__declspec(dllexport) void* InitDLLDebug(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
 {
 
     wchar_t* PtrUniFileName = NULL;
@@ -12511,7 +12511,7 @@ __declspec(dllexport) void* __stdcall InitDLLDebug(char* szFileName, bool Reserv
         return(false);
     }
 }
-__declspec(dllexport) void* __stdcall InitDLLDebugW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
+__declspec(dllexport) void* InitDLLDebugW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
 {
 
     int i = NULL;
@@ -12591,7 +12591,7 @@ __declspec(dllexport) void* __stdcall InitDLLDebugW(wchar_t* szFileName, bool Re
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall StopDebug()
+__declspec(dllexport) bool StopDebug()
 {
     if(dbgProcessInformation.hProcess != NULL)
     {
@@ -12604,11 +12604,11 @@ __declspec(dllexport) bool __stdcall StopDebug()
         return(false);
     }
 }
-__declspec(dllexport) void __stdcall SetBPXOptions(long DefaultBreakPointType)
+__declspec(dllexport) void SetBPXOptions(long DefaultBreakPointType)
 {
     engineDefaultBreakPointType = DefaultBreakPointType;
 }
-__declspec(dllexport) bool __stdcall IsBPXEnabled(ULONG_PTR bpxAddress)
+__declspec(dllexport) bool IsBPXEnabled(ULONG_PTR bpxAddress)
 {
 
     int i;
@@ -12654,7 +12654,7 @@ __declspec(dllexport) bool __stdcall IsBPXEnabled(ULONG_PTR bpxAddress)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall EnableBPX(ULONG_PTR bpxAddress)
+__declspec(dllexport) bool EnableBPX(ULONG_PTR bpxAddress)
 {
 
     int i;
@@ -12715,7 +12715,7 @@ __declspec(dllexport) bool __stdcall EnableBPX(ULONG_PTR bpxAddress)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DisableBPX(ULONG_PTR bpxAddress)
+__declspec(dllexport) bool DisableBPX(ULONG_PTR bpxAddress)
 {
 
     int i;
@@ -12754,7 +12754,7 @@ __declspec(dllexport) bool __stdcall DisableBPX(ULONG_PTR bpxAddress)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bpxCallBack)
+__declspec(dllexport) bool SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bpxCallBack)
 {
 
     int i = 0;
@@ -12884,7 +12884,7 @@ __declspec(dllexport) bool __stdcall SetBPX(ULONG_PTR bpxAddress, DWORD bpxType,
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall SetBPXEx(ULONG_PTR bpxAddress, DWORD bpxType, DWORD NumberOfExecution, DWORD CmpRegister, DWORD CmpCondition, ULONG_PTR CmpValue, LPVOID bpxCallBack, LPVOID bpxCompareCallBack, LPVOID bpxRemoveCallBack)
+__declspec(dllexport) bool SetBPXEx(ULONG_PTR bpxAddress, DWORD bpxType, DWORD NumberOfExecution, DWORD CmpRegister, DWORD CmpCondition, ULONG_PTR CmpValue, LPVOID bpxCallBack, LPVOID bpxCompareCallBack, LPVOID bpxRemoveCallBack)
 {
 
     int i = 0;
@@ -13019,11 +13019,11 @@ __declspec(dllexport) bool __stdcall SetBPXEx(ULONG_PTR bpxAddress, DWORD bpxTyp
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall DeleteBPX(ULONG_PTR bpxAddress)
+__declspec(dllexport) bool DeleteBPX(ULONG_PTR bpxAddress)
 {
 
     int i;
-    typedef void(__stdcall *fCustomBreakPoint)(void* myBreakPointAddress);
+    typedef void(*fCustomBreakPoint)(void* myBreakPointAddress);
     fCustomBreakPoint myCustomBreakPoint;
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
@@ -13095,11 +13095,11 @@ __declspec(dllexport) bool __stdcall DeleteBPX(ULONG_PTR bpxAddress)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall SafeDeleteBPX(ULONG_PTR bpxAddress)
+__declspec(dllexport) bool SafeDeleteBPX(ULONG_PTR bpxAddress)
 {
     return(DeleteBPX(bpxAddress));
 }
-__declspec(dllexport) bool __stdcall SetAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxType, DWORD bpxPlace, LPVOID bpxCallBack)
+__declspec(dllexport) bool SetAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxType, DWORD bpxPlace, LPVOID bpxCallBack)
 {
 
     BYTE ReadByte = NULL;
@@ -13260,7 +13260,7 @@ __declspec(dllexport) bool __stdcall SetAPIBreakPoint(char* szDLLName, char* szA
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace)
+__declspec(dllexport) bool DeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace)
 {
 
     BYTE ReadByte = NULL;
@@ -13421,11 +13421,11 @@ __declspec(dllexport) bool __stdcall DeleteAPIBreakPoint(char* szDLLName, char* 
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall SafeDeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace)
+__declspec(dllexport) bool SafeDeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace)
 {
     return(DeleteAPIBreakPoint(szDLLName, szAPIName, bpxPlace));
 }
-__declspec(dllexport) bool __stdcall SetMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory, LPVOID bpxCallBack)
+__declspec(dllexport) bool SetMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory, LPVOID bpxCallBack)
 {
     int i = 0;
     int j = -1;
@@ -13484,7 +13484,7 @@ __declspec(dllexport) bool __stdcall SetMemoryBPX(ULONG_PTR MemoryStart, DWORD S
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
+__declspec(dllexport) bool SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
 {
 
     int i = 0;
@@ -13545,7 +13545,7 @@ __declspec(dllexport) bool __stdcall SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory)
+__declspec(dllexport) bool RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory)
 {
 
     int i = 0;
@@ -13593,7 +13593,7 @@ __declspec(dllexport) bool __stdcall RemoveMemoryBPX(ULONG_PTR MemoryStart, DWOR
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall GetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
+__declspec(dllexport) bool GetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
 {
 
     if(FPUSaveArea != NULL)
@@ -13613,7 +13613,7 @@ __declspec(dllexport) bool __stdcall GetContextFPUDataEx(HANDLE hActiveThread, v
         return(false);
     }
 }
-__declspec(dllexport) long long __stdcall GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister)
+__declspec(dllexport) long long GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister)
 {
 
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
@@ -13889,7 +13889,7 @@ __declspec(dllexport) long long __stdcall GetContextDataEx(HANDLE hActiveThread,
 #endif
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall GetContextData(DWORD IndexOfRegister)
+__declspec(dllexport) long long GetContextData(DWORD IndexOfRegister)
 {
 
     HANDLE hActiveThread = 0;
@@ -13900,7 +13900,7 @@ __declspec(dllexport) long long __stdcall GetContextData(DWORD IndexOfRegister)
     EngineCloseHandle(hActiveThread);
     return(ContextReturn);
 }
-__declspec(dllexport) bool __stdcall SetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
+__declspec(dllexport) bool SetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
 {
 
     if(FPUSaveArea != NULL)
@@ -13920,7 +13920,7 @@ __declspec(dllexport) bool __stdcall SetContextFPUDataEx(HANDLE hActiveThread, v
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall SetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
+__declspec(dllexport) bool SetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
 
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
@@ -14221,7 +14221,7 @@ __declspec(dllexport) bool __stdcall SetContextDataEx(HANDLE hActiveThread, DWOR
 #endif
     return(false);
 }
-__declspec(dllexport) bool __stdcall SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
+__declspec(dllexport) bool SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
 
     HANDLE hActiveThread = 0;
@@ -14232,15 +14232,15 @@ __declspec(dllexport) bool __stdcall SetContextData(DWORD IndexOfRegister, ULONG
     EngineCloseHandle(hActiveThread);
     return(ContextReturn);
 }
-__declspec(dllexport) void __stdcall ClearExceptionNumber()
+__declspec(dllexport) void ClearExceptionNumber()
 {
     CurrentExceptionsNumber = 0;
 }
-__declspec(dllexport) long __stdcall CurrentExceptionNumber()
+__declspec(dllexport) long CurrentExceptionNumber()
 {
     return(CurrentExceptionsNumber);
 }
-__declspec(dllexport) bool __stdcall MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
+__declspec(dllexport) bool MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
 
     int i = NULL;
@@ -14318,7 +14318,7 @@ __declspec(dllexport) bool __stdcall MatchPatternEx(HANDLE hProcess, void* Memor
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall MatchPattern(void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
+__declspec(dllexport) bool MatchPattern(void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
 
     if(dbgProcessInformation.hProcess != NULL)
@@ -14330,7 +14330,7 @@ __declspec(dllexport) bool __stdcall MatchPattern(void* MemoryToCheck, int SizeO
         return(MatchPatternEx(GetCurrentProcess(), MemoryToCheck, SizeOfMemoryToCheck, PatternToMatch, SizeOfPatternToMatch, WildCard));
     }
 }
-__declspec(dllexport) long long __stdcall FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
+__declspec(dllexport) long long FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
 
     int i = NULL;
@@ -14422,7 +14422,8 @@ __declspec(dllexport) long long __stdcall FindEx(HANDLE hProcess, LPVOID MemoryS
         return(NULL);
     }
 }
-__declspec(dllexport) long long __stdcall FindU(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
+
+extern "C" __declspec(dllexport) long long Find(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
 
     if(dbgProcessInformation.hProcess != NULL)
@@ -14434,7 +14435,7 @@ __declspec(dllexport) long long __stdcall FindU(LPVOID MemoryStart, DWORD Memory
         return(FindEx(GetCurrentProcess(), MemoryStart, MemorySize, SearchPattern, PatternSize, WildCard));
     }
 }
-__declspec(dllexport) bool __stdcall FillEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, PBYTE FillByte)
+__declspec(dllexport) bool FillEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, PBYTE FillByte)
 {
 
     unsigned int i;
@@ -14462,7 +14463,7 @@ __declspec(dllexport) bool __stdcall FillEx(HANDLE hProcess, LPVOID MemoryStart,
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall Fill(LPVOID MemoryStart, DWORD MemorySize, PBYTE FillByte)
+__declspec(dllexport) bool Fill(LPVOID MemoryStart, DWORD MemorySize, PBYTE FillByte)
 {
 
     if(dbgProcessInformation.hProcess != NULL)
@@ -14474,7 +14475,7 @@ __declspec(dllexport) bool __stdcall Fill(LPVOID MemoryStart, DWORD MemorySize, 
         return(FillEx(GetCurrentProcess(), MemoryStart, MemorySize, FillByte));
     }
 }
-__declspec(dllexport) bool __stdcall PatchEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
+__declspec(dllexport) bool PatchEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
 {
 
     unsigned int i,recalcSize;
@@ -14527,7 +14528,7 @@ __declspec(dllexport) bool __stdcall PatchEx(HANDLE hProcess, LPVOID MemoryStart
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall Patch(LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
+__declspec(dllexport) bool Patch(LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
 {
 
     if(dbgProcessInformation.hProcess != NULL)
@@ -14539,7 +14540,7 @@ __declspec(dllexport) bool __stdcall Patch(LPVOID MemoryStart, DWORD MemorySize,
         return(PatchEx(GetCurrentProcess(), MemoryStart, MemorySize, ReplacePattern, ReplaceSize, AppendNOP, PrependNOP));
     }
 }
-__declspec(dllexport) bool __stdcall ReplaceEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)
+__declspec(dllexport) bool ReplaceEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)
 {
 
     unsigned int i;
@@ -14579,7 +14580,7 @@ __declspec(dllexport) bool __stdcall ReplaceEx(HANDLE hProcess, LPVOID MemorySta
         return(true);
     }
 }
-__declspec(dllexport) bool __stdcall Replace(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)
+__declspec(dllexport) bool Replace(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)
 {
 
     if(dbgProcessInformation.hProcess != NULL)
@@ -14591,27 +14592,27 @@ __declspec(dllexport) bool __stdcall Replace(LPVOID MemoryStart, DWORD MemorySiz
         return(ReplaceEx(GetCurrentProcess(), MemoryStart, MemorySize, SearchPattern, PatternSize, NumberOfRepetitions, ReplacePattern, ReplaceSize, WildCard));
     }
 }
-__declspec(dllexport) void* __stdcall GetDebugData()
+__declspec(dllexport) void* GetDebugData()
 {
     return(&DBGEvent);
 }
-__declspec(dllexport) void* __stdcall GetTerminationData()
+__declspec(dllexport) void* GetTerminationData()
 {
     return(&TerminateDBGEvent);
 }
-__declspec(dllexport) long __stdcall GetExitCode()
+__declspec(dllexport) long GetExitCode()
 {
     return(ProcessExitCode);
 }
-__declspec(dllexport) long long __stdcall GetDebuggedDLLBaseAddress()
+__declspec(dllexport) long long GetDebuggedDLLBaseAddress()
 {
     return((ULONG_PTR)engineDebuggingDLLBase);
 }
-__declspec(dllexport) unsigned long long __stdcall GetDebuggedFileBaseAddress()
+__declspec(dllexport) unsigned long long GetDebuggedFileBaseAddress()
 {
     return (unsigned long long)engineDebuggingMainModuleBase;
 }
-__declspec(dllexport) bool __stdcall GetRemoteString(HANDLE hProcess, LPVOID StringAddress, LPVOID StringStorage, int MaximumStringSize)
+__declspec(dllexport) bool GetRemoteString(HANDLE hProcess, LPVOID StringAddress, LPVOID StringStorage, int MaximumStringSize)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -14646,7 +14647,7 @@ __declspec(dllexport) bool __stdcall GetRemoteString(HANDLE hProcess, LPVOID Str
         return(false);
     }
 }
-__declspec(dllexport) long long __stdcall GetFunctionParameter(HANDLE hProcess, DWORD FunctionType, DWORD ParameterNumber, DWORD ParameterType)
+__declspec(dllexport) long long GetFunctionParameter(HANDLE hProcess, DWORD FunctionType, DWORD ParameterNumber, DWORD ParameterType)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -14814,7 +14815,7 @@ __declspec(dllexport) long long __stdcall GetFunctionParameter(HANDLE hProcess, 
     }
     return(-1);
 }
-__declspec(dllexport) long long __stdcall GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
+__declspec(dllexport) long long GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
 {
 
     LPVOID ReadMemory;
@@ -15098,11 +15099,11 @@ __declspec(dllexport) long long __stdcall GetJumpDestinationEx(HANDLE hProcess, 
     }
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall GetJumpDestination(HANDLE hProcess, ULONG_PTR InstructionAddress)
+__declspec(dllexport) long long GetJumpDestination(HANDLE hProcess, ULONG_PTR InstructionAddress)
 {
     return((ULONG_PTR)GetJumpDestinationEx(hProcess, InstructionAddress, false));
 }
-__declspec(dllexport) bool __stdcall IsJumpGoingToExecuteEx(HANDLE hProcess, HANDLE hThread, ULONG_PTR InstructionAddress, ULONG_PTR RegFlags)
+__declspec(dllexport) bool IsJumpGoingToExecuteEx(HANDLE hProcess, HANDLE hThread, ULONG_PTR InstructionAddress, ULONG_PTR RegFlags)
 {
     ULONG_PTR ThreadCIP = NULL;
     DWORD ThreadEflags = NULL;
@@ -15428,11 +15429,11 @@ __declspec(dllexport) bool __stdcall IsJumpGoingToExecuteEx(HANDLE hProcess, HAN
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall IsJumpGoingToExecute()
+__declspec(dllexport) bool IsJumpGoingToExecute()
 {
     return(IsJumpGoingToExecuteEx(dbgProcessInformation.hProcess, dbgProcessInformation.hThread, NULL, NULL));
 }
-__declspec(dllexport) void __stdcall SetCustomHandler(DWORD ExceptionId, LPVOID CallBack)
+__declspec(dllexport) void SetCustomHandler(DWORD ExceptionId, LPVOID CallBack)
 {
 
     if(ExceptionId == UE_CH_BREAKPOINT)
@@ -15544,7 +15545,7 @@ __declspec(dllexport) void __stdcall SetCustomHandler(DWORD ExceptionId, LPVOID 
         DBGCustomHandler->chSystemBreakpoint = (ULONG_PTR)CallBack;
     }
 }
-__declspec(dllexport) void __stdcall ForceClose()
+__declspec(dllexport) void ForceClose()
 {
     /*wchar_t szTempName[MAX_PATH];
     wchar_t szTempFolder[MAX_PATH];*/
@@ -15672,7 +15673,7 @@ __declspec(dllexport) void __stdcall ForceClose()
     engineDebuggingDLL = false;
     DebugExeFileEntryPointCallBack = NULL;
 }
-__declspec(dllexport) void __stdcall StepInto(LPVOID StepCallBack)
+__declspec(dllexport) void StepInto(LPVOID StepCallBack)
 {
     ULONG_PTR ueContext = NULL;
 
@@ -15686,7 +15687,7 @@ __declspec(dllexport) void __stdcall StepInto(LPVOID StepCallBack)
     engineStepCallBack = StepCallBack;
     engineStepCount = NULL;
 }
-__declspec(dllexport) void __stdcall StepOver(LPVOID StepCallBack)
+__declspec(dllexport) void StepOver(LPVOID StepCallBack)
 {
     ULONG_PTR ueCurrentPosition = NULL;
 #if !defined(_WIN64)
@@ -15706,7 +15707,7 @@ __declspec(dllexport) void __stdcall StepOver(LPVOID StepCallBack)
         StepInto(StepCallBack);
 }
 
-__declspec(dllexport) void __stdcall SingleStep(DWORD StepCount, LPVOID StepCallBack)
+__declspec(dllexport) void SingleStep(DWORD StepCount, LPVOID StepCallBack)
 {
 
     ULONG_PTR ueContext = NULL;
@@ -15722,11 +15723,11 @@ __declspec(dllexport) void __stdcall SingleStep(DWORD StepCount, LPVOID StepCall
     engineStepCallBack = StepCallBack;
     engineStepCount--;
 }
-__declspec(dllexport) bool __stdcall GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex)
+__declspec(dllexport) bool GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex)
 {
     return(EngineIsThereFreeHardwareBreakSlot(RegisterIndex));
 }
-__declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister)
+__declspec(dllexport) bool SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister)
 {
 
     ULONG_PTR HardwareBPX = NULL;
@@ -16010,7 +16011,7 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThrea
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack)
+__declspec(dllexport) bool SetHardwareBreakPoint(ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack)
 {
 
     ULONG_PTR HardwareBPX = NULL;
@@ -16294,7 +16295,7 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress,
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DeleteHardwareBreakPoint(DWORD IndexOfRegister)
+__declspec(dllexport) bool DeleteHardwareBreakPoint(DWORD IndexOfRegister)
 {
 
     ULONG_PTR HardwareBPX = NULL;
@@ -16354,7 +16355,7 @@ __declspec(dllexport) bool __stdcall DeleteHardwareBreakPoint(DWORD IndexOfRegis
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RemoveAllBreakPoints(DWORD RemoveOption)
+__declspec(dllexport) bool RemoveAllBreakPoints(DWORD RemoveOption)
 {
 
     int i = 0;
@@ -16449,15 +16450,15 @@ __declspec(dllexport) bool __stdcall RemoveAllBreakPoints(DWORD RemoveOption)
     }
     return(false);
 }
-__declspec(dllexport) void* __stdcall GetProcessInformation()
+__declspec(dllexport) void* GetProcessInformation()
 {
     return(&dbgProcessInformation);
 }
-__declspec(dllexport) void* __stdcall GetStartupInformation()
+__declspec(dllexport) void* GetStartupInformation()
 {
     return(&dbgStartupInfo);
 }
-__declspec(dllexport) void __stdcall DebugLoop()
+__declspec(dllexport) void DebugLoop()
 {
 
     int i = NULL;
@@ -16479,9 +16480,9 @@ __declspec(dllexport) void __stdcall DebugLoop()
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
     PLIBRARY_ITEM_DATAW hLoadedLibData = NULL;
     PLIBRARY_BREAK_DATA ptrLibrarianData = NULL;
-    typedef void(__stdcall *fCustomBreakPoint)(void);
-    typedef void(__stdcall *fCustomHandler)(void* SpecialDBG);
-    typedef void(__stdcall *fFindOEPHandler)(LPPROCESS_INFORMATION fProcessInfo, LPVOID fCallBack);
+    typedef void(*fCustomBreakPoint)(void);
+    typedef void(*fCustomHandler)(void* SpecialDBG);
+    typedef void(*fFindOEPHandler)(LPPROCESS_INFORMATION fProcessInfo, LPVOID fCallBack);
     fCustomHandler myCustomHandler;
     fCustomBreakPoint myCustomBreakPoint;
     fFindOEPHandler myFindOEPHandler;
@@ -18073,7 +18074,7 @@ __declspec(dllexport) void __stdcall DebugLoop()
         EngineExecutePluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_POSTDEBUG);
     }
 }
-__declspec(dllexport) void __stdcall SetDebugLoopTimeOut(DWORD TimeOut)
+__declspec(dllexport) void SetDebugLoopTimeOut(DWORD TimeOut)
 {
 
     if(TimeOut == NULL)
@@ -18082,7 +18083,7 @@ __declspec(dllexport) void __stdcall SetDebugLoopTimeOut(DWORD TimeOut)
     }
     engineWaitForDebugEventTimeOut = TimeOut;
 }
-__declspec(dllexport) void __stdcall SetNextDbgContinueStatus(DWORD SetDbgCode)
+__declspec(dllexport) void SetNextDbgContinueStatus(DWORD SetDbgCode)
 {
 
     if(SetDbgCode != DBG_CONTINUE)
@@ -18094,16 +18095,16 @@ __declspec(dllexport) void __stdcall SetNextDbgContinueStatus(DWORD SetDbgCode)
         DBGCode = DBG_CONTINUE;
     }
 }
-__declspec(dllexport) void __stdcall DebugLoopEx(DWORD TimeOut)
+__declspec(dllexport) void DebugLoopEx(DWORD TimeOut)
 {
     SetDebugLoopTimeOut(TimeOut);
     DebugLoop();
     SetDebugLoopTimeOut(INFINITE);
 }
-__declspec(dllexport) bool __stdcall AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
+__declspec(dllexport) bool AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
 {
 
-    typedef void(__stdcall *fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
+    typedef void(*fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
     fDebugSetProcessKillOnExit myDebugSetProcessKillOnExit;
     LPVOID funcDebugSetProcessKillOnExit = NULL;
 
@@ -18139,10 +18140,10 @@ __declspec(dllexport) bool __stdcall AttachDebugger(DWORD ProcessId, bool KillOn
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DetachDebugger(DWORD ProcessId)
+__declspec(dllexport) bool DetachDebugger(DWORD ProcessId)
 {
 
-    typedef bool(__stdcall *fDebugActiveProcessStop)(DWORD dwProcessId);
+    typedef bool(*fDebugActiveProcessStop)(DWORD dwProcessId);
     fDebugActiveProcessStop myDebugActiveProcessStop;
     LPVOID funcDebugActiveProcessStop = NULL;
     bool FuncReturn = false;
@@ -18169,7 +18170,7 @@ __declspec(dllexport) bool __stdcall DetachDebugger(DWORD ProcessId)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall DetachDebuggerEx(DWORD ProcessId)
+__declspec(dllexport) bool DetachDebuggerEx(DWORD ProcessId)
 {
 
     HANDLE hActiveThread;
@@ -18205,7 +18206,7 @@ __declspec(dllexport) bool __stdcall DetachDebuggerEx(DWORD ProcessId)
         return(false);
     }
 }
-__declspec(dllexport) void __stdcall AutoDebugEx(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
+__declspec(dllexport) void AutoDebugEx(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
 {
 
     wchar_t* PtrUniFileName = NULL;
@@ -18235,7 +18236,7 @@ __declspec(dllexport) void __stdcall AutoDebugEx(char* szFileName, bool ReserveM
         return(AutoDebugExW(PtrUniFileName, ReserveModuleBase, PtrUniCommandLine, PtrUniCurrentFolder, TimeOut, EntryCallBack));
     }
 }
-__declspec(dllexport) void __stdcall AutoDebugExW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
+__declspec(dllexport) void AutoDebugExW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
 {
     engineReserveModuleBase = NULL;
     DWORD ThreadId;
@@ -18281,11 +18282,11 @@ __declspec(dllexport) void __stdcall AutoDebugExW(wchar_t* szFileName, bool Rese
         SetDebugLoopTimeOut(INFINITE);
     }
 }
-__declspec(dllexport) bool __stdcall IsFileBeingDebugged()
+__declspec(dllexport) bool IsFileBeingDebugged()
 {
     return(engineFileIsBeingDebugged);
 }
-__declspec(dllexport) void __stdcall SetErrorModel(bool DisplayErrorMessages)
+__declspec(dllexport) void SetErrorModel(bool DisplayErrorMessages)
 {
 
     if(DisplayErrorMessages)
@@ -18298,7 +18299,7 @@ __declspec(dllexport) void __stdcall SetErrorModel(bool DisplayErrorMessages)
     }
 }
 // Global.FindOEP.functions:
-void __stdcall GenericOEPVirtualProtectHit()
+void GenericOEPVirtualProtectHit()
 {
 
     PBreakPointDetail bpxList = (PBreakPointDetail)BreakPointBuffer;
@@ -18323,11 +18324,11 @@ void __stdcall GenericOEPVirtualProtectHit()
         MaximumBreakPoints++;
     }
 }
-void __stdcall GenericOEPTraceHit()
+void GenericOEPTraceHit()
 {
 
     char* szInstructionType;
-    typedef void(__stdcall *fEPCallBack)();
+    typedef void(*fEPCallBack)();
     fEPCallBack myEPCallBack = (fEPCallBack)glbEntryTracerData.EPCallBack;
     LPDEBUG_EVENT myDbgEvent = (LPDEBUG_EVENT)GetDebugData();
 
@@ -18337,7 +18338,7 @@ void __stdcall GenericOEPTraceHit()
     szInstructionType = (char*)DisassembleEx(dbgProcessInformation.hProcess, (void*)glbEntryTracerData.MemoryAccessedFrom, true);
     StepInto(&GenericOEPTraceHited);
 }
-void __stdcall GenericOEPTraceHited()
+void GenericOEPTraceHited()
 {
 
     int i;
@@ -18345,7 +18346,7 @@ void __stdcall GenericOEPTraceHited()
     bool FakeEPDetected = false;
     ULONG_PTR NumberOfBytesRW;
     LPDEBUG_EVENT myDbgEvent = (LPDEBUG_EVENT)GetDebugData();
-    typedef void(__stdcall *fEPCallBack)();
+    typedef void(*fEPCallBack)();
     fEPCallBack myEPCallBack = (fEPCallBack)glbEntryTracerData.EPCallBack;
     PMEMORY_COMPARE_HANDLER myCmpHandler;
     ULONG_PTR memBpxAddress;
@@ -18437,7 +18438,7 @@ void __stdcall GenericOEPTraceHited()
         StopDebug();
     }
 }
-void __stdcall GenericOEPLibraryDetailsHit()
+void GenericOEPLibraryDetailsHit()
 {
 
     int i;
@@ -18481,13 +18482,13 @@ void __stdcall GenericOEPLibraryDetailsHit()
         }
     }
 }
-void __stdcall GenericOEPTraceInit()
+void GenericOEPTraceInit()
 {
 
     int i;
     void* lpHashBuffer;
     ULONG_PTR NumberOfBytesRW;
-    typedef void(__stdcall *fInitCallBack)();
+    typedef void(*fInitCallBack)();
     fInitCallBack myInitCallBack = (fInitCallBack)glbEntryTracerData.InitCallBack;
 
     if(glbEntryTracerData.FileIsDLL)
@@ -18524,7 +18525,7 @@ void __stdcall GenericOEPTraceInit()
         }
     }
 }
-bool __stdcall GenericOEPFileInitW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
+bool GenericOEPFileInitW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
 {
 
     int i;
@@ -18583,11 +18584,11 @@ bool __stdcall GenericOEPFileInitW(wchar_t* szFileName, LPVOID TraceInitCallBack
     return(false);
 }
 // TitanEngine.FindOEP.functions:
-__declspec(dllexport) void __stdcall FindOEPInit()
+__declspec(dllexport) void FindOEPInit()
 {
     RemoveAllBreakPoints(UE_OPTION_REMOVEALL);
 }
-__declspec(dllexport) bool __stdcall FindOEPGenerically(char* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
+__declspec(dllexport) bool FindOEPGenerically(char* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -18602,7 +18603,7 @@ __declspec(dllexport) bool __stdcall FindOEPGenerically(char* szFileName, LPVOID
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall FindOEPGenericallyW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
+__declspec(dllexport) bool FindOEPGenericallyW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
 {
 
     int i;
@@ -18619,7 +18620,7 @@ __declspec(dllexport) bool __stdcall FindOEPGenericallyW(wchar_t* szFileName, LP
     return(false);
 }
 // TitanEngine.Importer.functions:
-__declspec(dllexport) void __stdcall ImporterCleanup()
+__declspec(dllexport) void ImporterCleanup()
 {
 
     int i = 0;
@@ -18642,21 +18643,21 @@ __declspec(dllexport) void __stdcall ImporterCleanup()
         impOrdinalList[i][1] = 0;
     }
 }
-__declspec(dllexport) void __stdcall ImporterSetImageBase(ULONG_PTR ImageBase)
+__declspec(dllexport) void ImporterSetImageBase(ULONG_PTR ImageBase)
 {
     impImageBase = ImageBase;
 }
-__declspec(dllexport) void __stdcall ImporterSetUnknownDelta(ULONG_PTR DeltaAddress)
+__declspec(dllexport) void ImporterSetUnknownDelta(ULONG_PTR DeltaAddress)
 {
 
     impDeltaStart = DeltaAddress;
     impDeltaCurrent = DeltaAddress;
 }
-__declspec(dllexport) long long __stdcall ImporterGetCurrentDelta()
+__declspec(dllexport) long long ImporterGetCurrentDelta()
 {
     return((ULONG_PTR)impDeltaCurrent);
 }
-__declspec(dllexport) void __stdcall ImporterInit(DWORD MemorySize, ULONG_PTR ImageBase)
+__declspec(dllexport) void ImporterInit(DWORD MemorySize, ULONG_PTR ImageBase)
 {
 
     impImageBase = ImageBase;
@@ -18674,7 +18675,7 @@ __declspec(dllexport) void __stdcall ImporterInit(DWORD MemorySize, ULONG_PTR Im
     impDeltaStart = NULL;
     impDeltaCurrent = NULL;
 }
-__declspec(dllexport) void __stdcall ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk)
+__declspec(dllexport) void ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk)
 {
 
     int CopyDummy = 1;
@@ -18699,7 +18700,7 @@ __declspec(dllexport) void __stdcall ImporterAddNewDll(char* szDLLName, ULONG_PT
         impDeltaCurrent = impDeltaCurrent + sizeof ULONG_PTR;
     }
 }
-__declspec(dllexport) void __stdcall ImporterAddNewAPI(char* szAPIName, ULONG_PTR ThunkValue)
+__declspec(dllexport) void ImporterAddNewAPI(char* szAPIName, ULONG_PTR ThunkValue)
 {
 
     int i = NULL;
@@ -18763,7 +18764,7 @@ __declspec(dllexport) void __stdcall ImporterAddNewAPI(char* szAPIName, ULONG_PT
     CopyDummy++;
     RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][0] + 2 * sizeof ULONG_PTR), &CopyDummy, 4);
 }
-__declspec(dllexport) void __stdcall ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue)
+__declspec(dllexport) void ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue)
 {
 
     if(OrdinalNumber & IMAGE_ORDINAL_FLAG)
@@ -18776,11 +18777,11 @@ __declspec(dllexport) void __stdcall ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalN
         ImporterAddNewAPI((char*)OrdinalNumber, ThunkValue);
     }
 }
-__declspec(dllexport) long __stdcall ImporterGetAddedDllCount()
+__declspec(dllexport) long ImporterGetAddedDllCount()
 {
     return(impDLLNumber + 1);
 }
-__declspec(dllexport) long __stdcall ImporterGetAddedAPICount()
+__declspec(dllexport) long ImporterGetAddedAPICount()
 {
 
     int i = 0;
@@ -18798,7 +18799,7 @@ __declspec(dllexport) long __stdcall ImporterGetAddedAPICount()
     }
     return(APINumber);
 }
-__declspec(dllexport) void* __stdcall ImporterGetLastAddedDLLName()
+__declspec(dllexport) void* ImporterGetLastAddedDLLName()
 {
 
     if(impDLLNumber != -1)
@@ -18810,11 +18811,11 @@ __declspec(dllexport) void* __stdcall ImporterGetLastAddedDLLName()
         return(NULL);
     }
 }
-__declspec(dllexport) void __stdcall ImporterMoveIAT()
+__declspec(dllexport) void ImporterMoveIAT()
 {
     impMoveIAT = true;
 }
-__declspec(dllexport) bool __stdcall ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
 {
 
     int i = 0;
@@ -18953,7 +18954,7 @@ __declspec(dllexport) bool __stdcall ImporterExportIAT(ULONG_PTR StorePlace, ULO
         return(false);
     }
 }
-__declspec(dllexport) long __stdcall ImporterEstimatedSize()
+__declspec(dllexport) long ImporterEstimatedSize()
 {
 
     int i = 0;
@@ -18981,7 +18982,7 @@ __declspec(dllexport) long __stdcall ImporterEstimatedSize()
     }
     return(EstimatedSize);
 }
-__declspec(dllexport) bool __stdcall ImporterExportIATEx(char* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool ImporterExportIATEx(char* szExportFileName, char* szSectionName)
 {
 
     wchar_t uniExportFileName[MAX_PATH] = {};
@@ -18996,7 +18997,7 @@ __declspec(dllexport) bool __stdcall ImporterExportIATEx(char* szExportFileName,
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ImporterExportIATExW(wchar_t* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool ImporterExportIATExW(wchar_t* szExportFileName, char* szSectionName)
 {
 
     HANDLE FileHandle;
@@ -19034,7 +19035,7 @@ __declspec(dllexport) bool __stdcall ImporterExportIATExW(wchar_t* szExportFileN
         return(false);
     }
 }
-__declspec(dllexport) long long __stdcall ImporterFindAPIWriteLocation(char* szAPIName)
+__declspec(dllexport) long long ImporterFindAPIWriteLocation(char* szAPIName)
 {
 
     int i = 0;
@@ -19090,11 +19091,11 @@ __declspec(dllexport) long long __stdcall ImporterFindAPIWriteLocation(char* szA
     }
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
+__declspec(dllexport) long long ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
 {
     return(ImporterFindAPIWriteLocation((char*)OrdinalNumber));
 }
-__declspec(dllexport) long long __stdcall ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
+__declspec(dllexport) long long ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
 {
 
     int i = 0;
@@ -19128,7 +19129,7 @@ __declspec(dllexport) long long __stdcall ImporterFindAPIByWriteLocation(ULONG_P
     }
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
+__declspec(dllexport) long long ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
 {
 
     int i = 0;
@@ -19161,27 +19162,27 @@ __declspec(dllexport) long long __stdcall ImporterFindDLLByWriteLocation(ULONG_P
     }
     return(NULL);
 }
-__declspec(dllexport) void* __stdcall ImporterGetDLLName(ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetDLLName(ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLNAME));
 }
-__declspec(dllexport) void* __stdcall ImporterGetAPIName(ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetAPIName(ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));
 }
-__declspec(dllexport) long long __stdcall ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress)
+__declspec(dllexport) long long ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress)
 {
     return((long)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER));
 }
-__declspec(dllexport) void* __stdcall ImporterGetAPINameEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
+__declspec(dllexport) void* ImporterGetAPINameEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
     return((LPVOID)EngineGlobalAPIHandler(NULL, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));
 }
-__declspec(dllexport) long long __stdcall ImporterGetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) long long ImporterGetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_REALIGN_APIADDRESS));
 }
-__declspec(dllexport) long long __stdcall ImporterGetRemoteAPIAddressEx(char* szDLLName, char* szAPIName)
+__declspec(dllexport) long long ImporterGetRemoteAPIAddressEx(char* szDLLName, char* szAPIName)
 {
 
     int i = 0;
@@ -19273,35 +19274,35 @@ __declspec(dllexport) long long __stdcall ImporterGetRemoteAPIAddressEx(char* sz
     }
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall ImporterGetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) long long ImporterGetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_REALIGN_LOCAL_APIADDRESS));
 }
-__declspec(dllexport) void* __stdcall ImporterGetDLLNameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetDLLNameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLNAME));
 }
-__declspec(dllexport) void* __stdcall ImporterGetAPINameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetAPINameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));
 }
-__declspec(dllexport) long long __stdcall ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) long long ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((long)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER));
 }
-__declspec(dllexport) long __stdcall ImporterGetDLLIndexEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
+__declspec(dllexport) long ImporterGetDLLIndexEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
     return((DWORD)EngineGlobalAPIHandler(NULL, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLINDEX));
 }
-__declspec(dllexport) long __stdcall ImporterGetDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
+__declspec(dllexport) long ImporterGetDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
     return((DWORD)EngineGlobalAPIHandler(hProcess, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLINDEX));
 }
-__declspec(dllexport) long long __stdcall ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
+__declspec(dllexport) long long ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
 {
     return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, (ULONG_PTR)LocalModuleBase, NULL, UE_OPTION_IMPORTER_RETURN_DLLBASE));
 }
-__declspec(dllexport) long long __stdcall ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+__declspec(dllexport) long long ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
 {
 
     int i = 1;
@@ -19326,7 +19327,7 @@ __declspec(dllexport) long long __stdcall ImporterGetRemoteDLLBaseEx(HANDLE hPro
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall ImporterRelocateWriteLocation(ULONG_PTR AddValue)
+__declspec(dllexport) bool ImporterRelocateWriteLocation(ULONG_PTR AddValue)
 {
 
     unsigned int i;
@@ -19358,7 +19359,7 @@ __declspec(dllexport) bool __stdcall ImporterRelocateWriteLocation(ULONG_PTR Add
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) bool ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     if((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_DLLINDEX) > NULL)
     {
@@ -19369,31 +19370,31 @@ __declspec(dllexport) bool __stdcall ImporterIsForwardedAPI(HANDLE hProcess, ULO
         return(false);
     }
 }
-__declspec(dllexport) void* __stdcall ImporterGetForwardedAPIName(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetForwardedAPIName(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_APINAME));
 }
-__declspec(dllexport) void* __stdcall ImporterGetForwardedDLLName(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetForwardedDLLName(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_DLLNAME));
 }
-__declspec(dllexport) long __stdcall ImporterGetForwardedDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
+__declspec(dllexport) long ImporterGetForwardedDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
     return((DWORD)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_DLLINDEX));
 }
-__declspec(dllexport) long long __stdcall ImporterGetForwardedAPIOrdinalNumber(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) long long ImporterGetForwardedAPIOrdinalNumber(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((DWORD)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_API_ORDINAL_NUMBER));
 }
-__declspec(dllexport) long long __stdcall ImporterGetNearestAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) long long ImporterGetNearestAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_NEAREST_APIADDRESS));
 }
-__declspec(dllexport) void* __stdcall ImporterGetNearestAPIName(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) void* ImporterGetNearestAPIName(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_NEAREST_APINAME));
 }
-__declspec(dllexport) bool __stdcall ImporterCopyOriginalIAT(char* szOriginalFile, char* szDumpFile)
+__declspec(dllexport) bool ImporterCopyOriginalIAT(char* szOriginalFile, char* szDumpFile)
 {
 
     wchar_t uniDumpFile[MAX_PATH] = {};
@@ -19410,7 +19411,7 @@ __declspec(dllexport) bool __stdcall ImporterCopyOriginalIAT(char* szOriginalFil
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ImporterCopyOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile)
+__declspec(dllexport) bool ImporterCopyOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -19501,7 +19502,7 @@ __declspec(dllexport) bool __stdcall ImporterCopyOriginalIATW(wchar_t* szOrigina
     UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
     return(false);
 }
-__declspec(dllexport) bool __stdcall ImporterLoadImportTable(char* szFileName)
+__declspec(dllexport) bool ImporterLoadImportTable(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -19516,7 +19517,7 @@ __declspec(dllexport) bool __stdcall ImporterLoadImportTable(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ImporterLoadImportTableW(wchar_t* szFileName)
+__declspec(dllexport) bool ImporterLoadImportTableW(wchar_t* szFileName)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -19660,7 +19661,7 @@ __declspec(dllexport) bool __stdcall ImporterLoadImportTableW(wchar_t* szFileNam
     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     return(false);
 }
-__declspec(dllexport) bool __stdcall ImporterMoveOriginalIAT(char* szOriginalFile, char* szDumpFile, char* szSectionName)
+__declspec(dllexport) bool ImporterMoveOriginalIAT(char* szOriginalFile, char* szDumpFile, char* szSectionName)
 {
 
     if(ImporterLoadImportTable(szOriginalFile))
@@ -19669,7 +19670,7 @@ __declspec(dllexport) bool __stdcall ImporterMoveOriginalIAT(char* szOriginalFil
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ImporterMoveOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile, char* szSectionName)
+__declspec(dllexport) bool ImporterMoveOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile, char* szSectionName)
 {
 
     if(ImporterLoadImportTableW(szOriginalFile))
@@ -19678,7 +19679,7 @@ __declspec(dllexport) bool __stdcall ImporterMoveOriginalIATW(wchar_t* szOrigina
     }
     return(false);
 }
-__declspec(dllexport) void __stdcall ImporterAutoSearchIAT(HANDLE hProcess, char* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
+__declspec(dllexport) void ImporterAutoSearchIAT(HANDLE hProcess, char* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -19689,7 +19690,7 @@ __declspec(dllexport) void __stdcall ImporterAutoSearchIAT(HANDLE hProcess, char
         return(ImporterAutoSearchIATW(hProcess, uniFileName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize));
     }
 }
-__declspec(dllexport) void __stdcall ImporterAutoSearchIATW(HANDLE hProcess, wchar_t* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
+__declspec(dllexport) void ImporterAutoSearchIATW(HANDLE hProcess, wchar_t* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
 {
 
     int i = NULL;
@@ -20067,7 +20068,7 @@ __declspec(dllexport) void __stdcall ImporterAutoSearchIATW(HANDLE hProcess, wch
     VirtualFree(CheckMemory, NULL, MEM_RELEASE);
     return;
 }
-__declspec(dllexport) void __stdcall ImporterAutoSearchIATEx(HANDLE hProcess, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
+__declspec(dllexport) void ImporterAutoSearchIATEx(HANDLE hProcess, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
 {
 
     wchar_t szTempName[MAX_PATH];
@@ -20085,7 +20086,7 @@ __declspec(dllexport) void __stdcall ImporterAutoSearchIATEx(HANDLE hProcess, UL
         }
     }
 }
-__declspec(dllexport) void __stdcall ImporterEnumAddedData(LPVOID EnumCallBack)
+__declspec(dllexport) void ImporterEnumAddedData(LPVOID EnumCallBack)
 {
 
     int i = 0;
@@ -20097,7 +20098,7 @@ __declspec(dllexport) void __stdcall ImporterEnumAddedData(LPVOID EnumCallBack)
     LPVOID NameReadPlace = NULL;
     ULONG_PTR CurrentAPILocation = NULL;
     DWORD APINameRelativeOffset = NULL;
-    typedef void(__stdcall *fEnumCallBack)(LPVOID fImportDetail);
+    typedef void(*fEnumCallBack)(LPVOID fImportDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
     ImportEnumData myImportEnumData;
     char szOrdinalAPIName[MAX_PATH];
@@ -20165,7 +20166,7 @@ __declspec(dllexport) void __stdcall ImporterEnumAddedData(LPVOID EnumCallBack)
         }
     }
 }
-__declspec(dllexport) long __stdcall ImporterAutoFixIATEx(HANDLE hProcess, char* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
+__declspec(dllexport) long ImporterAutoFixIATEx(HANDLE hProcess, char* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
 {
 
     wchar_t uniDumpedFile[MAX_PATH] = {};
@@ -20180,7 +20181,7 @@ __declspec(dllexport) long __stdcall ImporterAutoFixIATEx(HANDLE hProcess, char*
         return(NULL);	// Critical error! *just to be safe, but it should never happen!
     }
 }
-__declspec(dllexport) long __stdcall ImporterAutoFixIATExW(HANDLE hProcess, wchar_t* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
+__declspec(dllexport) long ImporterAutoFixIATExW(HANDLE hProcess, wchar_t* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
 {
 
     int i;
@@ -20192,7 +20193,7 @@ __declspec(dllexport) long __stdcall ImporterAutoFixIATExW(HANDLE hProcess, wcha
 #else
     PE64Struct PEStructure;
 #endif
-    typedef void*(__stdcall *fFixerCallback)(LPVOID fIATPointer);
+    typedef void*(*fFixerCallback)(LPVOID fIATPointer);
     fFixerCallback myFixerCallback = (fFixerCallback)UnknownPointerFixCallback;
     MEMORY_BASIC_INFORMATION MemInfo;
     DWORD SectionFlags;
@@ -20862,11 +20863,11 @@ __declspec(dllexport) long __stdcall ImporterAutoFixIATExW(HANDLE hProcess, wcha
     VirtualFree(aEnumeratedModules, NULL, MEM_RELEASE);
     return(NULL);	// Critical error! *just te bo safe, but it should never happen!
 }
-__declspec(dllexport) long __stdcall ImporterAutoFixIAT(HANDLE hProcess, char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
+__declspec(dllexport) long ImporterAutoFixIAT(HANDLE hProcess, char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
 {
     return(ImporterAutoFixIATEx(hProcess, szDumpedFile, ".RL!TEv2", false, false, NULL, ImageBase, SearchStart, SearchSize, SearchStep, false, false, NULL));
 }
-__declspec(dllexport) long __stdcall ImporterAutoFixIATW(HANDLE hProcess, wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
+__declspec(dllexport) long ImporterAutoFixIATW(HANDLE hProcess, wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
 {
     return(ImporterAutoFixIATExW(hProcess, szDumpedFile, ".RL!TEv2", false, false, NULL, ImageBase, SearchStart, SearchSize, SearchStep, false, false, NULL));
 }
@@ -20881,7 +20882,7 @@ bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginalInstruc
     return(true);
 }
 // Global.Engine.Hook.functions:
-__declspec(dllexport) bool __stdcall HooksSafeTransitionEx(LPVOID HookAddressArray, int NumberOfHooks, bool TransitionStart)
+__declspec(dllexport) bool HooksSafeTransitionEx(LPVOID HookAddressArray, int NumberOfHooks, bool TransitionStart)
 {
 
     int i;
@@ -20951,7 +20952,7 @@ __declspec(dllexport) bool __stdcall HooksSafeTransitionEx(LPVOID HookAddressArr
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall HooksSafeTransition(LPVOID HookAddress, bool TransitionStart)
+__declspec(dllexport) bool HooksSafeTransition(LPVOID HookAddress, bool TransitionStart)
 {
 
     void* aHookAddress[1];
@@ -20959,7 +20960,7 @@ __declspec(dllexport) bool __stdcall HooksSafeTransition(LPVOID HookAddress, boo
 
     return(HooksSafeTransitionEx(&aHookAddress[0], sizeof aHookAddress, TransitionStart));
 }
-__declspec(dllexport) bool __stdcall HooksIsAddressRedirected(LPVOID HookAddress)
+__declspec(dllexport) bool HooksIsAddressRedirected(LPVOID HookAddress)
 {
 
     for(unsigned int i = 0; i < hookEntry.size(); i++)
@@ -20971,7 +20972,7 @@ __declspec(dllexport) bool __stdcall HooksIsAddressRedirected(LPVOID HookAddress
     }
     return(false);
 }
-__declspec(dllexport) void* __stdcall HooksGetTrampolineAddress(LPVOID HookAddress)
+__declspec(dllexport) void* HooksGetTrampolineAddress(LPVOID HookAddress)
 {
 
     for(unsigned int i = 0; i < hookEntry.size(); i++)
@@ -20983,7 +20984,7 @@ __declspec(dllexport) void* __stdcall HooksGetTrampolineAddress(LPVOID HookAddre
     }
     return(NULL);
 }
-__declspec(dllexport) void* __stdcall HooksGetHookEntryDetails(LPVOID HookAddress)
+__declspec(dllexport) void* HooksGetHookEntryDetails(LPVOID HookAddress)
 {
 
     for(unsigned int i = 0; i < hookEntry.size(); i++)
@@ -20995,7 +20996,7 @@ __declspec(dllexport) void* __stdcall HooksGetHookEntryDetails(LPVOID HookAddres
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall HooksInsertNewRedirection(LPVOID HookAddress, LPVOID RedirectTo, int HookType)
+__declspec(dllexport) bool HooksInsertNewRedirection(LPVOID HookAddress, LPVOID RedirectTo, int HookType)
 {
 
 #if !defined(_WIN64)
@@ -21283,7 +21284,7 @@ __declspec(dllexport) bool __stdcall HooksInsertNewRedirection(LPVOID HookAddres
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall HooksInsertNewIATRedirectionEx(ULONG_PTR FileMapVA, ULONG_PTR LoadedModuleBase, char* szHookFunction, LPVOID RedirectTo)
+__declspec(dllexport) bool HooksInsertNewIATRedirectionEx(ULONG_PTR FileMapVA, ULONG_PTR LoadedModuleBase, char* szHookFunction, LPVOID RedirectTo)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -21433,7 +21434,7 @@ __declspec(dllexport) bool __stdcall HooksInsertNewIATRedirectionEx(ULONG_PTR Fi
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall HooksInsertNewIATRedirection(char* szModuleName, char* szHookFunction, LPVOID RedirectTo)
+__declspec(dllexport) bool HooksInsertNewIATRedirection(char* szModuleName, char* szHookFunction, LPVOID RedirectTo)
 {
 
     HANDLE FileHandle;
@@ -21462,7 +21463,7 @@ __declspec(dllexport) bool __stdcall HooksInsertNewIATRedirection(char* szModule
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall HooksRemoveRedirection(LPVOID HookAddress, bool RemoveAll)
+__declspec(dllexport) bool HooksRemoveRedirection(LPVOID HookAddress, bool RemoveAll)
 {
 
     DWORD OldProtect = PAGE_READONLY;
@@ -21498,7 +21499,7 @@ __declspec(dllexport) bool __stdcall HooksRemoveRedirection(LPVOID HookAddress, 
         return(true);
     }
 }
-__declspec(dllexport) bool __stdcall HooksRemoveRedirectionsForModule(HMODULE ModuleBase)
+__declspec(dllexport) bool HooksRemoveRedirectionsForModule(HMODULE ModuleBase)
 {
 
     int j = NULL;
@@ -21533,7 +21534,7 @@ __declspec(dllexport) bool __stdcall HooksRemoveRedirectionsForModule(HMODULE Mo
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall HooksRemoveIATRedirection(char* szModuleName, char* szHookFunction, bool RemoveAll)
+__declspec(dllexport) bool HooksRemoveIATRedirection(char* szModuleName, char* szHookFunction, bool RemoveAll)
 {
 
     unsigned int i = (unsigned int)hookEntry.size() - 1;
@@ -21559,7 +21560,7 @@ __declspec(dllexport) bool __stdcall HooksRemoveIATRedirection(char* szModuleNam
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall HooksDisableRedirection(LPVOID HookAddress, bool DisableAll)
+__declspec(dllexport) bool HooksDisableRedirection(LPVOID HookAddress, bool DisableAll)
 {
 
     DWORD OldProtect = PAGE_READONLY;
@@ -21595,7 +21596,7 @@ __declspec(dllexport) bool __stdcall HooksDisableRedirection(LPVOID HookAddress,
         return(true);
     }
 }
-__declspec(dllexport) bool __stdcall HooksDisableRedirectionsForModule(HMODULE ModuleBase)
+__declspec(dllexport) bool HooksDisableRedirectionsForModule(HMODULE ModuleBase)
 {
 
     int j = NULL;
@@ -21630,7 +21631,7 @@ __declspec(dllexport) bool __stdcall HooksDisableRedirectionsForModule(HMODULE M
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall HooksDisableIATRedirection(char* szModuleName, char* szHookFunction, bool DisableAll)
+__declspec(dllexport) bool HooksDisableIATRedirection(char* szModuleName, char* szHookFunction, bool DisableAll)
 {
 
     unsigned int i = (unsigned int)hookEntry.size() - 1;
@@ -21659,7 +21660,7 @@ __declspec(dllexport) bool __stdcall HooksDisableIATRedirection(char* szModuleNa
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall HooksEnableRedirection(LPVOID HookAddress, bool EnableAll)
+__declspec(dllexport) bool HooksEnableRedirection(LPVOID HookAddress, bool EnableAll)
 {
 
     DWORD OldProtect = PAGE_READONLY;
@@ -21695,7 +21696,7 @@ __declspec(dllexport) bool __stdcall HooksEnableRedirection(LPVOID HookAddress, 
         return(true);
     }
 }
-__declspec(dllexport) bool __stdcall HooksEnableRedirectionsForModule(HMODULE ModuleBase)
+__declspec(dllexport) bool HooksEnableRedirectionsForModule(HMODULE ModuleBase)
 {
 
     int j = NULL;
@@ -21730,7 +21731,7 @@ __declspec(dllexport) bool __stdcall HooksEnableRedirectionsForModule(HMODULE Mo
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall HooksEnableIATRedirection(char* szModuleName, char* szHookFunction, bool EnableAll)
+__declspec(dllexport) bool HooksEnableIATRedirection(char* szModuleName, char* szHookFunction, bool EnableAll)
 {
 
     unsigned int i = (unsigned int)hookEntry.size() - 1;
@@ -21759,7 +21760,7 @@ __declspec(dllexport) bool __stdcall HooksEnableIATRedirection(char* szModuleNam
     }
     return(false);
 }
-__declspec(dllexport) void __stdcall HooksScanModuleMemory(HMODULE ModuleBase, LPVOID CallBack)
+__declspec(dllexport) void HooksScanModuleMemory(HMODULE ModuleBase, LPVOID CallBack)
 {
 
     unsigned int i;
@@ -21774,7 +21775,7 @@ __declspec(dllexport) void __stdcall HooksScanModuleMemory(HMODULE ModuleBase, L
     HANDLE hProcess = GetCurrentProcess();
     LIBRARY_ITEM_DATA RemoteLibInfo = {};
     PLIBRARY_ITEM_DATA pRemoteLibInfo = (PLIBRARY_ITEM_DATA)LibrarianGetLibraryInfoEx((void*)ModuleBase);
-    typedef bool(__stdcall *fEnumCallBack)(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATA ModuleInformation, DWORD SizeOfImage);
+    typedef bool(*fEnumCallBack)(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATA ModuleInformation, DWORD SizeOfImage);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)CallBack;
     BYTE CheckHookMemory[TEE_MAXIMUM_HOOK_SIZE];
     PMEMORY_COMPARE_HANDLER ExportedFunctions;
@@ -21978,7 +21979,7 @@ __declspec(dllexport) void __stdcall HooksScanModuleMemory(HMODULE ModuleBase, L
         }
     }
 }
-__declspec(dllexport) void __stdcall HooksScanEntireProcessMemory(LPVOID CallBack)
+__declspec(dllexport) void HooksScanEntireProcessMemory(LPVOID CallBack)
 {
 
     unsigned int i;
@@ -21995,7 +21996,7 @@ __declspec(dllexport) void __stdcall HooksScanEntireProcessMemory(LPVOID CallBac
         }
     }
 }
-__declspec(dllexport) void __stdcall HooksScanEntireProcessMemoryEx()
+__declspec(dllexport) void HooksScanEntireProcessMemoryEx()
 {
     HooksScanEntireProcessMemory(&ProcessHookScanAddNewHook);
 }
@@ -22529,15 +22530,15 @@ long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressToTrace, 
     return(NULL);
 }
 // TitanEngine.Tracer.functions:
-__declspec(dllexport) void __stdcall TracerInit()
+__declspec(dllexport) void TracerInit()
 {
     return;		// UE 1.5 compatibility mode
 }
-__declspec(dllexport) long long __stdcall TracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace)
+__declspec(dllexport) long long TracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace)
 {
     return((ULONG_PTR)EngineGlobalTracerHandler1(hProcess, AddressToTrace, false, NULL));
 }
-__declspec(dllexport) long long __stdcall HashTracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD InputNumberOfInstructions)
+__declspec(dllexport) long long HashTracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD InputNumberOfInstructions)
 {
 
     unsigned int i = 0;
@@ -22707,7 +22708,7 @@ __declspec(dllexport) long long __stdcall HashTracerLevel1(HANDLE hProcess, ULON
     }
     return((ULONG_PTR)APIFoundAddress);
 }
-__declspec(dllexport) long __stdcall TracerDetectRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace)
+__declspec(dllexport) long TracerDetectRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace)
 {
 
     int i,j;
@@ -23112,7 +23113,7 @@ __declspec(dllexport) long __stdcall TracerDetectRedirection(HANDLE hProcess, UL
     }
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall TracerFixKnownRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD RedirectionId)
+__declspec(dllexport) long long TracerFixKnownRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD RedirectionId)
 {
 
     int i = NULL;
@@ -23443,7 +23444,7 @@ __declspec(dllexport) long long __stdcall TracerFixKnownRedirection(HANDLE hProc
     return(NULL);
 }
 // TitanEngine.Exporter.functions:
-__declspec(dllexport) void __stdcall ExporterCleanup()
+__declspec(dllexport) void ExporterCleanup()
 {
 
     int i = NULL;
@@ -23463,11 +23464,11 @@ __declspec(dllexport) void __stdcall ExporterCleanup()
     expTableData = NULL;
     expImageBase = NULL;
 }
-__declspec(dllexport) void __stdcall ExporterSetImageBase(ULONG_PTR ImageBase)
+__declspec(dllexport) void ExporterSetImageBase(ULONG_PTR ImageBase)
 {
     expImageBase = ImageBase;
 }
-__declspec(dllexport) void __stdcall ExporterInit(DWORD MemorySize, ULONG_PTR ImageBase, DWORD ExportOrdinalBase, char* szExportModuleName)
+__declspec(dllexport) void ExporterInit(DWORD MemorySize, ULONG_PTR ImageBase, DWORD ExportOrdinalBase, char* szExportModuleName)
 {
 
     if(expTableData != NULL)
@@ -23489,7 +23490,7 @@ __declspec(dllexport) void __stdcall ExporterInit(DWORD MemorySize, ULONG_PTR Im
     }
     expImageBase = ImageBase;
 }
-__declspec(dllexport) bool __stdcall ExporterAddNewExport(char* szExportName, DWORD ExportRelativeAddress)
+__declspec(dllexport) bool ExporterAddNewExport(char* szExportName, DWORD ExportRelativeAddress)
 {
 
     unsigned int i;
@@ -23516,7 +23517,7 @@ __declspec(dllexport) bool __stdcall ExporterAddNewExport(char* szExportName, DW
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExporterAddNewOrdinalExport(DWORD OrdinalNumber, DWORD ExportRelativeAddress)
+__declspec(dllexport) bool ExporterAddNewOrdinalExport(DWORD OrdinalNumber, DWORD ExportRelativeAddress)
 {
 
     unsigned int i = NULL;
@@ -23556,11 +23557,11 @@ __declspec(dllexport) bool __stdcall ExporterAddNewOrdinalExport(DWORD OrdinalNu
     }
     return(false);
 }
-__declspec(dllexport) long __stdcall ExporterGetAddedExportCount()
+__declspec(dllexport) long ExporterGetAddedExportCount()
 {
     return(expExportNumber);
 }
-__declspec(dllexport) long __stdcall ExporterEstimatedSize()
+__declspec(dllexport) long ExporterEstimatedSize()
 {
 
     DWORD EstimatedSize = NULL;
@@ -23569,7 +23570,7 @@ __declspec(dllexport) long __stdcall ExporterEstimatedSize()
     EstimatedSize = EstimatedSize + (expExportNumber * 12) + sizeof IMAGE_EXPORT_DIRECTORY;
     return(EstimatedSize);
 }
-__declspec(dllexport) bool __stdcall ExporterBuildExportTable(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool ExporterBuildExportTable(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
 {
 
     unsigned int i = NULL;
@@ -23675,7 +23676,7 @@ __declspec(dllexport) bool __stdcall ExporterBuildExportTable(ULONG_PTR StorePla
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExporterBuildExportTableEx(char* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool ExporterBuildExportTableEx(char* szExportFileName, char* szSectionName)
 {
 
     wchar_t uniExportFileName[MAX_PATH] = {};
@@ -23690,7 +23691,7 @@ __declspec(dllexport) bool __stdcall ExporterBuildExportTableEx(char* szExportFi
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ExporterBuildExportTableExW(wchar_t* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool ExporterBuildExportTableExW(wchar_t* szExportFileName, char* szSectionName)
 {
 
     HANDLE FileHandle;
@@ -23728,7 +23729,7 @@ __declspec(dllexport) bool __stdcall ExporterBuildExportTableExW(wchar_t* szExpo
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ExporterLoadExportTable(char* szFileName)
+__declspec(dllexport) bool ExporterLoadExportTable(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -23743,7 +23744,7 @@ __declspec(dllexport) bool __stdcall ExporterLoadExportTable(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall ExporterLoadExportTableW(wchar_t* szFileName)
+__declspec(dllexport) bool ExporterLoadExportTableW(wchar_t* szFileName)
 {
 
     unsigned int i = 0;
@@ -23871,7 +23872,7 @@ __declspec(dllexport) bool __stdcall ExporterLoadExportTableW(wchar_t* szFileNam
     return(false);
 }
 // TitanEngine.Librarian.functions:
-__declspec(dllexport) bool __stdcall LibrarianSetBreakPoint(char* szLibraryName, DWORD bpxType, bool SingleShoot, LPVOID bpxCallBack)
+__declspec(dllexport) bool LibrarianSetBreakPoint(char* szLibraryName, DWORD bpxType, bool SingleShoot, LPVOID bpxCallBack)
 {
 
     int i = MAX_LIBRARY_BPX;
@@ -23892,7 +23893,7 @@ __declspec(dllexport) bool __stdcall LibrarianSetBreakPoint(char* szLibraryName,
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall LibrarianRemoveBreakPoint(char* szLibraryName, DWORD bpxType)
+__declspec(dllexport) bool LibrarianRemoveBreakPoint(char* szLibraryName, DWORD bpxType)
 {
 
     int i = MAX_LIBRARY_BPX;
@@ -23916,7 +23917,7 @@ __declspec(dllexport) bool __stdcall LibrarianRemoveBreakPoint(char* szLibraryNa
     }
     return(false);
 }
-__declspec(dllexport) void* __stdcall LibrarianGetLibraryInfo(char* szLibraryName)
+__declspec(dllexport) void* LibrarianGetLibraryInfo(char* szLibraryName)
 {
 
     wchar_t uniLibraryName[MAX_PATH] = {};
@@ -23947,7 +23948,7 @@ __declspec(dllexport) void* __stdcall LibrarianGetLibraryInfo(char* szLibraryNam
         return(NULL);
     }
 }
-__declspec(dllexport) void* __stdcall LibrarianGetLibraryInfoW(wchar_t* szLibraryName)
+__declspec(dllexport) void* LibrarianGetLibraryInfoW(wchar_t* szLibraryName)
 {
 
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
@@ -23969,7 +23970,7 @@ __declspec(dllexport) void* __stdcall LibrarianGetLibraryInfoW(wchar_t* szLibrar
     }
     return(NULL);
 }
-__declspec(dllexport) void* __stdcall LibrarianGetLibraryInfoEx(void* BaseOfDll)
+__declspec(dllexport) void* LibrarianGetLibraryInfoEx(void* BaseOfDll)
 {
 
     PLIBRARY_ITEM_DATAW LibInfo;
@@ -23991,7 +23992,7 @@ __declspec(dllexport) void* __stdcall LibrarianGetLibraryInfoEx(void* BaseOfDll)
         return(NULL);
     }
 }
-__declspec(dllexport) void* __stdcall LibrarianGetLibraryInfoExW(void* BaseOfDll)
+__declspec(dllexport) void* LibrarianGetLibraryInfoExW(void* BaseOfDll)
 {
 
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
@@ -24013,11 +24014,11 @@ __declspec(dllexport) void* __stdcall LibrarianGetLibraryInfoExW(void* BaseOfDll
     }
     return(NULL);
 }
-__declspec(dllexport) void __stdcall LibrarianEnumLibraryInfo(void* EnumCallBack)
+__declspec(dllexport) void LibrarianEnumLibraryInfo(void* EnumCallBack)
 {
 
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
-    typedef void(__stdcall *fEnumCallBack)(LPVOID fLibraryDetail);
+    typedef void(*fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
 
     if(hListLibrary != NULL)
@@ -24040,12 +24041,12 @@ __declspec(dllexport) void __stdcall LibrarianEnumLibraryInfo(void* EnumCallBack
         }
     }
 }
-__declspec(dllexport) void __stdcall LibrarianEnumLibraryInfoW(void* EnumCallBack)
+__declspec(dllexport) void LibrarianEnumLibraryInfoW(void* EnumCallBack)
 {
 
     LIBRARY_ITEM_DATA myLibraryInfoData;
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
-    typedef void(__stdcall *fEnumCallBack)(LPVOID fLibraryDetail);
+    typedef void(*fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
 
     if(hListLibrary != NULL)
@@ -24076,7 +24077,7 @@ __declspec(dllexport) void __stdcall LibrarianEnumLibraryInfoW(void* EnumCallBac
     }
 }
 // TitanEngine.Process.functions:
-__declspec(dllexport) long __stdcall GetActiveProcessId(char* szImageName)
+__declspec(dllexport) long GetActiveProcessId(char* szImageName)
 {
 
     wchar_t uniImageName[MAX_PATH] = {};
@@ -24091,7 +24092,7 @@ __declspec(dllexport) long __stdcall GetActiveProcessId(char* szImageName)
         return(NULL);
     }
 }
-__declspec(dllexport) long __stdcall GetActiveProcessIdW(wchar_t* szImageName)
+__declspec(dllexport) long GetActiveProcessIdW(wchar_t* szImageName)
 {
 
     int i;
@@ -24135,12 +24136,12 @@ __declspec(dllexport) long __stdcall GetActiveProcessIdW(wchar_t* szImageName)
     }
     return(NULL);
 }
-__declspec(dllexport) void __stdcall EnumProcessesWithLibrary(char* szLibraryName, void* EnumFunction)
+__declspec(dllexport) void EnumProcessesWithLibrary(char* szLibraryName, void* EnumFunction)
 {
 
     int i;
     int j;
-    typedef void(__stdcall *fEnumFunction)(DWORD ProcessId, HMODULE ModuleBaseAddress);
+    typedef void(*fEnumFunction)(DWORD ProcessId, HMODULE ModuleBaseAddress);
     fEnumFunction myEnumFunction = (fEnumFunction)EnumFunction;
     HMODULE EnumeratedModules[1024] = {};
     DWORD bProcessId[1024] = {};
@@ -24193,7 +24194,7 @@ __declspec(dllexport) void __stdcall EnumProcessesWithLibrary(char* szLibraryNam
     }
 }
 // TitanEngine.TLSFixer.functions:
-__declspec(dllexport) bool __stdcall TLSBreakOnCallBack(LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks, LPVOID bpxCallBack)
+__declspec(dllexport) bool TLSBreakOnCallBack(LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks, LPVOID bpxCallBack)
 {
 
     unsigned int i;
@@ -24215,7 +24216,7 @@ __declspec(dllexport) bool __stdcall TLSBreakOnCallBack(LPVOID ArrayOfCallBacks,
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSGrabCallBackData(char* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
+__declspec(dllexport) bool TLSGrabCallBackData(char* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -24230,7 +24231,7 @@ __declspec(dllexport) bool __stdcall TLSGrabCallBackData(char* szFileName, LPVOI
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSGrabCallBackDataW(wchar_t* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
+__declspec(dllexport) bool TLSGrabCallBackDataW(wchar_t* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -24346,7 +24347,7 @@ __declspec(dllexport) bool __stdcall TLSGrabCallBackDataW(wchar_t* szFileName, L
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall TLSBreakOnCallBackEx(char* szFileName, LPVOID bpxCallBack)
+__declspec(dllexport) bool TLSBreakOnCallBackEx(char* szFileName, LPVOID bpxCallBack)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -24361,7 +24362,7 @@ __declspec(dllexport) bool __stdcall TLSBreakOnCallBackEx(char* szFileName, LPVO
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSBreakOnCallBackExW(wchar_t* szFileName, LPVOID bpxCallBack)
+__declspec(dllexport) bool TLSBreakOnCallBackExW(wchar_t* szFileName, LPVOID bpxCallBack)
 {
 
     ULONG_PTR TlsArrayOfCallBacks[100];
@@ -24385,7 +24386,7 @@ __declspec(dllexport) bool __stdcall TLSBreakOnCallBackExW(wchar_t* szFileName, 
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSRemoveCallback(char* szFileName)
+__declspec(dllexport) bool TLSRemoveCallback(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -24400,7 +24401,7 @@ __declspec(dllexport) bool __stdcall TLSRemoveCallback(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSRemoveCallbackW(wchar_t* szFileName)
+__declspec(dllexport) bool TLSRemoveCallbackW(wchar_t* szFileName)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -24508,7 +24509,7 @@ __declspec(dllexport) bool __stdcall TLSRemoveCallbackW(wchar_t* szFileName)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall TLSRemoveTable(char* szFileName)
+__declspec(dllexport) bool TLSRemoveTable(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -24523,7 +24524,7 @@ __declspec(dllexport) bool __stdcall TLSRemoveTable(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSRemoveTableW(wchar_t* szFileName)
+__declspec(dllexport) bool TLSRemoveTableW(wchar_t* szFileName)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -24619,7 +24620,7 @@ __declspec(dllexport) bool __stdcall TLSRemoveTableW(wchar_t* szFileName)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall TLSBackupData(char* szFileName)
+__declspec(dllexport) bool TLSBackupData(char* szFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -24634,7 +24635,7 @@ __declspec(dllexport) bool __stdcall TLSBackupData(char* szFileName)
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSBackupDataW(wchar_t* szFileName)
+__declspec(dllexport) bool TLSBackupDataW(wchar_t* szFileName)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -24780,7 +24781,7 @@ __declspec(dllexport) bool __stdcall TLSBackupDataW(wchar_t* szFileName)
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall TLSRestoreData()
+__declspec(dllexport) bool TLSRestoreData()
 {
 
     ULONG_PTR ueNumberOfBytesRead = NULL;
@@ -24828,7 +24829,7 @@ __declspec(dllexport) bool __stdcall TLSRestoreData()
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_PTR StorePlace, ULONG_PTR StorePlaceRVA, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
+__declspec(dllexport) bool TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_PTR StorePlace, ULONG_PTR StorePlaceRVA, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
 
     BOOL FileIs64;
@@ -24904,7 +24905,7 @@ __declspec(dllexport) bool __stdcall TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall TLSBuildNewTableEx(char* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
+__declspec(dllexport) bool TLSBuildNewTableEx(char* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -24919,7 +24920,7 @@ __declspec(dllexport) bool __stdcall TLSBuildNewTableEx(char* szFileName, char* 
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall TLSBuildNewTableExW(wchar_t* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
+__declspec(dllexport) bool TLSBuildNewTableExW(wchar_t* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
 
     HANDLE FileHandle;
@@ -24953,7 +24954,7 @@ __declspec(dllexport) bool __stdcall TLSBuildNewTableExW(wchar_t* szFileName, ch
     }
 }
 // TitanEngine.TranslateName.functions:
-__declspec(dllexport) void* __stdcall TranslateNativeName(char* szNativeName)
+__declspec(dllexport) void* TranslateNativeName(char* szNativeName)
 {
 
     LPVOID TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
@@ -24998,7 +24999,7 @@ __declspec(dllexport) void* __stdcall TranslateNativeName(char* szNativeName)
     VirtualFree(TranslatedName, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) void* __stdcall TranslateNativeNameW(wchar_t* szNativeName)
+__declspec(dllexport) void* TranslateNativeNameW(wchar_t* szNativeName)
 {
 
     LPVOID TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
@@ -25044,7 +25045,7 @@ __declspec(dllexport) void* __stdcall TranslateNativeNameW(wchar_t* szNativeName
     return(NULL);
 }
 // TitanEngine.Handler.functions:
-__declspec(dllexport) long __stdcall HandlerGetActiveHandleCount(DWORD ProcessId)
+__declspec(dllexport) long HandlerGetActiveHandleCount(DWORD ProcessId)
 {
 
     int HandleCount = NULL;
@@ -25053,8 +25054,8 @@ __declspec(dllexport) long __stdcall HandlerGetActiveHandleCount(DWORD ProcessId
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25091,7 +25092,7 @@ __declspec(dllexport) long __stdcall HandlerGetActiveHandleCount(DWORD ProcessId
     }
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall HandlerIsHandleOpen(DWORD ProcessId, HANDLE hHandle)
+__declspec(dllexport) bool HandlerIsHandleOpen(DWORD ProcessId, HANDLE hHandle)
 {
 
     bool HandleActive = false;
@@ -25100,7 +25101,7 @@ __declspec(dllexport) bool __stdcall HandlerIsHandleOpen(DWORD ProcessId, HANDLE
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #endif
@@ -25138,7 +25139,7 @@ __declspec(dllexport) bool __stdcall HandlerIsHandleOpen(DWORD ProcessId, HANDLE
     }
     return(false);
 }
-__declspec(dllexport) void* __stdcall HandlerGetHandleName(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
+__declspec(dllexport) void* HandlerGetHandleName(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
 {
 
     bool NameFound = false;
@@ -25148,8 +25149,8 @@ __declspec(dllexport) void* __stdcall HandlerGetHandleName(HANDLE hProcess, DWOR
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25229,7 +25230,7 @@ __declspec(dllexport) void* __stdcall HandlerGetHandleName(HANDLE hProcess, DWOR
     VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) void* __stdcall HandlerGetHandleNameW(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
+__declspec(dllexport) void* HandlerGetHandleNameW(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
 {
 
     bool NameFound = false;
@@ -25239,8 +25240,8 @@ __declspec(dllexport) void* __stdcall HandlerGetHandleNameW(HANDLE hProcess, DWO
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25321,7 +25322,7 @@ __declspec(dllexport) void* __stdcall HandlerGetHandleNameW(HANDLE hProcess, DWO
     VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) long __stdcall HandlerEnumerateOpenHandles(DWORD ProcessId, LPVOID HandleBuffer, DWORD MaxHandleCount)
+__declspec(dllexport) long HandlerEnumerateOpenHandles(DWORD ProcessId, LPVOID HandleBuffer, DWORD MaxHandleCount)
 {
 
     HANDLE myHandle = NULL;
@@ -25331,7 +25332,7 @@ __declspec(dllexport) long __stdcall HandlerEnumerateOpenHandles(DWORD ProcessId
     unsigned int HandleCount = NULL;
     ULONG QuerySystemBufferSize = 0x2000;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #endif
@@ -25368,7 +25369,7 @@ __declspec(dllexport) long __stdcall HandlerEnumerateOpenHandles(DWORD ProcessId
     }
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall HandlerGetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, DWORD InformationReturn)
+__declspec(dllexport) long long HandlerGetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, DWORD InformationReturn)
 {
 
     HANDLE myHandle = NULL;
@@ -25377,8 +25378,8 @@ __declspec(dllexport) long long __stdcall HandlerGetHandleDetails(HANDLE hProces
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25484,7 +25485,7 @@ __declspec(dllexport) long long __stdcall HandlerGetHandleDetails(HANDLE hProces
     VirtualFree(HandleFullData, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall HandlerCloseRemoteHandle(HANDLE hProcess, HANDLE hHandle)
+__declspec(dllexport) bool HandlerCloseRemoteHandle(HANDLE hProcess, HANDLE hHandle)
 {
 
     HANDLE myHandle;
@@ -25496,7 +25497,7 @@ __declspec(dllexport) bool __stdcall HandlerCloseRemoteHandle(HANDLE hProcess, H
     }
     return(false);
 }
-__declspec(dllexport) long __stdcall HandlerEnumerateLockHandles(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated, LPVOID HandleDataBuffer, DWORD MaxHandleCount)
+__declspec(dllexport) long HandlerEnumerateLockHandles(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated, LPVOID HandleDataBuffer, DWORD MaxHandleCount)
 {
 
     wchar_t uniFileOrFolderName[MAX_PATH] = {};
@@ -25511,7 +25512,7 @@ __declspec(dllexport) long __stdcall HandlerEnumerateLockHandles(char* szFileOrF
         return(NULL);
     }
 }
-__declspec(dllexport) long __stdcall HandlerEnumerateLockHandlesW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated, LPVOID HandleDataBuffer, DWORD MaxHandleCount)
+__declspec(dllexport) long HandlerEnumerateLockHandlesW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated, LPVOID HandleDataBuffer, DWORD MaxHandleCount)
 {
 
     int FoundHandles = NULL;
@@ -25524,8 +25525,8 @@ __declspec(dllexport) long __stdcall HandlerEnumerateLockHandlesW(wchar_t* szFil
     ULONG TotalHandleCount = NULL;
     DWORD LastProcessId = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25624,7 +25625,7 @@ __declspec(dllexport) long __stdcall HandlerEnumerateLockHandlesW(wchar_t* szFil
     VirtualFree(HandleFullName, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) bool __stdcall HandlerCloseAllLockHandles(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
+__declspec(dllexport) bool HandlerCloseAllLockHandles(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
 {
 
     wchar_t uniFileOrFolderName[MAX_PATH] = {};
@@ -25639,7 +25640,7 @@ __declspec(dllexport) bool __stdcall HandlerCloseAllLockHandles(char* szFileOrFo
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall HandlerCloseAllLockHandlesW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
+__declspec(dllexport) bool HandlerCloseAllLockHandlesW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
 {
 
     bool AllHandled = true;
@@ -25652,8 +25653,8 @@ __declspec(dllexport) bool __stdcall HandlerCloseAllLockHandlesW(wchar_t* szFile
     ULONG TotalHandleCount = NULL;
     DWORD LastProcessId = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25756,7 +25757,7 @@ __declspec(dllexport) bool __stdcall HandlerCloseAllLockHandlesW(wchar_t* szFile
     VirtualFree(HandleFullName, NULL, MEM_RELEASE);
     return(false);
 }
-__declspec(dllexport) bool __stdcall HandlerIsFileLocked(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
+__declspec(dllexport) bool HandlerIsFileLocked(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
 {
 
     wchar_t uniFileOrFolderName[MAX_PATH] = {};
@@ -25771,7 +25772,7 @@ __declspec(dllexport) bool __stdcall HandlerIsFileLocked(char* szFileOrFolderNam
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall HandlerIsFileLockedW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
+__declspec(dllexport) bool HandlerIsFileLockedW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
 {
 
     HANDLE hProcess = NULL;
@@ -25783,8 +25784,8 @@ __declspec(dllexport) bool __stdcall HandlerIsFileLockedW(wchar_t* szFileOrFolde
     ULONG TotalHandleCount = NULL;
     DWORD LastProcessId = NULL;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25882,7 +25883,7 @@ __declspec(dllexport) bool __stdcall HandlerIsFileLockedW(wchar_t* szFileOrFolde
     return(false);
 }
 // TitanEngine.Handler[Mutex].functions:
-__declspec(dllexport) long __stdcall HandlerEnumerateOpenMutexes(HANDLE hProcess, DWORD ProcessId, LPVOID HandleBuffer, DWORD MaxHandleCount)
+__declspec(dllexport) long HandlerEnumerateOpenMutexes(HANDLE hProcess, DWORD ProcessId, LPVOID HandleBuffer, DWORD MaxHandleCount)
 {
 
     HANDLE myHandle = NULL;
@@ -25893,8 +25894,8 @@ __declspec(dllexport) long __stdcall HandlerEnumerateOpenMutexes(HANDLE hProcess
     unsigned int HandleCount = NULL;
     ULONG QuerySystemBufferSize = 0x2000;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -25960,7 +25961,7 @@ __declspec(dllexport) long __stdcall HandlerEnumerateOpenMutexes(HANDLE hProcess
     VirtualFree(HandleNameData, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) long long __stdcall HandlerGetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, char* szMutexString)
+__declspec(dllexport) long long HandlerGetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, char* szMutexString)
 {
 
     wchar_t uniMutexString[MAX_PATH] = {};
@@ -25975,7 +25976,7 @@ __declspec(dllexport) long long __stdcall HandlerGetOpenMutexHandle(HANDLE hProc
         return(NULL);
     }
 }
-__declspec(dllexport) long long __stdcall HandlerGetOpenMutexHandleW(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
+__declspec(dllexport) long long HandlerGetOpenMutexHandleW(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
 {
 
     int i;
@@ -26007,7 +26008,7 @@ __declspec(dllexport) long long __stdcall HandlerGetOpenMutexHandleW(HANDLE hPro
     VirtualFree(HandleBuffer, NULL, MEM_RELEASE);
     return(NULL);
 }
-__declspec(dllexport) long __stdcall HandlerGetProcessIdWhichCreatedMutex(char* szMutexString)
+__declspec(dllexport) long HandlerGetProcessIdWhichCreatedMutex(char* szMutexString)
 {
 
     wchar_t uniMutexString[MAX_PATH] = {};
@@ -26022,7 +26023,7 @@ __declspec(dllexport) long __stdcall HandlerGetProcessIdWhichCreatedMutex(char* 
         return(NULL);
     }
 }
-__declspec(dllexport) long __stdcall HandlerGetProcessIdWhichCreatedMutexW(wchar_t* szMutexString)
+__declspec(dllexport) long HandlerGetProcessIdWhichCreatedMutexW(wchar_t* szMutexString)
 {
 
     HANDLE hProcess = NULL;
@@ -26034,8 +26035,8 @@ __declspec(dllexport) long __stdcall HandlerGetProcessIdWhichCreatedMutexW(wchar
     ULONG TotalHandleCount = NULL;
     ULONG QuerySystemBufferSize = 0x2000;
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
-    typedef NTSTATUS(__stdcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
+    typedef NTSTATUS(*fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
 #else
     typedef NTSTATUS(__fastcall *fZwQuerySystemInformation)(DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
     typedef NTSTATUS(__fastcall *fZwQueryObject)(HANDLE hObject, DWORD fInfoType, LPVOID fBuffer, ULONG fBufferSize, PULONG fRequiredSize);
@@ -26128,7 +26129,7 @@ __declspec(dllexport) long __stdcall HandlerGetProcessIdWhichCreatedMutexW(wchar
     return(NULL);
 }
 // Global.Injector.functions: {DO NOT REORDER! USE ONLY IN RELEASE MODE!}
-long __stdcall injectedImpRec(LPVOID Parameter)
+long injectedImpRec(LPVOID Parameter)
 {
 
     HANDLE hFile;
@@ -26136,8 +26137,8 @@ long __stdcall injectedImpRec(LPVOID Parameter)
     PInjectImpRecCodeData APIData = (PInjectImpRecCodeData)Parameter;
     LPVOID szFileName = (LPVOID)((ULONG_PTR)Parameter + sizeof InjectImpRecCodeData);
     typedef ULONG_PTR(__cdecl *fTrace)(DWORD hFileMap, DWORD dwSizeMap, DWORD dwTimeOut, DWORD dwToTrace, DWORD dwExactCall);
-    typedef HANDLE(__stdcall *fCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
-    typedef HANDLE(__stdcall *fCreateFileMappingA)(HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName);
+    typedef HANDLE(*fCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+    typedef HANDLE(*fCreateFileMappingA)(HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName);
     typedef BOOL(__cdecl *fCloseHandle)(HANDLE hHandle);
     fTrace cTrace = (fTrace)(APIData->fTrace);
     fCreateFileW cCreateFileW = (fCreateFileW)(APIData->fCreateFileA);
@@ -26157,14 +26158,14 @@ long __stdcall injectedImpRec(LPVOID Parameter)
         return(0);
     }
 }
-long __stdcall injectedRemoteLoadLibrary(LPVOID Parameter)
+long injectedRemoteLoadLibrary(LPVOID Parameter)
 {
 
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
     Parameter = (LPVOID)((ULONG_PTR)Parameter + sizeof InjectCodeData);
 #if !defined(_WIN64)
-    typedef ULONG_PTR(__stdcall *fLoadLibraryW)(LPCWSTR fLibraryName);
-    typedef ULONG_PTR(__stdcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(*fLoadLibraryW)(LPCWSTR fLibraryName);
+    typedef ULONG_PTR(*fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #else
     typedef ULONG_PTR(__fastcall *fLoadLibraryW)(LPCWSTR fLibraryName);
     typedef ULONG_PTR(__fastcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
@@ -26180,13 +26181,13 @@ long __stdcall injectedRemoteLoadLibrary(LPVOID Parameter)
     cVirtualFree(Parameter, NULL, MEM_RELEASE);
     return(retValue);
 }
-long __stdcall injectedRemoteFreeLibrary(LPVOID Parameter)
+long injectedRemoteFreeLibrary(LPVOID Parameter)
 {
 
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
 #if !defined(_WIN64)
-    typedef ULONG_PTR(__stdcall *fFreeLibrary)(HMODULE fLibBase);
-    typedef ULONG_PTR(__stdcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(*fFreeLibrary)(HMODULE fLibBase);
+    typedef ULONG_PTR(*fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #else
     typedef ULONG_PTR(__fastcall *fFreeLibrary)(HMODULE fLibBase);
     typedef ULONG_PTR(__fastcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
@@ -26202,16 +26203,16 @@ long __stdcall injectedRemoteFreeLibrary(LPVOID Parameter)
     cVirtualFree(Parameter, NULL, MEM_RELEASE);
     return(retValue);
 }
-long __stdcall injectedRemoteFreeLibrarySimple(LPVOID Parameter)
+long injectedRemoteFreeLibrarySimple(LPVOID Parameter)
 {
 
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
     LPVOID orgParameter = Parameter;
     Parameter = (LPVOID)((ULONG_PTR)Parameter + sizeof InjectCodeData);
 #if !defined(_WIN64)
-    typedef ULONG_PTR(__stdcall *fFreeLibrary)(HMODULE fLibBase);
-    typedef HMODULE(__stdcall *fGetModuleHandleW)(LPCWSTR fLibraryName);
-    typedef ULONG_PTR(__stdcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(*fFreeLibrary)(HMODULE fLibBase);
+    typedef HMODULE(*fGetModuleHandleW)(LPCWSTR fLibraryName);
+    typedef ULONG_PTR(*fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #else
     typedef ULONG_PTR(__fastcall *fFreeLibrary)(HMODULE fLibBase);
     typedef HMODULE(__fastcall *fGetModuleHandleW)(LPCWSTR fLibraryName);
@@ -26238,12 +26239,12 @@ long __stdcall injectedRemoteFreeLibrarySimple(LPVOID Parameter)
     cVirtualFree(orgParameter, NULL, MEM_RELEASE);
     return(retValue);
 }
-long __stdcall injectedExitProcess(LPVOID Parameter)
+long injectedExitProcess(LPVOID Parameter)
 {
 
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
 #if !defined(_WIN64)
-    typedef ULONG_PTR(__stdcall *fExitProcess)(DWORD fExitCode);
+    typedef ULONG_PTR(*fExitProcess)(DWORD fExitCode);
 #else
     typedef ULONG_PTR(__fastcall *fExitProcess)(DWORD fExitCode);
 #endif
@@ -26253,7 +26254,7 @@ long __stdcall injectedExitProcess(LPVOID Parameter)
     cExitProcess(APIData->fExitProcessCode);
     return(NULL);
 }
-void __stdcall injectedTerminator()
+void injectedTerminator()
 {
 
     int i;
@@ -26268,7 +26269,7 @@ void __stdcall injectedTerminator()
     }
 }
 // TitanEngine.Injector.functions:
-__declspec(dllexport) bool __stdcall RemoteLoadLibrary(HANDLE hProcess, char* szLibraryFile, bool WaitForThreadExit)
+__declspec(dllexport) bool RemoteLoadLibrary(HANDLE hProcess, char* szLibraryFile, bool WaitForThreadExit)
 {
 
     wchar_t uniLibraryFile[MAX_PATH] = {};
@@ -26283,7 +26284,7 @@ __declspec(dllexport) bool __stdcall RemoteLoadLibrary(HANDLE hProcess, char* sz
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RemoteLoadLibraryW(HANDLE hProcess, wchar_t* szLibraryFile, bool WaitForThreadExit)
+__declspec(dllexport) bool RemoteLoadLibraryW(HANDLE hProcess, wchar_t* szLibraryFile, bool WaitForThreadExit)
 {
 
     int i;
@@ -26292,7 +26293,7 @@ __declspec(dllexport) bool __stdcall RemoteLoadLibraryW(HANDLE hProcess, wchar_t
     LPVOID remCodeData;
     ULONG_PTR remInjectSize = (ULONG_PTR)((ULONG_PTR)&injectedRemoteFreeLibrary - (ULONG_PTR)&injectedRemoteLoadLibrary);
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
+    typedef NTSTATUS(*fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
 #else
     typedef NTSTATUS(__fastcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
 #endif
@@ -26361,7 +26362,7 @@ __declspec(dllexport) bool __stdcall RemoteLoadLibraryW(HANDLE hProcess, wchar_t
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RemoteFreeLibrary(HANDLE hProcess, HMODULE hModule, char* szLibraryFile, bool WaitForThreadExit)
+__declspec(dllexport) bool RemoteFreeLibrary(HANDLE hProcess, HMODULE hModule, char* szLibraryFile, bool WaitForThreadExit)
 {
 
     wchar_t uniLibraryFile[MAX_PATH] = {};
@@ -26376,7 +26377,7 @@ __declspec(dllexport) bool __stdcall RemoteFreeLibrary(HANDLE hProcess, HMODULE 
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall RemoteFreeLibraryW(HANDLE hProcess, HMODULE hModule, wchar_t* szLibraryFile, bool WaitForThreadExit)
+__declspec(dllexport) bool RemoteFreeLibraryW(HANDLE hProcess, HMODULE hModule, wchar_t* szLibraryFile, bool WaitForThreadExit)
 {
 
     int i;
@@ -26386,7 +26387,7 @@ __declspec(dllexport) bool __stdcall RemoteFreeLibraryW(HANDLE hProcess, HMODULE
     ULONG_PTR remInjectSize1 = (ULONG_PTR)((ULONG_PTR)&injectedExitProcess - (ULONG_PTR)&injectedRemoteFreeLibrarySimple);
     ULONG_PTR remInjectSize2 = (ULONG_PTR)((ULONG_PTR)&injectedRemoteFreeLibrarySimple - (ULONG_PTR)&injectedRemoteFreeLibrary);
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
+    typedef NTSTATUS(*fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
 #else
     typedef NTSTATUS(__fastcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
 #endif
@@ -26505,7 +26506,7 @@ __declspec(dllexport) bool __stdcall RemoteFreeLibraryW(HANDLE hProcess, HMODULE
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall RemoteExitProcess(HANDLE hProcess, DWORD ExitCode)
+__declspec(dllexport) bool RemoteExitProcess(HANDLE hProcess, DWORD ExitCode)
 {
 
     InjectCodeData APIData;
@@ -26544,7 +26545,7 @@ __declspec(dllexport) bool __stdcall RemoteExitProcess(HANDLE hProcess, DWORD Ex
     return(false);
 }
 // TitanEngine.Tracer.functions:
-__declspec(dllexport) long __stdcall TracerFixRedirectionViaImpRecPlugin(HANDLE hProcess, char* szPluginName, ULONG_PTR AddressToTrace)
+__declspec(dllexport) long TracerFixRedirectionViaImpRecPlugin(HANDLE hProcess, char* szPluginName, ULONG_PTR AddressToTrace)
 {
 
     int szLenght = NULL;
@@ -26553,7 +26554,7 @@ __declspec(dllexport) long __stdcall TracerFixRedirectionViaImpRecPlugin(HANDLE 
     PMEMORY_CMP_HANDLER cmpModuleName;
     ULONG_PTR remInjectSize = (ULONG_PTR)((ULONG_PTR)&injectedRemoteLoadLibrary - (ULONG_PTR)&injectedImpRec);
 #if !defined(_WIN64)
-    typedef NTSTATUS(__stdcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
+    typedef NTSTATUS(*fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
 #else
     typedef NTSTATUS(__fastcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
 #endif
@@ -26655,7 +26656,7 @@ __declspec(dllexport) long __stdcall TracerFixRedirectionViaImpRecPlugin(HANDLE 
     return(TracedAddress);
 }
 // TitanEngine.StaticUnpacker.functions:
-__declspec(dllexport) bool __stdcall StaticFileLoad(char* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
+__declspec(dllexport) bool StaticFileLoad(char* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
 {
 
     if(!SimulateLoad)
@@ -26678,7 +26679,7 @@ __declspec(dllexport) bool __stdcall StaticFileLoad(char* szFileName, DWORD Desi
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticFileLoadW(wchar_t* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
+__declspec(dllexport) bool StaticFileLoadW(wchar_t* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
 {
 
     if(!SimulateLoad)
@@ -26701,7 +26702,7 @@ __declspec(dllexport) bool __stdcall StaticFileLoadW(wchar_t* szFileName, DWORD 
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticFileUnload(char* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool StaticFileUnload(char* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -26716,7 +26717,7 @@ __declspec(dllexport) bool __stdcall StaticFileUnload(char* szFileName, bool Com
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticFileUnloadW(wchar_t* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool StaticFileUnloadW(wchar_t* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
 {
 
     DWORD PeHeaderSize;
@@ -26811,7 +26812,7 @@ __declspec(dllexport) bool __stdcall StaticFileUnloadW(wchar_t* szFileName, bool
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticFileOpen(char* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
+__declspec(dllexport) bool StaticFileOpen(char* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -26826,7 +26827,7 @@ __declspec(dllexport) bool __stdcall StaticFileOpen(char* szFileName, DWORD Desi
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticFileOpenW(wchar_t* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
+__declspec(dllexport) bool StaticFileOpenW(wchar_t* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
 {
 
     __try
@@ -26847,7 +26848,7 @@ __declspec(dllexport) bool __stdcall StaticFileOpenW(wchar_t* szFileName, DWORD 
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticFileGetContent(HANDLE FileHandle, DWORD FilePositionLow, LPDWORD FilePositionHigh, void* Buffer, DWORD Size)
+__declspec(dllexport) bool StaticFileGetContent(HANDLE FileHandle, DWORD FilePositionLow, LPDWORD FilePositionHigh, void* Buffer, DWORD Size)
 {
 
     DWORD rfNumberOfBytesRead;
@@ -26868,11 +26869,11 @@ __declspec(dllexport) bool __stdcall StaticFileGetContent(HANDLE FileHandle, DWO
     }
     return(false);
 }
-__declspec(dllexport) void __stdcall StaticFileClose(HANDLE FileHandle)
+__declspec(dllexport) void StaticFileClose(HANDLE FileHandle)
 {
     EngineCloseHandle(FileHandle);
 }
-__declspec(dllexport) void __stdcall StaticMemoryDecrypt(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionType, DWORD DecryptionKeySize, ULONG_PTR DecryptionKey)
+__declspec(dllexport) void StaticMemoryDecrypt(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionType, DWORD DecryptionKeySize, ULONG_PTR DecryptionKey)
 {
 
     DWORD LoopCount = NULL;
@@ -26972,11 +26973,11 @@ __declspec(dllexport) void __stdcall StaticMemoryDecrypt(LPVOID MemoryStart, DWO
         }
     }
 }
-__declspec(dllexport) void __stdcall StaticMemoryDecryptEx(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, void* DecryptionCallBack)
+__declspec(dllexport) void StaticMemoryDecryptEx(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, void* DecryptionCallBack)
 {
 
     DWORD LoopCount = NULL;
-    typedef bool(__stdcall *fStaticCallBack)(void* sMemoryStart, int sKeySize);
+    typedef bool(*fStaticCallBack)(void* sMemoryStart, int sKeySize);
     fStaticCallBack myStaticCallBack = (fStaticCallBack)DecryptionCallBack;
 
     if(MemoryStart != NULL && MemorySize > NULL)
@@ -27000,11 +27001,11 @@ __declspec(dllexport) void __stdcall StaticMemoryDecryptEx(LPVOID MemoryStart, D
         }
     }
 }
-__declspec(dllexport) void __stdcall StaticMemoryDecryptSpecial(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, DWORD SpecDecryptionType, void* DecryptionCallBack)
+__declspec(dllexport) void StaticMemoryDecryptSpecial(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, DWORD SpecDecryptionType, void* DecryptionCallBack)
 {
 
     DWORD LoopCount = NULL;
-    typedef bool(__stdcall *fStaticCallBack)(void* sMemoryStart, int sKeySize);
+    typedef bool(*fStaticCallBack)(void* sMemoryStart, int sKeySize);
     fStaticCallBack myStaticCallBack = (fStaticCallBack)DecryptionCallBack;
 
     if(MemoryStart != NULL && MemorySize > NULL)
@@ -27039,7 +27040,7 @@ __declspec(dllexport) void __stdcall StaticMemoryDecryptSpecial(LPVOID MemorySta
         }
     }
 }
-__declspec(dllexport) void __stdcall StaticSectionDecrypt(ULONG_PTR FileMapVA, DWORD SectionNumber, bool SimulateLoad, DWORD DecryptionType, DWORD DecryptionKeySize, ULONG_PTR DecryptionKey)
+__declspec(dllexport) void StaticSectionDecrypt(ULONG_PTR FileMapVA, DWORD SectionNumber, bool SimulateLoad, DWORD DecryptionType, DWORD DecryptionKeySize, ULONG_PTR DecryptionKey)
 {
 
     if(!SimulateLoad)
@@ -27051,7 +27052,7 @@ __declspec(dllexport) void __stdcall StaticSectionDecrypt(ULONG_PTR FileMapVA, D
         StaticMemoryDecrypt((LPVOID)((ULONG_PTR)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONVIRTUALOFFSET) + FileMapVA), (DWORD)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWSIZE), DecryptionType, DecryptionKeySize, DecryptionKey);
     }
 }
-__declspec(dllexport) bool __stdcall StaticMemoryDecompress(void* Source, DWORD SourceSize, void* Destination, DWORD DestinationSize, int Algorithm)
+__declspec(dllexport) bool StaticMemoryDecompress(void* Source, DWORD SourceSize, void* Destination, DWORD DestinationSize, int Algorithm)
 {
 
     ELzmaStatus lzStatus;
@@ -27085,7 +27086,7 @@ __declspec(dllexport) bool __stdcall StaticMemoryDecompress(void* Source, DWORD 
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, char* szDumpFileName)
+__declspec(dllexport) bool StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, char* szDumpFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -27100,7 +27101,7 @@ __declspec(dllexport) bool __stdcall StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, wchar_t* szDumpFileName)
+__declspec(dllexport) bool StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, wchar_t* szDumpFileName)
 {
 
     DWORD SizeToRead;
@@ -27192,7 +27193,7 @@ __declspec(dllexport) bool __stdcall StaticRawMemoryCopyW(HANDLE hFile, ULONG_PT
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
+__declspec(dllexport) bool StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -27207,7 +27208,7 @@ __declspec(dllexport) bool __stdcall StaticRawMemoryCopyEx(HANDLE hFile, DWORD R
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
+__declspec(dllexport) bool StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
 {
 
     DWORD SizeToRead;
@@ -27286,7 +27287,7 @@ __declspec(dllexport) bool __stdcall StaticRawMemoryCopyExW(HANDLE hFile, DWORD 
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName)
+__declspec(dllexport) bool StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -27301,7 +27302,7 @@ __declspec(dllexport) bool __stdcall StaticRawMemoryCopyEx64(HANDLE hFile, DWORD
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, wchar_t* szDumpFileName)
+__declspec(dllexport) bool StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, wchar_t* szDumpFileName)
 {
 
     DWORD SizeToRead;
@@ -27384,7 +27385,7 @@ __declspec(dllexport) bool __stdcall StaticRawMemoryCopyEx64W(HANDLE hFile, DWOR
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticHashMemory(void* MemoryToHash, DWORD SizeOfMemory, void* HashDigest, bool OutputString, int Algorithm)
+__declspec(dllexport) bool StaticHashMemory(void* MemoryToHash, DWORD SizeOfMemory, void* HashDigest, bool OutputString, int Algorithm)
 {
 
 #define MD5LEN 16
@@ -27522,7 +27523,7 @@ __declspec(dllexport) bool __stdcall StaticHashMemory(void* MemoryToHash, DWORD 
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall StaticHashFile(char* szFileName, char* HashDigest, bool OutputString, int Algorithm)
+__declspec(dllexport) bool StaticHashFile(char* szFileName, char* HashDigest, bool OutputString, int Algorithm)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -27537,7 +27538,7 @@ __declspec(dllexport) bool __stdcall StaticHashFile(char* szFileName, char* Hash
         return(false);
     }
 }
-__declspec(dllexport) bool __stdcall StaticHashFileW(wchar_t* szFileName, char* HashDigest, bool OutputString, int Algorithm)
+__declspec(dllexport) bool StaticHashFileW(wchar_t* szFileName, char* HashDigest, bool OutputString, int Algorithm)
 {
 
 #define MD5LEN 16
@@ -27721,7 +27722,7 @@ __declspec(dllexport) bool __stdcall StaticHashFileW(wchar_t* szFileName, char* 
     return(false);
 }
 // TitanEngine.Engine.functions:
-__declspec(dllexport) void __stdcall SetEngineVariable(DWORD VariableId, bool VariableSet)
+__declspec(dllexport) void SetEngineVariable(DWORD VariableId, bool VariableSet)
 {
 
     if(VariableId == UE_ENGINE_ALOW_MODULE_LOADING)
@@ -27821,7 +27822,7 @@ void EngineFakeGetProcAddressReturn()
     }
 }
 // Global.TitanEngine.Engine.functions:
-bool __stdcall EngineGetFileDialog(char* GlobalBuffer)
+bool EngineGetFileDialog(char* GlobalBuffer)
 {
 
     OPENFILENAMEA sOpenFileName;
@@ -27845,12 +27846,12 @@ bool __stdcall EngineGetFileDialog(char* GlobalBuffer)
         return(true);
     }
 }
-long __stdcall EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
     char szAboutTitle[] = "[ About ]";
     char szAboutText[] = "%s \r\n\r\n ReversingLabs - http://www.reversinglabs.com \r\n\r\n  Minimum engine version needed:\r\n- TitanEngine %i.%i.%i by RevLabs\r\n\r\nUnpacker coded by %s";
-    typedef void(__stdcall *fStartUnpacking)(char* szInputFile, bool RealignFile, bool CopyOverlay);
+    typedef void(*fStartUnpacking)(char* szInputFile, bool RealignFile, bool CopyOverlay);
     fStartUnpacking myStartUnpacking = (fStartUnpacking)EngineStartUnpackingCallBack;
     char GlobalBuffer[1024] = {};
     char AboutBuffer[1024] = {};
@@ -28225,7 +28226,7 @@ void EngineSimplifyEntryPointCallBack()
     }
 }
 // TitanEngine.Engine.Simplification.functions:
-__declspec(dllexport) void __stdcall EngineUnpackerInitialize(char* szFileName, char* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
+__declspec(dllexport) void EngineUnpackerInitialize(char* szFileName, char* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -28245,7 +28246,7 @@ __declspec(dllexport) void __stdcall EngineUnpackerInitialize(char* szFileName, 
         }
     }
 }
-__declspec(dllexport) void __stdcall EngineUnpackerInitializeW(wchar_t* szFileName, wchar_t* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
+__declspec(dllexport) void EngineUnpackerInitializeW(wchar_t* szFileName, wchar_t* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
 {
 
     int i,j;
@@ -28301,7 +28302,7 @@ __declspec(dllexport) void __stdcall EngineUnpackerInitializeW(wchar_t* szFileNa
         }
     }
 }
-__declspec(dllexport) bool __stdcall EngineUnpackerSetBreakCondition(void* SearchStart, DWORD SearchSize, void* SearchPattern, DWORD PatternSize, DWORD PatternDelta, ULONG_PTR BreakType, bool SingleBreak, DWORD Parameter1, DWORD Parameter2)
+__declspec(dllexport) bool EngineUnpackerSetBreakCondition(void* SearchStart, DWORD SearchSize, void* SearchPattern, DWORD PatternSize, DWORD PatternDelta, ULONG_PTR BreakType, bool SingleBreak, DWORD Parameter1, DWORD Parameter2)
 {
 
     ULONG_PTR fPatternLocation;
@@ -28388,18 +28389,18 @@ __declspec(dllexport) bool __stdcall EngineUnpackerSetBreakCondition(void* Searc
     }
     return(false);
 }
-__declspec(dllexport) void __stdcall EngineUnpackerSetEntryPointAddress(ULONG_PTR UnpackedEntryPointAddress)
+__declspec(dllexport) void EngineUnpackerSetEntryPointAddress(ULONG_PTR UnpackedEntryPointAddress)
 {
     EngineUnpackerOptionUnpackedOEP = UnpackedEntryPointAddress;
 }
-__declspec(dllexport) void __stdcall EngineUnpackerFinalizeUnpacking()
+__declspec(dllexport) void EngineUnpackerFinalizeUnpacking()
 {
 
     EngineSimplifyEntryPointCallBack();
     EmptyGarbage();
 }
 // TitanEngine.Engine.functions:
-__declspec(dllexport) bool __stdcall EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)
+__declspec(dllexport) bool EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -28416,7 +28417,7 @@ __declspec(dllexport) bool __stdcall EngineCreateMissingDependencies(char* szFil
         return(NULL);
     }
 }
-__declspec(dllexport) bool __stdcall EngineCreateMissingDependenciesW(wchar_t* szFileName, wchar_t* szOutputFolder, bool LogCreatedFiles)
+__declspec(dllexport) bool EngineCreateMissingDependenciesW(wchar_t* szFileName, wchar_t* szOutputFolder, bool LogCreatedFiles)
 {
 
     char* ImportDllName;
@@ -28586,7 +28587,7 @@ __declspec(dllexport) bool __stdcall EngineCreateMissingDependenciesW(wchar_t* s
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall EngineFakeMissingDependencies(HANDLE hProcess)
+__declspec(dllexport) bool EngineFakeMissingDependencies(HANDLE hProcess)
 {
 
     if(hProcess != NULL)
@@ -28596,7 +28597,7 @@ __declspec(dllexport) bool __stdcall EngineFakeMissingDependencies(HANDLE hProce
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall EngineDeleteCreatedDependencies()
+__declspec(dllexport) bool EngineDeleteCreatedDependencies()
 {
 
     DWORD DummyCmp = NULL;
@@ -28635,7 +28636,7 @@ __declspec(dllexport) bool __stdcall EngineDeleteCreatedDependencies()
     return(false);
 }
 
-__declspec(dllexport) bool __stdcall EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack)
+__declspec(dllexport) bool EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack)
 {
 
     EngineStartUnpackingCallBack = StartUnpackingCallBack;
@@ -28652,7 +28653,7 @@ __declspec(dllexport) bool __stdcall EngineCreateUnpackerWindow(char* WindowUnpa
         return(false);
     }
 }
-__declspec(dllexport) void __stdcall EngineAddUnpackerWindowLogMessage(char* szLogMessage)
+__declspec(dllexport) void EngineAddUnpackerWindowLogMessage(char* szLogMessage)
 {
 
     int cSelect;
@@ -28663,7 +28664,7 @@ __declspec(dllexport) void __stdcall EngineAddUnpackerWindowLogMessage(char* szL
     SendMessageA(EngineBoxHandle, LB_SETCURSEL, (WPARAM)cSelect, NULL);
 }
 // Global.Engine.Extension.Functions:
-__declspec(dllexport) bool __stdcall ExtensionManagerIsPluginLoaded(char* szPluginName)
+__declspec(dllexport) bool ExtensionManagerIsPluginLoaded(char* szPluginName)
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28675,7 +28676,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerIsPluginLoaded(char* szPlug
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerIsPluginEnabled(char* szPluginName)
+__declspec(dllexport) bool ExtensionManagerIsPluginEnabled(char* szPluginName)
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28694,7 +28695,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerIsPluginEnabled(char* szPlu
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerDisableAllPlugins()
+__declspec(dllexport) bool ExtensionManagerDisableAllPlugins()
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28703,7 +28704,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerDisableAllPlugins()
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerDisablePlugin(char* szPluginName)
+__declspec(dllexport) bool ExtensionManagerDisablePlugin(char* szPluginName)
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28716,7 +28717,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerDisablePlugin(char* szPlugi
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerEnableAllPlugins()
+__declspec(dllexport) bool ExtensionManagerEnableAllPlugins()
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28725,7 +28726,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerEnableAllPlugins()
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerEnablePlugin(char* szPluginName)
+__declspec(dllexport) bool ExtensionManagerEnablePlugin(char* szPluginName)
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28738,7 +28739,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerEnablePlugin(char* szPlugin
     }
     return(false);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerUnloadAllPlugins()
+__declspec(dllexport) bool ExtensionManagerUnloadAllPlugins()
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28750,10 +28751,10 @@ __declspec(dllexport) bool __stdcall ExtensionManagerUnloadAllPlugins()
     }
     return(true);
 }
-__declspec(dllexport) bool __stdcall ExtensionManagerUnloadPlugin(char* szPluginName)
+__declspec(dllexport) bool ExtensionManagerUnloadPlugin(char* szPluginName)
 {
 
-    typedef void(__stdcall *fPluginReleaseExec)();
+    typedef void(*fPluginReleaseExec)();
     fPluginReleaseExec myPluginReleaseExec;
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28785,7 +28786,7 @@ __declspec(dllexport) bool __stdcall ExtensionManagerUnloadPlugin(char* szPlugin
     }
     return(false);
 }
-__declspec(dllexport) void* __stdcall ExtensionManagerGetPluginInfo(char* szPluginName)
+__declspec(dllexport) void* ExtensionManagerGetPluginInfo(char* szPluginName)
 {
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
@@ -28950,7 +28951,7 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
 #else
     wchar_t* szPluginFolder = L"plugins\\x86\\";
 #endif
-    typedef bool(__stdcall *fPluginRegister)(char* szPluginName, LPDWORD titanPluginMajorVersion, LPDWORD titanPluginMinorVersion);
+    typedef bool(*fPluginRegister)(char* szPluginName, LPDWORD titanPluginMajorVersion, LPDWORD titanPluginMinorVersion);
     wchar_t szPluginSearchString[MAX_PATH] = {};
     wchar_t szPluginFullPath[MAX_PATH] = {};
     fPluginRegister myPluginRegister;
