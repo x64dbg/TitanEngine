@@ -1780,7 +1780,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     ULONG_PTR ForwarderData = NULL;
     unsigned int ClosestAPI = 0x1000;
     int Vista64UserForwarderFix = 0;
-    int Windows7KernelBase = 0;
+    int Windows7KernelBase = -1;
 
     RtlZeroMemory(&engineFoundDLLName, 512);
     RtlZeroMemory(&EnumeratedModules, 0x2000 * sizeof ULONG_PTR);
@@ -1823,7 +1823,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                 {
                     Vista64UserForwarderFix = y;
                 }
-                else if(lstrcmpiA(RemoteDLLName, "kernelbase.dll") == NULL)
+                /*else if(lstrcmpiA(RemoteDLLName, "kernelbase.dll") == NULL)
                 {
                     GetModuleFileNameExA(hProcess, (HMODULE)EnumeratedModules[y], (LPSTR)RemoteDLLName, MAX_PATH);
                     RemoteDLLName[lstrlenA(szWindowsKernelBase)] = 0x00;
@@ -1831,7 +1831,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                     {
                         Windows7KernelBase = y;
                     }
-                }
+                }*/
             }
             y++;
         }
@@ -15733,18 +15733,27 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThrea
 
     if(bpxSize == UE_HARDWARE_SIZE_2)
     {
-        if(bpxAddress % 2 != 0)
+        if((bpxAddress % 2) != 0)
         {
             return(false);
         }
     }
     else if(bpxSize == UE_HARDWARE_SIZE_4)
     {
-        if(bpxAddress % 4 != 0)
+        if((bpxAddress % 4) != 0)
         {
             return(false);
         }
     }
+#if defined(_WIN64)
+    else if(bpxSize == UE_HARDWARE_SIZE_8)
+    {
+        if((bpxAddress % 8) != 0)
+        {
+            return(false);
+        }
+    }
+#endif
 
     if(IndexOfRegister == NULL)
     {
@@ -15810,6 +15819,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThrea
             HardwareBPX = HardwareBPX | (1 << 19);
             HardwareBPX = HardwareBPX | (1 << 18);
         }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 19);
+            HardwareBPX = HardwareBPX &~ (1 << 18);
+        }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
         HardwareBPX = HardwareBPX &~ (1 << 12);
@@ -15860,6 +15874,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThrea
         {
             HardwareBPX = HardwareBPX | (1 << 23);
             HardwareBPX = HardwareBPX | (1 << 22);
+        }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 23);
+            HardwareBPX = HardwareBPX &~ (1 << 22);
         }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
@@ -15912,6 +15931,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThrea
             HardwareBPX = HardwareBPX | (1 << 27);
             HardwareBPX = HardwareBPX | (1 << 26);
         }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 27);
+            HardwareBPX = HardwareBPX &~ (1 << 26);
+        }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
         HardwareBPX = HardwareBPX &~ (1 << 12);
@@ -15963,6 +15987,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPointEx(HANDLE hActiveThrea
             HardwareBPX = HardwareBPX | (1 << 31);
             HardwareBPX = HardwareBPX | (1 << 30);
         }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 31);
+            HardwareBPX = HardwareBPX &~ (1 << 30);
+        }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
         HardwareBPX = HardwareBPX &~ (1 << 12);
@@ -15988,18 +16017,28 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress,
 
     if(bpxSize == UE_HARDWARE_SIZE_2)
     {
-        if(bpxAddress % 2 != 0)
+        if((bpxAddress % 2) != 0)
         {
             return(false);
         }
     }
     else if(bpxSize == UE_HARDWARE_SIZE_4)
     {
-        if(bpxAddress % 4 != 0)
+        if((bpxAddress % 4) != 0)
         {
             return(false);
         }
     }
+#if defined(_WIN64)
+    else if(bpxSize == UE_HARDWARE_SIZE_8)
+    {
+        if((bpxAddress % 8) != 0)
+        {
+            return(false);
+        }
+    }
+#endif
+
 
     if(IndexOfRegister == NULL)
     {
@@ -16064,6 +16103,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress,
             HardwareBPX = HardwareBPX | (1 << 19);
             HardwareBPX = HardwareBPX | (1 << 18);
         }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 19);
+            HardwareBPX = HardwareBPX &~ (1 << 18);
+        }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
         HardwareBPX = HardwareBPX &~ (1 << 12);
@@ -16114,6 +16158,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress,
         {
             HardwareBPX = HardwareBPX | (1 << 23);
             HardwareBPX = HardwareBPX | (1 << 22);
+        }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 23);
+            HardwareBPX = HardwareBPX &~ (1 << 22);
         }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
@@ -16166,6 +16215,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress,
             HardwareBPX = HardwareBPX | (1 << 27);
             HardwareBPX = HardwareBPX | (1 << 26);
         }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 27);
+            HardwareBPX = HardwareBPX &~ (1 << 26);
+        }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
         HardwareBPX = HardwareBPX &~ (1 << 12);
@@ -16216,6 +16270,11 @@ __declspec(dllexport) bool __stdcall SetHardwareBreakPoint(ULONG_PTR bpxAddress,
         {
             HardwareBPX = HardwareBPX | (1 << 31);
             HardwareBPX = HardwareBPX | (1 << 30);
+        }
+        else if(bpxSize == UE_HARDWARE_SIZE_8)
+        {
+            HardwareBPX = HardwareBPX | (1 << 31);
+            HardwareBPX = HardwareBPX &~ (1 << 30);
         }
         HardwareBPX = HardwareBPX | (1 << 10);
         HardwareBPX = HardwareBPX &~ (1 << 11);
