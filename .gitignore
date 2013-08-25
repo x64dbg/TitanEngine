@@ -1,0 +1,9 @@
+/ipch
+/TitanEngine/bin
+/TitanEngine/obj
+/TitanEngine/x64
+/TitanEngine/Release
+*.layout
+*.depend
+*.sdf
+*.suo
