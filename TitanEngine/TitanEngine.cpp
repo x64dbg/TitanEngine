@@ -188,8 +188,6 @@ unsigned long Crc32Table[256];
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;
 
-
-
 // Global.Handle.functions:
 bool EngineCloseHandle(HANDLE myHandle)
 {
@@ -16470,6 +16468,7 @@ __declspec(dllexport) void DebugLoop()
     bool ResetBPX = false;
     bool BreakDBG = false;
     bool ResetHwBPX = false;
+    bool ResetMemBPX = false;
     bool CompareResult = false;
     bool SecondChance = false;
     ULONG_PTR CmpValue1 = NULL;
@@ -16491,6 +16490,8 @@ __declspec(dllexport) void DebugLoop()
     ULONG_PTR MemoryBpxCallBack = 0;
     DWORD ResetBPXSize = 0;
     ULONG_PTR ResetBPXAddressTo =  0;
+    ULONG_PTR ResetMemBPXAddress = 0;
+    SIZE_T ResetMemBPXSize = 0;
     int MaximumBreakPoints = 0;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -17037,7 +17038,6 @@ __declspec(dllexport) void DebugLoop()
 #endif
                             SetThreadContext(hActiveThread, &myDBGContext);
                             EngineCloseHandle(hActiveThread);
-                            //TODO fixed
                             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack);
                             if(BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != -1 && BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != 0)
@@ -17185,14 +17185,12 @@ __declspec(dllexport) void DebugLoop()
                         }
                         else
                         {
-                            //TODO fixed
                             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             DBGCode = DBG_CONTINUE;
                         }
                     }
                     else
                     {
-                        //TODO fixed
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                     }
@@ -17280,10 +17278,10 @@ __declspec(dllexport) void DebugLoop()
                         DBGCustomHandler->chSingleStep = NULL;
                     }
                 }*/
-                if(ResetBPX == true || ResetHwBPX == true)
+                if(ResetBPX == true || ResetHwBPX == true || ResetMemBPX == true)
                 {
                     DBGCode = DBG_CONTINUE;
-                    if(!ResetHwBPX)
+                    if(ResetBPX) //restore 'normal' breakpoint
                     {
                         if(ResetBPXAddressTo + ResetBPXSize != (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress)
                         {
@@ -17325,7 +17323,7 @@ __declspec(dllexport) void DebugLoop()
                             EngineCloseHandle(hActiveThread);
                         }
                     }
-                    else
+                    else if(ResetHwBPX) //restore hardware breakpoint
                     {
                         ResetHwBPX = false;
                         SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (LPVOID)DebugRegisterX.DrxCallBack);
@@ -17351,8 +17349,37 @@ __declspec(dllexport) void DebugLoop()
                             }
                         }
                     }
+                    else if(ResetMemBPX) //restore memory breakpoint
+                    {
+                        ResetMemBPX = false;
+                        VirtualQueryEx(dbgProcessInformation.hProcess, (LPCVOID)ResetMemBPXAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
+                        OldProtect = MemInfo.AllocationProtect;
+                        NewProtect = OldProtect | PAGE_GUARD;
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress, ResetMemBPXSize, NewProtect, &OldProtect);
+                        if(engineStepActive)
+                        {
+                            if(engineStepCount == NULL)
+                            {
+                                myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
+                                __try
+                                {
+                                    engineStepActive = false;
+                                    engineStepCallBack = NULL;
+                                    myCustomBreakPoint();
+                                }
+                                __except(EXCEPTION_EXECUTE_HANDLER)
+                                {
+
+                                }
+                            }
+                            else
+                            {
+                                SingleStep(engineStepCount, engineStepCallBack);
+                            }
+                        }
+                    }
                 }
-                else
+                else //no resetting needed (debugger reached hardware breakpoint or the user stepped)
                 {
                     if(engineStepActive)
                     {
@@ -17376,7 +17403,7 @@ __declspec(dllexport) void DebugLoop()
                             SingleStep(engineStepCount, engineStepCallBack);
                         }
                     }
-                    else
+                    else //handle hardware breakpoints
                     {
                         hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_ALL;
@@ -17394,14 +17421,7 @@ __declspec(dllexport) void DebugLoop()
                                 myCustomHandler = (fCustomHandler)(DebugRegister0.DrxCallBack);
                                 __try
                                 {
-                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
-                                    if(myDBGContext.Dr6 & 0x1)
-#if defined(_WIN64)
-                                        addr=(ULONG_PTR)myDBGContext.Rip;
-#else
-                                        addr=(ULONG_PTR)myDBGContext.Eip;
-#endif
-                                    myCustomHandler((void*)addr);
+                                    myCustomHandler((void*)myDBGContext.Dr0);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17431,14 +17451,7 @@ __declspec(dllexport) void DebugLoop()
                                 myCustomHandler = (fCustomHandler)(DebugRegister1.DrxCallBack);
                                 __try
                                 {
-                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
-                                    if(myDBGContext.Dr6 & 0x2)
-#if defined(_WIN64)
-                                        addr=(ULONG_PTR)myDBGContext.Rip;
-#else
-                                        addr=(ULONG_PTR)myDBGContext.Eip;
-#endif
-                                    myCustomHandler((void*)addr);
+                                    myCustomHandler((void*)myDBGContext.Dr1);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17468,14 +17481,7 @@ __declspec(dllexport) void DebugLoop()
                                 myCustomHandler = (fCustomHandler)(DebugRegister2.DrxCallBack);
                                 __try
                                 {
-                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
-                                    if(myDBGContext.Dr6 & 0x4)
-#if defined(_WIN64)
-                                        addr=(ULONG_PTR)myDBGContext.Rip;
-#else
-                                        addr=(ULONG_PTR)myDBGContext.Eip;
-#endif
-                                    myCustomHandler((void*)addr);
+                                    myCustomHandler((void*)myDBGContext.Dr2);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17505,14 +17511,7 @@ __declspec(dllexport) void DebugLoop()
                                 myCustomHandler = (fCustomHandler)(DebugRegister3.DrxCallBack);
                                 __try
                                 {
-                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
-                                    if(myDBGContext.Dr6 & 0x8)
-#if defined(_WIN64)
-                                        addr=(ULONG_PTR)myDBGContext.Rip;
-#else
-                                        addr=(ULONG_PTR)myDBGContext.Eip;
-#endif
-                                    myCustomHandler((void*)addr);
+                                    myCustomHandler((void*)myDBGContext.Dr3);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17554,40 +17553,32 @@ __declspec(dllexport) void DebugLoop()
             }
             else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_GUARD_PAGE_VIOLATION)
             {
-                /*if(DBGCustomHandler->chPageGuard != NULL)
-                {
-                    myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chPageGuard);
-                    __try
-                    {
-                        myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
-                    }
-                    __except(EXCEPTION_EXECUTE_HANDLER)
-                    {
-                        DBGCustomHandler->chPageGuard = NULL;
-                    }
-                }*/
-                char temp[20]="";
-                sprintf(temp, "%X", (unsigned int)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress);
-                MessageBoxA(0,temp,0,0);
                 MemoryBpxFound = false;
                 MaximumBreakPoints = 0;
+                ULONG_PTR bpaddr;
                 for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
                 {
                     ULONG_PTR addr=BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                    ULONG_PTR bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
-                    if(((BreakPointBuffer[MaximumBreakPoints].BreakPointType >= UE_MEMORY) && (BreakPointBuffer[MaximumBreakPoints].BreakPointType <= UE_MEMORY_WRITE)) && bpaddr>=addr && bpaddr<=(addr+BreakPointBuffer[MaximumBreakPoints].BreakPointSize))
+                    if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1)
+                        bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
+                    else
+                        bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
+                    if(((BreakPointBuffer[MaximumBreakPoints].BreakPointType >= UE_MEMORY) && (BreakPointBuffer[MaximumBreakPoints].BreakPointType <= UE_MEMORY_EXECUTE)) && bpaddr>=addr && bpaddr<=(addr+BreakPointBuffer[MaximumBreakPoints].BreakPointSize))
                     {
                         MemoryBpxFound = true;
                         break;
                     }
                 }
-                if(MaximumBreakPoints < MAXIMUM_BREAKPOINTS || MemoryBpxFound == true)
+                if(MaximumBreakPoints < MAXIMUM_BREAKPOINTS || MemoryBpxFound == true) //found memory breakpoint
                 {
-                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE)
+                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE) //memory breakpoint is active
                     {
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        myDBGContext.ContextFlags = CONTEXT_ALL;
+                        GetThreadContext(hActiveThread, &myDBGContext);
                         DBGCode = DBG_CONTINUE;
                         MemoryBpxCallBack = BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack;
-                        if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY)
+                        if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY) //READ|WRITE|EXECUTE
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
@@ -17595,22 +17586,26 @@ __declspec(dllexport) void DebugLoop()
                             }
                             else
                             {
-                                VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                OldProtect = MemInfo.AllocationProtect;
-                                NewProtect = OldProtect ^ PAGE_GUARD;
-                                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, NewProtect, &OldProtect);
+                                if(!(myDBGContext.EFlags & 0x100))
+                                {
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+                                }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
                             }
-                            myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)MemoryBpxCallBack);
+                            myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
                             __try
                             {
-                                myCustomBreakPoint();
+                                myCustomHandler((void*)bpaddr);
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
 
                             }
                         }
-                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_READ)
+                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_READ) //READ
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
@@ -17618,17 +17613,62 @@ __declspec(dllexport) void DebugLoop()
                             }
                             else
                             {
-                                VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                OldProtect = MemInfo.AllocationProtect;
-                                NewProtect = OldProtect ^ PAGE_GUARD;
-                                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, NewProtect, &OldProtect);
+                                if(!(myDBGContext.EFlags & 0x100))
+                                {
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+                                }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
                             }
-                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0)
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
                             {
-                                myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)MemoryBpxCallBack);
+                                myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
                                 __try
                                 {
-                                    myCustomBreakPoint();
+                                    myCustomHandler((void*)bpaddr);
+                                }
+                                __except(EXCEPTION_EXECUTE_HANDLER)
+                                {
+
+                                }
+                            }
+                            else //no read operation, restore breakpoint
+                            {
+                                if(!(myDBGContext.EFlags & 0x100))
+                                {
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+                                }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
+                            }
+                        }
+                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_WRITE) //WRITE
+                        {
+                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1) //remove breakpoint
+                            {
+                                RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                            }
+                            else //restore breakpoint after trap flag
+                            {
+                                if(!(myDBGContext.EFlags & 0x100))
+                                {
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+                                }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
+                            }
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
+                            {
+                                myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
+                                __try
+                                {
+                                    myCustomHandler((void*)bpaddr);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17637,16 +17677,17 @@ __declspec(dllexport) void DebugLoop()
                             }
                             else
                             {
-                                if(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress >= (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress <= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress + BreakPointBuffer[MaximumBreakPoints].BreakPointSize)
+                                if(!(myDBGContext.EFlags & 0x100))
                                 {
-                                    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                    OldProtect = MemInfo.AllocationProtect;
-                                    NewProtect = OldProtect ^ PAGE_GUARD;
-                                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, NewProtect, &OldProtect);
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
                             }
                         }
-                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_WRITE)
+                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_EXECUTE) //EXECUTE
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
@@ -17654,41 +17695,47 @@ __declspec(dllexport) void DebugLoop()
                             }
                             else
                             {
-                                VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                OldProtect = MemInfo.AllocationProtect;
-                                NewProtect = OldProtect ^ PAGE_GUARD;
-                                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, NewProtect, &OldProtect);
+                                if(!(myDBGContext.EFlags & 0x100))
+                                {
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+                                }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
                             }
-                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1)
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress >= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress <= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress + BreakPointBuffer[MaximumBreakPoints].BreakPointSize) //read operation
                             {
-                                myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)MemoryBpxCallBack);
+                                myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
                                 __try
                                 {
-                                    myCustomBreakPoint();
+                                    myCustomHandler((void*)bpaddr);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
 
                                 }
                             }
-                            else
+                            else //no execute operation, restore breakpoint
                             {
-                                if(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress >= (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress <= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress + BreakPointBuffer[MaximumBreakPoints].BreakPointSize)
+                                if(!(myDBGContext.EFlags & 0x100))
                                 {
-                                    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                    OldProtect = MemInfo.AllocationProtect;
-                                    NewProtect = OldProtect ^ PAGE_GUARD;
-                                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, NewProtect, &OldProtect);
+                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
+                                SetThreadContext(hActiveThread, &myDBGContext);
+                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
+                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                                ResetMemBPX = true;
                             }
                         }
+                        EngineCloseHandle(hActiveThread);
                     }
                     else
                     {
                         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                     }
                 }
-                else
+                else //no memory breakpoint found
                 {
                     DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 }
@@ -17772,7 +17819,6 @@ __declspec(dllexport) void DebugLoop()
                             }
                             SetThreadContext(hActiveThread, &myDBGContext);
                             EngineCloseHandle(hActiveThread);
-                            //TODO fixed
                             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack);
                             if(BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != -1 && BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != 0)
@@ -17920,14 +17966,12 @@ __declspec(dllexport) void DebugLoop()
                         }
                         else
                         {
-                            //TODO fixed
                             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             DBGCode = DBG_CONTINUE;
                         }
                     }
                     else
                     {
-                        //TODO fixed
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                     }
