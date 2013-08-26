@@ -8,11 +8,9 @@ bool RemoveGarbageItem(wchar_t* szGarbageItem, bool RemoveFolder);
 bool FillGarbageItem(wchar_t* szGarbageItem, wchar_t* szFileName, void* outGargabeItem, int MaxGargabeStringSize);
 void EmptyGarbage();
 
-#if !defined (_WIN64)
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/
-#endif
 
 // TitanEngine.Dumper.functions:
 __declspec(dllexport) bool DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint);
@@ -74,6 +72,7 @@ __declspec(dllexport) bool SetPE32Data(char* szFileName, DWORD WhichSection, DWO
 __declspec(dllexport) bool SetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue);
 __declspec(dllexport) bool SetPE32DataForMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage);
 __declspec(dllexport) bool SetPE32DataEx(char* szFileName, LPVOID DataStorage);
+__declspec(dllexport) bool SetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage);
 __declspec(dllexport) long GetPE32SectionNumberFromVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert);
 __declspec(dllexport) long long ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType);
 __declspec(dllexport) long long ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType);
@@ -155,7 +154,7 @@ __declspec(dllexport) bool ThreaderIsExceptionInMainThread();
 // TitanEngine.Debugger.functions:
 __declspec(dllexport) void* StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress);
 __declspec(dllexport) void* StaticDisassemble(LPVOID DisassmAddress);
-__declspec(dllexport) void* DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress);
+__declspec(dllexport) void* DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType);
 __declspec(dllexport) void* Disassemble(LPVOID DisassmAddress);
 __declspec(dllexport) long StaticLengthDisassemble(LPVOID DisassmAddress);
 __declspec(dllexport) long LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress);
@@ -271,6 +270,7 @@ __declspec(dllexport) long long ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hP
 __declspec(dllexport) long ImporterGetDLLIndexEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList);
 __declspec(dllexport) long ImporterGetDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList);
 __declspec(dllexport) long long ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase);
+__declspec(dllexport) long long ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName);
 __declspec(dllexport) bool ImporterRelocateWriteLocation(ULONG_PTR AddValue);
 __declspec(dllexport) bool ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllexport) void* ImporterGetForwardedAPIName(HANDLE hProcess, ULONG_PTR APIAddress);
@@ -441,8 +441,6 @@ __declspec(dllexport) bool ExtensionManagerUnloadAllPlugins();
 __declspec(dllexport) bool ExtensionManagerUnloadPlugin(char* szPluginName);
 __declspec(dllexport) void* ExtensionManagerGetPluginInfo(char* szPluginName);
 
-#if !defined (_WIN64)
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-#endif

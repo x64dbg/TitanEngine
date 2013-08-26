@@ -188,6 +188,8 @@ unsigned long Crc32Table[256];
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;
 
+
+
 // Global.Handle.functions:
 bool EngineCloseHandle(HANDLE myHandle)
 {
@@ -12697,18 +12699,18 @@ __declspec(dllexport) bool EnableBPX(ULONG_PTR bpxAddress)
                 if(testWrite)
                 {
                     BreakPointBuffer[i].BreakPointActive = UE_BPXACTIVE;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                     return(true);
                 }
                 else
                 {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                     return(false);
                 }
             }
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(false);
             }
         }
@@ -12736,18 +12738,18 @@ __declspec(dllexport) bool DisableBPX(ULONG_PTR bpxAddress)
                 if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer[i].OriginalByte[0], BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
                 {
                     BreakPointBuffer[i].BreakPointActive = UE_BPXINACTIVE;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                     return(true);
                 }
                 else
                 {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                     return(false);
                 }
             }
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(false);
             }
         }
@@ -12857,24 +12859,24 @@ __declspec(dllexport) bool SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bp
                 BreakPointBuffer[i].BreakPointType = (BYTE)bpxType;
                 BreakPointBuffer[i].NumberOfExecutions = -1;
                 BreakPointBuffer[i].ExecuteCallBack = (ULONG_PTR)bpxCallBack;
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(true);
             }
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(false);
             }
             /*}
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(false);
             }*/
         }
         else
         {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
             return(false);
         }
     }
@@ -12992,24 +12994,24 @@ __declspec(dllexport) bool SetBPXEx(ULONG_PTR bpxAddress, DWORD bpxType, DWORD N
                 BreakPointBuffer[i].ExecuteCallBack = (ULONG_PTR)bpxCallBack;
                 BreakPointBuffer[i].RemoveCallBack = (ULONG_PTR)bpxRemoveCallBack;
                 BreakPointBuffer[i].CompareCallBack = (ULONG_PTR)bpxCompareCallBack;
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(true);
             }
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(false);
             }
             /*}
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                 return(false);
             }*/
         }
         else
         {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
             return(false);
         }
     }
@@ -13051,7 +13053,7 @@ __declspec(dllexport) bool DeleteBPX(ULONG_PTR bpxAddress)
             {
                 if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer[i].OriginalByte[0], BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
                 {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                     if(BreakPointBuffer[i].RemoveCallBack != NULL)
                     {
                         __try
@@ -13074,7 +13076,7 @@ __declspec(dllexport) bool DeleteBPX(ULONG_PTR bpxAddress)
                 }
                 else
                 {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
                     return(false);
                 }
             }
@@ -13086,7 +13088,7 @@ __declspec(dllexport) bool DeleteBPX(ULONG_PTR bpxAddress)
         }
         else
         {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
             return(false);
         }
     }
@@ -14458,7 +14460,7 @@ __declspec(dllexport) bool FillEx(HANDLE hProcess, LPVOID MemoryStart, DWORD Mem
             WriteProcessMemory(hProcess, MemoryStart, FillByte, 1, &ueNumberOfBytesRead);
             MemoryStart = (LPVOID)((ULONG_PTR)MemoryStart + 1);
         }
-        VirtualProtectEx(hProcess, MemoryStart, MemorySize, MemInfo.AllocationProtect, &OldProtect);
+        VirtualProtectEx(hProcess, MemoryStart, MemorySize, OldProtect, &OldProtect);
         return(true);
     }
     return(false);
@@ -14523,7 +14525,7 @@ __declspec(dllexport) bool PatchEx(HANDLE hProcess, LPVOID MemoryStart, DWORD Me
         {
             WriteProcessMemory(hProcess, MemoryStart, ReplacePattern, ReplaceSize, &ueNumberOfBytesRead);
         }
-        VirtualProtectEx(hProcess, MemoryStart, MemorySize, MemInfo.AllocationProtect, &OldProtect);
+        VirtualProtectEx(hProcess, MemoryStart, MemorySize, OldProtect, &OldProtect);
         return(true);
     }
     return(false);
@@ -17035,7 +17037,8 @@ __declspec(dllexport) void DebugLoop()
 #endif
                             SetThreadContext(hActiveThread, &myDBGContext);
                             EngineCloseHandle(hActiveThread);
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                            //TODO fixed
+                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack);
                             if(BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != -1 && BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != 0)
                             {
@@ -17182,13 +17185,15 @@ __declspec(dllexport) void DebugLoop()
                         }
                         else
                         {
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                            //TODO fixed
+                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             DBGCode = DBG_CONTINUE;
                         }
                     }
                     else
                     {
-                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                        //TODO fixed
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                     }
                 }
@@ -17410,7 +17415,6 @@ __declspec(dllexport) void DebugLoop()
                             }
                             else
                             {
-                                //TODO: everytingelkse
                                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                             }
                         }
@@ -17562,6 +17566,9 @@ __declspec(dllexport) void DebugLoop()
                         DBGCustomHandler->chPageGuard = NULL;
                     }
                 }*/
+                char temp[20]="";
+                sprintf(temp, "%X", (unsigned int)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress);
+                MessageBoxA(0,temp,0,0);
                 MemoryBpxFound = false;
                 MaximumBreakPoints = 0;
                 for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
@@ -17765,7 +17772,8 @@ __declspec(dllexport) void DebugLoop()
                             }
                             SetThreadContext(hActiveThread, &myDBGContext);
                             EngineCloseHandle(hActiveThread);
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                            //TODO fixed
+                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack);
                             if(BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != -1 && BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != 0)
                             {
@@ -17912,13 +17920,15 @@ __declspec(dllexport) void DebugLoop()
                         }
                         else
                         {
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                            //TODO fixed
+                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                             DBGCode = DBG_CONTINUE;
                         }
                     }
                     else
                     {
-                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, MemInfo.AllocationProtect, &OldProtect);
+                        //TODO fixed
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
                         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                     }
                 }
