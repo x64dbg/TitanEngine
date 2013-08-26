@@ -12773,11 +12773,11 @@ __declspec(dllexport) bool SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bp
     }
     for(i = 0; i < BreakPointSetCount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
+        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT || BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT))
         {
             return(false);
         }
-        else if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE)
+        else if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE && (BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT || BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT))
         {
             return(EnableBPX(bpxAddress));
         }
