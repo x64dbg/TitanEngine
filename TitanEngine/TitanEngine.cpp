@@ -17386,10 +17386,17 @@ __declspec(dllexport) void DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomBreakPoint = (fCustomBreakPoint)(DebugRegister0.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister0.DrxCallBack);
                                 __try
                                 {
-                                    myCustomBreakPoint();
+                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
+                                    if(myDBGContext.Dr6 & 0x1)
+#if defined(_WIN64)
+                                        addr=(ULONG_PTR)myDBGContext.Rip;
+#else
+                                        addr=(ULONG_PTR)myDBGContext.Eip;
+#endif
+                                    myCustomHandler((void*)addr);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17417,10 +17424,17 @@ __declspec(dllexport) void DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomBreakPoint = (fCustomBreakPoint)(DebugRegister1.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister1.DrxCallBack);
                                 __try
                                 {
-                                    myCustomBreakPoint();
+                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
+                                    if(myDBGContext.Dr6 & 0x2)
+#if defined(_WIN64)
+                                        addr=(ULONG_PTR)myDBGContext.Rip;
+#else
+                                        addr=(ULONG_PTR)myDBGContext.Eip;
+#endif
+                                    myCustomHandler((void*)addr);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17447,10 +17461,17 @@ __declspec(dllexport) void DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomBreakPoint = (fCustomBreakPoint)(DebugRegister2.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister2.DrxCallBack);
                                 __try
                                 {
-                                    myCustomBreakPoint();
+                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
+                                    if(myDBGContext.Dr6 & 0x4)
+#if defined(_WIN64)
+                                        addr=(ULONG_PTR)myDBGContext.Rip;
+#else
+                                        addr=(ULONG_PTR)myDBGContext.Eip;
+#endif
+                                    myCustomHandler((void*)addr);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
@@ -17477,10 +17498,17 @@ __declspec(dllexport) void DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomBreakPoint = (fCustomBreakPoint)(DebugRegister3.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister3.DrxCallBack);
                                 __try
                                 {
-                                    myCustomBreakPoint();
+                                    ULONG_PTR addr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
+                                    if(myDBGContext.Dr6 & 0x8)
+#if defined(_WIN64)
+                                        addr=(ULONG_PTR)myDBGContext.Rip;
+#else
+                                        addr=(ULONG_PTR)myDBGContext.Eip;
+#endif
+                                    myCustomHandler((void*)addr);
                                 }
                                 __except(EXCEPTION_EXECUTE_HANDLER)
                                 {
