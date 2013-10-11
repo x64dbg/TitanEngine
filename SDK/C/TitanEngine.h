@@ -1,19 +1,505 @@
+#ifndef TITANENGINE
+#define TITANENGINE
+
 #define TITCALL
 
-// Global.Function.Declaration:
-void BreakPointManager();
-void GenericOEPTraceHited();
+#if _MSC_VER > 1000
+#pragma once
+#endif
 
-// Global.Garbage.functions:
-bool CreateGarbageItem(void* outGargabeItem, int MaxGargabeStringSize);
-bool RemoveGarbageItem(wchar_t* szGarbageItem, bool RemoveFolder);
-bool FillGarbageItem(wchar_t* szGarbageItem, wchar_t* szFileName, void* outGargabeItem, int MaxGargabeStringSize);
-void EmptyGarbage();
+#include <windows.h>
+
+#pragma pack(push, 1)
+
+// Global.Constant.Structure.Declaration:
+// Engine.External:
+#define UE_ACCESS_READ 0
+#define UE_ACCESS_WRITE 1
+#define UE_ACCESS_ALL 2
+
+#define UE_HIDE_BASIC 1
+
+#define UE_PLUGIN_CALL_REASON_PREDEBUG 1
+#define UE_PLUGIN_CALL_REASON_EXCEPTION 2
+#define UE_PLUGIN_CALL_REASON_POSTDEBUG 3
+
+#define TEE_HOOK_NRM_JUMP 1
+#define TEE_HOOK_NRM_CALL 3
+#define TEE_HOOK_IAT 5
+
+#define UE_ENGINE_ALOW_MODULE_LOADING 1
+#define UE_ENGINE_AUTOFIX_FORWARDERS 2
+#define UE_ENGINE_PASS_ALL_EXCEPTIONS 3
+#define UE_ENGINE_NO_CONSOLE_WINDOW 4
+#define UE_ENGINE_BACKUP_FOR_CRITICAL_FUNCTIONS 5
+#define UE_ENGINE_CALL_PLUGIN_CALLBACK 6
+#define UE_ENGINE_RESET_CUSTOM_HANDLER 7
+#define UE_ENGINE_CALL_PLUGIN_DEBUG_CALLBACK 8
+
+#define UE_OPTION_REMOVEALL 1
+#define UE_OPTION_DISABLEALL 2
+#define UE_OPTION_REMOVEALLDISABLED 3
+#define UE_OPTION_REMOVEALLENABLED 4
+
+#define UE_STATIC_DECRYPTOR_XOR 1
+#define UE_STATIC_DECRYPTOR_SUB 2
+#define UE_STATIC_DECRYPTOR_ADD 3
+
+#define UE_STATIC_DECRYPTOR_FOREWARD 1
+#define UE_STATIC_DECRYPTOR_BACKWARD 2
+
+#define UE_STATIC_KEY_SIZE_1 1
+#define UE_STATIC_KEY_SIZE_2 2
+#define UE_STATIC_KEY_SIZE_4 4
+#define UE_STATIC_KEY_SIZE_8 8
+
+#define UE_STATIC_APLIB 1
+#define UE_STATIC_APLIB_DEPACK 2
+#define UE_STATIC_LZMA 3
+
+#define UE_STATIC_HASH_MD5 1
+#define UE_STATIC_HASH_SHA1 2
+#define UE_STATIC_HASH_CRC32 3
+
+#define UE_RESOURCE_LANGUAGE_ANY -1
+
+#define UE_PE_OFFSET 0
+#define UE_IMAGEBASE 1
+#define UE_OEP 2
+#define UE_SIZEOFIMAGE 3
+#define UE_SIZEOFHEADERS 4
+#define UE_SIZEOFOPTIONALHEADER 5
+#define UE_SECTIONALIGNMENT 6
+#define UE_IMPORTTABLEADDRESS 7
+#define UE_IMPORTTABLESIZE 8
+#define UE_RESOURCETABLEADDRESS 9
+#define UE_RESOURCETABLESIZE 10
+#define UE_EXPORTTABLEADDRESS 11
+#define UE_EXPORTTABLESIZE 12
+#define UE_TLSTABLEADDRESS 13
+#define UE_TLSTABLESIZE 14
+#define UE_RELOCATIONTABLEADDRESS 15
+#define UE_RELOCATIONTABLESIZE 16
+#define UE_TIMEDATESTAMP 17
+#define UE_SECTIONNUMBER 18
+#define UE_CHECKSUM 19
+#define UE_SUBSYSTEM 20
+#define UE_CHARACTERISTICS 21
+#define UE_NUMBEROFRVAANDSIZES 22
+#define UE_SECTIONNAME 23
+#define UE_SECTIONVIRTUALOFFSET 24
+#define UE_SECTIONVIRTUALSIZE 25
+#define UE_SECTIONRAWOFFSET 26
+#define UE_SECTIONRAWSIZE 27
+#define UE_SECTIONFLAGS 28
+
+#define UE_CH_BREAKPOINT 1
+#define UE_CH_SINGLESTEP 2
+#define UE_CH_ACCESSVIOLATION 3
+#define UE_CH_ILLEGALINSTRUCTION 4
+#define UE_CH_NONCONTINUABLEEXCEPTION 5
+#define UE_CH_ARRAYBOUNDSEXCEPTION 6
+#define UE_CH_FLOATDENORMALOPERAND 7
+#define UE_CH_FLOATDEVIDEBYZERO 8
+#define UE_CH_INTEGERDEVIDEBYZERO 9
+#define UE_CH_INTEGEROVERFLOW 10
+#define UE_CH_PRIVILEGEDINSTRUCTION 11
+#define UE_CH_PAGEGUARD 12
+#define UE_CH_EVERYTHINGELSE 13
+#define UE_CH_CREATETHREAD 14
+#define UE_CH_EXITTHREAD 15
+#define UE_CH_CREATEPROCESS 16
+#define UE_CH_EXITPROCESS 17
+#define UE_CH_LOADDLL 18
+#define UE_CH_UNLOADDLL 19
+#define UE_CH_OUTPUTDEBUGSTRING 20
+#define UE_CH_AFTEREXCEPTIONPROCESSING 21
+#define UE_CH_ALLEVENTS 22
+#define UE_CH_SYSTEMBREAKPOINT 23
+#define UE_CH_UNHANDLEDEXCEPTION 24
+#define UE_CH_AFTERUNHANDLEDEXCEPTION 25
+
+#define UE_OPTION_HANDLER_RETURN_HANDLECOUNT 1
+#define UE_OPTION_HANDLER_RETURN_ACCESS 2
+#define UE_OPTION_HANDLER_RETURN_FLAGS 3
+#define UE_OPTION_HANDLER_RETURN_TYPENAME 4
+
+#define UE_BREAKPOINT_INT3 1
+#define UE_BREAKPOINT_LONG_INT3 2
+#define UE_BREAKPOINT_UD2 3
+
+#define UE_BPXREMOVED 0
+#define UE_BPXACTIVE 1
+#define UE_BPXINACTIVE 2
+
+#define UE_BREAKPOINT 0
+#define UE_SINGLESHOOT 1
+#define UE_HARDWARE 2
+#define UE_MEMORY 3
+#define UE_MEMORY_READ 4
+#define UE_MEMORY_WRITE 5
+#define UE_MEMORY_EXECUTE 6
+#define UE_BREAKPOINT_TYPE_INT3 0x10000000
+#define UE_BREAKPOINT_TYPE_LONG_INT3 0x20000000
+#define UE_BREAKPOINT_TYPE_UD2 0x30000000
+
+#define UE_HARDWARE_EXECUTE 4
+#define UE_HARDWARE_WRITE 5
+#define UE_HARDWARE_READWRITE 6
+
+#define UE_HARDWARE_SIZE_1 7
+#define UE_HARDWARE_SIZE_2 8
+#define UE_HARDWARE_SIZE_4 9
+#define UE_HARDWARE_SIZE_8 10
+
+#define UE_ON_LIB_LOAD 1
+#define UE_ON_LIB_UNLOAD 2
+#define UE_ON_LIB_ALL 3
+
+#define UE_APISTART 0
+#define UE_APIEND 1
+
+#define UE_PLATFORM_x86 1
+#define UE_PLATFORM_x64 2
+#define UE_PLATFORM_ALL 3
+
+#define UE_FUNCTION_STDCALL 1
+#define UE_FUNCTION_CCALL 2
+#define UE_FUNCTION_FASTCALL 3
+#define UE_FUNCTION_STDCALL_RET 4
+#define UE_FUNCTION_CCALL_RET 5
+#define UE_FUNCTION_FASTCALL_RET 6
+#define UE_FUNCTION_STDCALL_CALL 7
+#define UE_FUNCTION_CCALL_CALL 8
+#define UE_FUNCTION_FASTCALL_CALL 9
+#define UE_PARAMETER_BYTE 0
+#define UE_PARAMETER_WORD 1
+#define UE_PARAMETER_DWORD 2
+#define UE_PARAMETER_QWORD 3
+#define UE_PARAMETER_PTR_BYTE 4
+#define UE_PARAMETER_PTR_WORD 5
+#define UE_PARAMETER_PTR_DWORD 6
+#define UE_PARAMETER_PTR_QWORD 7
+#define UE_PARAMETER_STRING 8
+#define UE_PARAMETER_UNICODE 9
+
+#define UE_CMP_NOCONDITION 0
+#define UE_CMP_EQUAL 1
+#define UE_CMP_NOTEQUAL 2
+#define UE_CMP_GREATER 3
+#define UE_CMP_GREATEROREQUAL 4
+#define UE_CMP_LOWER 5
+#define UE_CMP_LOWEROREQUAL 6
+#define UE_CMP_REG_EQUAL 7
+#define UE_CMP_REG_NOTEQUAL 8
+#define UE_CMP_REG_GREATER 9
+#define UE_CMP_REG_GREATEROREQUAL 10
+#define UE_CMP_REG_LOWER 11
+#define UE_CMP_REG_LOWEROREQUAL 12
+#define UE_CMP_ALWAYSFALSE 13
+
+#define UE_EAX 1
+#define UE_EBX 2
+#define UE_ECX 3
+#define UE_EDX 4
+#define UE_EDI 5
+#define UE_ESI 6
+#define UE_EBP 7
+#define UE_ESP 8
+#define UE_EIP 9
+#define UE_EFLAGS 10
+#define UE_DR0 11
+#define UE_DR1 12
+#define UE_DR2 13
+#define UE_DR3 14
+#define UE_DR6 15
+#define UE_DR7 16
+#define UE_RAX 17
+#define UE_RBX 18
+#define UE_RCX 19
+#define UE_RDX 20
+#define UE_RDI 21
+#define UE_RSI 22
+#define UE_RBP 23
+#define UE_RSP 24
+#define UE_RIP 25
+#define UE_RFLAGS 26
+#define UE_R8 27
+#define UE_R9 28
+#define UE_R10 29
+#define UE_R11 30
+#define UE_R12 31
+#define UE_R13 32
+#define UE_R14 33
+#define UE_R15 34
+#define UE_CIP 35
+#define UE_CSP 36
+#ifdef _WIN64
+#define UE_CFLAGS UE_RFLAGS
+#else
+#define UE_CFLAGS UE_EFLAGS
+#endif
+#define UE_SEG_GS 37
+#define UE_SEG_FS 38
+#define UE_SEG_ES 39
+#define UE_SEG_DS 40
+#define UE_SEG_CS 41
+#define UE_SEG_SS 42
+
+typedef struct
+{
+    DWORD PE32Offset;
+    DWORD ImageBase;
+    DWORD OriginalEntryPoint;
+    DWORD NtSizeOfImage;
+    DWORD NtSizeOfHeaders;
+    WORD SizeOfOptionalHeaders;
+    DWORD FileAlignment;
+    DWORD SectionAligment;
+    DWORD ImportTableAddress;
+    DWORD ImportTableSize;
+    DWORD ResourceTableAddress;
+    DWORD ResourceTableSize;
+    DWORD ExportTableAddress;
+    DWORD ExportTableSize;
+    DWORD TLSTableAddress;
+    DWORD TLSTableSize;
+    DWORD RelocationTableAddress;
+    DWORD RelocationTableSize;
+    DWORD TimeDateStamp;
+    WORD SectionNumber;
+    DWORD CheckSum;
+    WORD SubSystem;
+    WORD Characteristics;
+    DWORD NumberOfRvaAndSizes;
+} PE32Struct, *PPE32Struct;
+
+typedef struct
+{
+    DWORD PE64Offset;
+    DWORD64 ImageBase;
+    DWORD OriginalEntryPoint;
+    DWORD NtSizeOfImage;
+    DWORD NtSizeOfHeaders;
+    WORD SizeOfOptionalHeaders;
+    DWORD FileAlignment;
+    DWORD SectionAligment;
+    DWORD ImportTableAddress;
+    DWORD ImportTableSize;
+    DWORD ResourceTableAddress;
+    DWORD ResourceTableSize;
+    DWORD ExportTableAddress;
+    DWORD ExportTableSize;
+    DWORD TLSTableAddress;
+    DWORD TLSTableSize;
+    DWORD RelocationTableAddress;
+    DWORD RelocationTableSize;
+    DWORD TimeDateStamp;
+    WORD SectionNumber;
+    DWORD CheckSum;
+    WORD SubSystem;
+    WORD Characteristics;
+    DWORD NumberOfRvaAndSizes;
+} PE64Struct, *PPE64Struct;
+
+typedef struct
+{
+    bool NewDll;
+    int NumberOfImports;
+    ULONG_PTR ImageBase;
+    ULONG_PTR BaseImportThunk;
+    ULONG_PTR ImportThunk;
+    char* APIName;
+    char* DLLName;
+} ImportEnumData, *PImportEnumData;
+
+typedef struct
+{
+    HANDLE hThread;
+    DWORD dwThreadId;
+    void* ThreadStartAddress;
+    void* ThreadLocalBase;
+} THREAD_ITEM_DATA, *PTHREAD_ITEM_DATA;
+
+typedef struct
+{
+    HANDLE hFile;
+    void* BaseOfDll;
+    HANDLE hFileMapping;
+    void* hFileMappingView;
+    char szLibraryPath[MAX_PATH];
+    char szLibraryName[MAX_PATH];
+} LIBRARY_ITEM_DATA, *PLIBRARY_ITEM_DATA;
+
+typedef struct
+{
+    HANDLE hFile;
+    void* BaseOfDll;
+    HANDLE hFileMapping;
+    void* hFileMappingView;
+    wchar_t szLibraryPath[MAX_PATH];
+    wchar_t szLibraryName[MAX_PATH];
+} LIBRARY_ITEM_DATAW, *PLIBRARY_ITEM_DATAW;
+
+typedef struct
+{
+    HANDLE hProcess;
+    DWORD dwProcessId;
+    HANDLE hThread;
+    DWORD dwThreadId;
+    HANDLE hFile;
+    void* BaseOfImage;
+    void* ThreadStartAddress;
+    void* ThreadLocalBase;
+} PROCESS_ITEM_DATA, *PPROCESS_ITEM_DATA;
+
+typedef struct
+{
+    ULONG ProcessId;
+    HANDLE hHandle;
+} HandlerArray, *PHandlerArray;
+
+typedef struct
+{
+    char PluginName[64];
+    DWORD PluginMajorVersion;
+    DWORD PluginMinorVersion;
+    HMODULE PluginBaseAddress;
+    void* TitanDebuggingCallBack;
+    void* TitanRegisterPlugin;
+    void* TitanReleasePlugin;
+    void* TitanResetPlugin;
+    bool PluginDisabled;
+} PluginInformation, *PPluginInformation;
+
+#define TEE_MAXIMUM_HOOK_SIZE 14
+#define TEE_MAXIMUM_HOOK_RELOCS 7
+#if defined(_WIN64)
+#define TEE_MAXIMUM_HOOK_INSERT_SIZE 14
+#else
+#define TEE_MAXIMUM_HOOK_INSERT_SIZE 5
+#endif
+
+typedef struct HOOK_ENTRY
+{
+    bool IATHook;
+    BYTE HookType;
+    DWORD HookSize;
+    void* HookAddress;
+    void* RedirectionAddress;
+    BYTE HookBytes[TEE_MAXIMUM_HOOK_SIZE];
+    BYTE OriginalBytes[TEE_MAXIMUM_HOOK_SIZE];
+    void* IATHookModuleBase;
+    DWORD IATHookNameHash;
+    bool HookIsEnabled;
+    bool HookIsRemote;
+    void* PatchedEntry;
+    DWORD RelocationInfo[TEE_MAXIMUM_HOOK_RELOCS];
+    int RelocationCount;
+} HOOK_ENTRY, *PHOOK_ENTRY;
+
+#define UE_DEPTH_SURFACE 0
+#define UE_DEPTH_DEEP 1
+
+#define UE_UNPACKER_CONDITION_SEARCH_FROM_EP 1
+
+#define UE_UNPACKER_CONDITION_LOADLIBRARY 1
+#define UE_UNPACKER_CONDITION_GETPROCADDRESS 2
+#define UE_UNPACKER_CONDITION_ENTRYPOINTBREAK 3
+#define UE_UNPACKER_CONDITION_RELOCSNAPSHOT1 4
+#define UE_UNPACKER_CONDITION_RELOCSNAPSHOT2 5
+
+#define UE_FIELD_OK 0
+#define UE_FIELD_BROKEN_NON_FIXABLE 1
+#define UE_FIELD_BROKEN_NON_CRITICAL 2
+#define UE_FIELD_BROKEN_FIXABLE_FOR_STATIC_USE 3
+#define UE_FIELD_BROKEN_BUT_CAN_BE_EMULATED 4
+#define UE_FILED_FIXABLE_NON_CRITICAL 5
+#define UE_FILED_FIXABLE_CRITICAL 6
+#define UE_FIELD_NOT_PRESET 7
+#define UE_FIELD_NOT_PRESET_WARNING 8
+
+#define UE_RESULT_FILE_OK 10
+#define UE_RESULT_FILE_INVALID_BUT_FIXABLE 11
+#define UE_RESULT_FILE_INVALID_AND_NON_FIXABLE 12
+#define UE_RESULT_FILE_INVALID_FORMAT 13
+
+typedef struct
+{
+    BYTE OveralEvaluation;
+    bool EvaluationTerminatedByException;
+    bool FileIs64Bit;
+    bool FileIsDLL;
+    bool FileIsConsole;
+    bool MissingDependencies;
+    bool MissingDeclaredAPIs;
+    BYTE SignatureMZ;
+    BYTE SignaturePE;
+    BYTE EntryPoint;
+    BYTE ImageBase;
+    BYTE SizeOfImage;
+    BYTE FileAlignment;
+    BYTE SectionAlignment;
+    BYTE ExportTable;
+    BYTE RelocationTable;
+    BYTE ImportTable;
+    BYTE ImportTableSection;
+    BYTE ImportTableData;
+    BYTE IATTable;
+    BYTE TLSTable;
+    BYTE LoadConfigTable;
+    BYTE BoundImportTable;
+    BYTE COMHeaderTable;
+    BYTE ResourceTable;
+    BYTE ResourceData;
+    BYTE SectionTable;
+} FILE_STATUS_INFO, *PFILE_STATUS_INFO;
+
+typedef struct
+{
+    BYTE OveralEvaluation;
+    bool FixingTerminatedByException;
+    bool FileFixPerformed;
+    bool StrippedRelocation;
+    bool DontFixRelocations;
+    DWORD OriginalRelocationTableAddress;
+    DWORD OriginalRelocationTableSize;
+    bool StrippedExports;
+    bool DontFixExports;
+    DWORD OriginalExportTableAddress;
+    DWORD OriginalExportTableSize;
+    bool StrippedResources;
+    bool DontFixResources;
+    DWORD OriginalResourceTableAddress;
+    DWORD OriginalResourceTableSize;
+    bool StrippedTLS;
+    bool DontFixTLS;
+    DWORD OriginalTLSTableAddress;
+    DWORD OriginalTLSTableSize;
+    bool StrippedLoadConfig;
+    bool DontFixLoadConfig;
+    DWORD OriginalLoadConfigTableAddress;
+    DWORD OriginalLoadConfigTableSize;
+    bool StrippedBoundImports;
+    bool DontFixBoundImports;
+    DWORD OriginalBoundImportTableAddress;
+    DWORD OriginalBoundImportTableSize;
+    bool StrippedIAT;
+    bool DontFixIAT;
+    DWORD OriginalImportAddressTableAddress;
+    DWORD OriginalImportAddressTableSize;
+    bool StrippedCOM;
+    bool DontFixCOM;
+    DWORD OriginalCOMTableAddress;
+    DWORD OriginalCOMTableSize;
+} FILE_FIX_INFO, *PFILE_FIX_INFO;
 
 #ifdef __cplusplus
-extern "C" {
-#endif /*__cplusplus*/
+extern "C"
+{
+#endif
 
+// Global.Function.Declaration:
 // TitanEngine.Dumper.functions:
 __declspec(dllexport) bool TITCALL DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint);
 __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint);
@@ -445,4 +931,8 @@ __declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(char* szPlugin
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
+
+#pragma pack(pop)
+
+#endif /*TITANENGINE*/
