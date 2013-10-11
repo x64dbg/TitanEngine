@@ -2888,7 +2888,7 @@ __declspec(dllexport) bool DumpProcessExW(DWORD ProcessId, LPVOID ImageBase, wch
     HANDLE hProcess = 0;
     BOOL ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ, FALSE, ProcessId);
+    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess != INVALID_HANDLE_VALUE)
     {
         ReturnValue = DumpProcessW(hProcess, ImageBase, szDumpFileName, EntryPoint);

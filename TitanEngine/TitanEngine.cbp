@@ -54,11 +54,16 @@
 			<Add library="shell32" />
 		</Linker>
 		<Unit filename="LzmaDec.cpp" />
+		<Unit filename="LzmaDec.h" />
+		<Unit filename="LzmaTypes.h" />
 		<Unit filename="TitanEngine.cpp" />
+		<Unit filename="TitanEngine.h" />
 		<Unit filename="TitanEngine.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="aplib.h" />
 		<Unit filename="definitions.h" />
+		<Unit filename="distorm.h" />
 		<Unit filename="dllmain.cpp" />
 		<Unit filename="resource.h" />
 		<Unit filename="stdafx.cpp" />

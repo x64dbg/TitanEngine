@@ -18,20 +18,20 @@ This file is used in win32proj and linuxproj.
  */
 // TINYC has a problem with some 64bits library functions, so pass.
 #ifndef __TINYC__
-	#define SUPPORT_64BIT_OFFSET
+#define SUPPORT_64BIT_OFFSET
 #endif
 
 /* If your compiler doesn't support stdint.h, define your own 64 bits type. */
 #ifdef SUPPORT_64BIT_OFFSET
-	#ifdef _MSC_VER
-		#define OFFSET_INTEGER unsigned __int64
-	#else
-		#include <stdint.h>
-		#define OFFSET_INTEGER uint64_t
-	#endif
+#ifdef _MSC_VER
+#define OFFSET_INTEGER unsigned __int64
 #else
-	/* 32 bit offsets are used. */
-	#define OFFSET_INTEGER unsigned long
+#include <stdint.h>
+#define OFFSET_INTEGER uint64_t
+#endif
+#else
+/* 32 bit offsets are used. */
+#define OFFSET_INTEGER unsigned long
 #endif
 
 
@@ -41,24 +41,29 @@ extern "C" {
 #endif
 
 /* Decodes modes of the disassembler, 16 bits or 32 bits or 64 bits for AMD64, x86-64. */
-typedef enum {Decode16Bits = 0, Decode32Bits = 1, Decode64Bits = 2} _DecodeType;
+typedef enum {
+    Decode16Bits = 0, Decode32Bits = 1, Decode64Bits = 2
+}
+                                 _DecodeType;
 
 typedef OFFSET_INTEGER _OffsetType;
 
 /* Static size of strings. Do not change this value. */
 #define MAX_TEXT_SIZE (60)
-typedef struct {
-	unsigned int length;
-	unsigned char p[MAX_TEXT_SIZE]; /* p is a null terminated string. */
+typedef struct
+{
+    unsigned int length;
+    unsigned char p[MAX_TEXT_SIZE]; /* p is a null terminated string. */
 } _WString;
 
 /* This structure holds all information the disassembler generates per instruction. */
-typedef struct {
-	_WString mnemonic; /* Mnemonic of decoded instruction, prefixed if required by REP, LOCK etc. */
-	_WString operands; /* Operands of the decoded instruction, up to 3 operands, comma-seperated. */
-	_WString instructionHex; /* Hex dump - little endian, including prefixes. */
-	unsigned int size; /* Size of decoded instruction. */
-	_OffsetType offset; /* Start offset of the decoded instruction. */
+typedef struct
+{
+    _WString mnemonic; /* Mnemonic of decoded instruction, prefixed if required by REP, LOCK etc. */
+    _WString operands; /* Operands of the decoded instruction, up to 3 operands, comma-seperated. */
+    _WString instructionHex; /* Hex dump - little endian, including prefixes. */
+    unsigned int size; /* Size of decoded instruction. */
+    _OffsetType offset; /* Start offset of the decoded instruction. */
 } _DecodedInst;
 
 /* Return code of the decoding function. */
@@ -83,11 +88,11 @@ typedef enum {DECRES_NONE, DECRES_SUCCESS, DECRES_MEMORYERR, DECRES_INPUTERR} _D
  *         2)You will have to synchronize the offset,code and length by yourself if you pass code fragments and not a complete code block!
  */
 #ifdef SUPPORT_64BIT_OFFSET
-	_DecodeResult distorm_decode64(_OffsetType codeOffset, const unsigned char* code, int codeLen, _DecodeType dt, _DecodedInst result[], unsigned int maxInstructions, unsigned int* usedInstructionsCount);
-	#define distorm_decode distorm_decode64
+_DecodeResult distorm_decode64(_OffsetType codeOffset, const unsigned char* code, int codeLen, _DecodeType dt, _DecodedInst result[], unsigned int maxInstructions, unsigned int* usedInstructionsCount);
+#define distorm_decode distorm_decode64
 #else
-	_DecodeResult distorm_decode32(_OffsetType codeOffset, const unsigned char* code, int codeLen, _DecodeType dt, _DecodedInst result[], unsigned int maxInstructions, unsigned int* usedInstructionsCount);
-	#define distorm_decode distorm_decode32
+_DecodeResult distorm_decode32(_OffsetType codeOffset, const unsigned char* code, int codeLen, _DecodeType dt, _DecodedInst result[], unsigned int maxInstructions, unsigned int* usedInstructionsCount);
+#define distorm_decode distorm_decode32
 #endif
 
 /*
