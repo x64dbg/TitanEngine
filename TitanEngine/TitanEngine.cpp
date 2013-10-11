@@ -25519,9 +25519,9 @@ __declspec(dllexport) long long HandlerGetHandleDetails(HANDLE hProcess, DWORD P
                             cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                             cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                             RtlZeroMemory(HandleNameData, 0x1000);
-                            if(pObjectTypeInfo->Name.Length != NULL)
+                            if(pObjectTypeInfo->TypeName.Length != NULL)
                             {
-                                WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->Name.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
+                                WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->TypeName.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
                                 ReturnData = (ULONG_PTR)HandleNameData;
                                 DontFreeStringMemory = true;
                             }
@@ -25536,10 +25536,10 @@ __declspec(dllexport) long long HandlerGetHandleDetails(HANDLE hProcess, DWORD P
                             cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                             cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                             RtlZeroMemory(HandleNameData, 0x1000);
-                            if(pObjectTypeInfo->Name.Length != NULL)
+                            if(pObjectTypeInfo->TypeName.Length != NULL)
                             {
-                                //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->Name.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
-                                lstrcpyW((wchar_t*)HandleNameData, (wchar_t*)pObjectTypeInfo->Name.Buffer);
+                                //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->TypeName.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
+                                lstrcpyW((wchar_t*)HandleNameData, (wchar_t*)pObjectTypeInfo->TypeName.Buffer);
                                 ReturnData = (ULONG_PTR)HandleNameData;
                                 DontFreeStringMemory = true;
                             }
@@ -26016,9 +26016,9 @@ __declspec(dllexport) long HandlerEnumerateOpenMutexes(HANDLE hProcess, DWORD Pr
                         cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                         cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                         RtlZeroMemory(HandleNameData, 0x1000);
-                        if(pObjectTypeInfo->Name.Length != NULL)
+                        if(pObjectTypeInfo->TypeName.Length != NULL)
                         {
-                            WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->Name.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
+                            WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->TypeName.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
                             if(lstrcmpiA((LPCSTR)HandleNameData, "Mutant") == NULL)
                             {
                                 copyHandle = (HANDLE)HandleInfo->hHandle;
@@ -26170,9 +26170,9 @@ __declspec(dllexport) long HandlerGetProcessIdWhichCreatedMutexW(wchar_t* szMute
                         cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                         cZwQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                         RtlZeroMemory(HandleNameData, 0x1000);
-                        if(pObjectTypeInfo->Name.Length != NULL)
+                        if(pObjectTypeInfo->TypeName.Length != NULL)
                         {
-                            //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->Name.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
+                            //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->TypeName.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
                             lstrcpyW((wchar_t*)HandleNameData, (wchar_t*)pObjectNameInfo->Name.Buffer);
                             if(lstrcmpiW((LPCWSTR)HandleNameData, L"Mutant") == NULL)
                             {

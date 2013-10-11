@@ -12,4 +12,5 @@ The following things have been fixed/added (list might be incomplete):
 - added memory breakpoints on execute
 - added QWORD hardware breakpoints
 - general code fixes
+- smaller and better DLL loaders
 
