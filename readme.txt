@@ -13,4 +13,4 @@ The following things have been fixed/added (list might be incomplete):
 - smaller and faster DLL loaders
 - supports multiple calling conventions (including the callbacks)
 - MinGW import libraries
-
+- fixed exception handling

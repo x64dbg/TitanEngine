@@ -15528,10 +15528,6 @@ __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
     {
         DBGCustomHandler->chUnhandledException = (ULONG_PTR)CallBack;
     }
-    else if(ExceptionId == UE_CH_AFTERUNHANDLEDEXCEPTION)
-    {
-        DBGCustomHandler->chAfterUnhandledException = (ULONG_PTR)CallBack;
-    }
     else if(ExceptionId == UE_CH_ALLEVENTS)
     {
         DBGCustomHandler->chEverythingElse = (ULONG_PTR)CallBack;
@@ -16959,7 +16955,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
         }
         else if(DBGEvent.dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
         {
-            bool firstchance=false;
+            //bool firstchance=false;
             if(DBGCustomHandler->chEverythingElse != NULL)
             {
                 myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chEverythingElse);
@@ -16972,19 +16968,20 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DBGCustomHandler->chEverythingElse = NULL;
                 }
             }
-            if(DBGEvent.u.Exception.dwFirstChance == FALSE)
+            if(DBGEvent.u.Exception.dwFirstChance == FALSE) //second chance exception
             {
                 if(!enginePassAllExceptions)
                 {
-                    firstchance=true;
                     DBGCode = DBG_CONTINUE;
                 }
                 else
                 {
-                    DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                    DBGCode = DBG_EXCEPTION_NOT_HANDLED; //let debuggee handle the exception
                 }
                 RtlMoveMemory(&TerminateDBGEvent, &DBGEvent, sizeof DEBUG_EVENT);
             }
+
+            //handle different exception codes
             if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_BREAKPOINT)
             {
                 /*if(DBGCustomHandler->chBreakPoint != NULL)
@@ -17266,18 +17263,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
             else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_SINGLE_STEP)
             {
-                /*if(DBGCustomHandler->chSingleStep != NULL)
-                {
-                    myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chSingleStep);
-                    __try
-                    {
-                        myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
-                    }
-                    __except(EXCEPTION_EXECUTE_HANDLER)
-                    {
-                        DBGCustomHandler->chSingleStep = NULL;
-                    }
-                }*/
                 if(ResetBPX == true || ResetHwBPX == true || ResetMemBPX == true)
                 {
                     DBGCode = DBG_CONTINUE;
@@ -17535,7 +17520,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         EngineCloseHandle(hActiveThread);
                     }
                 }
-                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED || firstchance)
+                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
                 {
                     if(DBGCustomHandler->chSingleStep != NULL)
                     {
@@ -17739,8 +17724,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 {
                     DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 }
-                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED || firstchance)
+                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
                 {
+                    //TODO: re-set memory breakpoint?
                     if(DBGCustomHandler->chPageGuard != NULL)
                     {
                         myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chPageGuard);
@@ -17773,18 +17759,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
             else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_ILLEGAL_INSTRUCTION)
             {
-                if(DBGCustomHandler->chIllegalInstruction != NULL)
-                {
-                    myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chIllegalInstruction);
-                    __try
-                    {
-                        myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
-                    }
-                    __except(EXCEPTION_EXECUTE_HANDLER)
-                    {
-                        DBGCustomHandler->chIllegalInstruction = NULL;
-                    }
-                }
                 MaximumBreakPoints = 0;
                 for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
                 {
@@ -17980,6 +17954,21 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 {
                     DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 }
+                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED) //call custom handler
+                {
+                    if(DBGCustomHandler->chIllegalInstruction != NULL)
+                    {
+                        myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chIllegalInstruction);
+                        __try
+                        {
+                            myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
+                            DBGCustomHandler->chIllegalInstruction = NULL;
+                        }
+                    }
+                }
             }
             else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_NONCONTINUABLE_EXCEPTION)
             {
@@ -18093,7 +18082,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            if(DBGCode==DBG_EXCEPTION_NOT_HANDLED || firstchance)
+
+            //post exception handling (for debugger exceptions)
+            if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
             {
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {
@@ -18107,19 +18098,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         DBGCustomHandler->chUnhandledException = NULL;
                     }
                 }
-                if(DBGCustomHandler->chAfterUnhandledException != NULL)
-                {
-                    myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chAfterUnhandledException);
-                    __try
-                    {
-                        myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
-                    }
-                    __except(EXCEPTION_EXECUTE_HANDLER)
-                    {
-                        DBGCustomHandler->chAfterUnhandledException = NULL;
-                    }
-                }
             }
+
             if(DBGCustomHandler->chAfterException != NULL)
             {
                 myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chAfterException);
@@ -18133,6 +18113,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+
+        //after handling of debug codes
         if(engineResumeProcessIfNoThreadIsActive)
         {
             if(!ThreaderIsAnyThreadActive())

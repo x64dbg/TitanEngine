@@ -164,7 +164,6 @@ typedef struct
     ULONG_PTR chAfterException;
     ULONG_PTR chSystemBreakpoint;
     ULONG_PTR chUnhandledException;
-    ULONG_PTR chAfterUnhandledException;
 } CustomHandler, *PCustomHandler;
 
 typedef struct
@@ -391,7 +390,6 @@ typedef struct HOOK_ENTRY
 #define UE_CH_ALLEVENTS 22
 #define UE_CH_SYSTEMBREAKPOINT 23
 #define UE_CH_UNHANDLEDEXCEPTION 24
-#define UE_CH_AFTERUNHANDLEDEXCEPTION 25
 
 #define UE_OPTION_HANDLER_RETURN_HANDLECOUNT 1
 #define UE_OPTION_HANDLER_RETURN_ACCESS 2
