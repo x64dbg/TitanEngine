@@ -3244,11 +3244,13 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
         FileSize = GetFileSize(hFile, NULL);
         if(FileSize < 0x1000)
         {
-            ReadFile(hFile, ueReadBuffer, FileSize, &uedNumberOfBytesRead, NULL);
+            if(!ReadFile(hFile, ueReadBuffer, FileSize, &uedNumberOfBytesRead, NULL))
+				return false;
         }
         else
         {
-            ReadFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
+            if(!ReadFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
+				return false;
         }
         if(FileSize > 0x200)
         {
@@ -3894,15 +3896,15 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                         if(OverlaySize > 0x1000)
                         {
                             RtlZeroMemory(ueReadBuffer, 0x2000);
-                            ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL);
-                            WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL);
+                            if(!ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL) || !WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
+								return false;
                             OverlaySize = OverlaySize - 0x1000;
                         }
                         else
                         {
                             RtlZeroMemory(ueReadBuffer, 0x2000);
-                            ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL);
-                            WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL);
+                            if(!ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL) || !WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
+								return false;                            
                             OverlaySize = 0;
                         }
                     }
@@ -3965,15 +3967,15 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
                 if(OverlaySize > 0x1000)
                 {
                     RtlZeroMemory(ueReadBuffer, 0x2000);
-                    ReadFile(hFileRead, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
-                    WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
+                    if(!ReadFile(hFileRead, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL) || !WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
+						return false;
                     OverlaySize = OverlaySize - 0x1000;
                 }
                 else
                 {
                     RtlZeroMemory(ueReadBuffer, 0x2000);
-                    ReadFile(hFileRead, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL);
-                    WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL);
+                    if(!ReadFile(hFileRead, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL) || !WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
+						return false;
                     OverlaySize = 0;
                 }
             }
@@ -9012,7 +9014,8 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileEx(char* szFileName, LPVOID 
 }
 __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
 {
-
+	if(!FileFixInfo)
+		return false;
     DWORD ReadData = NULL;
     DWORD ReadSize = NULL;
     WORD ReadDataWORD = NULL;
@@ -9037,7 +9040,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
     PIMAGE_THUNK_DATA32 ThunkData32;
     PIMAGE_THUNK_DATA64 ThunkData64;
     PFILE_STATUS_INFO myFileStatusInfo = (PFILE_STATUS_INFO)FileStatusInfo;
-    PFILE_FIX_INFO myFileFixInfo = (PFILE_FIX_INFO)FileFixInfo;
+    PFILE_FIX_INFO myFileFixInfo = (PFILE_FIX_INFO)FileFixInfo; //can bad point
     bool hLoadedModuleSimulated = false;
     HMODULE hLoadedModule;
     ULONG_PTR ImportNamePtr;
@@ -9050,9 +9053,12 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
     bool FileFixed = true;
     bool FeatureFixed = false;
 
-    if(myFileStatusInfo == NULL)
+	FILE_STANDARD_INFO filestatusinfo; //for internal use
+	
+    if(myFileStatusInfo == NULL) //here check for myfilestrus..ah lol, youre right
     {
-        IsPE32FileValidExW(szFileName, UE_DEPTH_DEEP, FileStatusInfo);
+		myFileStatusInfo=(PFILE_STATUS_INFO)&filestatusinfo;
+        IsPE32FileValidExW(szFileName, UE_DEPTH_DEEP, myFileStatusInfo);
     }
     if(myFileFixInfo->FileFixPerformed == false && myFileStatusInfo->OveralEvaluation == UE_RESULT_FILE_INVALID_BUT_FIXABLE)
     {
@@ -10543,6 +10549,8 @@ __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
 
     ULONG RequiredLen = NULL;
     PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+	if(!myProcessBasicInformation)
+		return 0;
 #if !defined(_WIN64)
     typedef NTSTATUS(WINAPI *fZwQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 #else
@@ -14242,7 +14250,8 @@ __declspec(dllexport) long TITCALL CurrentExceptionNumber()
 }
 __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
-
+	if(!MemoryToCheck || !PatternToMatch)
+		return false;
     int i = NULL;
     BYTE intWildCard = NULL;
     LPVOID ueReadBuffer = NULL;
@@ -14833,6 +14842,8 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         if(MemInfo.RegionSize > NULL)
         {
             ReadMemory = VirtualAlloc(NULL, MAXIMUM_INSTRUCTION_SIZE, MEM_COMMIT, PAGE_READWRITE);
+			if(!ReadMemory)
+				return 0;
             if(ReadProcessMemory(hProcess, (LPVOID)InstructionAddress, ReadMemory, MAXIMUM_INSTRUCTION_SIZE, &ueNumberOfBytesRead))
             {
                 CompareMemory = (PMEMORY_CMP_HANDLER)ReadMemory;
@@ -22802,6 +22813,10 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
         if(sizeof HANDLE == 4)
         {
             TraceMemory = VirtualAlloc(NULL, MaximumReadSize, MEM_COMMIT, PAGE_READWRITE);
+            if(!TraceMemory)
+            {
+                return (NULL);
+            }
             if(ReadProcessMemory(hProcess, (LPVOID)AddressToTrace, TraceMemory, MaximumReadSize, &ueNumberOfBytesRead))
             {
                 cMem = (PMEMORY_CMP_HANDLER)TraceMemory;
@@ -23189,6 +23204,8 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     LPVOID TracerReadMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+	if(!TracerReadMemory)
+		return (NULL);
     cMem = (PMEMORY_CMP_HANDLER)TracerReadMemory;
 
     VirtualQueryEx(hProcess, (LPVOID)AddressToTrace, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
