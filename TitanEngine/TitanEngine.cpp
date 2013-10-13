@@ -923,7 +923,7 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
     HANDLE hFile;
     char szTryFileName[512];
 
-    if(szPresentInFolder != NULL)
+    if(szPresentInFolder != NULL && szFileName != NULL)
     {
         RtlZeroMemory(&szTryFileName, 512);
         lstrcpyA(szTryFileName, szPresentInFolder);
