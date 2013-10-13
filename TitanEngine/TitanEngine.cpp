@@ -483,9 +483,8 @@ bool EngineFileExists(char* szFileName)
         return(false);
     }
 }
-char* EngineExtractPath(char* szFileName)
+static char* EngineExtractPath(char* szFileName)
 {
-
     int i;
 
     RtlZeroMemory(&engineExtractedFolderName, 512);
@@ -920,7 +919,6 @@ bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName)
 }
 bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char* szPresentInFolder)
 {
-
     int i,j;
     HANDLE hFile;
     char szTryFileName[512];
@@ -1658,25 +1656,12 @@ long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName)
             }
             for(j = 0; j < (int)PEExports->NumberOfNames; j++)
             {
-                if(!FileIs64)
+                if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)(ModuleBase + (ULONG_PTR)ExportedFunctionNames->ExportedItem)) == NULL)
                 {
-                    if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)(ModuleBase + (ULONG_PTR)ExportedFunctionNames->ExportedItem)) == NULL)
-                    {
-                        ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
-                        ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
-                        APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)ModuleBase;
-                        return((ULONG_PTR)APIFoundAddress);
-                    }
-                }
-                else
-                {
-                    if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)(ModuleBase + (ULONG_PTR)ExportedFunctionNames->ExportedItem)) == NULL)
-                    {
-                        ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
-                        ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
-                        APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)ModuleBase;
-                        return((ULONG_PTR)APIFoundAddress);
-                    }
+                    ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
+                    ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
+                    APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)ModuleBase;
+                    return((ULONG_PTR)APIFoundAddress);
                 }
                 ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctionNames + 4);
             }
@@ -1973,16 +1958,8 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                                     if(APIAddress - (ExportedFunctions->ExportedItem + LoadedModules[i][0]) < ClosestAPI)
                                     {
                                         ClosestAPI = (unsigned int)(APIAddress - (ExportedFunctions->ExportedItem + LoadedModules[i][0]));
-                                        if(!FileIs64)
-                                        {
-                                            ExportedFunctionNames = (PEXPORTED_DATA)(PEExports->AddressOfNames + LoadedModules[i][1]);
-                                            ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)(PEExports->AddressOfNameOrdinals + LoadedModules[i][1]);
-                                        }
-                                        else
-                                        {
-                                            ExportedFunctionNames = (PEXPORTED_DATA)(PEExports->AddressOfNames + LoadedModules[i][1]);
-                                            ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)(PEExports->AddressOfNameOrdinals + LoadedModules[i][1]);
-                                        }
+                                        ExportedFunctionNames = (PEXPORTED_DATA)(PEExports->AddressOfNames + LoadedModules[i][1]);
+                                        ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)(PEExports->AddressOfNameOrdinals + LoadedModules[i][1]);
                                         GetModuleBaseNameA(hProcess, (HMODULE)LoadedModules[i][0], (LPSTR)engineFoundDLLName, 512);
                                         RtlZeroMemory(&engineFoundAPIName, 512);
                                         x = n;
@@ -3245,12 +3222,12 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
         if(FileSize < 0x1000)
         {
             if(!ReadFile(hFile, ueReadBuffer, FileSize, &uedNumberOfBytesRead, NULL))
-				return false;
+                return false;
         }
         else
         {
             if(!ReadFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
-				return false;
+                return false;
         }
         if(FileSize > 0x200)
         {
@@ -3897,14 +3874,14 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                         {
                             RtlZeroMemory(ueReadBuffer, 0x2000);
                             if(!ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL) || !WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
-								return false;
+                                return false;
                             OverlaySize = OverlaySize - 0x1000;
                         }
                         else
                         {
                             RtlZeroMemory(ueReadBuffer, 0x2000);
                             if(!ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL) || !WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
-								return false;                            
+                                return false;
                             OverlaySize = 0;
                         }
                     }
@@ -3968,14 +3945,14 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
                 {
                     RtlZeroMemory(ueReadBuffer, 0x2000);
                     if(!ReadFile(hFileRead, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL) || !WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
-						return false;
+                        return false;
                     OverlaySize = OverlaySize - 0x1000;
                 }
                 else
                 {
                     RtlZeroMemory(ueReadBuffer, 0x2000);
                     if(!ReadFile(hFileRead, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL) || !WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
-						return false;
+                        return false;
                     OverlaySize = 0;
                 }
             }
@@ -4685,7 +4662,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
                         {
                             PESections->SizeOfRawData = (((PESections->SizeOfRawData + NumberOfExpandBytes) / PEHeader32->OptionalHeader.FileAlignment) + 1) * PEHeader32->OptionalHeader.FileAlignment;
                         }
-                        if(SectionRawSize < NULL)
+                        if(SectionRawSize > 0x7FFFFFFF)
                         {
                             SectionRawSize = NULL;
                         }
@@ -4713,14 +4690,13 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     if(szBackupItem[0] != NULL)
                     {
+                        RemoveGarbageItem(szBackupItem, true);
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
-                            RemoveGarbageItem(szBackupItem, true);
                             return(true);
                         }
                         else
                         {
-                            RemoveGarbageItem(szBackupItem, true);
                             return(false);
                         }
                     }
@@ -4755,7 +4731,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
                         {
                             PESections->SizeOfRawData = (((PESections->SizeOfRawData + NumberOfExpandBytes) / PEHeader64->OptionalHeader.FileAlignment) + 1) * PEHeader64->OptionalHeader.FileAlignment;
                         }
-                        if(SectionRawSize < NULL)
+                        if(SectionRawSize > 0x7FFFFFFF)
                         {
                             SectionRawSize = NULL;
                         }
@@ -7813,7 +7789,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             else
                             {
                                 SectionNumber = GetPE32SectionNumberFromVA(FileMapVA, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress + PEHeader32->OptionalHeader.ImageBase);
-                                if(SectionNumber >= NULL)
+                                if(SectionNumber < 0x7FFFFFFF)
                                 {
                                     SectionAttributes = (DWORD)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONFLAGS);
                                     if(SectionAttributes & IMAGE_SCN_MEM_EXECUTE || SectionAttributes & IMAGE_SCN_CNT_CODE || SectionAttributes & IMAGE_SCN_MEM_WRITE || SectionAttributes & IMAGE_SCN_CNT_INITIALIZED_DATA)
@@ -9014,8 +8990,8 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileEx(char* szFileName, LPVOID 
 }
 __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
 {
-	if(!FileFixInfo)
-		return false;
+    if(!FileFixInfo)
+        return false;
     DWORD ReadData = NULL;
     DWORD ReadSize = NULL;
     WORD ReadDataWORD = NULL;
@@ -9053,11 +9029,11 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
     bool FileFixed = true;
     bool FeatureFixed = false;
 
-	FILE_STANDARD_INFO filestatusinfo; //for internal use
-	
+    FILE_STANDARD_INFO filestatusinfo; //for internal use
+
     if(myFileStatusInfo == NULL) //here check for myfilestrus..ah lol, youre right
     {
-		myFileStatusInfo=(PFILE_STATUS_INFO)&filestatusinfo;
+        myFileStatusInfo=(PFILE_STATUS_INFO)&filestatusinfo;
         IsPE32FileValidExW(szFileName, UE_DEPTH_DEEP, myFileStatusInfo);
     }
     if(myFileFixInfo->FileFixPerformed == false && myFileStatusInfo->OveralEvaluation == UE_RESULT_FILE_INVALID_BUT_FIXABLE)
@@ -10549,8 +10525,8 @@ __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
 
     ULONG RequiredLen = NULL;
     PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-	if(!myProcessBasicInformation)
-		return 0;
+    if(!myProcessBasicInformation)
+        return 0;
 #if !defined(_WIN64)
     typedef NTSTATUS(WINAPI *fZwQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
 #else
@@ -12064,10 +12040,9 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadStillRunning(HANDLE hThread)
 }
 __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
 {
-
-    if(SuspendThread(hThread) < 0)
+    if(SuspendThread(hThread)) //if previous suspend count is above 0 (which means thread is suspended)
     {
-        ResumeThread(hThread);
+        ResumeThread(hThread); //decrement suspend count
         return(true);
     }
     return(false);
@@ -14250,8 +14225,8 @@ __declspec(dllexport) long TITCALL CurrentExceptionNumber()
 }
 __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
-	if(!MemoryToCheck || !PatternToMatch)
-		return false;
+    if(!MemoryToCheck || !PatternToMatch)
+        return false;
     int i = NULL;
     BYTE intWildCard = NULL;
     LPVOID ueReadBuffer = NULL;
@@ -14842,8 +14817,8 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         if(MemInfo.RegionSize > NULL)
         {
             ReadMemory = VirtualAlloc(NULL, MAXIMUM_INSTRUCTION_SIZE, MEM_COMMIT, PAGE_READWRITE);
-			if(!ReadMemory)
-				return 0;
+            if(!ReadMemory)
+                return 0;
             if(ReadProcessMemory(hProcess, (LPVOID)InstructionAddress, ReadMemory, MAXIMUM_INSTRUCTION_SIZE, &ueNumberOfBytesRead))
             {
                 CompareMemory = (PMEMORY_CMP_HANDLER)ReadMemory;
@@ -15425,13 +15400,6 @@ __declspec(dllexport) bool TITCALL IsJumpGoingToExecuteEx(HANDLE hProcess, HANDL
             else if(lstrcmpiA(DisassembledString, "JS") == NULL)
             {
                 if(bSF)
-                {
-                    return(true);
-                }
-            }
-            else if(lstrcmpiA(DisassembledString, "JC") == NULL)
-            {
-                if(bCF)
                 {
                     return(true);
                 }
@@ -16587,7 +16555,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                     if(engineReserveModuleBase) //reserve original image base
                     {
-                        VirtualAllocEx(dbgProcessInformation.hProcess, (void*)engineReserveModuleBase, 0x1000, MEM_RESERVE, PAGE_READWRITE);
+                        VirtualAllocEx(dbgProcessInformation.hProcess, (void*)engineReserveModuleBase, 0x1000, MEM_RESERVE, PAGE_READWRITE); //return value nt used, yea just ignore. return value doesnt matter and there is no possible fix when failed :D this is only used to make sure DLL loads on another image base
                     }
                 }
                 if(hListProcess == NULL)
@@ -16791,7 +16759,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 {
                     hListLibraryPtr->hFileMapping = hFileMapping;
                     hListLibraryPtr->hFileMappingView = hFileMappingView;
-                    if(GetMappedFileNameW(GetCurrentProcess(), hFileMappingView, DLLDebugFileName, sizeof DLLDebugFileName) > NULL)
+                    if(GetMappedFileNameW(GetCurrentProcess(), hFileMappingView, DLLDebugFileName, sizeof(DLLDebugFileName)/sizeof(DLLDebugFileName[0])) > NULL)
                     {
                         i = lstrlenW(DLLDebugFileName);
                         while(DLLDebugFileName[i] != 0x5C && i >= NULL)
@@ -22114,28 +22082,15 @@ long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressToTrace, 
             if(ReadProcessMemory(hProcess, (LPVOID)MemInfo.BaseAddress, TraceMemory, memSize, &ueNumberOfBytesRead))
             {
                 TraceStartAddress = AddressToTrace - (ULONG_PTR)MemInfo.BaseAddress + (ULONG_PTR)TraceMemory;
-                if(HashInstructions)
+                if(HashInstructions && InputNumberOfInstructions > NULL)
                 {
-                    if(InputNumberOfInstructions > NULL)
-                    {
-                        LoopCondition = true;
-                    }
-                    else
-                    {
-                        LoopCondition = false;
-                    }
+                    LoopCondition = true;
                 }
                 else
                 {
-                    if(CurrentNumberOfInstructions < 1000 && FoundValidAPI == false)
-                    {
-                        LoopCondition = true;
-                    }
-                    else
-                    {
-                        LoopCondition = false;
-                    }
+                    LoopCondition = false;
                 }
+
                 while(LoopCondition)
                 {
                     SkipHashing = false;
@@ -22336,151 +22291,152 @@ long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressToTrace, 
                         if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC8 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
-                            /*
+                        }
+                        /*
                             	MOV EBX,EBX (0x8B 0xC9)
                             */
-                        }
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV ECX,ECX (0x8B 0xDB)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xED)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xF6)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xE4)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xE4 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV EDX,EDX (0x8B 0xD2)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xD2 && CurrentNumberOfInstructions != 1 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV EDI,EDI (0x8B 0xFF)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xFF && CurrentNumberOfInstructions != 1 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV AL,AL (0x8A 0xC0)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV BL,BL (0x8A 0xDB)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV CL,CL (0x8A 0xC9)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8A 0xD2)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xD2 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8A 0xE4)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xE4 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8A 0xED)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8A 0xFF)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xFF && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8A 0xF6)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV AX,AX (0x8B 0xC0)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xDB)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xC9)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xF6)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
-                        {
-                            SkipThisInstruction = true;
-                            /*
-                            	MOV (0x8B 0xED)
-                            */
-                        }
-                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
+                        MOV ECX,ECX (0x8B 0xDB)
+                        */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                           	MOV (0x8B 0xED)
+                           */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+
+                        }
+                        /*
+                            	MOV (0x8B 0xF6)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                        MOV (0x8B 0xE4)
+                        */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xE4 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                        MOV EDX,EDX (0x8B 0xD2)
+                        */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xD2 && CurrentNumberOfInstructions != 1 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV EDI,EDI (0x8B 0xFF)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xFF && CurrentNumberOfInstructions != 1 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV AL,AL (0x8A 0xC0)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV BL,BL (0x8A 0xDB)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV CL,CL (0x8A 0xC9)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                           	MOV (0x8A 0xD2)
+                           */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xD2 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV (0x8A 0xE4)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xE4 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                           	MOV (0x8A 0xED)
+                           */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV (0x8A 0xFF)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xFF && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV (0x8A 0xF6)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                           	MOV AX,AX (0x8B 0xC0)
+                           */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                           	MOV (0x8B 0xDB)
+                           */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV (0x8B 0xC9)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                            	MOV (0x8B 0xF6)
+                            */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                        /*
+                           	MOV (0x8B 0xED)
+                           */
+                        else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
+                        {
+                            SkipThisInstruction = true;
+                        }
+                    }
+                    /*
                         	RDTSC (0x0F 0x31)
                         */
-                    }
                     else if(CompareMemory->DataByte[0] == 0x0F && CompareMemory->DataByte[1] == 0x31 && CurrentInstructionSize == 2)
                     {
                         SkipThisInstruction = true;
@@ -22792,7 +22748,7 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
     ULONG_PTR ueNumberOfBytesRead = NULL;
     PMEMORY_CMP_HANDLER cMem;
     DWORD MemoryHash = NULL;
-    DWORD MaximumReadSize;
+    DWORD MaximumReadSize = 0;
     DWORD TestAddressX86;
     LPVOID TraceMemory;
     bool HashCheck = false;
@@ -23204,8 +23160,8 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     LPVOID TracerReadMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-	if(!TracerReadMemory)
-		return (NULL);
+    if(!TracerReadMemory)
+        return (NULL);
     cMem = (PMEMORY_CMP_HANDLER)TracerReadMemory;
 
     VirtualQueryEx(hProcess, (LPVOID)AddressToTrace, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -23665,7 +23621,7 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
     DWORD StorePlaceRVA = (DWORD)ConvertFileOffsetToVA(FileMapVA, StorePlace, false);
     ULONG_PTR TempULONG;
     DWORD TempDWORD;
-    BOOL FileIs64;
+    BOOL FileIs64 = false;
 
     if(expTableDataCWP != NULL)
     {
@@ -23738,6 +23694,10 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
                 else if(PEHeader32->OptionalHeader.Magic == 0x20B)
                 {
                     FileIs64 = true;
+                }
+                else
+                {
+                    return false;
                 }
                 if(!FileIs64)
                 {
@@ -26059,7 +26019,8 @@ __declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandle(HANDLE hProces
 }
 __declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandleW(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
 {
-
+    if(!szMutexString || lstrlenW(szMutexString)>=512)
+        return 0;
     int i;
     HANDLE myHandle;
     LPVOID HandleBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
@@ -26106,7 +26067,8 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutex(char* sz
 }
 __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t* szMutexString)
 {
-
+    if(!szMutexString || lstrlenW(szMutexString)>=512)
+        return 0;
     HANDLE hProcess = NULL;
     DWORD ReturnData = NULL;
     HANDLE myHandle = NULL;
@@ -27135,7 +27097,8 @@ __declspec(dllexport) void TITCALL StaticSectionDecrypt(ULONG_PTR FileMapVA, DWO
 }
 __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD SourceSize, void* Destination, DWORD DestinationSize, int Algorithm)
 {
-
+    if(!Source || !Destination)
+        return false;
     ELzmaStatus lzStatus;
     CLzmaProps lzProps = {};
     ISzAlloc lzAlloc = {&LzmaAllocMem, &LzmaFreeMem};
@@ -27147,12 +27110,7 @@ __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD So
         {
             return(true);
         }
-#endif
-    }
-    else if(Algorithm == UE_STATIC_APLIB)
-    {
-#if !defined (_WIN64)
-        if(aPsafe_depack(Source, SourceSize, Destination, DestinationSize) != APLIB_ERROR)
+        else if(aPsafe_depack(Source, SourceSize, Destination, DestinationSize) != APLIB_ERROR)
         {
             return(true);
         }
@@ -28157,8 +28115,8 @@ void EngineSimplifyMakeSnapshotCallBack()
 void EngineSimplifyEntryPointCallBack()
 {
 
-    int i;
-    int j;
+    int i = 0;
+    int j = 0;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
@@ -28719,7 +28677,8 @@ __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies()
 
 __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack)
 {
-
+    if(!WindowUnpackerTitle || !WindowUnpackerLongTitle || !WindowUnpackerName || !WindowUnpackerAuthor || !StartUnpackingCallBack)
+        return false;
     EngineStartUnpackingCallBack = StartUnpackingCallBack;
     lstrcpyA(szWindowUnpackerTitle, WindowUnpackerTitle);
     lstrcpyA(szWindowUnpackerLongTitle, WindowUnpackerLongTitle);
@@ -28983,7 +28942,8 @@ bool RemoveGarbageItem(wchar_t* szGarbageItem, bool RemoveFolder)
 }
 bool FillGarbageItem(wchar_t* szGarbageItem, wchar_t* szFileName, void* outGargabeItem, int MaxGargabeStringSize)
 {
-
+    if(!szGarbageItem || !szFileName || !outGargabeItem)
+        return false;
     wchar_t szCopyFileName[512];
     wchar_t szGargabeItemBuff[128];
 
