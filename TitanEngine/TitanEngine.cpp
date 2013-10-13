@@ -10439,7 +10439,6 @@ __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR Fil
 // Global.Engine.Hider.functions:
 bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
 {
-
     ULONG_PTR AddressOfPEB = NULL;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     BYTE patchCheckRemoteDebuggerPresent[5] = {0x33, 0xC0, 0xC2, 0x08, 0x00};
@@ -10460,7 +10459,7 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
                 myPEB.NtGlobalFlag = NULL;
                 if(WriteProcessMemory(hProcess, (void*)AddressOfPEB, (void*)&myPEB, sizeof NTPEB, &ueNumberOfBytesRead))
                 {
-                    if(PatchAPILevel >= 1)
+                    if(PatchAPILevel == UE_HIDE_BASIC)
                     {
                         APIPatchAddress = (ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, (ULONG_PTR)GetProcAddress(GetModuleHandleA("kernel32.dll"),"CheckRemoteDebuggerPresent"), NULL, UE_OPTION_IMPORTER_REALIGN_APIADDRESS);
                         VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -10486,7 +10485,7 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
                 myPEB.BeingDebugged = true;
                 if(WriteProcessMemory(hProcess, (void*)AddressOfPEB, (void*)&myPEB, sizeof NTPEB, &ueNumberOfBytesRead))
                 {
-                    if(PatchAPILevel >= 1)
+                    if(PatchAPILevel == UE_HIDE_BASIC)
                     {
                         APIPatchAddress = (ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, (ULONG_PTR)GetProcAddress(GetModuleHandleA("kernel32.dll"),"CheckRemoteDebuggerPresent"), NULL, UE_OPTION_IMPORTER_REALIGN_APIADDRESS);
                         VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);

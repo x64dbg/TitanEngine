@@ -14,3 +14,5 @@ The following things have been fixed/added (list might be incomplete):
 - supports multiple calling conventions (including the callbacks)
 - MinGW import libraries
 - fixed exception handling
+
+NOTE: LUA, Python, MASM and Delphi might not work correctly.
