@@ -18714,7 +18714,7 @@ __declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR Imag
     }
     ImporterCleanup();
     impMoveIAT = false;
-    impDLLNumber = -1;
+    impDLLNumber = 0xFFFFFFFF;
     impDeltaStart = NULL;
     impDeltaCurrent = NULL;
 }
@@ -18724,6 +18724,11 @@ __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR 
     int CopyDummy = 1;
 
     impDLLNumber++;
+    if(impDLLNumber>=1000)
+    {
+        impDLLNumber--;
+        return;
+    }
     impDLLDataList[impDLLNumber][0] = (ULONG_PTR)(VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE));
     impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][0];
     impDLLStringList[impDLLNumber][0] = (ULONG_PTR)(VirtualAlloc(NULL, impAllocSize, MEM_COMMIT, PAGE_READWRITE));
@@ -18844,8 +18849,7 @@ __declspec(dllexport) long TITCALL ImporterGetAddedAPICount()
 }
 __declspec(dllexport) void* TITCALL ImporterGetLastAddedDLLName()
 {
-
-    if(impDLLNumber != -1)
+    if(impDLLNumber != 0xFFFFFFFF && impDLLNumber < 1000)
     {
         return((void*)impDLLStringList[impDLLNumber][0]);
     }
