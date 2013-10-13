@@ -1,6 +1,8 @@
 #ifndef TITANENGINE_CPP
 #define TITANENGINE_CPP
 
+#define TITCALL
+
 #if _MSC_VER > 1000
     #pragma once
 #endif
@@ -944,7 +946,7 @@ class ResourcerX
 
 protected:
 
-	typedef void(__stdcall *fResourceEnumCallback)(const wchar_t* szResourceType, DWORD ResourceType, const wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, DWORD ResourceData, DWORD ResourceSize);
+	typedef void(TITCALL *fResourceEnumCallback)(const wchar_t* szResourceType, DWORD ResourceType, const wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, DWORD ResourceData, DWORD ResourceSize);
 
 	static bool FreeLoadedFile(void* LoadedFileBase)
 	{
@@ -1034,8 +1036,8 @@ public:
 
 	typedef UE::THREAD_ITEM_DATA THREAD_ITEM_DATA;
 
-	typedef void(__stdcall *fThreadEnumCallback)(const THREAD_ITEM_DATA* fThreadDetail);
-	typedef void(__stdcall *fThreadExitCallback)(const EXIT_THREAD_DEBUG_INFO* SpecialDBG);
+	typedef void(TITCALL *fThreadEnumCallback)(const THREAD_ITEM_DATA* fThreadDetail);
+	typedef void(TITCALL *fThreadExitCallback)(const EXIT_THREAD_DEBUG_INFO* SpecialDBG);
 
 	static bool ImportRunningThreadData(DWORD ProcessId)
 	{
@@ -1139,8 +1141,8 @@ class DebuggerX
 
 protected:
 
-	typedef void(__stdcall *fBreakPointCallback)();
-	typedef void(__stdcall *fCustomHandlerCallback)(void* ExceptionData);
+	typedef void(TITCALL *fBreakPointCallback)();
+	typedef void(TITCALL *fCustomHandlerCallback)(void* ExceptionData);
 
 	static const char* StaticDisassembleEx(ULONG_PTR DisassmStart, void* DisassmAddress)
 	{
@@ -1616,8 +1618,8 @@ protected:
 
 	typedef UE::ImportEnumData ImportEnumData;
 
-	typedef void(__stdcall *fImportEnumCallBack)(const ImportEnumData* ptrImportEnumData);
-	typedef void*(__stdcall *fImportFixCallback)(void* fIATPointer);
+	typedef void(TITCALL *fImportEnumCallBack)(const ImportEnumData* ptrImportEnumData);
+	typedef void*(TITCALL *fImportFixCallback)(void* fIATPointer);
 
 	static void Cleanup()
 	{
@@ -1923,7 +1925,7 @@ class LibrarianX
 {
 protected:
 
-	typedef void(__stdcall *fLibraryBreakPointCallback)(const LOAD_DLL_DEBUG_INFO* SpecialDBG);
+	typedef void(TITCALL *fLibraryBreakPointCallback)(const LOAD_DLL_DEBUG_INFO* SpecialDBG);
 
 	static bool SetBreakPoint(char* szLibraryName, eLibraryEvent bpxType, bool SingleShoot, fLibraryBreakPointCallback bpxCallBack)
 	{
@@ -1941,7 +1943,7 @@ public:
 
 	typedef UE::LIBRARY_ITEM_DATA LIBRARY_ITEM_DATA;
 
-	typedef void(__stdcall *fLibraryEnumCallback)(const LIBRARY_ITEM_DATA* fLibraryDetail);
+	typedef void(TITCALL *fLibraryEnumCallback)(const LIBRARY_ITEM_DATA* fLibraryDetail);
 
 	static const LIBRARY_ITEM_DATA* GetLibraryInfo(char* szLibraryName)
 	{
@@ -1963,7 +1965,7 @@ public:
 
 	typedef UE::LIBRARY_ITEM_DATAW LIBRARY_ITEM_DATA;
 
-	typedef void(__stdcall *fLibraryEnumCallback)(const LIBRARY_ITEM_DATA* fLibraryDetail);
+	typedef void(TITCALL *fLibraryEnumCallback)(const LIBRARY_ITEM_DATA* fLibraryDetail);
 
 	static const LIBRARY_ITEM_DATA* GetLibraryInfo(wchar_t* szLibraryName)
 	{
@@ -2015,7 +2017,7 @@ public:
 
 	typedef UE::HOOK_ENTRY HOOK_ENTRY;
 
-	typedef bool(__stdcall *fHookEnumCallBack)(const HOOK_ENTRY* HookDetails, void* ptrOriginalInstructions, const LibrarianA::LIBRARY_ITEM_DATA* ModuleInformation, DWORD SizeOfImage);
+	typedef bool(TITCALL *fHookEnumCallBack)(const HOOK_ENTRY* HookDetails, void* ptrOriginalInstructions, const LibrarianA::LIBRARY_ITEM_DATA* ModuleInformation, DWORD SizeOfImage);
 
 	static bool SafeTransitionEx(void** HookAddressArray, int NumberOfHooks, bool TransitionStart)
 	{
@@ -2225,7 +2227,7 @@ class ProcessX
 {
 protected:
 
-	typedef void(__stdcall *fProcessWithLibraryEnumCallback)(DWORD ProcessId, HMODULE ModuleBaseAddress);
+	typedef void(TITCALL *fProcessWithLibraryEnumCallback)(DWORD ProcessId, HMODULE ModuleBaseAddress);
 
 	static void EnumProcessesWithLibrary(char* szLibraryName, fProcessWithLibraryEnumCallback EnumFunction)
 	{
@@ -2571,7 +2573,7 @@ class StaticX
 {
 protected:
 
-	typedef bool(__stdcall *fStaticDecryptCallback)(void* sMemoryStart, int sKeySize);
+	typedef bool(TITCALL *fStaticDecryptCallback)(void* sMemoryStart, int sKeySize);
 
 	static bool FileGetContent(HANDLE FileHandle, DWORD FilePositionLow, LPDWORD FilePositionHigh, void* Buffer, DWORD Size)
 	{
