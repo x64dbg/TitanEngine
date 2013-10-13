@@ -301,6 +301,12 @@ typedef struct
     DWORD NumberOfRvaAndSizes;
 } PE64Struct, *PPE64Struct;
 
+#if defined(_WIN64)
+typedef PE64Struct PEStruct;
+#else
+typedef PE32Struct PEStruct;
+#endif
+
 typedef struct
 {
     bool NewDll;

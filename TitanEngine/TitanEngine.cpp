@@ -1765,7 +1765,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     ULONG_PTR ForwarderData = NULL;
     unsigned int ClosestAPI = 0x1000;
     int Vista64UserForwarderFix = 0;
-    int Windows7KernelBase = -1;
+    unsigned int Windows7KernelBase = 0xFFFFFFFF;
 
     RtlZeroMemory(&engineFoundDLLName, 512);
     RtlZeroMemory(&EnumeratedModules, 0x2000 * sizeof ULONG_PTR);
@@ -1804,11 +1804,10 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
             if(Vista64UserForwarderFix == NULL)
             {
                 GetModuleBaseNameA(hProcess, (HMODULE)EnumeratedModules[y], (LPSTR)RemoteDLLName, MAX_PATH);
-                if(lstrcmpiA(RemoteDLLName, "user32.dll") == NULL)
-                {
+                if(!lstrcmpiA(RemoteDLLName, "user32.dll"))
                     Vista64UserForwarderFix = y;
-                }
-                /*else if(lstrcmpiA(RemoteDLLName, "kernelbase.dll") == NULL)
+                //NOTE: this code is used to ignore all APIs inside kernelbase.dll
+                else if(!lstrcmpiA(RemoteDLLName, "kernelbase.dll"))
                 {
                     GetModuleFileNameExA(hProcess, (HMODULE)EnumeratedModules[y], (LPSTR)RemoteDLLName, MAX_PATH);
                     RemoteDLLName[lstrlenA(szWindowsKernelBase)] = 0x00;
@@ -1816,20 +1815,21 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                     {
                         Windows7KernelBase = y;
                     }
-                }*/
+                }
             }
             y++;
         }
         while(APINameFound == false && EnumeratedModules[i] != NULL)
         {
-            if(i == Windows7KernelBase)
+            //NOTE: un-comment when kernelbase should be ignored
+            /*if(i == Windows7KernelBase)
             {
                 i++;
                 if(EnumeratedModules[i] == NULL)
                 {
                     break;
                 }
-            }
+            }*/
             ValidateHeader = false;
             RtlZeroMemory(&RemoteDLLName, MAX_PATH);
             GetModuleFileNameExA(hProcess, (HMODULE)EnumeratedModules[i], (LPSTR)RemoteDLLName, MAX_PATH);
