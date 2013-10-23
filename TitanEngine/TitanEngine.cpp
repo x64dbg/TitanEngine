@@ -15103,7 +15103,7 @@ __declspec(dllexport) bool TITCALL IsJumpGoingToExecuteEx(HANDLE hProcess, HANDL
     bool bDF = false;
     bool bOF = false;
 
-    if(hProcess != NULL && hThread != NULL)
+    if(hProcess != NULL && (hThread || RegFlags))
     {
         if(InstructionAddress == NULL)
         {
@@ -16838,7 +16838,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-
             //loadDLL callback
             if(DBGCustomHandler->chLoadDll != NULL)
             {
