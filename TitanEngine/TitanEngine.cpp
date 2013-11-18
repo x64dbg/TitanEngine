@@ -120,10 +120,7 @@ ULONG_PTR DebugModuleImageBase;
 LPVOID DebugModuleEntryPointCallBack;
 LPVOID DebugExeFileEntryPointCallBack;
 HMODULE engineHandle;
-HARDWARE_DATA DebugRegister0 = {};
-HARDWARE_DATA DebugRegister1 = {};
-HARDWARE_DATA DebugRegister2 = {};
-HARDWARE_DATA DebugRegister3 = {};
+HARDWARE_DATA DebugRegister[4] = {};
 LPVOID RelocationData = NULL;
 LPVOID RelocationLastPage = NULL;
 LPVOID RelocationStartPosition = NULL;
@@ -433,7 +430,7 @@ void EngineExecutePluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReason)
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
 {
 
-    if(DebugRegister0.DrxEnabled == false)
+    if(DebugRegister[0].DrxEnabled == false)
     {
         if(FreeRegister != NULL)
         {
@@ -441,7 +438,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         }
         return(true);
     }
-    else if(DebugRegister1.DrxEnabled == false)
+    else if(DebugRegister[1].DrxEnabled == false)
     {
         if(FreeRegister != NULL)
         {
@@ -449,7 +446,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         }
         return(true);
     }
-    else if(DebugRegister2.DrxEnabled == false)
+    else if(DebugRegister[2].DrxEnabled == false)
     {
         if(FreeRegister != NULL)
         {
@@ -457,7 +454,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         }
         return(true);
     }
-    else if(DebugRegister3.DrxEnabled == false)
+    else if(DebugRegister[3].DrxEnabled == false)
     {
         if(FreeRegister != NULL)
         {
@@ -13904,10 +13901,10 @@ __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, voi
 }
 __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-
+    SuspendThread(hActiveThread);
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
     DBGContext.ContextFlags = CONTEXT_ALL;
-#if defined(_WIN64)
+#ifdef _WIN64
     GetThreadContext(hActiveThread, &DBGContext);
     if(IndexOfRegister == UE_EAX)
     {
@@ -14088,10 +14085,12 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     }
     else
     {
+        ResumeThread(hActiveThread);
         return(false);
     }
     if(SetThreadContext(hActiveThread, &DBGContext))
     {
+        ResumeThread(hActiveThread);
         return(true);
     }
 #else
@@ -14194,13 +14193,16 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     }
     else
     {
+        ResumeThread(hActiveThread);
         return(false);
     }
     if(SetThreadContext(hActiveThread, &DBGContext))
     {
+        ResumeThread(hActiveThread);
         return(true);
     }
 #endif
+    ResumeThread(hActiveThread);
     return(false);
 }
 __declspec(dllexport) bool TITCALL SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
@@ -14209,7 +14211,7 @@ __declspec(dllexport) bool TITCALL SetContextData(DWORD IndexOfRegister, ULONG_P
     HANDLE hActiveThread = 0;
     bool ContextReturn;
 
-    hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+    hActiveThread = OpenThread(THREAD_ALL_ACCESS, false, DBGEvent.dwThreadId);
     ContextReturn = SetContextDataEx(hActiveThread, IndexOfRegister, NewRegisterValue);
     EngineCloseHandle(hActiveThread);
     return(ContextReturn);
@@ -15701,574 +15703,217 @@ __declspec(dllexport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD R
 {
     return(EngineIsThereFreeHardwareBreakSlot(RegisterIndex));
 }
-__declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister)
+
+static ULONG_PTR dr7uint(DR7* dr7)
 {
-
-    ULONG_PTR HardwareBPX = NULL;
-
-    if(bpxSize == UE_HARDWARE_SIZE_2)
-    {
-        if((bpxAddress % 2) != 0)
-        {
-            return(false);
-        }
-    }
-    else if(bpxSize == UE_HARDWARE_SIZE_4)
-    {
-        if((bpxAddress % 4) != 0)
-        {
-            return(false);
-        }
-    }
-#if defined(_WIN64)
-    else if(bpxSize == UE_HARDWARE_SIZE_8)
-    {
-        if((bpxAddress % 8) != 0)
-        {
-            return(false);
-        }
-    }
-#endif
-
-    if(IndexOfRegister == NULL)
-    {
-        if(!DebugRegister0.DrxEnabled)
-        {
-            IndexOfRegister = UE_DR0;
-        }
-        else if(!DebugRegister1.DrxEnabled)
-        {
-            IndexOfRegister = UE_DR1;
-        }
-        else if(!DebugRegister2.DrxEnabled)
-        {
-            IndexOfRegister = UE_DR2;
-        }
-        else if(!DebugRegister3.DrxEnabled)
-        {
-            IndexOfRegister = UE_DR3;
-        }
-        else
-        {
-            IndexOfRegister = UE_DR3;
-        }
-    }
-
-    *IndexOfSelectedRegister = IndexOfRegister;
-    if(IndexOfRegister == UE_DR0)
-    {
-        DebugRegister0.DrxExecution = false;
-        DebugRegister0.DrxBreakPointType = bpxType;
-        DebugRegister0.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 0);
-        HardwareBPX = HardwareBPX &~ (1 << 1);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister0.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 17);
-            HardwareBPX = HardwareBPX &~ (1 << 16);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 17);
-            HardwareBPX = HardwareBPX | (1 << 16);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 17);
-            HardwareBPX = HardwareBPX | (1 << 16);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 19);
-            HardwareBPX = HardwareBPX &~ (1 << 18);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 19);
-            HardwareBPX = HardwareBPX | (1 << 18);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 19);
-            HardwareBPX = HardwareBPX | (1 << 18);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 19);
-            HardwareBPX = HardwareBPX &~ (1 << 18);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextDataEx(hActiveThread, UE_DR0, (ULONG_PTR)bpxAddress);
-        SetContextDataEx(hActiveThread, UE_DR7, HardwareBPX);
-        DebugRegister0.DrxEnabled = true;
-        DebugRegister0.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister0.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR1)
-    {
-        DebugRegister1.DrxExecution = false;
-        DebugRegister1.DrxBreakPointType = bpxType;
-        DebugRegister1.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 2);
-        HardwareBPX = HardwareBPX &~ (1 << 3);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister1.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 21);
-            HardwareBPX = HardwareBPX &~ (1 << 20);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 21);
-            HardwareBPX = HardwareBPX | (1 << 20);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 21);
-            HardwareBPX = HardwareBPX | (1 << 20);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 23);
-            HardwareBPX = HardwareBPX &~ (1 << 22);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 23);
-            HardwareBPX = HardwareBPX | (1 << 22);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 23);
-            HardwareBPX = HardwareBPX | (1 << 22);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 23);
-            HardwareBPX = HardwareBPX &~ (1 << 22);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextDataEx(hActiveThread, UE_DR1, (ULONG_PTR)bpxAddress);
-        SetContextDataEx(hActiveThread, UE_DR7, HardwareBPX);
-        DebugRegister1.DrxEnabled = true;
-        DebugRegister1.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister1.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR2)
-    {
-        DebugRegister2.DrxExecution = false;
-        DebugRegister2.DrxBreakPointType = bpxType;
-        DebugRegister2.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 4);
-        HardwareBPX = HardwareBPX &~ (1 << 5);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister2.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 25);
-            HardwareBPX = HardwareBPX &~ (1 << 24);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 25);
-            HardwareBPX = HardwareBPX | (1 << 24);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 25);
-            HardwareBPX = HardwareBPX | (1 << 24);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 27);
-            HardwareBPX = HardwareBPX &~ (1 << 26);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 27);
-            HardwareBPX = HardwareBPX | (1 << 26);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 27);
-            HardwareBPX = HardwareBPX | (1 << 26);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 27);
-            HardwareBPX = HardwareBPX &~ (1 << 26);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextDataEx(hActiveThread, UE_DR2, (ULONG_PTR)bpxAddress);
-        SetContextDataEx(hActiveThread, UE_DR7, HardwareBPX);
-        DebugRegister2.DrxEnabled = true;
-        DebugRegister2.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister2.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR3)
-    {
-        DebugRegister3.DrxExecution = false;
-        DebugRegister3.DrxBreakPointType = bpxType;
-        DebugRegister3.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 6);
-        HardwareBPX = HardwareBPX &~ (1 << 7);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister3.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 29);
-            HardwareBPX = HardwareBPX &~ (1 << 28);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 29);
-            HardwareBPX = HardwareBPX | (1 << 28);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 29);
-            HardwareBPX = HardwareBPX | (1 << 28);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 31);
-            HardwareBPX = HardwareBPX &~ (1 << 30);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 31);
-            HardwareBPX = HardwareBPX | (1 << 30);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 31);
-            HardwareBPX = HardwareBPX | (1 << 30);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 31);
-            HardwareBPX = HardwareBPX &~ (1 << 30);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextDataEx(hActiveThread, UE_DR3, (ULONG_PTR)bpxAddress);
-        SetContextDataEx(hActiveThread, UE_DR7, HardwareBPX);
-        DebugRegister3.DrxEnabled = true;
-        DebugRegister3.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister3.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
-    return(false);
+    ULONG_PTR ret=0;
+    if(BITGET(dr7->HWBP_MODE[0],0))
+        BITSET(ret,0);
+    if(BITGET(dr7->HWBP_MODE[0],1))
+        BITSET(ret,1);
+    if(BITGET(dr7->HWBP_MODE[1],0))
+        BITSET(ret,2);
+    if(BITGET(dr7->HWBP_MODE[1],1))
+        BITSET(ret,3);
+    if(BITGET(dr7->HWBP_MODE[2],0))
+        BITSET(ret,4);
+    if(BITGET(dr7->HWBP_MODE[2],1))
+        BITSET(ret,5);
+    if(BITGET(dr7->HWBP_MODE[3],0))
+        BITSET(ret,6);
+    if(BITGET(dr7->HWBP_MODE[3],1))
+        BITSET(ret,7);
+    if(BITGET(dr7->HWBP_TYPE[0],0))
+        BITSET(ret,16);
+    if(BITGET(dr7->HWBP_TYPE[0],1))
+        BITSET(ret,17);
+    if(BITGET(dr7->HWBP_SIZE[0],0))
+        BITSET(ret,18);
+    if(BITGET(dr7->HWBP_SIZE[0],1))
+        BITSET(ret,19);
+    if(BITGET(dr7->HWBP_TYPE[1],0))
+        BITSET(ret,20);
+    if(BITGET(dr7->HWBP_TYPE[1],1))
+        BITSET(ret,21);
+    if(BITGET(dr7->HWBP_SIZE[1],0))
+        BITSET(ret,22);
+    if(BITGET(dr7->HWBP_SIZE[1],1))
+        BITSET(ret,23);
+    if(BITGET(dr7->HWBP_TYPE[2],0))
+        BITSET(ret,24);
+    if(BITGET(dr7->HWBP_TYPE[2],1))
+        BITSET(ret,25);
+    if(BITGET(dr7->HWBP_SIZE[2],0))
+        BITSET(ret,26);
+    if(BITGET(dr7->HWBP_SIZE[2],1))
+        BITSET(ret,27);
+    if(BITGET(dr7->HWBP_TYPE[3],0))
+        BITSET(ret,28);
+    if(BITGET(dr7->HWBP_TYPE[3],1))
+        BITSET(ret,29);
+    if(BITGET(dr7->HWBP_SIZE[3],0))
+        BITSET(ret,30);
+    if(BITGET(dr7->HWBP_SIZE[3],1))
+        BITSET(ret,31);
+    return ret;
 }
+
+static void uintdr7(ULONG_PTR dr7, DR7* ret)
+{
+    memset(ret, 0, sizeof(DR7));
+    if(BITGET(dr7,0))
+        BITSET(ret->HWBP_MODE[0],0);
+    if(BITGET(dr7,1))
+        BITSET(ret->HWBP_MODE[0],1);
+    if(BITGET(dr7,2))
+        BITSET(ret->HWBP_MODE[1],0);
+    if(BITGET(dr7,3))
+        BITSET(ret->HWBP_MODE[1],1);
+    if(BITGET(dr7,4))
+        BITSET(ret->HWBP_MODE[2],0);
+    if(BITGET(dr7,5))
+        BITSET(ret->HWBP_MODE[2],1);
+    if(BITGET(dr7,6))
+        BITSET(ret->HWBP_MODE[3],0);
+    if(BITGET(dr7,7))
+        BITSET(ret->HWBP_MODE[3],1);
+    if(BITGET(dr7,16))
+        BITSET(ret->HWBP_TYPE[0],0);
+    if(BITGET(dr7,17))
+        BITSET(ret->HWBP_TYPE[0],1);
+    if(BITGET(dr7,18))
+        BITSET(ret->HWBP_SIZE[0],0);
+    if(BITGET(dr7,19))
+        BITSET(ret->HWBP_SIZE[0],1);
+    if(BITGET(dr7,20))
+        BITSET(ret->HWBP_TYPE[1],0);
+    if(BITGET(dr7,21))
+        BITSET(ret->HWBP_TYPE[1],1);
+    if(BITGET(dr7,22))
+        BITSET(ret->HWBP_SIZE[1],0);
+    if(BITGET(dr7,23))
+        BITSET(ret->HWBP_SIZE[1],1);
+    if(BITGET(dr7,24))
+        BITSET(ret->HWBP_TYPE[2],0);
+    if(BITGET(dr7,25))
+        BITSET(ret->HWBP_TYPE[2],1);
+    if(BITGET(dr7,26))
+        BITSET(ret->HWBP_SIZE[2],0);
+    if(BITGET(dr7,27))
+        BITSET(ret->HWBP_SIZE[2],1);
+    if(BITGET(dr7,28))
+        BITSET(ret->HWBP_TYPE[3],0);
+    if(BITGET(dr7,29))
+        BITSET(ret->HWBP_TYPE[3],1);
+    if(BITGET(dr7,30))
+        BITSET(ret->HWBP_SIZE[3],0);
+    if(BITGET(dr7,31))
+        BITSET(ret->HWBP_SIZE[3],1);
+}
+
 __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack)
 {
+    HWBP_SIZE hwbpSize;
+    HWBP_MODE hwbpMode;
+    HWBP_TYPE hwbpType;
+    int hwbpIndex=-1;
+    DR7 dr7;
 
-    ULONG_PTR HardwareBPX = NULL;
-
-    if(bpxSize == UE_HARDWARE_SIZE_2)
+    switch(bpxSize)
     {
-        if((bpxAddress % 2) != 0)
-        {
-            return(false);
-        }
+    case UE_HARDWARE_SIZE_1:
+        hwbpSize=SIZE_1;
+        break;
+    case UE_HARDWARE_SIZE_2:
+        hwbpSize=SIZE_2;
+        if((bpxAddress%2)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_4:
+        hwbpSize=SIZE_4;
+        if((bpxAddress%4)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_8:
+        hwbpSize=SIZE_8;
+        if((bpxAddress%8)!=0)
+            return false;
+        break;
+    default:
+        return false;
     }
-    else if(bpxSize == UE_HARDWARE_SIZE_4)
-    {
-        if((bpxAddress % 4) != 0)
-        {
-            return(false);
-        }
-    }
-#if defined(_WIN64)
-    else if(bpxSize == UE_HARDWARE_SIZE_8)
-    {
-        if((bpxAddress % 8) != 0)
-        {
-            return(false);
-        }
-    }
-#endif
 
-
-    if(IndexOfRegister == NULL)
+    if(!IndexOfRegister)
     {
-        if(!DebugRegister0.DrxEnabled)
-        {
+        if(!DebugRegister[0].DrxEnabled)
             IndexOfRegister = UE_DR0;
-        }
-        else if(!DebugRegister1.DrxEnabled)
-        {
+        else if(!DebugRegister[1].DrxEnabled)
             IndexOfRegister = UE_DR1;
-        }
-        else if(!DebugRegister2.DrxEnabled)
-        {
+        else if(!DebugRegister[2].DrxEnabled)
             IndexOfRegister = UE_DR2;
-        }
-        else if(!DebugRegister3.DrxEnabled)
-        {
+        else if(!DebugRegister[3].DrxEnabled)
             IndexOfRegister = UE_DR3;
-        }
         else
-        {
-            IndexOfRegister = UE_DR3;
-        }
+            return false;
     }
 
-    if(IndexOfRegister == UE_DR0)
+    switch(IndexOfRegister)
     {
-        DebugRegister0.DrxExecution = false;
-        DebugRegister0.DrxBreakPointType = bpxType;
-        DebugRegister0.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 0);
-        HardwareBPX = HardwareBPX &~ (1 << 1);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister0.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 17);
-            HardwareBPX = HardwareBPX &~ (1 << 16);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 17);
-            HardwareBPX = HardwareBPX | (1 << 16);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 17);
-            HardwareBPX = HardwareBPX | (1 << 16);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 19);
-            HardwareBPX = HardwareBPX &~ (1 << 18);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 19);
-            HardwareBPX = HardwareBPX | (1 << 18);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 19);
-            HardwareBPX = HardwareBPX | (1 << 18);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 19);
-            HardwareBPX = HardwareBPX &~ (1 << 18);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextData(UE_DR0, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister0.DrxEnabled = true;
-        DebugRegister0.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister0.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
+    case UE_DR0:
+        hwbpIndex=0;
+        break;
+    case UE_DR1:
+        hwbpIndex=1;
+        break;
+    case UE_DR2:
+        hwbpIndex=2;
+        break;
+    case UE_DR3:
+        hwbpIndex=3;
+        break;
+    default:
+        return false;
     }
-    else if(IndexOfRegister == UE_DR1)
+
+    uintdr7(GetContextData(UE_DR7), &dr7);
+
+    DebugRegister[hwbpIndex].DrxExecution=false;
+
+    switch(bpxType)
     {
-        DebugRegister1.DrxExecution = false;
-        DebugRegister1.DrxBreakPointType = bpxType;
-        DebugRegister1.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 2);
-        HardwareBPX = HardwareBPX &~ (1 << 3);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister1.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 21);
-            HardwareBPX = HardwareBPX &~ (1 << 20);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 21);
-            HardwareBPX = HardwareBPX | (1 << 20);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 21);
-            HardwareBPX = HardwareBPX | (1 << 20);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 23);
-            HardwareBPX = HardwareBPX &~ (1 << 22);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 23);
-            HardwareBPX = HardwareBPX | (1 << 22);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 23);
-            HardwareBPX = HardwareBPX | (1 << 22);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 23);
-            HardwareBPX = HardwareBPX &~ (1 << 22);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextData(UE_DR1, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister1.DrxEnabled = true;
-        DebugRegister1.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister1.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
+    case UE_HARDWARE_EXECUTE:
+        hwbpSize=SIZE_1;
+        hwbpType=TYPE_EXECUTE;
+        DebugRegister[hwbpIndex].DrxExecution=true;
+        break;
+    case UE_HARDWARE_WRITE:
+        hwbpType=TYPE_WRITE;
+        break;
+    case UE_HARDWARE_READWRITE:
+        hwbpType=TYPE_READWRITE;
+        break;
+    default:
+        return false;
     }
-    else if(IndexOfRegister == UE_DR2)
-    {
-        DebugRegister2.DrxExecution = false;
-        DebugRegister2.DrxBreakPointType = bpxType;
-        DebugRegister2.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 4);
-        HardwareBPX = HardwareBPX &~ (1 << 5);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister2.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 25);
-            HardwareBPX = HardwareBPX &~ (1 << 24);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 25);
-            HardwareBPX = HardwareBPX | (1 << 24);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 25);
-            HardwareBPX = HardwareBPX | (1 << 24);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 27);
-            HardwareBPX = HardwareBPX &~ (1 << 26);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 27);
-            HardwareBPX = HardwareBPX | (1 << 26);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 27);
-            HardwareBPX = HardwareBPX | (1 << 26);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 27);
-            HardwareBPX = HardwareBPX &~ (1 << 26);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextData(UE_DR2, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister2.DrxEnabled = true;
-        DebugRegister2.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister2.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR3)
-    {
-        DebugRegister3.DrxExecution = false;
-        DebugRegister3.DrxBreakPointType = bpxType;
-        DebugRegister3.DrxBreakPointSize = bpxSize;
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX | (1 << 6);
-        HardwareBPX = HardwareBPX &~ (1 << 7);
-        if(bpxType == UE_HARDWARE_EXECUTE)
-        {
-            DebugRegister3.DrxExecution = true;
-            HardwareBPX = HardwareBPX &~ (1 << 29);
-            HardwareBPX = HardwareBPX &~ (1 << 28);
-        }
-        else if(bpxType == UE_HARDWARE_WRITE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 29);
-            HardwareBPX = HardwareBPX | (1 << 28);
-        }
-        else if(bpxType == UE_HARDWARE_READWRITE)
-        {
-            HardwareBPX = HardwareBPX | (1 << 29);
-            HardwareBPX = HardwareBPX | (1 << 28);
-        }
-        if(bpxSize == UE_HARDWARE_SIZE_1 || bpxType == UE_HARDWARE_EXECUTE)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 31);
-            HardwareBPX = HardwareBPX &~ (1 << 30);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_2)
-        {
-            HardwareBPX = HardwareBPX &~ (1 << 31);
-            HardwareBPX = HardwareBPX | (1 << 30);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_4)
-        {
-            HardwareBPX = HardwareBPX | (1 << 31);
-            HardwareBPX = HardwareBPX | (1 << 30);
-        }
-        else if(bpxSize == UE_HARDWARE_SIZE_8)
-        {
-            HardwareBPX = HardwareBPX | (1 << 31);
-            HardwareBPX = HardwareBPX &~ (1 << 30);
-        }
-        HardwareBPX = HardwareBPX | (1 << 10);
-        HardwareBPX = HardwareBPX &~ (1 << 11);
-        HardwareBPX = HardwareBPX &~ (1 << 12);
-        HardwareBPX = HardwareBPX &~ (1 << 14);
-        HardwareBPX = HardwareBPX &~ (1 << 15);
-        SetContextData(UE_DR3, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister3.DrxEnabled = true;
-        DebugRegister3.DrxBreakAddress = (ULONG_PTR)bpxAddress;
-        DebugRegister3.DrxCallBack = (ULONG_PTR)bpxCallBack;
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
-    return(false);
+
+    hwbpMode=MODE_LOCAL;
+
+    dr7.HWBP_MODE[hwbpIndex]=hwbpMode;
+    dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
+    dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
+
+    SetContextData(UE_DR7, dr7uint(&dr7)); //NOTE: MUST SET THIS FIRST FOR X64!
+    SetContextData(IndexOfRegister, (ULONG_PTR)bpxAddress);
+
+    DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
+    DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
+    DebugRegister[hwbpIndex].DrxEnabled=true;
+    DebugRegister[hwbpIndex].DrxBreakAddress=(ULONG_PTR)bpxAddress;
+    DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
+
+    return true;
 }
+
 __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegister)
 {
 
@@ -16282,9 +15927,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = HardwareBPX &~ (1 << 1);
         SetContextData(UE_DR0, (ULONG_PTR)bpxAddress);
         SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister0.DrxEnabled = false;
-        DebugRegister0.DrxBreakAddress = NULL;
-        DebugRegister0.DrxCallBack = NULL;
+        DebugRegister[0].DrxEnabled = false;
+        DebugRegister[0].DrxBreakAddress = NULL;
+        DebugRegister[0].DrxCallBack = NULL;
         return(true);
     }
     else if(IndexOfRegister == UE_DR1)
@@ -16294,9 +15939,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = HardwareBPX &~ (1 << 3);
         SetContextData(UE_DR1, (ULONG_PTR)bpxAddress);
         SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister1.DrxEnabled = false;
-        DebugRegister1.DrxBreakAddress = NULL;
-        DebugRegister1.DrxCallBack = NULL;
+        DebugRegister[1].DrxEnabled = false;
+        DebugRegister[1].DrxBreakAddress = NULL;
+        DebugRegister[1].DrxCallBack = NULL;
         return(true);
     }
     else if(IndexOfRegister == UE_DR2)
@@ -16306,9 +15951,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = HardwareBPX &~ (1 << 5);
         SetContextData(UE_DR2, (ULONG_PTR)bpxAddress);
         SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister2.DrxEnabled = false;
-        DebugRegister2.DrxBreakAddress = NULL;
-        DebugRegister2.DrxCallBack = NULL;
+        DebugRegister[2].DrxEnabled = false;
+        DebugRegister[2].DrxBreakAddress = NULL;
+        DebugRegister[2].DrxCallBack = NULL;
         return(true);
     }
     else if(IndexOfRegister == UE_DR3)
@@ -16318,9 +15963,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = HardwareBPX &~ (1 << 7);
         SetContextData(UE_DR3, (ULONG_PTR)bpxAddress);
         SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister3.DrxEnabled = false;
-        DebugRegister3.DrxBreakAddress = NULL;
-        DebugRegister3.DrxCallBack = NULL;
+        DebugRegister[3].DrxEnabled = false;
+        DebugRegister[3].DrxBreakAddress = NULL;
+        DebugRegister[3].DrxCallBack = NULL;
         return(true);
     }
     else
@@ -16329,6 +15974,113 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
     }
     return(false);
 }
+
+__declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister)
+{
+    HWBP_SIZE hwbpSize;
+    HWBP_MODE hwbpMode;
+    HWBP_TYPE hwbpType;
+    int hwbpIndex=-1;
+    DR7 dr7;
+
+    switch(bpxSize)
+    {
+    case UE_HARDWARE_SIZE_1:
+        hwbpSize=SIZE_1;
+        break;
+    case UE_HARDWARE_SIZE_2:
+        hwbpSize=SIZE_2;
+        if((bpxAddress%2)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_4:
+        hwbpSize=SIZE_4;
+        if((bpxAddress%4)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_8:
+        hwbpSize=SIZE_8;
+        if((bpxAddress%8)!=0)
+            return false;
+        break;
+    default:
+        return false;
+    }
+
+    if(!IndexOfRegister)
+    {
+        if(!DebugRegister[0].DrxEnabled)
+            IndexOfRegister = UE_DR0;
+        else if(!DebugRegister[1].DrxEnabled)
+            IndexOfRegister = UE_DR1;
+        else if(!DebugRegister[2].DrxEnabled)
+            IndexOfRegister = UE_DR2;
+        else if(!DebugRegister[3].DrxEnabled)
+            IndexOfRegister = UE_DR3;
+        else
+            return false;
+    }
+
+    if(IndexOfSelectedRegister)
+        *IndexOfSelectedRegister=IndexOfRegister;
+
+    switch(IndexOfRegister)
+    {
+    case UE_DR0:
+        hwbpIndex=0;
+        break;
+    case UE_DR1:
+        hwbpIndex=1;
+        break;
+    case UE_DR2:
+        hwbpIndex=2;
+        break;
+    case UE_DR3:
+        hwbpIndex=3;
+        break;
+    default:
+        return false;
+    }
+
+    uintdr7(GetContextDataEx(hActiveThread, UE_DR7), &dr7);
+
+    DebugRegister[hwbpIndex].DrxExecution=false;
+
+    switch(bpxType)
+    {
+    case UE_HARDWARE_EXECUTE:
+        hwbpSize=SIZE_1;
+        hwbpType=TYPE_EXECUTE;
+        DebugRegister[hwbpIndex].DrxExecution=true;
+        break;
+    case UE_HARDWARE_WRITE:
+        hwbpType=TYPE_WRITE;
+        break;
+    case UE_HARDWARE_READWRITE:
+        hwbpType=TYPE_READWRITE;
+        break;
+    default:
+        return false;
+    }
+
+    hwbpMode=MODE_LOCAL;
+
+    dr7.HWBP_MODE[hwbpIndex]=hwbpMode;
+    dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
+    dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
+
+    SetContextDataEx(hActiveThread, UE_DR7, dr7uint(&dr7));
+    SetContextDataEx(hActiveThread, IndexOfRegister, (ULONG_PTR)bpxAddress);
+
+    DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
+    DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
+    DebugRegister[hwbpIndex].DrxEnabled=true;
+    DebugRegister[hwbpIndex].DrxBreakAddress=(ULONG_PTR)bpxAddress;
+    DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
+
+    return true;
+}
+
 __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
 {
 
@@ -16486,10 +16238,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
     DBGFileHandle = NULL;
     DBGCode = DBG_CONTINUE;
     engineFakeDLLHandle = NULL;
-    DebugRegister0.DrxEnabled = false;
-    DebugRegister1.DrxEnabled = false;
-    DebugRegister2.DrxEnabled = false;
-    DebugRegister3.DrxEnabled = false;
+    DebugRegister[0].DrxEnabled = false;
+    DebugRegister[1].DrxEnabled = false;
+    DebugRegister[2].DrxEnabled = false;
+    DebugRegister[3].DrxEnabled = false;
     engineProcessIsNowDetached = false;
     engineResumeProcessIfNoThreadIsActive = false;
     RtlZeroMemory(&DBGEvent, sizeof DEBUG_EVENT);
@@ -17385,7 +17137,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
                         {
-                            if(DebugRegister0.DrxEnabled)
+                            if(DebugRegister[0].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
                                 if(!(myDBGContext.EFlags & 0x100))
@@ -17393,7 +17145,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister0.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister[0].DrxCallBack);
                                 __try
                                 {
                                     myCustomHandler((void*)myDBGContext.Dr0);
@@ -17403,7 +17155,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                                 }
                                 RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister0, sizeof HARDWARE_DATA);
+                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[0], sizeof HARDWARE_DATA);
                                 DeleteHardwareBreakPoint(UE_DR0);
                                 DebugRegisterXId = UE_DR0;
                                 ResetHwBPX = true;
@@ -17415,7 +17167,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr1 || (myDBGContext.Dr6 & 0x2))
                         {
-                            if(DebugRegister1.DrxEnabled)
+                            if(DebugRegister[1].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
                                 if(!(myDBGContext.EFlags & 0x100))
@@ -17423,7 +17175,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister1.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister[1].DrxCallBack);
                                 __try
                                 {
                                     myCustomHandler((void*)myDBGContext.Dr1);
@@ -17433,7 +17185,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                                 }
                                 RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister1, sizeof HARDWARE_DATA);
+                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[1], sizeof HARDWARE_DATA);
                                 DeleteHardwareBreakPoint(UE_DR1);
                                 DebugRegisterXId = UE_DR1;
                                 ResetHwBPX = true;
@@ -17445,7 +17197,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr2 || (myDBGContext.Dr6 & 0x4))
                         {
-                            if(DebugRegister2.DrxEnabled)
+                            if(DebugRegister[2].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
                                 if(!(myDBGContext.EFlags & 0x100))
@@ -17453,7 +17205,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister2.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister[2].DrxCallBack);
                                 __try
                                 {
                                     myCustomHandler((void*)myDBGContext.Dr2);
@@ -17463,7 +17215,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                                 }
                                 RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister2, sizeof HARDWARE_DATA);
+                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[2], sizeof HARDWARE_DATA);
                                 DeleteHardwareBreakPoint(UE_DR2);
                                 DebugRegisterXId = UE_DR2;
                                 ResetHwBPX = true;
@@ -17475,7 +17227,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr3 || (myDBGContext.Dr6 & 0x8))
                         {
-                            if(DebugRegister3.DrxEnabled)
+                            if(DebugRegister[3].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
                                 if(!(myDBGContext.EFlags & 0x100))
@@ -17483,7 +17235,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                     myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                                 }
                                 SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister3.DrxCallBack);
+                                myCustomHandler = (fCustomHandler)(DebugRegister[3].DrxCallBack);
                                 __try
                                 {
                                     myCustomHandler((void*)myDBGContext.Dr3);
@@ -17493,7 +17245,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                                 }
                                 RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister3, sizeof HARDWARE_DATA);
+                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[3], sizeof HARDWARE_DATA);
                                 DeleteHardwareBreakPoint(UE_DR3);
                                 DebugRegisterXId = UE_DR3;
                                 ResetHwBPX = true;

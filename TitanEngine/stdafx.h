@@ -131,13 +131,47 @@ typedef struct
 
 typedef struct
 {
-    bool DrxEnabled;
-    bool DrxExecution;
-    DWORD DrxBreakPointType;
-    DWORD DrxBreakPointSize;
     ULONG_PTR DrxBreakAddress;
     ULONG_PTR DrxCallBack;
+    DWORD DrxBreakPointType;
+    DWORD DrxBreakPointSize;
+    bool DrxEnabled;
+    bool DrxExecution;
 } HARDWARE_DATA, *PHARDWARE_DATA;
+
+enum HWBP_MODE
+{
+    MODE_DISABLED=0, //00
+    MODE_LOCAL=1, //01
+    MODE_GLOBAL=2 //10
+};
+
+enum HWBP_TYPE
+{
+    TYPE_EXECUTE=0, //00
+    TYPE_WRITE=1, //01
+    TYPE_READWRITE=3 //11
+};
+
+enum HWBP_SIZE
+{
+    SIZE_1=0, //00
+    SIZE_2=1, //01
+    SIZE_8=2, //10
+    SIZE_4=3 //11
+};
+
+struct DR7
+{
+    BYTE HWBP_MODE[4];
+    BYTE HWBP_TYPE[4];
+    BYTE HWBP_SIZE[4];
+};
+
+#define BITSET(a,x) (a|=1<<x)
+#define BITCLEAR(a,x) (a&=~(1<<x))
+#define BITTOGGLE(a,x) (a^=1<<x)
+#define BITGET(a,x) (a&(1<<x))
 
 typedef struct
 {
