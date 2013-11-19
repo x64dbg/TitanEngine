@@ -17337,7 +17337,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
-                                RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
+                                    RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
                             }
                             else
                             {
@@ -17378,7 +17379,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1) //remove breakpoint
                             {
-                                RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
+                                    RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
                             }
                             else //restore breakpoint after trap flag
                             {
@@ -17419,7 +17421,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
-                                RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress >= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress <= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress + BreakPointBuffer[MaximumBreakPoints].BreakPointSize) //read operation
+                                    RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
                             }
                             else
                             {

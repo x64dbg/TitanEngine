@@ -3,6 +3,7 @@
 /TitanEngine/obj
 /TitanEngine/x64
 /TitanEngine/Release
+Release/*/*
 *.layout
 *.depend
 *.sdf
