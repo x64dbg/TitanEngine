@@ -5135,7 +5135,7 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + WhichSection * IMAGE_SIZEOF_SECTION_HEADER);
                         if(WhichData == UE_SECTIONNAME)
                         {
-                            return((ULONG_PTR)PESections->Name);
+                            return((ULONG)*((DWORD*)PESections->Name));
                         }
                         else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                         {
