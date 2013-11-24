@@ -5005,6 +5005,7 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
     PIMAGE_SECTION_HEADER PESections;
     DWORD SectionNumber = 0;
     BOOL FileIs64;
+	static char sectionName[8] = "";
 
     if(FileMapVA != NULL)
     {
@@ -5135,7 +5136,8 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + WhichSection * IMAGE_SIZEOF_SECTION_HEADER);
                         if(WhichData == UE_SECTIONNAME)
                         {
-                            return((ULONG)*((DWORD*)PESections->Name));
+							memcpy(sectionName, PESections->Name, 8);
+							return (long long)sectionName;
                         }
                         else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                         {
