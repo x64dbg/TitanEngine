@@ -13537,7 +13537,11 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD 
 
     for(i = 0; i < BreakPointSetCount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart && BreakPointBuffer[i].BreakPointType == UE_MEMORY)
+        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart && 
+            (BreakPointBuffer[i].BreakPointType == UE_MEMORY || 
+            BreakPointBuffer[i].BreakPointType == UE_MEMORY_READ ||
+            BreakPointBuffer[i].BreakPointType == UE_MEMORY_WRITE)
+            )
         {
             if(i - 1 == BreakPointSetCount)
             {
