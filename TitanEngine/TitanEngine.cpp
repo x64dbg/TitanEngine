@@ -5005,7 +5005,7 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
     PIMAGE_SECTION_HEADER PESections;
     DWORD SectionNumber = 0;
     BOOL FileIs64;
-	static char sectionName[8] = "";
+    static char sectionName[9] = "";
 
     if(FileMapVA != NULL)
     {
@@ -5136,8 +5136,8 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + WhichSection * IMAGE_SIZEOF_SECTION_HEADER);
                         if(WhichData == UE_SECTIONNAME)
                         {
-							memcpy(sectionName, PESections->Name, 8);
-							return (long long)sectionName;
+                            memcpy(sectionName, PESections->Name, 8);
+                            return (long long)sectionName;
                         }
                         else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                         {
@@ -13537,11 +13537,12 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD 
 
     for(i = 0; i < BreakPointSetCount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart && 
-            (BreakPointBuffer[i].BreakPointType == UE_MEMORY || 
-            BreakPointBuffer[i].BreakPointType == UE_MEMORY_READ ||
-            BreakPointBuffer[i].BreakPointType == UE_MEMORY_WRITE)
-            )
+        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart &&
+                (BreakPointBuffer[i].BreakPointType == UE_MEMORY ||
+                 BreakPointBuffer[i].BreakPointType == UE_MEMORY_READ ||
+                 BreakPointBuffer[i].BreakPointType == UE_MEMORY_WRITE ||
+                 BreakPointBuffer[i].BreakPointType == UE_MEMORY_EXECUTE)
+          )
         {
             if(i - 1 == BreakPointSetCount)
             {
@@ -16101,7 +16102,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
             {
                 DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
             }
-            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_WRITE)
+            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_EXECUTE)
             {
                 RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
             }
@@ -16126,7 +16127,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
             {
                 DisableBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
             }
-            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_WRITE)
+            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_EXECUTE)
             {
                 RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
                 RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
