@@ -5697,7 +5697,8 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                             PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + WhichSection * IMAGE_SIZEOF_SECTION_HEADER);
                             if(WhichData == UE_SECTIONNAME)
                             {
-                                return(false);
+                                memcpy(PESections->Name, (void*)NewDataValue, 8);
+                                return(true);
                             }
                             else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                             {
