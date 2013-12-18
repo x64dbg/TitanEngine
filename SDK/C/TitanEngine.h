@@ -87,12 +87,15 @@
 #define UE_SUBSYSTEM 20
 #define UE_CHARACTERISTICS 21
 #define UE_NUMBEROFRVAANDSIZES 22
-#define UE_SECTIONNAME 23
-#define UE_SECTIONVIRTUALOFFSET 24
-#define UE_SECTIONVIRTUALSIZE 25
-#define UE_SECTIONRAWOFFSET 26
-#define UE_SECTIONRAWSIZE 27
-#define UE_SECTIONFLAGS 28
+#define UE_BASEOFCODE 23
+#define UE_BASEOFDATA 24
+//leaving some enum space here for future additions
+#define UE_SECTIONNAME 40
+#define UE_SECTIONVIRTUALOFFSET 41
+#define UE_SECTIONVIRTUALSIZE 42
+#define UE_SECTIONRAWOFFSET 43
+#define UE_SECTIONRAWSIZE 44
+#define UE_SECTIONFLAGS 45
 
 #define UE_VANOTFOUND = -2;
 
@@ -253,6 +256,8 @@ typedef struct
     DWORD PE32Offset;
     DWORD ImageBase;
     DWORD OriginalEntryPoint;
+    DWORD BaseOfCode;
+    DWORD BaseOfData;
     DWORD NtSizeOfImage;
     DWORD NtSizeOfHeaders;
     WORD SizeOfOptionalHeaders;
@@ -281,6 +286,8 @@ typedef struct
     DWORD PE64Offset;
     DWORD64 ImageBase;
     DWORD OriginalEntryPoint;
+    DWORD BaseOfCode;
+    DWORD BaseOfData;
     DWORD NtSizeOfImage;
     DWORD NtSizeOfHeaders;
     WORD SizeOfOptionalHeaders;

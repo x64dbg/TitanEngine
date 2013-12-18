@@ -87,12 +87,15 @@ const BYTE UE_CHECKSUM = 19;
 const BYTE UE_SUBSYSTEM = 20;
 const BYTE UE_CHARACTERISTICS = 21;
 const BYTE UE_NUMBEROFRVAANDSIZES = 22;
-const BYTE UE_SECTIONNAME = 23;
-const BYTE UE_SECTIONVIRTUALOFFSET = 24;
-const BYTE UE_SECTIONVIRTUALSIZE = 25;
-const BYTE UE_SECTIONRAWOFFSET = 26;
-const BYTE UE_SECTIONRAWSIZE = 27;
-const BYTE UE_SECTIONFLAGS = 28;
+const BYTE UE_BASEOFCODE = 23;
+const BYTE UE_BASEOFDATA = 24;
+//leaving some enum space here for future additions
+const BYTE UE_SECTIONNAME = 40;
+const BYTE UE_SECTIONVIRTUALOFFSET = 41;
+const BYTE UE_SECTIONVIRTUALSIZE = 42;
+const BYTE UE_SECTIONRAWOFFSET = 43;
+const BYTE UE_SECTIONRAWSIZE = 44;
+const BYTE UE_SECTIONFLAGS = 45;
 
 const long UE_VANOTFOUND = -2;
 
@@ -253,6 +256,8 @@ typedef struct
     DWORD PE32Offset;
     DWORD ImageBase;
     DWORD OriginalEntryPoint;
+    DWORD BaseOfCode;
+    DWORD BaseOfData;
     DWORD NtSizeOfImage;
     DWORD NtSizeOfHeaders;
     WORD SizeOfOptionalHeaders;
@@ -281,6 +286,8 @@ typedef struct
     DWORD PE64Offset;
     DWORD64 ImageBase;
     DWORD OriginalEntryPoint;
+    DWORD BaseOfCode;
+    DWORD BaseOfData;
     DWORD NtSizeOfImage;
     DWORD NtSizeOfHeaders;
     WORD SizeOfOptionalHeaders;

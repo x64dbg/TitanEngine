@@ -5044,6 +5044,14 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                     {
                         return(PEHeader32->OptionalHeader.AddressOfEntryPoint);
                     }
+                    else if(WhichData == UE_BASEOFCODE)
+                    {
+                        return(PEHeader32->OptionalHeader.BaseOfCode);
+                    }
+                    else if(WhichData == UE_BASEOFDATA)
+                    {
+                        return(PEHeader32->OptionalHeader.BaseOfData);
+                    }
                     else if(WhichData == UE_SIZEOFIMAGE)
                     {
                         return(PEHeader32->OptionalHeader.SizeOfImage);
@@ -5185,6 +5193,15 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                     {
                         return(PEHeader64->OptionalHeader.AddressOfEntryPoint);
                     }
+                    else if(WhichData == UE_BASEOFCODE)
+                    {
+                        return(PEHeader64->OptionalHeader.BaseOfCode);
+                    }
+                    /* non-existent in IMAGE_OPTIONAL_HEADER64
+                    else if(WhichData == UE_BASEOFDATA)
+                    {
+                        return(PEHeader64->OptionalHeader.BaseOfData);
+                    }*/
                     else if(WhichData == UE_SIZEOFIMAGE)
                     {
                         return(PEHeader64->OptionalHeader.SizeOfImage);
@@ -5389,6 +5406,8 @@ __declspec(dllexport) bool TITCALL GetPE32DataFromMappedFileEx(ULONG_PTR FileMap
                 PE32Structure->PE32Offset = DOSHeader->e_lfanew;
                 PE32Structure->ImageBase = PEHeader32->OptionalHeader.ImageBase;
                 PE32Structure->OriginalEntryPoint = PEHeader32->OptionalHeader.AddressOfEntryPoint;
+                PE32Structure->BaseOfCode = PEHeader32->OptionalHeader.BaseOfCode;
+                PE32Structure->BaseOfData = PEHeader32->OptionalHeader.BaseOfData;
                 PE32Structure->NtSizeOfImage = PEHeader32->OptionalHeader.SizeOfImage;
                 PE32Structure->NtSizeOfHeaders = PEHeader32->OptionalHeader.SizeOfHeaders;
                 PE32Structure->SizeOfOptionalHeaders = PEHeader32->FileHeader.SizeOfOptionalHeader;
@@ -5417,6 +5436,8 @@ __declspec(dllexport) bool TITCALL GetPE32DataFromMappedFileEx(ULONG_PTR FileMap
                 PE64Structure->PE64Offset = DOSHeader->e_lfanew;
                 PE64Structure->ImageBase = PEHeader64->OptionalHeader.ImageBase;
                 PE64Structure->OriginalEntryPoint = PEHeader64->OptionalHeader.AddressOfEntryPoint;
+                PE64Structure->BaseOfCode = PEHeader32->OptionalHeader.BaseOfCode;
+                PE64Structure->BaseOfData = PEHeader32->OptionalHeader.BaseOfData;
                 PE64Structure->NtSizeOfImage = PEHeader64->OptionalHeader.SizeOfImage;
                 PE64Structure->NtSizeOfHeaders = PEHeader64->OptionalHeader.SizeOfHeaders;
                 PE64Structure->SizeOfOptionalHeaders = PEHeader64->FileHeader.SizeOfOptionalHeader;
@@ -5552,6 +5573,16 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                         else if(WhichData == UE_OEP)
                         {
                             PEHeader32->OptionalHeader.AddressOfEntryPoint = (DWORD)NewDataValue;
+                            return(true);
+                        }
+                        else if(WhichData == UE_BASEOFCODE)
+                        {
+                            PEHeader32->OptionalHeader.BaseOfCode = (DWORD)NewDataValue;
+                            return(true);
+                        }
+                        else if(WhichData == UE_BASEOFDATA)
+                        {
+                            PEHeader32->OptionalHeader.BaseOfData = (DWORD)NewDataValue;
                             return(true);
                         }
                         else if(WhichData == UE_SIZEOFIMAGE)
@@ -5728,6 +5759,16 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                         {
                             PEHeader64->OptionalHeader.AddressOfEntryPoint = (DWORD)NewDataValue;
                             return(true);
+                        }
+                        else if(WhichData == UE_BASEOFCODE)
+                        {
+                            PEHeader64->OptionalHeader.BaseOfCode = (DWORD)NewDataValue;
+                            return(true);
+                        }
+                        else if(WhichData == UE_BASEOFDATA)
+                        {
+                            //non-existant in IMAGE_OPTIONAL_HEADER64
+                            return(false);
                         }
                         else if(WhichData == UE_SIZEOFIMAGE)
                         {
@@ -5979,6 +6020,8 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFileEx(ULONG_PTR FileMapV
                     DOSHeader->e_lfanew = PE32Structure->PE32Offset;
                     PEHeader32->OptionalHeader.ImageBase = PE32Structure->ImageBase;
                     PEHeader32->OptionalHeader.AddressOfEntryPoint = PE32Structure->OriginalEntryPoint;
+                    PEHeader32->OptionalHeader.BaseOfCode = PE32Structure->BaseOfCode;
+                    PEHeader32->OptionalHeader.BaseOfData = PE32Structure->BaseOfData;
                     PEHeader32->OptionalHeader.SizeOfImage = PE32Structure->NtSizeOfImage;
                     PEHeader32->OptionalHeader.SizeOfHeaders = PE32Structure->NtSizeOfHeaders;
                     PEHeader32->FileHeader.SizeOfOptionalHeader = PE32Structure->SizeOfOptionalHeaders;
@@ -6014,6 +6057,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFileEx(ULONG_PTR FileMapV
                     DOSHeader->e_lfanew = PE64Structure->PE64Offset;
                     PEHeader64->OptionalHeader.ImageBase = PE64Structure->ImageBase;
                     PEHeader64->OptionalHeader.AddressOfEntryPoint = PE64Structure->OriginalEntryPoint;
+                    PEHeader64->OptionalHeader.BaseOfCode = PE64Structure->BaseOfCode;
                     PEHeader64->OptionalHeader.SizeOfImage = PE64Structure->NtSizeOfImage;
                     PEHeader64->OptionalHeader.SizeOfHeaders = PE64Structure->NtSizeOfHeaders;
                     PEHeader64->FileHeader.SizeOfOptionalHeader = PE64Structure->SizeOfOptionalHeaders;
@@ -6077,7 +6121,6 @@ __declspec(dllexport) bool TITCALL SetPE32DataEx(char* szFileName, LPVOID DataSt
         return(false);
     }
 }
-
 __declspec(dllexport) bool TITCALL SetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
 {
 
