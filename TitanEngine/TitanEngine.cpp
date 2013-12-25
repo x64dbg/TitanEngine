@@ -17979,7 +17979,7 @@ __declspec(dllexport) void TITCALL DebugLoopEx(DWORD TimeOut)
 __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
 {
 
-    typedef void(TITCALL *fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
+    typedef void(WINAPI *fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
     fDebugSetProcessKillOnExit myDebugSetProcessKillOnExit;
     LPVOID funcDebugSetProcessKillOnExit = NULL;
 
@@ -18017,8 +18017,7 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 }
 __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
 {
-
-    typedef bool(TITCALL *fDebugActiveProcessStop)(DWORD dwProcessId);
+    typedef bool(WINAPI *fDebugActiveProcessStop)(DWORD dwProcessId);
     fDebugActiveProcessStop myDebugActiveProcessStop;
     LPVOID funcDebugActiveProcessStop = NULL;
     bool FuncReturn = false;
