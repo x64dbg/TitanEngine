@@ -103,7 +103,7 @@
       <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(ProjectDir)distorm_x86.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)scylla_iatfix.lib;$(ProjectDir)distorm_x86.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)TitanEngine.dll</OutputFile>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <ModuleDefinitionFile>$(ProjectDir)TitanEngine.def</ModuleDefinitionFile>
@@ -233,6 +233,7 @@
     <ClCompile Include="LzmaDec.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3rdparty-definitions.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />

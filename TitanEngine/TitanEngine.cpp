@@ -20,6 +20,8 @@
 // Global.Engine:
 #include "definitions.h"
 #include "resource.h"
+// 3rd party
+#include "3rdparty-definitions.h"
 
 #define TE_VER_MAJOR 2
 #define TE_VER_MIDDLE 0
@@ -19557,7 +19559,7 @@ __declspec(dllexport) bool TITCALL ImporterMoveOriginalIATW(wchar_t* szOriginalF
     }
     return(false);
 }
-__declspec(dllexport) void TITCALL ImporterAutoSearchIAT(HANDLE hProcess, char* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
+__declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
 {
 
     wchar_t uniFileName[MAX_PATH] = {};
@@ -19565,388 +19567,25 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(HANDLE hProcess, char* 
     if(szFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(ImporterAutoSearchIATW(hProcess, uniFileName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize));
+        return(ImporterAutoSearchIATW(ProcessId, uniFileName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize));
     }
 }
-__declspec(dllexport) void TITCALL ImporterAutoSearchIATW(HANDLE hProcess, wchar_t* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
+__declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar_t* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
 {
+    HANDLE hProcess = 0;
+    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+ 
+    DWORD iatStart = 0xDEADBEEF;
+    DWORD iatSize = 0xDEADBEEF;
 
-    int i = NULL;
-    int j = NULL;
-    int MaximumBlankSpaces;
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
-    MEMORY_BASIC_INFORMATION MemInfo;
-    PMEMORY_COMPARE_HANDLER cmpHandler;
-    BOOL FileIs64;
-    HANDLE FileHandle;
-    DWORD FileSize;
-    HANDLE FileMap;
-    ULONG_PTR FileMapVA;
-    ULONG_PTR IATThunkSize;
-    ULONG_PTR SearchStartFO;
-    ULONG_PTR OriginalSearchStartFO;
-    LPVOID SearchMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID memSearchMemory = SearchMemory;
-    LPVOID CheckMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID memCheckMemory = CheckMemory;
-    ULONG_PTR IATThunkPossiblePointer = NULL;
-    DWORD IATThunkPossiblePointerFO = NULL;
-    WORD IATCmpNearCall = 0x15FF;
-    WORD IATCmpNearJump = 0x25FF;
-    DWORD NtSizeOfImage = NULL;
-    ULONG_PTR IATHigh = NULL;
-    ULONG_PTR IATHighestFound = NULL;
-    ULONG_PTR IATLow = NULL;
-    ULONG_PTR IATLowestFound = NULL;
-    ULONG_PTR SearchStartX64 = SearchStart;
-    DWORD CurrentSearchSize;
-    char* CompareBuffer[12];
-    void* LastValidPtr;
-    bool ValidPointer;
+    if(hProcess!=0) {
+        scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
 
-    RtlZeroMemory(&CompareBuffer, 10 * sizeof ULONG_PTR);
-    if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
-    {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
-        if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
-        {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            if(PEHeader32->OptionalHeader.Magic == 0x10B)
-            {
-                FileIs64 = false;
-            }
-            else if(PEHeader32->OptionalHeader.Magic == 0x20B)
-            {
-                FileIs64 = true;
-            }
-            else
-            {
-                VirtualFree(SearchMemory, NULL, MEM_RELEASE);
-                VirtualFree(CheckMemory, NULL, MEM_RELEASE);
-                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return;
-            }
-            if(!FileIs64)
-            {
-                IATThunkSize = 4;
-                NtSizeOfImage = PEHeader32->OptionalHeader.SizeOfImage;
-            }
-            else
-            {
-                IATThunkSize = 8;
-                NtSizeOfImage = PEHeader64->OptionalHeader.SizeOfImage;
-            }
-            SearchStartFO = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, SearchStart, true);
-            OriginalSearchStartFO = SearchStartFO;
-            if(SearchSize > 0x1000)
-            {
-                CurrentSearchSize = 0x1000;
-            }
-            else
-            {
-                CurrentSearchSize = SearchSize;
-            }
-            while(SearchSize > NULL && EngineGrabDataFromMappedFile(FileHandle, FileMapVA, SearchStartFO, CurrentSearchSize, SearchMemory) == true)
-            {
-                memSearchMemory = SearchMemory;
-                i = CurrentSearchSize - 6;
-                while(i > NULL)
-                {
-                    if(memcmp(memSearchMemory, &IATCmpNearCall, 2) == NULL || memcmp(memSearchMemory, &IATCmpNearJump, 2) == NULL)
-                    {
-                        RtlMoveMemory(&IATThunkPossiblePointer, (LPVOID)((ULONG_PTR)memSearchMemory + 2), 4);
-                        if(!FileIs64)
-                        {
-                            if(IATThunkPossiblePointer >= (DWORD)ImageBase && IATThunkPossiblePointer <= (DWORD)ImageBase + NtSizeOfImage)
-                            {
-                                if(IATHigh == NULL && IATLow == NULL)
-                                {
-                                    IATThunkPossiblePointerFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, IATThunkPossiblePointer, true);
-                                    if(IATThunkPossiblePointerFO - FileMapVA > 0x1000 && FileSize - (IATThunkPossiblePointerFO - FileMapVA) > 0x1000)
-                                    {
-                                        j = NULL;
-                                        while(j == NULL)
-                                        {
-                                            EngineGrabDataFromMappedFile(FileHandle, FileMapVA, IATThunkPossiblePointerFO, 0x1000, CheckMemory);
-                                            memCheckMemory = CheckMemory;
-                                            LastValidPtr = memCheckMemory;
-                                            MaximumBlankSpaces = 4;
-                                            ValidPointer = true;
-                                            j = 0x1000 - 2 * 4;
-                                            while(j > NULL && ValidPointer == true && MaximumBlankSpaces > NULL)
-                                            {
-                                                if(memcmp(memCheckMemory, &CompareBuffer, sizeof ULONG_PTR) != NULL)
-                                                {
-                                                    cmpHandler = (PMEMORY_COMPARE_HANDLER)memCheckMemory;
-                                                    VirtualQueryEx(hProcess, (void*)cmpHandler->Array.dwArrayEntry[0], &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                    if(MemInfo.State != MEM_COMMIT)
-                                                    {
-                                                        ValidPointer = false;
-                                                        memCheckMemory = LastValidPtr;
-                                                    }
-                                                    else
-                                                    {
-                                                        LastValidPtr = memCheckMemory;
-                                                        memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory + 4);
-                                                        MaximumBlankSpaces = 4;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory + 4);
-                                                    MaximumBlankSpaces--;
-                                                }
-                                                j = j - 4;
-                                            }
-                                            IATThunkPossiblePointerFO = IATThunkPossiblePointerFO + 0x1000;
-                                        }
-                                        if(MaximumBlankSpaces == NULL)
-                                        {
-                                            memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory - (5 * sizeof ULONG_PTR));
-                                        }
-                                        IATHigh = (DWORD)ConvertFileOffsetToVA(FileMapVA, IATThunkPossiblePointerFO + (ULONG_PTR)memCheckMemory - (ULONG_PTR)CheckMemory - 0x1000, true);
-                                        IATThunkPossiblePointerFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, IATThunkPossiblePointer, true) - 0x1000;
-                                        j = NULL;
-                                        while(j == NULL)
-                                        {
-                                            EngineGrabDataFromMappedFile(FileHandle, FileMapVA, IATThunkPossiblePointerFO, 0x1000, CheckMemory);
-                                            memCheckMemory = (LPVOID)((ULONG_PTR)CheckMemory + 0x1000 - 8);
-                                            LastValidPtr = (LPVOID)((ULONG_PTR)CheckMemory + 0x1000);
-                                            MaximumBlankSpaces = 4;
-                                            ValidPointer = true;
-                                            j = 0x1000 - 2 * 4;
-                                            while(j > NULL && ValidPointer == true && MaximumBlankSpaces > NULL)
-                                            {
-                                                if(memcmp(memCheckMemory, &CompareBuffer, sizeof ULONG_PTR) != NULL)
-                                                {
-                                                    cmpHandler = (PMEMORY_COMPARE_HANDLER)memCheckMemory;
-                                                    VirtualQueryEx(hProcess, (void*)cmpHandler->Array.dwArrayEntry[0], &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                    if(MemInfo.State != MEM_COMMIT)
-                                                    {
-                                                        ValidPointer = false;
-                                                        memCheckMemory = LastValidPtr;
-                                                    }
-                                                    else
-                                                    {
-                                                        LastValidPtr = memCheckMemory;
-                                                        memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory - 4);
-                                                        MaximumBlankSpaces = 4;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory - 4);
-                                                    MaximumBlankSpaces--;
-                                                }
-                                                j = j - 4;
-                                            }
-                                            IATThunkPossiblePointerFO = IATThunkPossiblePointerFO - 0x1000;
-                                        }
-                                        if(MaximumBlankSpaces == NULL)
-                                        {
-                                            memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory + (5 * sizeof ULONG_PTR));
-                                        }
-                                        IATLow = (DWORD)ConvertFileOffsetToVA(FileMapVA, IATThunkPossiblePointerFO + (ULONG_PTR)memCheckMemory - (ULONG_PTR)CheckMemory + 0x1000, true);
-                                        memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 6);
-                                        i = i - 6;
-                                    }
-                                    else
-                                    {
-                                        memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 2);
-                                        i = i - 2;
-                                    }
-                                }
-                                else
-                                {
-                                    if(IATHighestFound < IATThunkPossiblePointer || IATHighestFound == NULL)
-                                    {
-                                        if(IATThunkPossiblePointer < IATHigh || IATHighestFound == NULL)
-                                        {
-                                            IATHighestFound = IATThunkPossiblePointer;
-                                        }
-                                    }
-                                    if(IATLowestFound > IATThunkPossiblePointer || IATLowestFound == NULL)
-                                    {
-                                        if(IATThunkPossiblePointer > IATLow || IATLowestFound == NULL)
-                                        {
-                                            IATLowestFound = IATThunkPossiblePointer;
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 2);
-                                i = i - 2;
-                            }
-                        }
-                        else
-                        {
-                            SearchStartX64 = SearchStartFO - OriginalSearchStartFO + ((ULONG_PTR)memSearchMemory - (ULONG_PTR)SearchMemory) + SearchStart;
-                            IATThunkPossiblePointer = IATThunkPossiblePointer + SearchStartX64 + 6;
-                            if(IATThunkPossiblePointer >= ImageBase && IATThunkPossiblePointer <= ImageBase + NtSizeOfImage)
-                            {
-                                if(IATHigh == NULL && IATLow == NULL)
-                                {
-                                    IATThunkPossiblePointerFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, IATThunkPossiblePointer, true);
-                                    if(IATThunkPossiblePointerFO - FileMapVA > 0x1000 && FileSize - (IATThunkPossiblePointerFO - FileMapVA) > 0x1000)
-                                    {
-                                        j = NULL;
-                                        while(j == NULL)
-                                        {
-                                            EngineGrabDataFromMappedFile(FileHandle, FileMapVA, IATThunkPossiblePointerFO, 0x1000, CheckMemory);
-                                            memCheckMemory = CheckMemory;
-                                            LastValidPtr = memCheckMemory;
-                                            MaximumBlankSpaces = 4;
-                                            ValidPointer = true;
-                                            j = 0x1000 - 2 * 8;
-                                            while(j > NULL && ValidPointer == true && MaximumBlankSpaces > NULL)
-                                            {
-                                                if(memcmp(memCheckMemory, &CompareBuffer, sizeof ULONG_PTR) != NULL)
-                                                {
-                                                    cmpHandler = (PMEMORY_COMPARE_HANDLER)memCheckMemory;
-                                                    VirtualQueryEx(hProcess, (void*)cmpHandler->Array.dwArrayEntry[0], &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                    if(MemInfo.State != MEM_COMMIT)
-                                                    {
-                                                        ValidPointer = false;
-                                                        memCheckMemory = LastValidPtr;
-                                                    }
-                                                    else
-                                                    {
-                                                        LastValidPtr = memCheckMemory;
-                                                        memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory + 8);
-                                                        MaximumBlankSpaces = 4;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory + 8);
-                                                    MaximumBlankSpaces--;
-                                                }
-                                                j = j - 8;
-                                            }
-                                            IATThunkPossiblePointerFO = IATThunkPossiblePointerFO + 0x1000;
-                                        }
-                                        if(MaximumBlankSpaces == NULL)
-                                        {
-                                            memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory - (5 * sizeof ULONG_PTR));
-                                        }
-                                        IATHigh = (DWORD)ConvertFileOffsetToVA(FileMapVA, IATThunkPossiblePointerFO + (ULONG_PTR)memCheckMemory - (ULONG_PTR)CheckMemory - 0x1000, true);
-                                        IATThunkPossiblePointerFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, IATThunkPossiblePointer, true) - 0x1000;
-                                        j = NULL;
-                                        while(j == NULL)
-                                        {
-                                            EngineGrabDataFromMappedFile(FileHandle, FileMapVA, IATThunkPossiblePointerFO, 0x1000, CheckMemory);
-                                            memCheckMemory = (LPVOID)((ULONG_PTR)CheckMemory + 0x1000 - 8);
-                                            LastValidPtr = (LPVOID)((ULONG_PTR)CheckMemory + 0x1000);
-                                            MaximumBlankSpaces = 4;
-                                            ValidPointer = true;
-                                            j = 0x1000 - 2 * 8;
-                                            while(j > NULL && ValidPointer == true && MaximumBlankSpaces > NULL)
-                                            {
-                                                if(memcmp(memCheckMemory, &CompareBuffer, sizeof ULONG_PTR) != NULL)
-                                                {
-                                                    cmpHandler = (PMEMORY_COMPARE_HANDLER)memCheckMemory;
-                                                    VirtualQueryEx(hProcess, (void*)cmpHandler->Array.dwArrayEntry[0], &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                    if(MemInfo.State != MEM_COMMIT)
-                                                    {
-                                                        ValidPointer = false;
-                                                        memCheckMemory = LastValidPtr;
-                                                    }
-                                                    else
-                                                    {
-                                                        LastValidPtr = memCheckMemory;
-                                                        memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory - 8);
-                                                        MaximumBlankSpaces = 4;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory - 8);
-                                                    MaximumBlankSpaces--;
-                                                }
-                                                j = j - 8;
-                                            }
-                                            IATThunkPossiblePointerFO = IATThunkPossiblePointerFO - 0x1000;
-                                        }
-                                        if(MaximumBlankSpaces == NULL)
-                                        {
-                                            memCheckMemory = (LPVOID)((ULONG_PTR)memCheckMemory + (5 * sizeof ULONG_PTR));
-                                        }
-                                        IATLow = (DWORD)ConvertFileOffsetToVA(FileMapVA, IATThunkPossiblePointerFO + (ULONG_PTR)memCheckMemory - (ULONG_PTR)CheckMemory + 0x1000, true);
-                                        memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 6);
-                                        i = i - 6;
-                                    }
-                                    else
-                                    {
-                                        memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 2);
-                                        i = i - 2;
-                                    }
-                                }
-                                else
-                                {
-                                    if(IATHighestFound < IATThunkPossiblePointer || IATHighestFound == NULL)
-                                    {
-                                        if(IATThunkPossiblePointer < IATHigh || IATHighestFound == NULL)
-                                        {
-                                            IATHighestFound = IATThunkPossiblePointer;
-                                        }
-                                    }
-                                    if(IATLowestFound > IATThunkPossiblePointer || IATLowestFound == NULL)
-                                    {
-                                        if(IATThunkPossiblePointer > IATLow || IATLowestFound == NULL)
-                                        {
-                                            IATLowestFound = IATThunkPossiblePointer;
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 2);
-                                i = i - 2;
-                            }
-                        }
-                    }
-                    memSearchMemory = (LPVOID)((ULONG_PTR)memSearchMemory + 1);
-                    i--;
-                }
-                if(SearchSize > 0x1000)
-                {
-                    SearchSize = SearchSize - 0x1000;
-                    CurrentSearchSize = 0x1000;
-                }
-                else
-                {
-                    SearchSize = NULL;
-                    CurrentSearchSize = SearchSize;
-                }
-                SearchStartFO = SearchStartFO + CurrentSearchSize;
-            }
-            IATHigh = IATHigh - IATLow + sizeof ULONG_PTR;
-            RtlMoveMemory(pIATStart, &IATLow, sizeof ULONG_PTR);
-            RtlMoveMemory(pIATSize, &IATHigh, sizeof ULONG_PTR);
-            VirtualFree(SearchMemory, NULL, MEM_RELEASE);
-            VirtualFree(CheckMemory, NULL, MEM_RELEASE);
-            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return;
-        }
-        else
-        {
-            VirtualFree(SearchMemory, NULL, MEM_RELEASE);
-            VirtualFree(CheckMemory, NULL, MEM_RELEASE);
-            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return;
-        }
     }
-    VirtualFree(SearchMemory, NULL, MEM_RELEASE);
-    VirtualFree(CheckMemory, NULL, MEM_RELEASE);
+
     return;
 }
-__declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(HANDLE hProcess, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
+__declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
 {
 
     wchar_t szTempName[MAX_PATH];
@@ -19958,8 +19597,8 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(HANDLE hProcess, ULON
     {
         if(GetTempFileNameW(szTempFolder, L"DumpTemp", GetTickCount() + 102, szTempName))
         {
-            DumpProcessW(hProcess, (LPVOID)ImageBase, szTempName, NULL);
-            ImporterAutoSearchIATW(hProcess, szTempName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize);
+            //DumpProcessW(ProcessId, (LPVOID)ImageBase, szTempName, NULL); //TODO 
+            ImporterAutoSearchIATW(ProcessId, szTempName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize);
             DeleteFileW(szTempName);
         }
     }
