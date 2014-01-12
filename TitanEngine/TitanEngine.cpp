@@ -18728,24 +18728,26 @@ __declspec(dllexport) long TITCALL ImporterEstimatedSize()
     }
     return(EstimatedSize);
 }
-__declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, char* szExportFileName, char* szSectionName)
 {
 
     wchar_t uniExportFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {};
 
-    if(szExportFileName != NULL)
+    if(szExportFileName != NULL && szDumpFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName)+1, uniExportFileName, sizeof(uniExportFileName)/(sizeof(uniExportFileName[0])));
-        return(ImporterExportIATExW(uniExportFileName, szSectionName));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        return(ImporterExportIATExW(uniDumpFileName, uniExportFileName, szSectionName));
     }
     else
     {
         return(false);
     }
 }
-__declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, char* szSectionName)
 {
-    if(scylla_fixDump(szExportFileName, L".scy") != SCY_ERROR_SUCCESS) {
+    if(scylla_fixDump(szDumpFileName, szExportFileName) != SCY_ERROR_SUCCESS) {
         return false;
     }
 
@@ -19379,20 +19381,20 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
 }
 __declspec(dllexport) bool TITCALL ImporterMoveOriginalIAT(char* szOriginalFile, char* szDumpFile, char* szSectionName)
 {
-
+    /*
     if(ImporterLoadImportTable(szOriginalFile))
     {
         return(ImporterExportIATEx(szDumpFile, szSectionName));
-    }
+    }*/
     return(false);
 }
 __declspec(dllexport) bool TITCALL ImporterMoveOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile, char* szSectionName)
 {
-
+    /*
     if(ImporterLoadImportTableW(szOriginalFile))
     {
         return(ImporterExportIATExW(szDumpFile, szSectionName));
-    }
+    }*/
     return(false);
 }
 __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* szFileName, ULONG_PTR SearchStart, LPVOID pIATStart, LPVOID pIATSize)
@@ -19554,7 +19556,7 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     *Extension = 0;
     lstrcpy(IatFixFileName, DumpFileName);
     *Extension = Bak;
-    lstrcat(IatFixFileName, L"_");
+    lstrcat(IatFixFileName, L"_scy");
     lstrcat(IatFixFileName, Extension);
     lstrcat(DumpFileName, Extension);
 
