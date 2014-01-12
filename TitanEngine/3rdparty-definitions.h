@@ -1,11 +1,11 @@
 #include "stdafx.h"
 
 /* Scylla definitions */
-#define SCY_ERROR_SUCCESS  0;
-#define SCY_ERROR_PROCOPEN = -1;
-#define SCY_ERROR_IATWRITE = -2;
-#define SCY_ERROR_IATSEARCH = -3;
-#define SCY_ERROR_IATNOTFOUND = -4;
+const BYTE SCY_ERROR_SUCCESS = 0;
+const BYTE SCY_ERROR_PROCOPEN = -1;
+const BYTE SCY_ERROR_IATWRITE = -2;
+const BYTE SCY_ERROR_IATSEARCH = -3;
+const BYTE SCY_ERROR_IATNOTFOUND = -4;
 
 #ifdef __cplusplus
 extern "C" {
