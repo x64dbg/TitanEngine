@@ -24,8 +24,8 @@
 #include "3rdparty-definitions.h"
 
 #define TE_VER_MAJOR 2
-#define TE_VER_MIDDLE 0
-#define TE_VER_MINOR 3
+#define TE_VER_MIDDLE 1
+#define TE_VER_MINOR 0
 
 /*#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0'" \
 						"processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")*/
@@ -18733,21 +18733,23 @@ __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, cha
 
     wchar_t uniExportFileName[MAX_PATH] = {};
     wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniSectionName[MAX_PATH] = {};
 
     if(szExportFileName != NULL && szDumpFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName)+1, uniExportFileName, sizeof(uniExportFileName)/(sizeof(uniExportFileName[0])));
         MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
-        return(ImporterExportIATExW(uniDumpFileName, uniExportFileName, szSectionName));
+        MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName)+1, uniSectionName, sizeof(uniSectionName)/(sizeof(uniSectionName[0])));
+        return(ImporterExportIATExW(uniDumpFileName, uniExportFileName, uniSectionName));
     }
     else
     {
         return(false);
     }
 }
-__declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, char* szSectionName)
+__declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, wchar_t* szSectionName)
 {
-    if(scylla_fixDump(szDumpFileName, szExportFileName) != SCY_ERROR_SUCCESS) {
+    if(scylla_fixDump(szDumpFileName, szExportFileName, szSectionName) != SCY_ERROR_SUCCESS) {
         return false;
     }
 
@@ -19527,18 +19529,20 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATEx(DWORD ProcessId, char* s
 {
 
     wchar_t uniDumpedFile[MAX_PATH] = {};
+    wchar_t uniSectionName[MAX_PATH] = {};
 
     if(szDumpedFile != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szDumpedFile, lstrlenA(szDumpedFile)+1, uniDumpedFile, sizeof(uniDumpedFile)/(sizeof(uniDumpedFile[0])));
-        return(ImporterAutoFixIATExW(ProcessId, uniDumpedFile, szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, UnknownPointerFixCallback));
+        MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName)+1, uniSectionName, sizeof(uniSectionName)/(sizeof(uniSectionName[0])));
+        return(ImporterAutoFixIATExW(ProcessId, uniDumpedFile, uniSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, UnknownPointerFixCallback));
     }
     else
     {
         return(NULL);	// Critical error! *just to be safe, but it should never happen!
     }
 }
-__declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_t* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart,  bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
+__declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_t* szDumpedFile, wchar_t* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart,  bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
 {
     HANDLE FileHandle;
     DWORD FileSize;
@@ -19589,7 +19593,7 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
         return (0x405);
     }
 
-    ret = scylla_fixDump(szDumpedFile, IatFixFileName);
+    ret = scylla_fixDump(szDumpedFile, IatFixFileName, szSectionName);
 
     if(ret == SCY_ERROR_IATWRITE) {
         return (0x407); 
@@ -19616,7 +19620,7 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIAT(DWORD ProcessId, char* szD
 }
 __declspec(dllexport) long TITCALL ImporterAutoFixIATW(DWORD ProcessId, wchar_t* szDumpedFile, ULONG_PTR SearchStart)
 {
-    return(ImporterAutoFixIATExW(ProcessId, szDumpedFile, ".RL!TEv2", false, false, NULL, NULL, SearchStart, false, false, NULL));
+    return(ImporterAutoFixIATExW(ProcessId, szDumpedFile, L".RL!TEv2", false, false, NULL, NULL, SearchStart, false, false, NULL));
 }
 // Internal.Engine.Hook.functions:
 bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATAW ModuleInformation, DWORD SizeOfImage)

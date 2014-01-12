@@ -1849,9 +1849,9 @@ class ImporterW
 {
 public:
 
-	static bool ExportIATEx(const wchar_t* szDumpFileName, const wchar_t* szExportFileName, const char* szSectionName)
+	static bool ExportIATEx(const wchar_t* szDumpFileName, const wchar_t* szExportFileName, const wchar_t* szSectionName)
 	{
-		return UE::ImporterExportIATExW((wchar_t*)szDumpFileName, (wchar_t*)szExportFileName, (char*)szSectionName);
+		return UE::ImporterExportIATExW((wchar_t*)szDumpFileName, (wchar_t*)szExportFileName, (wchar_t*)szSectionName);
 	}
 	static bool CopyOriginalIAT(const wchar_t* szOriginalFile, const wchar_t* szDumpFile)
 	{

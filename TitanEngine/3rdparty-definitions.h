@@ -14,7 +14,7 @@ extern "C" {
 int scylla_searchIAT(DWORD pid, DWORD_PTR &iatStart, DWORD &iatSize, DWORD_PTR searchStart, bool advancedSearch);
 int scylla_getImports(DWORD_PTR iatAddr, DWORD iatSize, DWORD pid);
 bool scylla_importsValid();
-int scylla_fixDump(WCHAR* dumpFile, WCHAR* iatFixFile);
+int scylla_fixDump(WCHAR* dumpFile, WCHAR* iatFixFile, WCHAR* sectionName = L".scy");
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
