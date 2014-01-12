@@ -19412,6 +19412,9 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar
     ULONG_PTR iatSize = NULL;
 
     scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
+    
+    //we also try to automatically read imports so following call to ExportIAT has a chance 
+    scylla_getImports(iatStart, iatSize, ProcessId);
 
     RtlMoveMemory(pIATStart, &iatStart, sizeof ULONG_PTR);
     RtlMoveMemory(pIATSize, &iatSize, sizeof ULONG_PTR);
