@@ -19571,17 +19571,14 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* 
     }
 }
 __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar_t* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, LPVOID pIATStart, LPVOID pIATSize)
-{
-    HANDLE hProcess = 0;
-    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
- 
-    DWORD iatStart = 0xDEADBEEF;
-    DWORD iatSize = 0xDEADBEEF;
+{ 
+    ULONG_PTR iatStart = NULL;
+    ULONG_PTR iatSize = NULL;
 
-    if(hProcess!=0) {
-        scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
+    scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
 
-    }
+    RtlMoveMemory(pIATStart, &iatStart, sizeof ULONG_PTR);
+    RtlMoveMemory(pIATSize, &iatSize, sizeof ULONG_PTR);
 
     return;
 }
@@ -19597,7 +19594,9 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULON
     {
         if(GetTempFileNameW(szTempFolder, L"DumpTemp", GetTickCount() + 102, szTempName))
         {
-            //DumpProcessW(ProcessId, (LPVOID)ImageBase, szTempName, NULL); //TODO 
+            //HANDLE hProcess = 0;
+            //hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+            //DumpProcessW(ProcessId, (LPVOID)ImageBase, szTempName, NULL);  TODO
             ImporterAutoSearchIATW(ProcessId, szTempName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize);
             DeleteFileW(szTempName);
         }
@@ -19683,7 +19682,7 @@ __declspec(dllexport) void TITCALL ImporterEnumAddedData(LPVOID EnumCallBack)
         }
     }
 }
-__declspec(dllexport) long TITCALL ImporterAutoFixIATEx(HANDLE hProcess, char* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
+__declspec(dllexport) long TITCALL ImporterAutoFixIATEx(DWORD ProcessId, char* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR SearchStart, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
 {
 
     wchar_t uniDumpedFile[MAX_PATH] = {};
@@ -19691,702 +19690,92 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATEx(HANDLE hProcess, char* s
     if(szDumpedFile != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szDumpedFile, lstrlenA(szDumpedFile)+1, uniDumpedFile, sizeof(uniDumpedFile)/(sizeof(uniDumpedFile[0])));
-        return(ImporterAutoFixIATExW(hProcess, uniDumpedFile, szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, SearchSize, SearchStep, TryAutoFix, FixEliminations, UnknownPointerFixCallback));
+        return(ImporterAutoFixIATExW(ProcessId, uniDumpedFile, szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, SearchStart, TryAutoFix, FixEliminations, UnknownPointerFixCallback));
     }
     else
     {
         return(NULL);	// Critical error! *just to be safe, but it should never happen!
     }
 }
-__declspec(dllexport) long TITCALL ImporterAutoFixIATExW(HANDLE hProcess, wchar_t* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
+__declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_t* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR SearchStart,  bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
 {
-
-    int i;
-    int j;
-    int delta;
-    int currentSectionSize;
-#if !defined(_WIN64)
-    PE32Struct PEStructure;
-#else
-    PE64Struct PEStructure;
-#endif
-    typedef void*(TITCALL *fFixerCallback)(LPVOID fIATPointer);
-    fFixerCallback myFixerCallback = (fFixerCallback)UnknownPointerFixCallback;
-    MEMORY_BASIC_INFORMATION MemInfo;
-    DWORD SectionFlags;
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    LPVOID aSearchMemory;
-    LPVOID cSearchMemory;
-    LPVOID aEnumeratedModules;
-    ULONG_PTR ueNumberOfBytesRead;
-    DWORD dwPossibleIATPointer;
-    ULONG_PTR qwPossibleIATPointer;
-    ULONG_PTR PossibleIATPointer;
-    ULONG_PTR TracedIATPointer;
-    PMEMORY_COMPARE_HANDLER currentSearchPos;
-    DWORD SetionVirtualOffset;
-    ULONG_PTR TestReadData;
-    DWORD LastDllId = 1024;
-    bool FileIs64 = false;
-    bool PossibleThunk = false;
-    bool UpdateJump = false;
-    DWORD CurrentDllId;
-    char* szDLLName;
-    char* szAPIName;
-    DWORD TraceIndex;
-    DWORD Dummy;
+    ULONG_PTR iatStart = NULL;
+    ULONG_PTR iatSize = NULL;
+    TCHAR IatFixFileName[MAX_PATH];
+    TCHAR DumpFileName[MAX_PATH];
 
-    if(hProcess == NULL)
-    {
-        return(0x401);		// Error, process terminated
-    }
-    if(SearchStep == NULL)
-    {
-        SearchStep++;
-    }
+    lstrcpy(DumpFileName, szDumpedFile);
+
+    TCHAR* Extension = wcsrchr(DumpFileName, L'.');
+    TCHAR Bak = *Extension;
+    *Extension = 0;
+    lstrcpy(IatFixFileName, DumpFileName);
+    *Extension = Bak;
+    lstrcat(IatFixFileName, L"_");
+    lstrcat(IatFixFileName, Extension);
+    lstrcat(DumpFileName, Extension);
+
+    //do we need to dump first?
+    /*  TODO
     if(DumpRunningProcess)
     {
         if(!DumpProcessW(hProcess, (LPVOID)ImageBase, szDumpedFile, EntryPointAddress))
         {
             return(NULL);	// Critical error! *just to be safe, but it should never happen!
         }
+    }*/
+
+    //we need to fix iat, thats for sure
+    int ret = scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
+
+    if(ret != SCY_ERROR_SUCCESS) {
+        if(ret == SCY_ERROR_PROCOPEN) {
+            return (0x401); //error proc terminated
+        }
+        if(ret == SCY_ERROR_IATNOTFOUND || ret == SCY_ERROR_IATSEARCH) {
+            return (0x405); //no API found
+        }
+    }
+    
+    scylla_getImports(iatStart, iatSize, ProcessId);
+
+    if(!scylla_importsValid()) {
+        //TODO call UnknownPointerFixCallback for every bad import, scylla_wrapper needs to be enhanced tho
+        return (0x405);
     }
 
-    aEnumeratedModules = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
-    if(EnumProcessModules(hProcess, (HMODULE*)aEnumeratedModules, 0x2000, &Dummy))
+    ret = scylla_fixDump(szDumpedFile, IatFixFileName);
+
+    if(ret == SCY_ERROR_IATWRITE) {
+        return (0x407); 
+    }
+
+    //do we need to realign ?
+    if(RealignFile)
     {
-        aSearchMemory = VirtualAlloc(NULL, SearchSize, MEM_COMMIT, PAGE_READWRITE);
-        cSearchMemory = aSearchMemory;
-        __try
+        if(MapFileExW(szDumpedFile, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
         {
-            if(SearchStart == NULL || ReadProcessMemory(hProcess, (LPVOID)SearchStart, aSearchMemory, SearchSize, &ueNumberOfBytesRead))
-            {
-                ImporterInit(MAX_IMPORT_ALLOC, ImageBase);
-                if(SearchStart != NULL)
-                {
-                    //SearchSize = SearchSize / SearchStep;
-                    while((int)SearchSize > NULL)
-                    {
-                        RtlMoveMemory(&PossibleIATPointer, cSearchMemory, sizeof ULONG_PTR);
-                        if(ReadProcessMemory(hProcess, (LPVOID)PossibleIATPointer, &TestReadData, sizeof ULONG_PTR, &ueNumberOfBytesRead))
-                        {
-                            //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                            CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                            if(CurrentDllId == NULL && TryAutoFix == true)
-                            {
-                                TraceIndex = TracerDetectRedirection(hProcess, PossibleIATPointer);
-                                if(TraceIndex > NULL)
-                                {
-                                    PossibleIATPointer = (ULONG_PTR)TracerFixKnownRedirection(hProcess, PossibleIATPointer, TraceIndex);
-                                    if(PossibleIATPointer != NULL)
-                                    {
-                                        //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                        CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                    }
-                                }
-                                else
-                                {
-                                    TracedIATPointer = (ULONG_PTR)TracerLevel1(hProcess, PossibleIATPointer);
-                                    if(TracedIATPointer > 0x1000)
-                                    {
-                                        PossibleIATPointer = TracedIATPointer;
-                                        //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                        CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                    }
-                                    else
-                                    {
-                                        if(TracedIATPointer != NULL)
-                                        {
-                                            TracedIATPointer = (ULONG_PTR)HashTracerLevel1(hProcess, PossibleIATPointer, (DWORD)TracedIATPointer);
-                                            if(TracedIATPointer != NULL)
-                                            {
-                                                PossibleIATPointer = TracedIATPointer;
-                                                //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if(CurrentDllId == NULL && UnknownPointerFixCallback != NULL)
-                            {
-                                __try
-                                {
-                                    PossibleIATPointer = (ULONG_PTR)myFixerCallback((LPVOID)PossibleIATPointer);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-                                    UnknownPointerFixCallback = NULL;
-                                    PossibleIATPointer = NULL;
-                                }
-                                if(PossibleIATPointer != NULL)
-                                {
-                                    //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                    CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                }
-                            }
-                            if(CurrentDllId != NULL)
-                            {
-                                if(LastDllId != CurrentDllId)
-                                {
-                                    LastDllId = CurrentDllId;
-                                    szDLLName = (char*)ImporterGetDLLNameFromDebugee(hProcess, PossibleIATPointer);
-                                    szAPIName = (char*)ImporterGetAPINameFromDebugee(hProcess, PossibleIATPointer);
-                                    if(szDLLName != NULL && szAPIName != NULL)
-                                    {
-                                        ImporterAddNewDll(szDLLName, (ULONG_PTR)((ULONG_PTR)cSearchMemory - (ULONG_PTR)aSearchMemory + SearchStart));
-                                        ImporterAddNewAPI(szAPIName, (ULONG_PTR)((ULONG_PTR)cSearchMemory - (ULONG_PTR)aSearchMemory + SearchStart));
-                                    }
-                                    else if(szDLLName != NULL && szAPIName == NULL)
-                                    {
-                                        ImporterAddNewDll(szDLLName, (ULONG_PTR)((ULONG_PTR)cSearchMemory - (ULONG_PTR)aSearchMemory + SearchStart));
-                                        ImporterAddNewAPI((char*)ImporterGetAPIOrdinalNumberFromDebugee(hProcess, PossibleIATPointer), (ULONG_PTR)((ULONG_PTR)cSearchMemory - (ULONG_PTR)aSearchMemory + SearchStart));
-                                    }
-                                }
-                                else
-                                {
-                                    szAPIName = (char*)ImporterGetAPINameFromDebugee(hProcess, PossibleIATPointer);
-                                    if(szAPIName != NULL)
-                                    {
-                                        ImporterAddNewAPI(szAPIName, (ULONG_PTR)((ULONG_PTR)cSearchMemory - (ULONG_PTR)aSearchMemory + SearchStart));
-                                    }
-                                    else
-                                    {
-                                        szAPIName = (char*)ImporterGetAPIOrdinalNumberFromDebugee(hProcess, PossibleIATPointer);
-                                        if(szAPIName != NULL)
-                                        {
-                                            ImporterAddNewAPI(szAPIName, (ULONG_PTR)((ULONG_PTR)cSearchMemory - (ULONG_PTR)aSearchMemory + SearchStart));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if(PossibleIATPointer == NULL)
-                            {
-                                LastDllId = NULL;
-                            }
-                        }
-                        cSearchMemory = (LPVOID)((ULONG_PTR)cSearchMemory + SearchStep);
-                        SearchSize = SearchSize - SearchStep;
-                    }
-                }
-                if(FixEliminations)
-                {
-                    LastDllId = 1024;
-                    if(ImporterGetAddedDllCount() == NULL)
-                    {
-                        ImporterCleanup();
-                        ImporterInit(MAX_IMPORT_ALLOC, ImageBase);
-                    }
-                    if(GetPE32DataExW(szDumpedFile, &PEStructure))
-                    {
-                        if(MapFileExW(szDumpedFile, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
-                        {
-                            ImporterMoveIAT();
-                            ImporterSetUnknownDelta((ULONG_PTR)EngineEstimateNewSectionRVA(FileMapVA));
-                            for(i = 0; i < PEStructure.SectionNumber; i++)
-                            {
-                                if(GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONRAWSIZE) > 4)
-                                {
-                                    SectionFlags = (DWORD)GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONFLAGS);
-                                    SetionVirtualOffset = (DWORD)GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONVIRTUALOFFSET);
-                                    if(SectionFlags & IMAGE_SCN_MEM_EXECUTE || SectionFlags & IMAGE_SCN_CNT_CODE || SectionFlags & IMAGE_SCN_MEM_WRITE || SectionFlags & IMAGE_SCN_CNT_INITIALIZED_DATA)
-                                    {
-                                        currentSearchPos = (PMEMORY_COMPARE_HANDLER)(FileMapVA + GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONRAWOFFSET));
-                                        currentSectionSize = (int)GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONRAWSIZE) - 6;
-                                        for(j = 0; j < currentSectionSize; j++)
-                                        {
-                                            if(!FileIs64)
-                                            {
-                                                // x86
-                                                delta = 0;
-                                                PossibleThunk = false;
-                                                UpdateJump = false;
-                                                if(currentSearchPos->Array.bArrayEntry[0] == 0xFF && (currentSearchPos->Array.bArrayEntry[1] == 0x15 || currentSearchPos->Array.bArrayEntry[1] == 0x25))
-                                                {
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + 2);
-                                                    PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos - 2);
-                                                    if(PossibleIATPointer > PEStructure.ImageBase && PossibleIATPointer < PEStructure.ImageBase + PEStructure.NtSizeOfImage)
-                                                    {
-                                                        PossibleThunk = true;
-                                                        delta = 2;
-                                                    }
-                                                    else
-                                                    {
-                                                        VirtualQueryEx(hProcess, (LPVOID)PossibleIATPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                        if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect & PAGE_READWRITE || MemInfo.Protect & PAGE_EXECUTE_READWRITE || MemInfo.Protect & PAGE_EXECUTE))
-                                                        {
-                                                            PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                            PossibleThunk = true;
-                                                            delta = 2;
-                                                        }
-                                                    }
-                                                }
-                                                else if(currentSearchPos->Array.bArrayEntry[0] == 0xE8 || currentSearchPos->Array.bArrayEntry[0] == 0xE9)
-                                                {
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + 1);
-                                                    PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset + ImageBase;
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos - 1);
-                                                    if(PossibleIATPointer > PEStructure.ImageBase && PossibleIATPointer < PEStructure.ImageBase + PEStructure.NtSizeOfImage)
-                                                    {
-                                                        PossibleThunk = true;
-                                                        UpdateJump = true;
-                                                        delta = 1;
-                                                    }
-                                                    else
-                                                    {
-                                                        VirtualQueryEx(hProcess, (LPVOID)PossibleIATPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                        if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect & PAGE_READWRITE || MemInfo.Protect & PAGE_EXECUTE_READWRITE || MemInfo.Protect & PAGE_EXECUTE))
-                                                        {
-                                                            PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                            PossibleThunk = true;
-                                                            UpdateJump = true;
-                                                            delta = 1;
-                                                        }
-                                                    }
-                                                }
-                                                else if(currentSearchPos->Array.dwArrayEntry[0] > PEStructure.ImageBase && currentSearchPos->Array.dwArrayEntry[0] < PEStructure.ImageBase + PEStructure.NtSizeOfImage)
-                                                {
-                                                    PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                    PossibleThunk = true;
-                                                    delta = 0;
-                                                }
-                                                else
-                                                {
-                                                    VirtualQueryEx(hProcess, (LPVOID)currentSearchPos->Array.dwArrayEntry[0], &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                    if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect & PAGE_READWRITE || MemInfo.Protect & PAGE_EXECUTE_READWRITE || MemInfo.Protect & PAGE_EXECUTE))
-                                                    {
-                                                        PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                        PossibleThunk = true;
-                                                        delta = 0;
-                                                    }
-                                                }
-                                                if(PossibleThunk)
-                                                {
-                                                    if(ReadProcessMemory(hProcess, (LPVOID)PossibleIATPointer, &dwPossibleIATPointer, 4, &ueNumberOfBytesRead))
-                                                    {
-                                                        VirtualQueryEx(hProcess, (LPVOID)dwPossibleIATPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                        if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect >= PAGE_READONLY || MemInfo.Protect <= PAGE_EXECUTE_READWRITE))
-                                                        {
-                                                            PossibleIATPointer = (ULONG_PTR)dwPossibleIATPointer;
-                                                            //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                            CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                            if(CurrentDllId == NULL && TryAutoFix == true)
-                                                            {
-                                                                TraceIndex = TracerDetectRedirection(hProcess, PossibleIATPointer);
-                                                                if(TraceIndex > NULL)
-                                                                {
-                                                                    PossibleIATPointer = (ULONG_PTR)TracerFixKnownRedirection(hProcess, PossibleIATPointer, TraceIndex);
-                                                                    if(PossibleIATPointer != NULL)
-                                                                    {
-                                                                        //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                        CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                    }
-                                                                }
-                                                                else
-                                                                {
-                                                                    TracedIATPointer = (ULONG_PTR)TracerLevel1(hProcess, PossibleIATPointer);
-                                                                    if(TracedIATPointer > 0x1000)
-                                                                    {
-                                                                        PossibleIATPointer = TracedIATPointer;
-                                                                        //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                        CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        if(TracedIATPointer != NULL)
-                                                                        {
-                                                                            TracedIATPointer = (ULONG_PTR)HashTracerLevel1(hProcess, PossibleIATPointer, (DWORD)TracedIATPointer);
-                                                                            if(TracedIATPointer != NULL)
-                                                                            {
-                                                                                PossibleIATPointer = TracedIATPointer;
-                                                                                //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                                CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                            if(CurrentDllId == NULL && UnknownPointerFixCallback != NULL)
-                                                            {
-                                                                __try
-                                                                {
-                                                                    PossibleIATPointer = (ULONG_PTR)myFixerCallback((LPVOID)PossibleIATPointer);
-                                                                }
-                                                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                                                {
-                                                                    UnknownPointerFixCallback = NULL;
-                                                                    PossibleIATPointer = NULL;
-                                                                }
-                                                                if(PossibleIATPointer != NULL)
-                                                                {
-                                                                    //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                    CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                }
-                                                            }
-                                                            if(CurrentDllId != NULL)
-                                                            {
-                                                                szDLLName = (char*)ImporterGetDLLNameFromDebugee(hProcess, PossibleIATPointer);
-                                                                szAPIName = (char*)ImporterGetAPINameFromDebugee(hProcess, PossibleIATPointer);
-                                                                if(szAPIName == NULL)
-                                                                {
-                                                                    szAPIName = (char*)ImporterGetAPIOrdinalNumberFromDebugee(hProcess, PossibleIATPointer);
-                                                                }
-                                                                if(szDLLName != NULL && szAPIName != NULL)
-                                                                {
-                                                                    if(ImporterGetAddedDllCount() > NULL)
-                                                                    {
-                                                                        PossibleIATPointer = (ULONG_PTR)ImporterFindAPIWriteLocation(szAPIName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        PossibleIATPointer = NULL;
-                                                                    }
-                                                                    if(PossibleIATPointer != NULL)
-                                                                    {
-                                                                        dwPossibleIATPointer = (DWORD)(PossibleIATPointer);
-                                                                        if(!UpdateJump)
-                                                                        {
-                                                                            RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            dwPossibleIATPointer = dwPossibleIATPointer - (j + SetionVirtualOffset) - (DWORD)ImageBase - 5;
-                                                                            RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                        }
-                                                                        currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + delta + 4 - 1);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        if(CurrentDllId != LastDllId)
-                                                                        {
-                                                                            LastDllId = CurrentDllId;
-                                                                            ImporterAddNewDll(szDLLName, NULL);
-                                                                            dwPossibleIATPointer = (DWORD)(ImporterGetCurrentDelta());
-                                                                            if(!UpdateJump)
-                                                                            {
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                dwPossibleIATPointer = dwPossibleIATPointer - (j + SetionVirtualOffset) - (DWORD)ImageBase - 5;
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                            }
-                                                                            ImporterAddNewAPI(szAPIName, NULL);
-                                                                            currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + delta + 4 - 1);
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            dwPossibleIATPointer = (DWORD)(ImporterGetCurrentDelta());
-                                                                            if(!UpdateJump)
-                                                                            {
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                dwPossibleIATPointer = dwPossibleIATPointer - (j + SetionVirtualOffset) - (DWORD)ImageBase - 5;
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                            }
-                                                                            ImporterAddNewAPI(szAPIName, NULL);
-                                                                            currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + delta + 4 - 1);
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        if(PossibleIATPointer == NULL)
-                                                        {
-                                                            LastDllId = NULL;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                // x64
-                                                delta = 0;
-                                                PossibleThunk = false;
-                                                UpdateJump = false;
-                                                if(currentSearchPos->Array.bArrayEntry[0] == 0xFF && (currentSearchPos->Array.bArrayEntry[1] == 0x15 || currentSearchPos->Array.bArrayEntry[1] == 0x25))
-                                                {
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + 2);
-                                                    PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset + ImageBase;
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos - 2);
-                                                    if(PossibleIATPointer > PEStructure.ImageBase && PossibleIATPointer < PEStructure.ImageBase + PEStructure.NtSizeOfImage)
-                                                    {
-                                                        PossibleThunk = true;
-                                                        delta = 2;
-                                                    }
-                                                    else
-                                                    {
-                                                        VirtualQueryEx(hProcess, (LPVOID)PossibleIATPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                        if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect & PAGE_READWRITE || MemInfo.Protect & PAGE_EXECUTE_READWRITE || MemInfo.Protect & PAGE_EXECUTE))
-                                                        {
-                                                            PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                            PossibleThunk = true;
-                                                            delta = 2;
-                                                        }
-                                                    }
-                                                }
-                                                else if(currentSearchPos->Array.bArrayEntry[0] == 0xE8 || currentSearchPos->Array.bArrayEntry[0] == 0xE9)
-                                                {
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + 1);
-                                                    PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset + ImageBase;
-                                                    currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos - 1);
-                                                    if(PossibleIATPointer > PEStructure.ImageBase && PossibleIATPointer < PEStructure.ImageBase + PEStructure.NtSizeOfImage)
-                                                    {
-                                                        PossibleThunk = true;
-                                                        UpdateJump = true;
-                                                        delta = 1;
-                                                    }
-                                                    else
-                                                    {
-                                                        VirtualQueryEx(hProcess, (LPVOID)PossibleIATPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                        if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect & PAGE_READWRITE || MemInfo.Protect & PAGE_EXECUTE_READWRITE || MemInfo.Protect & PAGE_EXECUTE))
-                                                        {
-                                                            PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0];
-                                                            PossibleThunk = true;
-                                                            UpdateJump = true;
-                                                            delta = 1;
-                                                        }
-                                                    }
-                                                }
-                                                else if(currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset > PEStructure.ImageBase && currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset < PEStructure.ImageBase + PEStructure.NtSizeOfImage)
-                                                {
-                                                    PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset + ImageBase;
-                                                    PossibleThunk = true;
-                                                    delta = 0;
-                                                }
-                                                else
-                                                {
-                                                    VirtualQueryEx(hProcess, (LPVOID)(currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset), &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                    if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect & PAGE_READWRITE || MemInfo.Protect & PAGE_EXECUTE_READWRITE || MemInfo.Protect & PAGE_EXECUTE))
-                                                    {
-                                                        PossibleIATPointer = currentSearchPos->Array.dwArrayEntry[0] + j + SetionVirtualOffset + ImageBase;
-                                                        PossibleThunk = true;
-                                                        delta = 0;
-                                                    }
-                                                }
-                                                if(PossibleThunk)
-                                                {
-                                                    if(ReadProcessMemory(hProcess, (LPVOID)PossibleIATPointer, &qwPossibleIATPointer, 8, &ueNumberOfBytesRead))
-                                                    {
-                                                        VirtualQueryEx(hProcess, (LPVOID)qwPossibleIATPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                                        if(MemInfo.State == MEM_COMMIT && (MemInfo.Protect >= PAGE_READONLY || MemInfo.Protect <= PAGE_EXECUTE_READWRITE))
-                                                        {
-                                                            PossibleIATPointer = qwPossibleIATPointer;
-                                                            //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                            CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                            if(CurrentDllId == NULL && TryAutoFix == true)
-                                                            {
-                                                                TraceIndex = TracerDetectRedirection(hProcess, PossibleIATPointer);
-                                                                if(TraceIndex > NULL)
-                                                                {
-                                                                    PossibleIATPointer = (ULONG_PTR)TracerFixKnownRedirection(hProcess, PossibleIATPointer, TraceIndex);
-                                                                    if(PossibleIATPointer != NULL)
-                                                                    {
-                                                                        //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                        CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                    }
-                                                                }
-                                                                else
-                                                                {
-                                                                    TracedIATPointer = (ULONG_PTR)TracerLevel1(hProcess, PossibleIATPointer);
-                                                                    if(TracedIATPointer > 0x1000)
-                                                                    {
-                                                                        PossibleIATPointer = TracedIATPointer;
-                                                                        //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                        CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        if(TracedIATPointer != NULL)
-                                                                        {
-                                                                            TracedIATPointer = (ULONG_PTR)HashTracerLevel1(hProcess, PossibleIATPointer, (DWORD)TracedIATPointer);
-                                                                            if(TracedIATPointer != NULL)
-                                                                            {
-                                                                                PossibleIATPointer = TracedIATPointer;
-                                                                                //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                                CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                            if(CurrentDllId == NULL && UnknownPointerFixCallback != NULL)
-                                                            {
-                                                                __try
-                                                                {
-                                                                    PossibleIATPointer = (ULONG_PTR)myFixerCallback((LPVOID)PossibleIATPointer);
-                                                                }
-                                                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                                                {
-                                                                    UnknownPointerFixCallback = NULL;
-                                                                    PossibleIATPointer = NULL;
-                                                                }
-                                                                if(PossibleIATPointer != NULL)
-                                                                {
-                                                                    //CurrentDllId = ImporterGetDLLIndexEx(PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                    CurrentDllId = ImporterGetDLLIndex(hProcess, PossibleIATPointer, (ULONG_PTR)aEnumeratedModules);
-                                                                }
-                                                            }
-                                                            if(CurrentDllId != NULL)
-                                                            {
-                                                                szDLLName = (char*)ImporterGetDLLNameFromDebugee(hProcess, PossibleIATPointer);
-                                                                szAPIName = (char*)ImporterGetAPINameFromDebugee(hProcess, PossibleIATPointer);
-                                                                if(szAPIName == NULL)
-                                                                {
-                                                                    szAPIName = (char*)ImporterGetAPIOrdinalNumberFromDebugee(hProcess, PossibleIATPointer);
-                                                                }
-                                                                if(szDLLName != NULL && szAPIName != NULL)
-                                                                {
-                                                                    if(ImporterGetAddedDllCount() > NULL)
-                                                                    {
-                                                                        PossibleIATPointer = (ULONG_PTR)ImporterFindAPIWriteLocation(szAPIName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        PossibleIATPointer = NULL;
-                                                                    }
-                                                                    if(PossibleIATPointer != NULL)
-                                                                    {
-                                                                        if(!UpdateJump)
-                                                                        {
-                                                                            dwPossibleIATPointer = (DWORD)(PossibleIATPointer - j - SetionVirtualOffset - ImageBase);
-                                                                            RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            dwPossibleIATPointer = (DWORD)(PossibleIATPointer);
-                                                                            dwPossibleIATPointer = (DWORD)(dwPossibleIATPointer - (j + SetionVirtualOffset) - (ULONG_PTR)ImageBase - 5);
-                                                                            RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &dwPossibleIATPointer, 4);
-                                                                        }
-                                                                        currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + delta + 4 - 1);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        if(CurrentDllId != LastDllId)
-                                                                        {
-                                                                            LastDllId = CurrentDllId;
-                                                                            ImporterAddNewDll(szDLLName, NULL);
-                                                                            qwPossibleIATPointer = (ULONG_PTR)(ImporterGetCurrentDelta());
-                                                                            if(!UpdateJump)
-                                                                            {
-                                                                                qwPossibleIATPointer = (DWORD)(qwPossibleIATPointer - j - SetionVirtualOffset - ImageBase);
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &qwPossibleIATPointer, 4);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                qwPossibleIATPointer = (DWORD)(qwPossibleIATPointer - j - SetionVirtualOffset - ImageBase - 5);
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &qwPossibleIATPointer, 4);
-                                                                            }
-                                                                            ImporterAddNewAPI(szAPIName, NULL);
-                                                                            currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + delta + 4 - 1);
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            qwPossibleIATPointer = (ULONG_PTR)(ImporterGetCurrentDelta());
-                                                                            if(!UpdateJump)
-                                                                            {
-                                                                                qwPossibleIATPointer = (DWORD)(qwPossibleIATPointer - j - SetionVirtualOffset - ImageBase);
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &qwPossibleIATPointer, 4);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                qwPossibleIATPointer = (DWORD)(qwPossibleIATPointer - j - SetionVirtualOffset - ImageBase - 5);
-                                                                                RtlMoveMemory(&currentSearchPos->Array.dwArrayEntry[0 + delta], &qwPossibleIATPointer, 4);
-                                                                            }
-                                                                            ImporterAddNewAPI(szAPIName, NULL);
-                                                                            currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + delta + 4 - 1);
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        if(PossibleIATPointer == NULL)
-                                                        {
-                                                            LastDllId = NULL;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            currentSearchPos = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)currentSearchPos + 1);
-                                        }
-                                    }
-                                }
-                            }
-                            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        }
-                        else
-                        {
-                            return(0x405);	// Error, no API found!
-                        }
-                    }
-                }
-                VirtualFree(aEnumeratedModules, NULL, MEM_RELEASE);
-                VirtualFree(aSearchMemory, NULL, MEM_RELEASE);
-                if(ImporterGetAddedDllCount() > NULL && ImporterGetAddedAPICount() > NULL)
-                {
-                    if(!ImporterExportIATExW(szDumpedFile, szSectionName))
-                    {
-                        return(NULL); // Critical error! *just to be safe, but it should never happen!
-                    }
-                }
-                else
-                {
-                    return(0x405);	// Error, no API found!
-                }
-                if(RealignFile)
-                {
-                    if(MapFileExW(szDumpedFile, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
-                    {
-                        FileSize = RealignPE(FileMapVA, FileSize, NULL);
-                        UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    }
-                    else
-                    {
-                        return(0x406);	// Success, but realign failed!
-                    }
-                }
-                return(0x400);	// Success!
-            }
-            else
-            {
-                VirtualFree(aEnumeratedModules, NULL, MEM_RELEASE);
-                VirtualFree(aSearchMemory, NULL, MEM_RELEASE);
-                return(0x404);	// Error, memory could not be read!
-            }
+            FileSize = RealignPE(FileMapVA, FileSize, NULL);
+            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         }
-        __except(EXCEPTION_EXECUTE_HANDLER)
+        else
         {
-            ImporterCleanup();
-            VirtualFree(aEnumeratedModules, NULL, MEM_RELEASE);
-            VirtualFree(aSearchMemory, NULL, MEM_RELEASE);
-            return(NULL);	// Critical error! *just to be safe, but it should never happen!
+            return(0x406);	// Success, but realign failed!
         }
     }
-    VirtualFree(aEnumeratedModules, NULL, MEM_RELEASE);
-    return(NULL);	// Critical error! *just te bo safe, but it should never happen!
+    return(0x400);	// Success!
 }
-__declspec(dllexport) long TITCALL ImporterAutoFixIAT(HANDLE hProcess, char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
+__declspec(dllexport) long TITCALL ImporterAutoFixIAT(DWORD ProcessId, char* szDumpedFile, ULONG_PTR SearchStart)
 {
-    return(ImporterAutoFixIATEx(hProcess, szDumpedFile, ".RL!TEv2", false, false, NULL, ImageBase, SearchStart, SearchSize, SearchStep, false, false, NULL));
+    return(ImporterAutoFixIATEx(ProcessId, szDumpedFile, ".RL!TEv2", false, false, NULL, SearchStart, false, false, NULL));
 }
-__declspec(dllexport) long TITCALL ImporterAutoFixIATW(HANDLE hProcess, wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
+__declspec(dllexport) long TITCALL ImporterAutoFixIATW(DWORD ProcessId, wchar_t* szDumpedFile, ULONG_PTR SearchStart)
 {
-    return(ImporterAutoFixIATExW(hProcess, szDumpedFile, ".RL!TEv2", false, false, NULL, ImageBase, SearchStart, SearchSize, SearchStep, false, false, NULL));
+    return(ImporterAutoFixIATExW(ProcessId, szDumpedFile, ".RL!TEv2", false, false, NULL, SearchStart, false, false, NULL));
 }
 // Internal.Engine.Hook.functions:
 bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATAW ModuleInformation, DWORD SizeOfImage)
