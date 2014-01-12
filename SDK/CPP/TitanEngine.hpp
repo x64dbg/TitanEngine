@@ -1801,9 +1801,9 @@ protected:
 	{
 		return (const char*)UE::ImporterGetNearestAPIName(hProcess, APIAddress);
 	}
-	static void AutoSearchIATEx(HANDLE hProcess, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
+	static void AutoSearchIATEx(DWORD ProcessId, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
 	{
-		UE::ImporterAutoSearchIATEx(hProcess, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize);
+		UE::ImporterAutoSearchIATEx(ProcessId, ImageBase, SearchStart, pIATStart, pIATSize);
 	}
 	static void EnumAddedData(fImportEnumCallBack EnumCallBack)
 	{
@@ -1831,17 +1831,17 @@ public:
 	{
 		return UE::ImporterMoveOriginalIAT((char*)szOriginalFile, (char*)szDumpFile, (char*)szSectionName);
 	}
-	static void AutoSearchIAT(HANDLE hProcess, const char* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
+	static void AutoSearchIAT(DWORD ProcessId, char* szFileName, ULONG_PTR SearchStart, LPVOID pIATStart, LPVOID pIATSize)
 	{
-		UE::ImporterAutoSearchIAT(hProcess, (char*)szFileName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize);
+		UE::ImporterAutoSearchIAT(ProcessId, (char*)szFileName, SearchStart, pIATStart, pIATSize);
 	}
-	static long AutoFixIATEx(HANDLE hProcess, const char* szDumpedFile, const char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, ImporterX::fImportFixCallback UnknownPointerFixCallback)
+	static long AutoFixIATEx(DWORD ProcessId, const char* szDumpedFile, const char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, ImporterX::fImportFixCallback UnknownPointerFixCallback)
 	{
-		return UE::ImporterAutoFixIATEx(hProcess, (char*)szDumpedFile, (char*)szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, SearchSize, SearchStep, TryAutoFix, FixEliminations, (void*)UnknownPointerFixCallback);
+		return UE::ImporterAutoFixIATEx(ProcessId, (char*)szDumpedFile, (char*)szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, (void*)UnknownPointerFixCallback);
 	}
-	static long AutoFixIAT(HANDLE hProcess, const char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
+	static long AutoFixIAT(DWORD ProcessId, const char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart)
 	{
-		return UE::ImporterAutoFixIAT(hProcess, (char*)szDumpedFile, ImageBase, SearchStart, SearchSize, SearchStep);
+		return UE::ImporterAutoFixIAT(ProcessId, (char*)szDumpedFile, ImageBase, SearchStart);
 	}
 };
 
@@ -1865,17 +1865,17 @@ public:
 	{
 		return UE::ImporterMoveOriginalIATW((wchar_t*)szOriginalFile, (wchar_t*)szDumpFile, (char*)szSectionName);
 	}
-	static void AutoSearchIAT(HANDLE hProcess, const wchar_t* szFileName, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
+	static void AutoSearchIAT(DWORD ProcessId, const wchar_t* szFileName, ULONG_PTR SearchStart, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
 	{
-		UE::ImporterAutoSearchIATW(hProcess, (wchar_t*)szFileName, ImageBase, SearchStart, SearchSize, pIATStart, pIATSize);
+		UE::ImporterAutoSearchIATW(ProcessId, (wchar_t*)szFileName, SearchStart, pIATStart, pIATSize);
 	}
-	static long AutoFixIATEx(HANDLE hProcess, const wchar_t* szDumpedFile, const char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep, bool TryAutoFix, bool FixEliminations, ImporterX::fImportFixCallback UnknownPointerFixCallback)
+	static long AutoFixIATEx(DWORD ProcessId, const wchar_t* szDumpedFile, const char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, bool TryAutoFix, bool FixEliminations, ImporterX::fImportFixCallback UnknownPointerFixCallback)
 	{
-		return UE::ImporterAutoFixIATExW(hProcess, (wchar_t*)szDumpedFile, (char*)szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, SearchSize, SearchStep, TryAutoFix, FixEliminations, (void*)UnknownPointerFixCallback);
+		return UE::ImporterAutoFixIATExW(ProcessId, (wchar_t*)szDumpedFile, (char*)szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, (void*)UnknownPointerFixCallback);
 	}
-	static long AutoFixIAT(HANDLE hProcess, const wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, DWORD SearchStep)
+	static long AutoFixIAT(DWORD ProcessId, const wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart)
 	{
-		return UE::ImporterAutoFixIATW(hProcess, (wchar_t*)szDumpedFile, ImageBase, SearchStart, SearchSize, SearchStep);
+		return UE::ImporterAutoFixIATW(ProcessId, (wchar_t*)szDumpedFile, ImageBase, SearchStart);
 	}
 };
 
