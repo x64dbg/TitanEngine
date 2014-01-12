@@ -18697,142 +18697,8 @@ __declspec(dllexport) void TITCALL ImporterMoveIAT()
 }
 __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
 {
-
-    int i = 0;
-    int j = 0;
-    int x = 0;
-    int NumberOfAPIs = NULL;
-    DWORD DLLNumber = NULL;
-    DWORD APINumber = NULL;
-    PIMAGE_IMPORT_DESCRIPTOR StoreIID = (PIMAGE_IMPORT_DESCRIPTOR)StorePlace;
-    ULONG_PTR StorePlaceVA = (ULONG_PTR)ConvertFileOffsetToVA(FileMapVA, StorePlace, true);
-    ULONG_PTR OriginalStorePlaceRVA = (DWORD)(StorePlaceVA - impImageBase);
-    ULONG_PTR StringStorePlaceFO = StorePlace + ((impDLLNumber + 2) * sizeof IMAGE_IMPORT_DESCRIPTOR);
-    ULONG_PTR StringStorePlaceVA = StorePlaceVA + ((impDLLNumber + 2) * sizeof IMAGE_IMPORT_DESCRIPTOR);
-    ULONG_PTR ThunkStorePlaceFO = NULL;
-    ULONG_PTR ThunkReadValue = NULL;
-    LPVOID ThunkReadPlace = NULL;
-    ULONG_PTR FirstThunk = NULL;
-    ULONG_PTR CurrentThunk = NULL;
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
-    bool FileIs64 = false;
-    bool OrdinalImport = false;
-
-    if(ImporterGetAddedDllCount() > NULL)
-    {
-        if(impMoveIAT)
-        {
-            NumberOfAPIs = ImporterGetAddedAPICount() + ImporterGetAddedDllCount();
-            StorePlaceVA = StorePlaceVA + (NumberOfAPIs * sizeof ULONG_PTR);
-            StringStorePlaceFO = StringStorePlaceFO + (NumberOfAPIs * sizeof ULONG_PTR);
-            StringStorePlaceVA = StringStorePlaceVA + (NumberOfAPIs * sizeof ULONG_PTR);
-            OriginalStorePlaceRVA = OriginalStorePlaceRVA + (NumberOfAPIs * sizeof ULONG_PTR);
-            StoreIID = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)StorePlace + (NumberOfAPIs * sizeof ULONG_PTR));
-        }
-
-        __try
-        {
-            DLLNumber = impDLLNumber + 1;
-            while(DLLNumber > NULL)
-            {
-                RtlMoveMemory(&FirstThunk, (LPVOID)impDLLDataList[i][0], sizeof ULONG_PTR);
-                StoreIID->FirstThunk = (DWORD)(FirstThunk - impImageBase);
-                StoreIID->Name = (DWORD)(StringStorePlaceVA - impImageBase);
-                RtlMoveMemory((LPVOID)StringStorePlaceFO, (LPVOID)impDLLStringList[i][0], (int)(impDLLStringList[i][1] - impDLLStringList[i][0]));
-                StringStorePlaceFO = StringStorePlaceFO + (int)(impDLLStringList[i][1] - impDLLStringList[i][0]);
-#if !defined(_WIN64)
-                ThunkReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-#else
-                ThunkReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-#endif
-                ThunkStorePlaceFO = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, FirstThunk, true);
-                RtlMoveMemory(&APINumber, (LPVOID)(impDLLDataList[i][0] + 2 * sizeof ULONG_PTR), 4);
-                CurrentThunk = FirstThunk;
-                APINumber--;
-                while(APINumber > NULL)
-                {
-                    OrdinalImport = false;
-                    for(j = 0; j < 1000; j++)
-                    {
-                        if(impOrdinalList[j][0] == CurrentThunk)
-                        {
-                            OrdinalImport = true;
-                            x = j;
-                            j = 1000;
-                        }
-                        else if(impOrdinalList[j][0] == NULL)
-                        {
-                            j = 1000;
-                        }
-                    }
-                    if(!OrdinalImport)
-                    {
-                        RtlMoveMemory(&ThunkReadValue, ThunkReadPlace, 4);
-                        ThunkReadValue = ThunkReadValue + StringStorePlaceVA - impImageBase;
-                        RtlMoveMemory((LPVOID)ThunkStorePlaceFO, &ThunkReadValue, sizeof ULONG_PTR);
-                        ThunkReadPlace = (LPVOID)((ULONG_PTR)ThunkReadPlace + 4);
-                        ThunkStorePlaceFO = ThunkStorePlaceFO + sizeof ULONG_PTR;
-                    }
-                    else
-                    {
-                        j = x;
-                        ThunkReadValue = impOrdinalList[j][1];
-                        RtlMoveMemory((LPVOID)ThunkStorePlaceFO, &ThunkReadValue, sizeof ULONG_PTR);
-                        ThunkReadPlace = (LPVOID)((ULONG_PTR)ThunkReadPlace + 4);
-                        ThunkStorePlaceFO = ThunkStorePlaceFO + sizeof ULONG_PTR;
-                    }
-                    CurrentThunk = CurrentThunk + sizeof ULONG_PTR;
-                    APINumber--;
-                }
-                ThunkReadValue = 0;
-                RtlMoveMemory((LPVOID)ThunkStorePlaceFO, &ThunkReadValue, sizeof ULONG_PTR);
-
-                StorePlaceVA = StorePlaceVA + (int)(impDLLStringList[i][1] - impDLLStringList[i][0]);
-                StringStorePlaceVA = StringStorePlaceVA + (int)(impDLLStringList[i][1] - impDLLStringList[i][0]);
-                StoreIID = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)StoreIID + sizeof IMAGE_IMPORT_DESCRIPTOR);
-                DLLNumber--;
-                i++;
-            }
-
-            DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
-            if(EngineValidateHeader(FileMapVA, NULL, NULL, DOSHeader, true))
-            {
-                PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-                PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-                if(PEHeader32->OptionalHeader.Magic == 0x10B)
-                {
-                    FileIs64 = false;
-                }
-                else if(PEHeader32->OptionalHeader.Magic == 0x20B)
-                {
-                    FileIs64 = true;
-                }
-                if(!FileIs64)
-                {
-                    PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = (DWORD)OriginalStorePlaceRVA;
-                    PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size = (DWORD)((impDLLNumber + 2) * sizeof IMAGE_IMPORT_DESCRIPTOR);
-                }
-                else
-                {
-                    PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = (DWORD)OriginalStorePlaceRVA;
-                    PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size = (DWORD)((impDLLNumber + 2) * sizeof IMAGE_IMPORT_DESCRIPTOR);
-                }
-            }
-            ImporterCleanup();
-            return(true);
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-            ImporterCleanup();
-            return(false);
-        }
-    }
-    else
-    {
-        return(false);
-    }
+    //TODO this needs an scylla_wrapper update for exporting to a VA
+    return false;
 }
 __declspec(dllexport) long TITCALL ImporterEstimatedSize()
 {
@@ -18879,41 +18745,11 @@ __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szExportFileName, c
 }
 __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szExportFileName, char* szSectionName)
 {
-
-    HANDLE FileHandle;
-    DWORD FileSize;
-    HANDLE FileMap;
-    ULONG_PTR FileMapVA;
-    DWORD NewSectionVO = NULL;
-    DWORD NewSectionFO = NULL;
-    bool ReturnValue = false;
-
-    if(ImporterGetAddedDllCount() > NULL)
-    {
-        NewSectionVO = AddNewSectionW(szExportFileName, szSectionName, ImporterEstimatedSize());
-        if(MapFileExW(szExportFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
-        {
-            NewSectionFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, NewSectionVO + impImageBase, true);
-            ReturnValue = ImporterExportIAT(NewSectionFO, FileMapVA);
-            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            if(ReturnValue)
-            {
-                return(true);
-            }
-            else
-            {
-                return(false);
-            }
-        }
-        else
-        {
-            return(false);
-        }
+    if(scylla_fixDump(szExportFileName, L".scy") != SCY_ERROR_SUCCESS) {
+        return false;
     }
-    else
-    {
-        return(false);
-    }
+
+    return true;
 }
 __declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPIName)
 {
