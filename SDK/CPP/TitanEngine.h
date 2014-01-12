@@ -792,8 +792,8 @@ __declspec(dllimport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULON
 __declspec(dllimport) void TITCALL ImporterEnumAddedData(LPVOID EnumCallBack);
 __declspec(dllimport) long TITCALL ImporterAutoFixIATEx(DWORD ProcessId, char* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback);
 __declspec(dllimport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_t* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart,  bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback);
-__declspec(dllimport) long TITCALL ImporterAutoFixIAT(DWORD ProcessId, char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart);
-__declspec(dllimport) long TITCALL ImporterAutoFixIATW(DWORD ProcessId, wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart);
+__declspec(dllimport) long TITCALL ImporterAutoFixIAT(DWORD ProcessId, char* szDumpedFile, ULONG_PTR SearchStart);
+__declspec(dllimport) long TITCALL ImporterAutoFixIATW(DWORD ProcessId, wchar_t* szDumpedFile, ULONG_PTR SearchStart);
 // Global.Engine.Hook.functions:
 __declspec(dllimport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray, int NumberOfHooks, bool TransitionStart);
 __declspec(dllimport) bool TITCALL HooksSafeTransition(LPVOID HookAddress, bool TransitionStart);

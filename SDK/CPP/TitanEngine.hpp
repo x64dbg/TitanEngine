@@ -1839,9 +1839,9 @@ public:
 	{
 		return UE::ImporterAutoFixIATEx(ProcessId, (char*)szDumpedFile, (char*)szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, (void*)UnknownPointerFixCallback);
 	}
-	static long AutoFixIAT(DWORD ProcessId, const char* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart)
+	static long AutoFixIAT(DWORD ProcessId, const char* szDumpedFile, ULONG_PTR SearchStart)
 	{
-		return UE::ImporterAutoFixIAT(ProcessId, (char*)szDumpedFile, ImageBase, SearchStart);
+		return UE::ImporterAutoFixIAT(ProcessId, (char*)szDumpedFile, SearchStart);
 	}
 };
 
@@ -1873,9 +1873,9 @@ public:
 	{
 		return UE::ImporterAutoFixIATExW(ProcessId, (wchar_t*)szDumpedFile, (char*)szSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, (void*)UnknownPointerFixCallback);
 	}
-	static long AutoFixIAT(DWORD ProcessId, const wchar_t* szDumpedFile, ULONG_PTR ImageBase, ULONG_PTR SearchStart)
+	static long AutoFixIAT(DWORD ProcessId, const wchar_t* szDumpedFile, ULONG_PTR SearchStart)
 	{
-		return UE::ImporterAutoFixIATW(ProcessId, (wchar_t*)szDumpedFile, ImageBase, SearchStart);
+		return UE::ImporterAutoFixIATW(ProcessId, (wchar_t*)szDumpedFile, SearchStart);
 	}
 };
 
