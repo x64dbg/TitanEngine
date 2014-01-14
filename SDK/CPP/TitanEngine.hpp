@@ -1801,7 +1801,7 @@ protected:
 	{
 		return (const char*)UE::ImporterGetNearestAPIName(hProcess, APIAddress);
 	}
-	static void AutoSearchIATEx(DWORD ProcessId, ULONG_PTR ImageBase, ULONG_PTR SearchStart, DWORD SearchSize, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
+	static void AutoSearchIATEx(DWORD ProcessId, ULONG_PTR ImageBase, ULONG_PTR SearchStart, ULONG_PTR* pIATStart, ULONG_PTR* pIATSize)
 	{
 		UE::ImporterAutoSearchIATEx(ProcessId, ImageBase, SearchStart, pIATStart, pIATSize);
 	}
