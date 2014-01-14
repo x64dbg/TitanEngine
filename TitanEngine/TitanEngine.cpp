@@ -18695,10 +18695,13 @@ __declspec(dllexport) void TITCALL ImporterMoveIAT()
 {
     impMoveIAT = true;
 }
-__declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
+__declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap)
 {
-    //TODO this needs an scylla_wrapper update for exporting to a VA
-    return false;
+    if(scylla_fixMappedDump(StorePlace, FileMapVA, hFileMap) != SCY_ERROR_SUCCESS) {
+        return false;
+    }
+
+    return true;
 }
 __declspec(dllexport) long TITCALL ImporterEstimatedSize()
 {
@@ -19418,7 +19421,9 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar
     scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
     
     //we also try to automatically read imports so following call to ExportIAT has a chance 
-    scylla_getImports(iatStart, iatSize, ProcessId);
+    if(iatStart != NULL && iatSize != NULL) {
+        scylla_getImports(iatStart, iatSize, ProcessId);
+    }
 
     RtlMoveMemory(pIATStart, &iatStart, sizeof ULONG_PTR);
     RtlMoveMemory(pIATSize, &iatSize, sizeof ULONG_PTR);
@@ -26903,7 +26908,7 @@ void EngineSimplifyEntryPointCallBack()
         }
         if(StaticFileLoadW(szEngineUnpackerOutputFile, UE_ACCESS_ALL, false, &FileHandle, &FileSize, &FileMap, &FileMapVA))
         {
-            if(ImporterExportIAT((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, mImportTableOffset, true), FileMapVA))
+            if(ImporterExportIAT((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, mImportTableOffset, true), FileMapVA, FileHandle))
             {
                 if(EngineUnpackerOptionLogData)
                 {

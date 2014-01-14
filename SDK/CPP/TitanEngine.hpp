@@ -1693,9 +1693,9 @@ protected:
 	{
 		UE::ImporterMoveIAT();
 	}
-	static bool ExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA)
+	static bool ExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap)
 	{
-		return UE::ImporterExportIAT(StorePlace, FileMapVA);
+		return UE::ImporterExportIAT(StorePlace, FileMapVA, hFileMap);
 	}
 	static long EstimatedSize()
 	{

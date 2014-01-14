@@ -751,7 +751,7 @@ __declspec(dllimport) long TITCALL ImporterGetAddedDllCount();
 __declspec(dllimport) long TITCALL ImporterGetAddedAPICount();
 __declspec(dllimport) void* TITCALL ImporterGetLastAddedDLLName();
 __declspec(dllimport) void TITCALL ImporterMoveIAT();
-__declspec(dllimport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA);
+__declspec(dllimport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap);
 __declspec(dllimport) long TITCALL ImporterEstimatedSize();
 __declspec(dllimport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, char* szExportFileName, char* szSectionName);
 __declspec(dllimport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, wchar_t* szSectionName = L".RL!TEv2");
