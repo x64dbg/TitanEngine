@@ -149,3 +149,8 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
+
+*.cscope_file_list
+*.bmarks
+*.depend
+*.layout

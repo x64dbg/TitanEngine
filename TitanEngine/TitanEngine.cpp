@@ -19416,7 +19416,7 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* 
 __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar_t* szFileName, ULONG_PTR SearchStart, LPVOID pIATStart, LPVOID pIATSize)
 { 
     ULONG_PTR iatStart = NULL;
-    ULONG_PTR iatSize = NULL;
+    DWORD iatSize = NULL;
 
     scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
     
@@ -19554,7 +19554,7 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
     ULONG_PTR iatStart = NULL;
-    ULONG_PTR iatSize = NULL;
+    DWORD iatSize = NULL;
     TCHAR IatFixFileName[MAX_PATH];
     TCHAR DumpFileName[MAX_PATH];
 
@@ -27542,9 +27542,9 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginNa
     }
     return(false);
 }
+
 __declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(char* szPluginName)
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
@@ -27554,6 +27554,7 @@ __declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(char* szPlugin
     }
     return(NULL);
 }
+
 // Global.Garbage.functions:
 bool CreateGarbageItem(void* outGargabeItem, int MaxGargabeStringSize)
 {
