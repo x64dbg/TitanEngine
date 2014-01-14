@@ -19442,9 +19442,9 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULON
     {
         if(GetTempFileNameW(szTempFolder, L"DumpTemp", GetTickCount() + 102, szTempName))
         {
-            //HANDLE hProcess = 0;
-            //hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
-            //DumpProcessW(ProcessId, (LPVOID)ImageBase, szTempName, NULL);  TODO
+            HANDLE hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+
+            DumpProcessW(hProcess, (LPVOID)ImageBase, szTempName, NULL);
             ImporterAutoSearchIATW(ProcessId, szTempName, SearchStart, pIATStart, pIATSize);
             DeleteFileW(szTempName);
         }
