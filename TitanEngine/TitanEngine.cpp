@@ -19570,14 +19570,15 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     lstrcat(DumpFileName, Extension);
 
     //do we need to dump first?
-    /*  TODO
     if(DumpRunningProcess)
     {
+        HANDLE hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+
         if(!DumpProcessW(hProcess, (LPVOID)ImageBase, szDumpedFile, EntryPointAddress))
         {
             return(NULL);	// Critical error! *just to be safe, but it should never happen!
         }
-    }*/
+    }
 
     //we need to fix iat, thats for sure
     int ret = scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
