@@ -7449,16 +7449,16 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
 {
     unsigned int i;
     ULONG_PTR ReadData = NULL;
-    DWORD ReadSize = NULL;
-    WORD ReadDataWORD = NULL;
+    DWORD ReadSize = 0;
+    WORD ReadDataWORD = 0;
     ULONG_PTR hSimulatedFileLoad;
-    DWORD SectionNumber = NULL;
-    DWORD SectionAttributes = NULL;
+    long SectionNumber = 0;
+    DWORD SectionAttributes = 0;
     ULONG_PTR ConvertedAddress = NULL;
-    DWORD CorrectedImageSize = NULL;
-    DWORD SectionVirtualSize = NULL;
-    DWORD SectionVirtualSizeFixed = NULL;
-    DWORD NumberOfSections = NULL;
+    DWORD CorrectedImageSize = 0;
+    DWORD SectionVirtualSize = 0;
+    DWORD SectionVirtualSizeFixed = 0;
+    DWORD NumberOfSections = 0;
     FILE_STATUS_INFO myFileStatusInfo;
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
@@ -9034,7 +9034,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
     ULONG_PTR ReadDataQWORD = NULL;
     DWORD OrdinalBase = NULL;
     DWORD OrdinalCount = NULL;
-    DWORD SectionNumber = NULL;
+    long SectionNumber = NULL;
     DWORD SectionAttributes = NULL;
     ULONG_PTR ConvertedAddress = NULL;
     DWORD CorrectedImageSize = NULL;
