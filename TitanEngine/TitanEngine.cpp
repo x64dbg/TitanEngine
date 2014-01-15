@@ -636,8 +636,8 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
 
     bool StringIsValid = true;
     unsigned int i = 512;
-    MEMORY_BASIC_INFORMATION MemInfo;
-    DWORD MaxDisassmSize;
+	MEMORY_BASIC_INFORMATION MemInfo = {0};
+    DWORD MaxDisassmSize = 512;
     BYTE TestChar;
 
     VirtualQueryEx(GetCurrentProcess(), (LPVOID)PossibleStringPtr, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -651,19 +651,13 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
             {
                 i = MaxDisassmSize;
             }
-            else
-            {
-                MaxDisassmSize = 512;
-            }
         }
-        else
-        {
-            MaxDisassmSize = 512;
-        }
-        RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+
+		TestChar = *((BYTE*)PossibleStringPtr);
         while(i > NULL && StringIsValid == true && TestChar != 0x00)
         {
-            RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+			TestChar = *((BYTE*)PossibleStringPtr);
+
             if(TestChar < 32 || TestChar > 126)
             {
                 if(TestChar != 0x00)
@@ -691,7 +685,7 @@ int EnginePointedMemoryStringLength(ULONG_PTR PossibleStringPtr)
     bool StringIsValid = true;
     unsigned int i = 512;
     MEMORY_BASIC_INFORMATION MemInfo;
-    DWORD MaxDisassmSize;
+    DWORD MaxDisassmSize = 512;
     BYTE TestChar;
 
     VirtualQueryEx(GetCurrentProcess(), (LPVOID)PossibleStringPtr, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -705,19 +699,13 @@ int EnginePointedMemoryStringLength(ULONG_PTR PossibleStringPtr)
             {
                 i = MaxDisassmSize;
             }
-            else
-            {
-                MaxDisassmSize = 512;
-            }
         }
-        else
-        {
-            MaxDisassmSize = 512;
-        }
-        RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+
+		TestChar = *((BYTE*)PossibleStringPtr);
         while(i > NULL && StringIsValid == true && TestChar != 0x00)
         {
-            RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+			TestChar = *((BYTE*)PossibleStringPtr);
+
             if(TestChar < 32 || TestChar > 126)
             {
                 if(TestChar != 0x00)
@@ -831,10 +819,11 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
         LPVOID lpPossibleStringPtr = (LPVOID)PossibleStringPtr;
         BYTE TestChar;
 
-        RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+		TestChar = *((BYTE*)PossibleStringPtr);
+
         while(TestChar != 0x2E && TestChar != 0x00)
         {
-            RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+			TestChar = *((BYTE*)PossibleStringPtr);
             PossibleStringPtr++;
         }
         if(TestChar == 0x00)
@@ -845,14 +834,15 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
         RtlCopyMemory(szFwdDLLName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
         lstrcatA((LPSTR)szFwdDLLName, ".dll");
         lpPossibleStringPtr = (LPVOID)(PossibleStringPtr + 1);
-        RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+		TestChar = *((BYTE*)PossibleStringPtr);
+
         if(TestChar == 0x23)
         {
             lpPossibleStringPtr = (LPVOID)(PossibleStringPtr + 1);
         }
         while(TestChar != 0x00)
         {
-            RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
+			TestChar = *((BYTE*)PossibleStringPtr);
             PossibleStringPtr++;
         }
         RtlCopyMemory(szFwdAPIName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
@@ -1218,19 +1208,20 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
             {
                 if(!EngineIsBadReadPtrEx(ResourceData, ResourceSize))
                 {
-                    RtlMoveMemory((LPVOID)lParam, &ReturnData, 1);
+					*((LONG*)lParam) = ReturnData;
                     return(false);
                 }
             }
             else
             {
-                RtlMoveMemory((LPVOID)lParam, &ReturnData, 1);
+				*((LONG*)lParam) = ReturnData;
                 return(false);
             }
         }
         return(true);
     }
-    RtlMoveMemory((LPVOID)lParam, &ReturnData, 1);
+
+	*((LONG*)lParam) = ReturnData;
     return(false);
 }
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile)
