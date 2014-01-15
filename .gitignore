@@ -11,3 +11,6 @@ Release/*/*
 *.bmarks
 TitanEngine/TitanEngine.cscope_file_list
 *.opensdf
+
+/Debug
+/TitanEngine/Debug
