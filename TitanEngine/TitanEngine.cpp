@@ -566,17 +566,17 @@ bool EngineCreatePathForFileW(wchar_t* szFileName)
 {
 
     int i,j;
-    wchar_t szFolderName[2 * MAX_PATH] = {};
-    wchar_t szCreateFolder[2 * MAX_PATH] = {};
+    wchar_t szFolderName[MAX_PATH] = {};
+    wchar_t szCreateFolder[MAX_PATH] = {};
 
     if(engineCreatePathForFiles)
     {
         i = lstrlenW(szFileName);
-        while(szFileName[i] != '\\' && i > NULL)
+        while(szFileName[i] != '\\' && i > 0)
         {
             i--;
         }
-        if(i != NULL)
+        if(i != 0)
         {
             RtlMoveMemory(szFolderName, szFileName, (i * 2) + 2);
             if(!CreateDirectoryW(szFolderName, NULL))
