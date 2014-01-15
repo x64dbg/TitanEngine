@@ -1,3 +1,7 @@
+#ifndef definitions_h__
+#define definitions_h__
+
+
 #define TITCALL
 
 // Global.Function.Declaration:
@@ -439,3 +443,7 @@ __declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(char* szPlugin
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
+
+
+#endif // definitions_h__
+
