@@ -3800,19 +3800,35 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                     SetFilePointer(hFile, OverlayStart, NULL, FILE_BEGIN);
                     while(OverlaySize > 0)
                     {
+						RtlZeroMemory(ueReadBuffer, 0x2000);
+
                         if(OverlaySize > 0x1000)
                         {
-                            RtlZeroMemory(ueReadBuffer, 0x2000);
-                            if(!ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL) || !WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
-                                return false;
-                            OverlaySize = OverlaySize - 0x1000;
+                            if(ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
+							{
+								if(!WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
+									return false;
+							}
+							else
+							{
+								return false;
+							}
+
+							OverlaySize = OverlaySize - 0x1000;
                         }
                         else
                         {
-                            RtlZeroMemory(ueReadBuffer, 0x2000);
-                            if(!ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL) || !WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
-                                return false;
-                            OverlaySize = 0;
+                            if(ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
+							{
+								if(!WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
+									return false;
+							}
+							else
+							{
+								return false;
+							}
+
+							OverlaySize = 0;
                         }
                     }
                     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
@@ -3871,18 +3887,34 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
             SetFilePointer(hFile, FileSize, NULL, FILE_BEGIN);
             while(OverlaySize > 0)
             {
+				RtlZeroMemory(ueReadBuffer, 0x2000);
+
                 if(OverlaySize > 0x1000)
                 {
-                    RtlZeroMemory(ueReadBuffer, 0x2000);
-                    if(!ReadFile(hFileRead, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL) || !WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
-                        return false;
+                    if(ReadFile(hFileRead, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
+					{
+						if(!WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
+							return false;
+					}
+					else
+					{
+						return false;
+					}
+
                     OverlaySize = OverlaySize - 0x1000;
                 }
                 else
                 {
-                    RtlZeroMemory(ueReadBuffer, 0x2000);
-                    if(!ReadFile(hFileRead, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL) || !WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
-                        return false;
+                    if(ReadFile(hFileRead, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
+					{
+						if(!WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
+							return false;
+					}
+					else
+					{
+						return false;
+					}
+
                     OverlaySize = 0;
                 }
             }
