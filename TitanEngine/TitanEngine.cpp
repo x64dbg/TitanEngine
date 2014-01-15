@@ -477,7 +477,7 @@ static char* EngineExtractPath(char* szFileName)
 {
     int i;
 
-    RtlZeroMemory(&engineExtractedFolderName, 512);
+    RtlZeroMemory(&engineExtractedFolderName, sizeof(engineExtractedFolderName));
     lstrcpyA(engineExtractedFolderName, szFileName);
     i = lstrlenA(engineExtractedFolderName);
     while(i > 0 && engineExtractedFolderName[i] != 0x5C)
@@ -495,7 +495,7 @@ char* EngineExtractFileName(char* szFileName)
     int x = 0;
 
     i = lstrlenA(szFileName);
-    RtlZeroMemory(&engineExtractedFileName, 512);
+    RtlZeroMemory(&engineExtractedFileName, sizeof(engineExtractedFileName));
     while(i > 0 && szFileName[i] != 0x5C)
     {
         i--;
@@ -912,11 +912,10 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
 {
     int i,j;
     HANDLE hFile;
-    char szTryFileName[512];
+    char szTryFileName[512] = {0};
 
     if(szPresentInFolder != NULL && szFileName != NULL)
     {
-        RtlZeroMemory(&szTryFileName, 512);
         lstrcpyA(szTryFileName, szPresentInFolder);
         if(szTryFileName[lstrlenA(szTryFileName)-1] != 0x5C)
         {
@@ -988,11 +987,10 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
 
     int i,j;
     HANDLE hFile;
-    wchar_t szTryFileName[512];
+	wchar_t szTryFileName[512] = {0};
 
     if(szPresentInFolder != NULL)
     {
-        RtlZeroMemory(&szTryFileName, 512);
         lstrcpyW(szTryFileName, szPresentInFolder);
         if(szTryFileName[lstrlenW(szTryFileName)-1] != 0x5C)
         {
@@ -1038,7 +1036,6 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
         }
         if(szDependencyForFile != NULL)
         {
-            RtlZeroMemory(&szTryFileName, 512);
             i = lstrlenW(szDependencyForFile);
             while(i > 0 && szDependencyForFile[i] != 0x5C)
             {
@@ -1064,7 +1061,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
 
     int i,j;
     HANDLE hFile;
-    char szTryFileName[512];
+	char szTryFileName[512] = {0};
 
     if(szFileName != NULL)
     {
@@ -1172,7 +1169,7 @@ long EngineHashMemory(char* MemoryAddress, int MemorySize, DWORD InitialHashValu
 bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize)
 {
 
-    MEMORY_BASIC_INFORMATION MemInfo;
+	MEMORY_BASIC_INFORMATION MemInfo = {0};
 
     while(DataSize > NULL)
     {
@@ -1727,11 +1724,11 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     HANDLE hProcess = NULL;
     ULONG_PTR EnumeratedModules[0x2000];
     ULONG_PTR LoadedModules[1000][4];
-    char RemoteDLLName[MAX_PATH];
-    char FullRemoteDLLName[MAX_PATH];
-    char szWindowsSideBySide[MAX_PATH];
-    char szWindowsSideBySideCmp[MAX_PATH];
-    char szWindowsKernelBase[MAX_PATH];
+	char RemoteDLLName[MAX_PATH]={0};
+    char FullRemoteDLLName[MAX_PATH]={0};
+    char szWindowsSideBySide[MAX_PATH]={0};
+    char szWindowsSideBySideCmp[MAX_PATH]={0};
+    char szWindowsKernelBase[MAX_PATH]={0};
     HANDLE hLoadedModule = NULL;
     HANDLE ModuleHandle = NULL;
     PIMAGE_DOS_HEADER DOSHeader;
@@ -1750,15 +1747,15 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     unsigned int FoundIndex = 0;
     unsigned int FoundOrdinalNumber = 0;
     ULONG_PTR FileMapVA;
-    char szFwdDLLName[512];
-    char szFwdAPIName[512];
+	char szFwdDLLName[512] = {0};
+	char szFwdAPIName[512] = {0};
     ULONG_PTR RealignedAPIAddress;
     ULONG_PTR ForwarderData = NULL;
     unsigned int ClosestAPI = 0x1000;
     int Vista64UserForwarderFix = 0;
     unsigned int Windows7KernelBase = 0xFFFFFFFF;
 
-    RtlZeroMemory(&engineFoundDLLName, 512);
+    RtlZeroMemory(&engineFoundDLLName, sizeof(szFwdDLLName));
     RtlZeroMemory(&EnumeratedModules, 0x2000 * sizeof ULONG_PTR);
     RtlZeroMemory(&LoadedModules, 1000 * 4 * sizeof ULONG_PTR);
     GetWindowsDirectoryA(szWindowsSideBySide, MAX_PATH);
@@ -1952,7 +1949,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                                         ExportedFunctionNames = (PEXPORTED_DATA)(PEExports->AddressOfNames + LoadedModules[i][1]);
                                         ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)(PEExports->AddressOfNameOrdinals + LoadedModules[i][1]);
                                         GetModuleBaseNameA(hProcess, (HMODULE)LoadedModules[i][0], (LPSTR)engineFoundDLLName, 512);
-                                        RtlZeroMemory(&engineFoundAPIName, 512);
+                                        RtlZeroMemory(&engineFoundAPIName, sizeof(engineFoundAPIName));
                                         x = n;
                                         FoundOrdinalNumber = (unsigned int)PEExports->Base;
                                         for(j = 0; j < PEExports->NumberOfNames; j++)
@@ -2035,7 +2032,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                                         if(ExportedFunctions->ExportedItem + LoadedModules[i][0] == APIAddress)
                                         {
                                             GetModuleBaseNameA(hProcess, (HMODULE)LoadedModules[i][0], (LPSTR)engineFoundDLLName, 512);
-                                            RtlZeroMemory(&engineFoundAPIName, 512);
+                                            RtlZeroMemory(&engineFoundAPIName, sizeof(engineFoundAPIName));
                                             x = j;
                                             FoundOrdinalNumber = (unsigned int)PEExports->Base;
                                             for(j = 0; j < PEExports->NumberOfNames; j++)
@@ -2071,7 +2068,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                                             ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
                                             ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
                                             GetModuleBaseNameA(hProcess, (HMODULE)LoadedModules[i][0], (LPSTR)engineFoundDLLName, 512);
-                                            RtlZeroMemory(&engineFoundAPIName, 512);
+                                            RtlZeroMemory(&engineFoundAPIName, sizeof(engineFoundAPIName));
                                             ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (j + PEExports->Base) * 4);
                                             APIFoundAddress = ExportedFunctions->ExportedItem + LoadedModules[i][0];
                                             APINameFound = true;
@@ -2084,7 +2081,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
-                                RtlZeroMemory(&engineFoundAPIName, 512);
+                                RtlZeroMemory(&engineFoundAPIName, sizeof(engineFoundAPIName));
                                 APINameFound = false;
                             }
                         }
