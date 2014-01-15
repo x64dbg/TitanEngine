@@ -181,29 +181,20 @@ unsigned long Crc32Table[256];
 // Global.Handle.functions:
 bool EngineCloseHandle(HANDLE myHandle)
 {
-
     DWORD HandleFlags;
-
     if(GetHandleInformation(myHandle, &HandleFlags))
     {
         if(CloseHandle(myHandle))
         {
             return(true);
         }
-        else
-        {
-            return(false);
-        }
     }
-    else
-    {
-        return(false);
-    }
+    
+	return(false);
 }
 // Global.Mapping.functions:
 bool MapFileEx(char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD FileSize, LPHANDLE FileMap, LPVOID FileMapVA, DWORD SizeModifier)
 {
-
     HANDLE hFile = 0;
     DWORD FileAccess = 0;
     DWORD FileMapType = 0;
@@ -460,9 +451,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
 bool EngineFileExists(char* szFileName)
 {
 
-    HANDLE hFile;
-
-    hFile = CreateFileA(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hFile = CreateFileA(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(hFile != INVALID_HANDLE_VALUE)
     {
         EngineCloseHandle(hFile);
@@ -548,10 +537,6 @@ bool EngineCreatePathForFile(char* szFileName)
                 }
             }
         }
-        else
-        {
-            return(true);
-        }
     }
     return(true);
 }
@@ -588,10 +573,6 @@ bool EngineCreatePathForFileW(wchar_t* szFileName)
                     }
                 }
             }
-        }
-        else
-        {
-            return(true);
         }
     }
     return(true);
@@ -665,10 +646,6 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
         {
             return(true);
         }
-        else
-        {
-            return(false);
-        }
     }
     return(false);
 }
@@ -713,10 +690,6 @@ int EnginePointedMemoryStringLength(ULONG_PTR PossibleStringPtr)
         {
             i = 512 - i;
             return(i);
-        }
-        else
-        {
-            return(NULL);
         }
     }
     return(NULL);
@@ -763,6 +736,7 @@ long long EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA)
         {
             return(0);
         }
+
         if(!FileIs64)
         {
             PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
@@ -848,19 +822,11 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
 }
 bool EngineGrabDataFromMappedFile(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR FileOffset, DWORD CopySize, LPVOID CopyToMemory)
 {
-
     DWORD rfNumberOfBytesRead = NULL;
 
     RtlZeroMemory(CopyToMemory, CopySize);
     SetFilePointer(hFile, (DWORD)(FileOffset - FileMapVA), NULL, FILE_BEGIN);
-    if(ReadFile(hFile, CopyToMemory, CopySize, &rfNumberOfBytesRead, NULL))
-    {
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
+    return !!ReadFile(hFile, CopyToMemory, CopySize, &rfNumberOfBytesRead, NULL);
 }
 bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName)
 {
@@ -919,6 +885,7 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
             return(true);
         }
     }
+
     if(szFileName != NULL)
     {
         hFile = CreateFileA(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -1013,6 +980,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
                 return(true);
             }
         }
+
         if(GetWindowsDirectoryW(szTryFileName, 512) > NULL)
         {
             lstrcatW(szTryFileName, L"\\");
@@ -1024,6 +992,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
                 return(true);
             }
         }
+
         if(szDependencyForFile != NULL)
         {
             i = lstrlenW(szDependencyForFile);
@@ -2967,15 +2936,9 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
         {
             return(true);
         }
-        else
-        {
-            return(false);
-        }
     }
-    else
-    {
-        return(false);
-    }
+
+	return(false);
 }
 __declspec(dllexport) bool TITCALL DumpRegions(HANDLE hProcess, char* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
@@ -3074,15 +3037,9 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
         {
             return(true);
         }
-        else
-        {
-            return(false);
-        }
     }
-    else
-    {
-        return(false);
-    }
+
+	return(false);
 }
 __declspec(dllexport) bool TITCALL DumpModule(HANDLE hProcess, LPVOID ModuleBase, char* szDumpFileName)
 {
@@ -3150,15 +3107,9 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
         {
             return(true);
         }
-        else
-        {
-            return(false);
-        }
     }
-    else
-    {
-        return(false);
-    }
+
+	return(false);
 }
 __declspec(dllexport) bool TITCALL PastePEHeader(HANDLE hProcess, LPVOID ImageBase, char* szDebuggedFileName)
 {
