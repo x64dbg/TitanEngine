@@ -541,7 +541,7 @@ bool EngineCreatePathForFile(char* szFileName)
                         if(szFileName[i] == '\\')
                         {
                             RtlZeroMemory(szCreateFolder, 2 * MAX_PATH);
-                            RtlMoveMemory(szCreateFolder, szFileName, i + 1);
+                            RtlCopyMemory(szCreateFolder, szFileName, i + 1);
                             CreateDirectoryA(szCreateFolder, NULL);
                         }
                     }
@@ -571,7 +571,7 @@ bool EngineCreatePathForFileW(wchar_t* szFileName)
         }
         if(i != 0)
         {
-            RtlMoveMemory(szFolderName, szFileName, (i * 2) + 2);
+            RtlCopyMemory(szFolderName, szFileName, (i * 2) + 2);
             if(!CreateDirectoryW(szFolderName, NULL))
             {
                 if(GetLastError() != ERROR_ALREADY_EXISTS)
@@ -582,7 +582,7 @@ bool EngineCreatePathForFileW(wchar_t* szFileName)
                         if(szFileName[i] == '\\')
                         {
                             RtlZeroMemory(szCreateFolder, 2 * MAX_PATH);
-                            RtlMoveMemory(szCreateFolder, szFileName, (i * 2) + 1);
+                            RtlCopyMemory(szCreateFolder, szFileName, (i * 2) + 1);
                             CreateDirectoryW(szCreateFolder, NULL);
                         }
                     }
@@ -835,7 +835,7 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
             return(false);
         }
         PossibleStringPtr--;
-        RtlMoveMemory(szFwdDLLName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
+        RtlCopyMemory(szFwdDLLName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
         lstrcatA((LPSTR)szFwdDLLName, ".dll");
         lpPossibleStringPtr = (LPVOID)(PossibleStringPtr + 1);
         RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
@@ -848,7 +848,7 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
             RtlMoveMemory(&TestChar, (LPVOID)PossibleStringPtr, 1);
             PossibleStringPtr++;
         }
-        RtlMoveMemory(szFwdAPIName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
+        RtlCopyMemory(szFwdAPIName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
         return(true);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -1071,7 +1071,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
             RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
             if(lstrlenA(szFileName) <= MaxStringSize)
             {
-                RtlMoveMemory(szLocationOfTheFile, szFileName, lstrlenA(szFileName));
+                RtlCopyMemory(szLocationOfTheFile, szFileName, lstrlenA(szFileName));
             }
             EngineCloseHandle(hFile);
             return(true);
@@ -1086,7 +1086,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                 RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
                 if(lstrlenA(szTryFileName) <= MaxStringSize)
                 {
-                    RtlMoveMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
+                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
                 }
                 EngineCloseHandle(hFile);
                 return(true);
@@ -1102,7 +1102,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                 RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
                 if(lstrlenA(szTryFileName) <= MaxStringSize)
                 {
-                    RtlMoveMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
+                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
                 }
                 EngineCloseHandle(hFile);
                 return(true);
@@ -1127,7 +1127,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                 RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
                 if(lstrlenA(szTryFileName) <= MaxStringSize)
                 {
-                    RtlMoveMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
+                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
                 }
                 EngineCloseHandle(hFile);
                 return(true);
@@ -1233,7 +1233,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     DWORD MemorySize = NULL;
     PIMAGE_NT_HEADERS32 PEHeader32;
     IMAGE_NT_HEADERS32 RemotePEHeader32;
-    MEMORY_BASIC_INFORMATION MemoryInfo;
+	MEMORY_BASIC_INFORMATION MemoryInfo={0};
     ULONG_PTR NumberOfBytesRW = NULL;
 
     if(IsFile)
@@ -1368,10 +1368,10 @@ long long EngineSimulateNtLoaderW(wchar_t* szFileName)
                     PeHeaderSize = DOSHeader->e_lfanew + PEHeader32->FileHeader.SizeOfOptionalHeader + (sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections) + sizeof(IMAGE_FILE_HEADER) + 4;
                     PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
                     SectionNumber = PEHeader32->FileHeader.NumberOfSections;
-                    RtlMoveMemory(AllocatedFile, (LPVOID)FileMapVA, PeHeaderSize);
+                    RtlCopyMemory(AllocatedFile, (LPVOID)FileMapVA, PeHeaderSize);
                     while(SectionNumber > 0)
                     {
-                        RtlMoveMemory((LPVOID)((ULONG_PTR)AllocatedFile + PESections->VirtualAddress), (LPVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData);
+                        RtlCopyMemory((LPVOID)((ULONG_PTR)AllocatedFile + PESections->VirtualAddress), (LPVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData);
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
                         SectionNumber--;
                     }
@@ -1392,10 +1392,10 @@ long long EngineSimulateNtLoaderW(wchar_t* szFileName)
                     PeHeaderSize = DOSHeader->e_lfanew + PEHeader64->FileHeader.SizeOfOptionalHeader + (sizeof(IMAGE_SECTION_HEADER) * PEHeader64->FileHeader.NumberOfSections) + sizeof(IMAGE_FILE_HEADER) + 4;
                     PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
                     SectionNumber = PEHeader64->FileHeader.NumberOfSections;
-                    RtlMoveMemory(AllocatedFile, (LPVOID)FileMapVA, PeHeaderSize);
+                    RtlCopyMemory(AllocatedFile, (LPVOID)FileMapVA, PeHeaderSize);
                     while(SectionNumber > 0)
                     {
-                        RtlMoveMemory((LPVOID)((ULONG_PTR)AllocatedFile + PESections->VirtualAddress), (LPVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData);
+                        RtlCopyMemory((LPVOID)((ULONG_PTR)AllocatedFile + PESections->VirtualAddress), (LPVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData);
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
                         SectionNumber--;
                     }
@@ -1450,15 +1450,15 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
     PIMAGE_EXPORT_DIRECTORY PEExports;
     PEXPORTED_DATA ExportedFunctionNames;
     ULONG_PTR ConvertedExport = NULL;
-    char szFileRemoteProc[1024];
-    char szDLLFileLocation[512];
-    char* szTranslatedProcName;
+	char szFileRemoteProc[1024]={0};
+	char szDLLFileLocation[512]={0};
+    char* szTranslatedProcName=0;
 
-    GetProcessImageFileNameA(hProcess, szFileRemoteProc, 1024);
+    GetProcessImageFileNameA(hProcess, szFileRemoteProc, sizeof(szFileRemoteProc));
     szTranslatedProcName = (char*)TranslateNativeName(szFileRemoteProc);
     if(EngineIsDependencyPresent(szFileName, NULL, NULL))
     {
-        if(EngineGetDependencyLocation(szFileName, szTranslatedProcName, &szDLLFileLocation, 512))
+        if(EngineGetDependencyLocation(szFileName, szTranslatedProcName, &szDLLFileLocation, sizeof(szDLLFileLocation)))
         {
             VirtualFree((void*)szTranslatedProcName, NULL, MEM_RELEASE);
             if(MapFileEx(szDLLFileLocation, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
@@ -1504,8 +1504,8 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
                                     if(ConvertedExport != NULL)
                                     {
                                         PEExports = (PIMAGE_EXPORT_DIRECTORY)((ULONG_PTR)DLLMemory + ExportDelta);
-                                        RtlMoveMemory(DLLMemory, (LPVOID)FileMapVA, PEHeaderSize + DOSHeader->e_lfanew);
-                                        RtlMoveMemory((LPVOID)((ULONG_PTR)DLLMemory + ExportDelta), (LPVOID)ConvertedExport, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size);
+                                        RtlCopyMemory(DLLMemory, (LPVOID)FileMapVA, PEHeaderSize + DOSHeader->e_lfanew);
+                                        RtlCopyMemory((LPVOID)((ULONG_PTR)DLLMemory + ExportDelta), (LPVOID)ConvertedExport, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size);
                                         PEExports->AddressOfFunctions = PEExports->AddressOfFunctions - PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + ExportDelta;
                                         PEExports->AddressOfNameOrdinals = PEExports->AddressOfNameOrdinals - PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + ExportDelta;
                                         PEExports->AddressOfNames = PEExports->AddressOfNames - PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + ExportDelta;
@@ -1555,8 +1555,8 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
                                     if(ConvertedExport != NULL)
                                     {
                                         PEExports = (PIMAGE_EXPORT_DIRECTORY)((ULONG_PTR)DLLMemory + ExportDelta);
-                                        RtlMoveMemory(DLLMemory, (LPVOID)FileMapVA, PEHeaderSize + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size);
-                                        RtlMoveMemory((LPVOID)((ULONG_PTR)DLLMemory + ExportDelta), (LPVOID)ConvertedExport, PEHeaderSize + DOSHeader->e_lfanew);
+                                        RtlCopyMemory(DLLMemory, (LPVOID)FileMapVA, PEHeaderSize + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size);
+                                        RtlCopyMemory((LPVOID)((ULONG_PTR)DLLMemory + ExportDelta), (LPVOID)ConvertedExport, PEHeaderSize + DOSHeader->e_lfanew);
                                         PEExports->AddressOfFunctions = PEExports->AddressOfFunctions - PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + ExportDelta;
                                         PEExports->AddressOfNameOrdinals = PEExports->AddressOfNameOrdinals - PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + ExportDelta;
                                         PEExports->AddressOfNames = PEExports->AddressOfNames - PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + ExportDelta;
@@ -1823,7 +1823,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
             GetModuleFileNameExA(hProcess, (HMODULE)EnumeratedModules[i], (LPSTR)RemoteDLLName, MAX_PATH);
             lstrcpyA(FullRemoteDLLName, RemoteDLLName);
             RtlZeroMemory(&szWindowsSideBySideCmp, MAX_PATH);
-            RtlMoveMemory(&szWindowsSideBySideCmp, FullRemoteDLLName, lstrlenA(szWindowsSideBySide));
+            RtlCopyMemory(&szWindowsSideBySideCmp, FullRemoteDLLName, lstrlenA(szWindowsSideBySide));
             if(GetModuleHandleA(RemoteDLLName) == NULL)
             {
                 RtlZeroMemory(&RemoteDLLName, MAX_PATH);
