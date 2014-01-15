@@ -1262,7 +1262,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
         {
             if(DOSHeader->e_magic == 0x5A4D)
             {
-                if(DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof IMAGE_NT_HEADERS64 < MemorySize)
+                if(DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof(IMAGE_NT_HEADERS64) < MemorySize)
                 {
                     PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
                     if(PEHeader32->Signature != 0x4550)
@@ -1297,7 +1297,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
         {
             if(DOSHeader->e_magic == 0x5A4D)
             {
-                if(DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof IMAGE_NT_HEADERS64 < ModuleInfo.SizeOfImage)
+                if(DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof(IMAGE_NT_HEADERS64) < ModuleInfo.SizeOfImage)
                 {
                     if(ReadProcessMemory(hFileProc, (LPVOID)((ULONG_PTR)ImageBase + DOSHeader->e_lfanew), &RemotePEHeader32, sizeof IMAGE_NT_HEADERS32, &NumberOfBytesRW))
                     {
