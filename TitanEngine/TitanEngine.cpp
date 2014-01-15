@@ -12437,7 +12437,7 @@ __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandL
     }
     else
     {
-        return(false);
+        return NULL;
     }
 }
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
@@ -12526,7 +12526,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveM
     }
     else
     {
-        return(false);
+        return NULL;
     }
 }
 __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
