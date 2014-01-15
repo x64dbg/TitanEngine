@@ -25495,7 +25495,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
                             }
                             while((int)Size > NULL)
                             {
-                                if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) == TRUE && rfNumberOfBytesRead == SizeToRead)
+                                if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                                 {
                                     WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
                                     if(Size > 0x1000)
@@ -25504,7 +25504,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
                                     }
                                     else if(SizeToRead != Size)
                                     {
-                                        if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) == TRUE && rfNumberOfBytesRead == SizeToRead)
+                                        if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                                         {
                                             WriteFile(hWriteFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL);
                                         }
@@ -25590,7 +25590,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                         }
                         while((int)Size > NULL)
                         {
-                            if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) == TRUE && rfNumberOfBytesRead == SizeToRead)
+                            if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                             {
                                 WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
                                 if(Size > 0x1000)
@@ -25599,7 +25599,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                                 }
                                 else if(SizeToRead != Size)
                                 {
-                                    if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) == TRUE && rfNumberOfBytesRead == SizeToRead)
+                                    if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                                     {
                                         WriteFile(hWriteFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL);
                                     }
@@ -25688,7 +25688,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
                         }
                         while(Size != NULL)
                         {
-                            if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) == TRUE && rfNumberOfBytesRead == SizeToRead)
+                            if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                             {
                                 WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
                                 if(Size > 0x1000)
@@ -25697,7 +25697,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
                                 }
                                 else if((DWORD64)SizeToRead != Size)
                                 {
-                                    if(ReadFile(hFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL) == TRUE && rfNumberOfBytesRead == SizeToRead)
+                                    if(ReadFile(hFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                                     {
                                         WriteFile(hWriteFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL);
                                     }
