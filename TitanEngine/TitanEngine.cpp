@@ -26953,14 +26953,13 @@ __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess
 __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies()
 {
 
-    DWORD DummyCmp = NULL;
     wchar_t szTempName[MAX_PATH];
     wchar_t szTempFolder[MAX_PATH];
 
     if(engineDependencyFiles != NULL)
     {
         engineDependencyFilesCWP = engineDependencyFiles;
-        while(memcmp(engineDependencyFilesCWP, &DummyCmp, 1) != NULL)
+		while(*((char*)engineDependencyFilesCWP) != 0)
         {
             RtlZeroMemory(&szTempName, sizeof szTempName);
             RtlZeroMemory(&szTempFolder, sizeof szTempFolder);
