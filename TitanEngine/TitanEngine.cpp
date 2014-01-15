@@ -21463,12 +21463,12 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
     int i = NULL;
     DWORD TestAddressX86;
     DWORD ReadAddressX86;
-    DWORD MaximumReadSize;
     DWORD MemoryHash = NULL;
     PMEMORY_CMP_HANDLER cMem;
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     LPVOID TracerReadMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+	DWORD MaximumReadSize=0x1000;
     if(!TracerReadMemory)
         return (NULL);
     cMem = (PMEMORY_CMP_HANDLER)TracerReadMemory;
