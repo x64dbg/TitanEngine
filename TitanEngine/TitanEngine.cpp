@@ -18805,13 +18805,13 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
     PIMAGE_NT_HEADERS32 PEHeader32;
     PIMAGE_NT_HEADERS64 PEHeader64;
     BOOL FileIs64;
-    HANDLE FileHandle;
+    HANDLE FileHandle=0;
     DWORD FileSize;
-    HANDLE FileMap;
+    HANDLE FileMap=0;
     ULONG_PTR FileMapVA;
-    HANDLE FileHandle1;
+    HANDLE FileHandle1=0;
     DWORD FileSize1;
-    HANDLE FileMap1;
+    HANDLE FileMap1=0;
     ULONG_PTR FileMapVA1;
     ULONG_PTR IATPointer;
     ULONG_PTR IATWritePointer;
@@ -18877,16 +18877,11 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
                     }
                 }
             }
-            else
-            {
-                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
-                return(false);
-            }
+			UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
         }
+		UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     }
-    UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-    UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
+
     return(false);
 }
 __declspec(dllexport) bool TITCALL ImporterLoadImportTable(char* szFileName)
