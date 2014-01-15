@@ -19592,7 +19592,7 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
         }
     }
     
-    scylla_getImports(iatStart, iatSize, ProcessId);
+    scylla_getImports(iatStart, iatSize, ProcessId, UnknownPointerFixCallback);
 
     if(!scylla_importsValid()) {
         //TODO call UnknownPointerFixCallback for every bad import, scylla_wrapper needs to be enhanced tho
