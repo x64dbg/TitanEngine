@@ -2,12 +2,15 @@
 //
 #include "resource.h"
 
+#include "WinResrc.h"
+#define IDC_STATIC (-1)
+
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+//#include "afxres.h" //MFC
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
