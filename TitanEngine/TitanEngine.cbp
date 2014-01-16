@@ -22,6 +22,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="/DEF:TitanEngine.def" />
+					<Add library=".\scylla_wrapper_x86.lib" />
 					<Add library=".\distorm_x86.lib" />
 					<Add library="Imagehlp.lib" />
 					<Add library="psapi.lib" />
@@ -42,6 +43,7 @@
 					<Add option="/DUNPACKERENGINE_EXPORTS" />
 				</Compiler>
 				<Linker>
+					<Add library=".\scylla_wrapper_x64.lib" />
 					<Add library=".\distorm_x64.lib" />
 					<Add library="Imagehlp.lib" />
 					<Add library="psapi.lib" />
@@ -54,11 +56,11 @@
 			<Add library="comdlg32" />
 			<Add library="shell32" />
 		</Linker>
+		<Unit filename="3rdparty-definitions.h" />
 		<Unit filename="LzmaDec.cpp" />
 		<Unit filename="LzmaDec.h" />
 		<Unit filename="LzmaTypes.h" />
 		<Unit filename="TitanEngine.cpp" />
-		<Unit filename="TitanEngine.h" />
 		<Unit filename="TitanEngine.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

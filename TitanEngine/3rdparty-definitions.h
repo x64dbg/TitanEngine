@@ -15,7 +15,7 @@ int scylla_getImports(DWORD_PTR iatAddr, DWORD iatSize, DWORD pid, LPVOID invali
 bool scylla_importsValid();
 bool scylla_cutImport(DWORD_PTR apiAddr);
 int scylla_fixDump(WCHAR* dumpFile, WCHAR* iatFixFile, WCHAR* sectionName = L".scy");
-int scylla_fixMappedDump(DWORD_PTR iatVA, DWORD_PTR FileMapVA, HANDLE hFileMap); 
+int scylla_fixMappedDump(DWORD_PTR iatVA, DWORD_PTR FileMapVA, HANDLE hFileMap);
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/

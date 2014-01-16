@@ -18579,11 +18579,11 @@ __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR 
     RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1]), &FirstThunk, sizeof ULONG_PTR);
     RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1] + sizeof ULONG_PTR), &FirstThunk, sizeof ULONG_PTR);
     RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1] + 2 * sizeof ULONG_PTR), &CopyDummy, 4);
-#if !defined(_WIN64)
+    #if !defined(_WIN64)
     impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][0] + 12;
-#else
+    #else
     impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][0] + 20;
-#endif
+    #endif
     RtlMoveMemory((LPVOID)(impDLLStringList[impDLLNumber][1]), szDLLName, lstrlenA((LPCSTR)szDLLName));
     impDLLStringList[impDLLNumber][1] = impDLLStringList[impDLLNumber][1] + lstrlenA((LPCSTR)szDLLName) + 3;
     if(FirstThunk == NULL && impDeltaStart != NULL)
@@ -18723,7 +18723,8 @@ __declspec(dllexport) void TITCALL ImporterMoveIAT()
 }
 __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap)
 {
-    if(scylla_fixMappedDump(StorePlace, FileMapVA, hFileMap) != SCY_ERROR_SUCCESS) {
+    if(scylla_fixMappedDump(StorePlace, FileMapVA, hFileMap) != SCY_ERROR_SUCCESS)
+    {
         return false;
     }
 
@@ -18781,7 +18782,8 @@ __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, cha
 }
 __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, wchar_t* szSectionName)
 {
-    if(scylla_fixDump(szDumpFileName, szExportFileName, szSectionName) != SCY_ERROR_SUCCESS) {
+    if(scylla_fixDump(szDumpFileName, szExportFileName, szSectionName) != SCY_ERROR_SUCCESS)
+    {
         return false;
     }
 
@@ -18807,11 +18809,11 @@ __declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPI
             DLLNumber = impDLLNumber + 1;
             while(DLLNumber > NULL)
             {
-#if !defined(_WIN64)
+    #if !defined(_WIN64)
                 NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-#else
+    #else
                 NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-#endif
+    #endif
                 RtlMoveMemory(&CurrentAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
                 RtlMoveMemory(&NumberOfAPIs, (LPVOID)(impDLLDataList[i][0] + 2 * sizeof ULONG_PTR), 4);
                 while(NumberOfAPIs > NULL)
@@ -18866,11 +18868,11 @@ __declspec(dllexport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR
         DLLNumber = impDLLNumber + 1;
         while(DLLNumber > NULL)
         {
-#if !defined(_WIN64)
+    #if !defined(_WIN64)
             NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-#else
+    #else
             NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-#endif
+    #endif
             RtlMoveMemory(&MinAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
             RtlMoveMemory(&MaxAPILocation, (LPVOID)(impDLLDataList[i][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
             if(MinAPILocation <= APIWriteLocation && APIWriteLocation <= MaxAPILocation)
@@ -18901,11 +18903,11 @@ __declspec(dllexport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR
         DLLNumber = impDLLNumber + 1;
         while(DLLNumber > NULL)
         {
-#if !defined(_WIN64)
+    #if !defined(_WIN64)
             NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-#else
+    #else
             NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-#endif
+    #endif
             RtlMoveMemory(&MinAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
             RtlMoveMemory(&MaxAPILocation, (LPVOID)(impDLLDataList[i][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
             if(MinAPILocation <= APIWriteLocation && APIWriteLocation <= MaxAPILocation)
@@ -19452,14 +19454,15 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* 
     }
 }
 __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar_t* szFileName, ULONG_PTR SearchStart, LPVOID pIATStart, LPVOID pIATSize)
-{ 
+{
     ULONG_PTR iatStart = NULL;
     DWORD iatSize = NULL;
 
     scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
-    
-    //we also try to automatically read imports so following call to ExportIAT has a chance 
-    if(iatStart != NULL && iatSize != NULL) {
+
+    //we also try to automatically read imports so following call to ExportIAT has a chance
+    if(iatStart != NULL && iatSize != NULL)
+    {
         scylla_getImports(iatStart, iatSize, ProcessId);
     }
 
@@ -19512,11 +19515,11 @@ __declspec(dllexport) void TITCALL ImporterEnumAddedData(LPVOID EnumCallBack)
         DLLNumber = impDLLNumber + 1;
         while(DLLNumber > NULL)
         {
-#if !defined(_WIN64)
+    #if !defined(_WIN64)
             NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-#else
+    #else
             NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-#endif
+    #endif
             RtlMoveMemory(&CurrentAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
             RtlMoveMemory(&NumberOfAPIs, (LPVOID)(impDLLDataList[i][0] + 2 * sizeof ULONG_PTR), 4);
             RtlZeroMemory(&myImportEnumData, sizeof ImportEnumData);
@@ -19596,19 +19599,19 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     ULONG_PTR FileMapVA;
     ULONG_PTR iatStart = NULL;
     DWORD iatSize = NULL;
-    TCHAR IatFixFileName[MAX_PATH];
-    TCHAR DumpFileName[MAX_PATH];
+    WCHAR IatFixFileName[MAX_PATH];
+    WCHAR DumpFileName[MAX_PATH];
 
-    lstrcpy(DumpFileName, szDumpedFile);
+    lstrcpyW(DumpFileName, szDumpedFile);
 
-    TCHAR* Extension = wcsrchr(DumpFileName, L'.');
-    TCHAR Bak = *Extension;
+    WCHAR* Extension = wcsrchr(DumpFileName, L'.');
+    WCHAR Bak = *Extension;
     *Extension = 0;
-    lstrcpy(IatFixFileName, DumpFileName);
+    lstrcpyW(IatFixFileName, DumpFileName);
     *Extension = Bak;
-    lstrcat(IatFixFileName, L"_scy");
-    lstrcat(IatFixFileName, Extension);
-    lstrcat(DumpFileName, Extension);
+    lstrcatW(IatFixFileName, L"_scy");
+    lstrcatW(IatFixFileName, Extension);
+    lstrcatW(DumpFileName, Extension);
 
     //do we need to dump first?
     if(DumpRunningProcess)
@@ -19624,25 +19627,30 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     //we need to fix iat, thats for sure
     int ret = scylla_searchIAT(ProcessId, iatStart, iatSize, SearchStart, false);
 
-    if(ret != SCY_ERROR_SUCCESS) {
-        if(ret == SCY_ERROR_PROCOPEN) {
+    if(ret != SCY_ERROR_SUCCESS)
+    {
+        if(ret == SCY_ERROR_PROCOPEN)
+        {
             return (0x401); //error proc terminated
         }
-        if(ret == SCY_ERROR_IATNOTFOUND || ret == SCY_ERROR_IATSEARCH) {
+        if(ret == SCY_ERROR_IATNOTFOUND || ret == SCY_ERROR_IATSEARCH)
+        {
             return (0x405); //no API found
         }
     }
-    
+
     scylla_getImports(iatStart, iatSize, ProcessId, UnknownPointerFixCallback);
 
-    if(!scylla_importsValid()) {
+    if(!scylla_importsValid())
+    {
         return (0x405);
     }
 
     ret = scylla_fixDump(szDumpedFile, IatFixFileName, szSectionName);
 
-    if(ret == SCY_ERROR_IATWRITE) {
-        return (0x407); 
+    if(ret == SCY_ERROR_IATWRITE)
+    {
+        return (0x407);
     }
 
     //do we need to realign ?
