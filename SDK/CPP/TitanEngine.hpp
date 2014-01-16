@@ -1809,6 +1809,10 @@ protected:
 	{
 		UE::ImporterEnumAddedData((void*)EnumCallBack);
 	}
+    static bool DeleteAPI(DWORD_PTR apiAddr)
+    {
+       return UE::ImporterDeleteAPI(apiAddr);
+    }
 };
 
 class ImporterA
@@ -1937,6 +1941,7 @@ public:
 	using ImporterW::AutoSearchIAT;
 	using ImporterX::AutoSearchIATEx;
 	using ImporterX::EnumAddedData;
+    using ImporterX::DeleteAPI;
 	using ImporterA::AutoFixIATEx;
 	using ImporterW::AutoFixIATEx;
 	using ImporterA::AutoFixIAT;

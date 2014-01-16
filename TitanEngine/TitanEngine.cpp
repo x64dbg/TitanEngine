@@ -19595,7 +19595,6 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     scylla_getImports(iatStart, iatSize, ProcessId, UnknownPointerFixCallback);
 
     if(!scylla_importsValid()) {
-        //TODO call UnknownPointerFixCallback for every bad import, scylla_wrapper needs to be enhanced tho
         return (0x405);
     }
 
@@ -19627,6 +19626,10 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIAT(DWORD ProcessId, char* szD
 __declspec(dllexport) long TITCALL ImporterAutoFixIATW(DWORD ProcessId, wchar_t* szDumpedFile, ULONG_PTR SearchStart)
 {
     return(ImporterAutoFixIATExW(ProcessId, szDumpedFile, L".RL!TEv2", false, false, NULL, NULL, SearchStart, false, false, NULL));
+}
+__declspec(dllexport) bool TITCALL ImporterDeleteAPI(DWORD_PTR apiAddr)
+{
+    return scylla_cutImport(apiAddr);
 }
 // Internal.Engine.Hook.functions:
 bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATAW ModuleInformation, DWORD SizeOfImage)
