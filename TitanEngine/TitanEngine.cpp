@@ -18498,7 +18498,9 @@ __declspec(dllexport) bool TITCALL FindOEPGenericallyW(wchar_t* szFileName, LPVO
 // TitanEngine.Importer.functions:
 __declspec(dllexport) void TITCALL ImporterCleanup()
 {
-
+    //TODO scylla obsoleted this
+    return;
+    /*
     int i = 0;
 
     for(i = 0; i < 1000; i++)
@@ -18518,24 +18520,29 @@ __declspec(dllexport) void TITCALL ImporterCleanup()
         impOrdinalList[i][0] = 0;
         impOrdinalList[i][1] = 0;
     }
+    */
 }
 __declspec(dllexport) void TITCALL ImporterSetImageBase(ULONG_PTR ImageBase)
 {
+    // scylla obsoleted this
     impImageBase = ImageBase;
 }
 __declspec(dllexport) void TITCALL ImporterSetUnknownDelta(ULONG_PTR DeltaAddress)
 {
-
+    //scylla obsoleted this
     impDeltaStart = DeltaAddress;
     impDeltaCurrent = DeltaAddress;
 }
 __declspec(dllexport) long long TITCALL ImporterGetCurrentDelta()
 {
+    //scylla obsoleted this
     return((ULONG_PTR)impDeltaCurrent);
 }
 __declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR ImageBase)
 {
-
+    //TODO scylla obsoleted this
+    return;
+    /*
     impImageBase = ImageBase;
     if(MemorySize != NULL)
     {
@@ -18550,10 +18557,13 @@ __declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR Imag
     impDLLNumber = 0xFFFFFFFF;
     impDeltaStart = NULL;
     impDeltaCurrent = NULL;
+    */
 }
 __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk)
 {
-
+    //TODO scylla enable
+    return;
+    /*
     int CopyDummy = 1;
 
     impDLLNumber++;
@@ -18579,11 +18589,13 @@ __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR 
     if(FirstThunk == NULL && impDeltaStart != NULL)
     {
         impDeltaCurrent = impDeltaCurrent + sizeof ULONG_PTR;
-    }
+    }*/
 }
 __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR ThunkValue)
 {
-
+    //TODO scylla enable
+    return;
+    /*
     int i = NULL;
     int CopyDummy = NULL;
     ULONG_PTR LastThunkValue = NULL;
@@ -18644,10 +18656,13 @@ __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR 
     RtlMoveMemory(&CopyDummy, (LPVOID)(impDLLDataList[impDLLNumber][0] + 2 * sizeof ULONG_PTR), 4);
     CopyDummy++;
     RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][0] + 2 * sizeof ULONG_PTR), &CopyDummy, 4);
+    */
 }
 __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue)
 {
-
+    //TODO scylla enable
+    return;
+    /*
     if(OrdinalNumber & IMAGE_ORDINAL_FLAG)
     {
         OrdinalNumber = OrdinalNumber ^ IMAGE_ORDINAL_FLAG;
@@ -18657,14 +18672,21 @@ __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNum
     {
         ImporterAddNewAPI((char*)OrdinalNumber, ThunkValue);
     }
+    */
 }
 __declspec(dllexport) long TITCALL ImporterGetAddedDllCount()
 {
+    //TODO scylla enable
+    return 0;
+    /*
     return(impDLLNumber + 1);
+    */
 }
 __declspec(dllexport) long TITCALL ImporterGetAddedAPICount()
 {
-
+    //TODO scylla enable
+    return 0;
+    /*
     int i = 0;
     int CopyDummy = NULL;
     DWORD DLLNumber = NULL;
@@ -18679,9 +18701,13 @@ __declspec(dllexport) long TITCALL ImporterGetAddedAPICount()
         i++;
     }
     return(APINumber);
+    */
 }
 __declspec(dllexport) void* TITCALL ImporterGetLastAddedDLLName()
 {
+    //TODO scylla enable
+    return NULL;
+    /*
     if(impDLLNumber != 0xFFFFFFFF && impDLLNumber < 1000)
     {
         return((void*)impDLLStringList[impDLLNumber][0]);
@@ -18689,7 +18715,7 @@ __declspec(dllexport) void* TITCALL ImporterGetLastAddedDLLName()
     else
     {
         return(NULL);
-    }
+    }*/
 }
 __declspec(dllexport) void TITCALL ImporterMoveIAT()
 {
@@ -18705,7 +18731,9 @@ __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG
 }
 __declspec(dllexport) long TITCALL ImporterEstimatedSize()
 {
-
+    //TODO scylla enable
+    return 0;
+    /*
     int i = 0;
     DWORD DLLNumber = NULL;
     long EstimatedSize = 0x200;
@@ -18730,6 +18758,7 @@ __declspec(dllexport) long TITCALL ImporterEstimatedSize()
         }
     }
     return(EstimatedSize);
+    */
 }
 __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, char* szExportFileName, char* szSectionName)
 {
@@ -18760,7 +18789,8 @@ __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName,
 }
 __declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPIName)
 {
-
+    //TODO scylla enable
+    /*
     int i = 0;
     int j = 0;
     DWORD DLLNumber = NULL;
@@ -18812,6 +18842,7 @@ __declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPI
             }
         }
     }
+    */
     return(NULL);
 }
 __declspec(dllexport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
@@ -18820,7 +18851,8 @@ __declspec(dllexport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULON
 }
 __declspec(dllexport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
 {
-
+    //TODO scylla enable
+    /*
     int i = 0;
     DWORD DLLNumber = NULL;
     LPVOID NameReadPlace = NULL;
@@ -18849,12 +18881,13 @@ __declspec(dllexport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR
             DLLNumber--;
             i++;
         }
-    }
+    }*/
     return(NULL);
 }
 __declspec(dllexport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
 {
-
+    //TODO scylla enable
+    /*
     int i = 0;
     DWORD DLLNumber = NULL;
     LPVOID NameReadPlace = NULL;
@@ -18882,7 +18915,7 @@ __declspec(dllexport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR
             DLLNumber--;
             i++;
         }
-    }
+    }*/
     return(NULL);
 }
 __declspec(dllexport) void* TITCALL ImporterGetDLLName(ULONG_PTR APIAddress)
@@ -19052,7 +19085,8 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProce
 }
 __declspec(dllexport) bool TITCALL ImporterRelocateWriteLocation(ULONG_PTR AddValue)
 {
-
+    //TODO scylla obsoleted this
+    /*
     unsigned int i;
     ULONG_PTR RealignData = NULL;
 
@@ -19080,6 +19114,7 @@ __declspec(dllexport) bool TITCALL ImporterRelocateWriteLocation(ULONG_PTR AddVa
     {
         return(false);
     }
+    */
     return(false);
 }
 __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
@@ -19242,7 +19277,9 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTable(char* szFileName)
 }
 __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
 {
-
+    //TODO scylla enable
+    return false;
+    /*
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
     PIMAGE_NT_HEADERS64 PEHeader64;
@@ -19383,6 +19420,7 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
     }
     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     return(false);
+    */
 }
 __declspec(dllexport) bool TITCALL ImporterMoveOriginalIAT(char* szOriginalFile, char* szDumpFile, char* szSectionName)
 {
@@ -19452,7 +19490,9 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULON
 }
 __declspec(dllexport) void TITCALL ImporterEnumAddedData(LPVOID EnumCallBack)
 {
-
+    //TODO scylla enable
+    return;
+    /*
     int i = 0;
     int j = 0;
     int x = 0;
@@ -19529,6 +19569,7 @@ __declspec(dllexport) void TITCALL ImporterEnumAddedData(LPVOID EnumCallBack)
             i++;
         }
     }
+    */
 }
 __declspec(dllexport) long TITCALL ImporterAutoFixIATEx(DWORD ProcessId, char* szDumpedFile, char* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart, bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
 {

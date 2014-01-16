@@ -1,0 +1,57 @@
+scylla-integration possible TODO
+
+
+obsolete functions:
+
+Init
+SetImageBase
+Cleanup
+MoveIAT
+RelocateWriteLocation  //only used for MoveIAT
+SetUnknownDelta  //only used for MoveIAT
+GetCurrentDelta  //only used for MoveIAT
+
+defunct until scylla-enabled:
+
+AddNewDLL
+AddNewAPI
+AddNewOrdinal
+GetLastAddedDLLName
+GetAddedDllCount
+GetAddedAPICount
+EnumAddedData   //useful for investigating complete iat moduleList
+EstimatedSize   
+GetDLLIndexEx 
+GetDLLIndex
+FindAPIWriteLocation
+FindOrdinalAPIWriteLocation
+FindAPIByWriteLocation
+FindDLLByWriteLocation
+LoadImportTable
+MoveOriginalIAT
+
+
+questionable if working, all proxy to EngineGlobalAPIHandler which is buggy
+
+GetDLLName -> EngineGlobalAPIHandler
+GetAPIName -> EngineGlobalAPIHandler
+GetAPINameEx -> EngineGlobalAPIHandler
+GetAPIOrdinalNumber -> EngineGlobalAPIHandler
+GetRemoteAPIAddress -> EngineGlobalAPIHandler
+GetLocalAPIAddress-> EngineGlobalAPIHandler
+GetDLLNameFromDebuggee-> EngineGlobalAPIHandler
+GetAPIOrdinalNumberFromDebuggee -> EngineGlobalAPIHandler
+GetRemoteDLLBase -> EngineGlobalAPIHandler
+IsForwardedAPI -> EngineGlobalAPIHandler
+GetForwardedAPIName- > EngineGlobalAPIHandler
+GetForwardedAPIOrdinalNumber -> EngineGlobalAPIHandler
+GetForwardedDLLName -> EngineGlobalAPIHandler
+GetNearestAPIAddress -> EngineGlobalAPIHandler
+GetNearestAPIName -> EngineGlobalAPIHandler
+
+
+no change required:
+
+CopyOriginalIAT
+GetRemoteAPIAddressEX
+GetRemoteDLLBaseEX
