@@ -18676,32 +18676,11 @@ __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNum
 }
 __declspec(dllexport) long TITCALL ImporterGetAddedDllCount()
 {
-    //TODO scylla enable
-    return 0;
-    /*
-    return(impDLLNumber + 1);
-    */
+    return scylla_getModuleCount();
 }
 __declspec(dllexport) long TITCALL ImporterGetAddedAPICount()
 {
-    //TODO scylla enable
-    return 0;
-    /*
-    int i = 0;
-    int CopyDummy = NULL;
-    DWORD DLLNumber = NULL;
-    long APINumber = NULL;
-
-    DLLNumber = impDLLNumber + 1;
-    while(DLLNumber > NULL)
-    {
-        RtlMoveMemory(&CopyDummy, (LPVOID)(impDLLDataList[i][0] + 2 * sizeof ULONG_PTR), 4);
-        APINumber = APINumber + CopyDummy - 1;
-        DLLNumber--;
-        i++;
-    }
-    return(APINumber);
-    */
+    return scylla_getImportCount();
 }
 __declspec(dllexport) void* TITCALL ImporterGetLastAddedDLLName()
 {

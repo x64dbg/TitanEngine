@@ -17,8 +17,6 @@ AddNewDLL
 AddNewAPI
 AddNewOrdinal
 GetLastAddedDLLName
-GetAddedDllCount
-GetAddedAPICount
 EnumAddedData   //useful for investigating complete iat moduleList
 EstimatedSize   
 GetDLLIndexEx 
