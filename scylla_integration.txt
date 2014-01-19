@@ -17,7 +17,6 @@ AddNewDLL
 AddNewAPI
 AddNewOrdinal
 GetLastAddedDLLName
-EnumAddedData   //useful for investigating complete iat moduleList
 EstimatedSize   
 GetDLLIndexEx 
 GetDLLIndex

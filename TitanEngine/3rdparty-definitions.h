@@ -18,6 +18,7 @@ int scylla_fixDump(WCHAR* dumpFile, WCHAR* iatFixFile, WCHAR* sectionName = L".s
 int scylla_fixMappedDump(DWORD_PTR iatVA, DWORD_PTR FileMapVA, HANDLE hFileMap);
 int scylla_getModuleCount();
 int scylla_getImportCount();
+void scylla_enumImportTree(LPVOID enumCallBack);
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
