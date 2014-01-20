@@ -13,19 +13,18 @@ GetCurrentDelta  //only used for MoveIAT
 
 defunct until scylla-enabled:
 
-AddNewDLL
-AddNewAPI
-AddNewOrdinal
-GetLastAddedDLLName
-EstimatedSize   
-GetDLLIndexEx 
-GetDLLIndex
-FindAPIWriteLocation
-FindOrdinalAPIWriteLocation
-FindAPIByWriteLocation
-FindDLLByWriteLocation
-LoadImportTable
-MoveOriginalIAT
+* AddNewDLL
+* AddNewAPI
+AddNewOrdinal -> AddNewAPI
+GetLastAddedDLLName -> no scylla export needed, just rewrite
+* GetDLLIndexEx 
+* GetDLLIndex
+* FindAPIWriteLocation
+FindOrdinalAPIWriteLocation -> FindAPIWriteLocation
+* FindAPIByWriteLocation
+* FindDLLByWriteLocation
+* LoadImportTable
+* MoveOriginalIAT
 
 
 questionable if working, all proxy to EngineGlobalAPIHandler which is buggy

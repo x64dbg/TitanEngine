@@ -18711,34 +18711,7 @@ __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG
 }
 __declspec(dllexport) long TITCALL ImporterEstimatedSize()
 {
-    //TODO scylla enable
-    return 0;
-    /*
-    int i = 0;
-    DWORD DLLNumber = NULL;
-    long EstimatedSize = 0x200;
-
-    if(impMoveIAT)
-    {
-        EstimatedSize = EstimatedSize + (ImporterGetAddedAPICount() * sizeof ULONG_PTR) + ((impDLLNumber + 1) * sizeof ULONG_PTR);
-    }
-    EstimatedSize = EstimatedSize + ((impDLLNumber + 2) * sizeof IMAGE_IMPORT_DESCRIPTOR);
-    DLLNumber = impDLLNumber + 1;
-    while(DLLNumber > NULL)
-    {
-        EstimatedSize = EstimatedSize + (DWORD)(impDLLStringList[i][1] - impDLLStringList[i][0]);
-        DLLNumber--;
-        i++;
-    }
-    for(i = 0; i < 1000; i++)
-    {
-        if(impOrdinalList[i][0] != NULL && impOrdinalList[i][1] != NULL)
-        {
-            EstimatedSize = EstimatedSize + sizeof ULONG_PTR;
-        }
-    }
-    return(EstimatedSize);
-    */
+    return scylla_estimatedIATSize();
 }
 __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, char* szExportFileName, char* szSectionName)
 {
