@@ -1647,26 +1647,6 @@ protected:
     typedef void (TITCALL *fImportEnumCallBack)(void* ptrImportEnumData);
     typedef void* (TITCALL *fImportFixCallback)(void* fIATPointer);
 
-    static void Cleanup()
-    {
-        UE::ImporterCleanup();
-    }
-    static void SetImageBase(ULONG_PTR ImageBase)
-    {
-        UE::ImporterSetImageBase(ImageBase);
-    }
-    static void SetUnknownDelta(ULONG_PTR DeltaAddress)
-    {
-        UE::ImporterSetUnknownDelta(DeltaAddress);
-    }
-    static long long GetCurrentDelta()
-    {
-        return UE::ImporterGetCurrentDelta();
-    }
-    static void Init(DWORD MemorySize, ULONG_PTR ImageBase)
-    {
-        UE::ImporterInit(MemorySize, ImageBase);
-    }
     static void AddNewDll(const char* szDLLName, ULONG_PTR FirstThunk)
     {
         UE::ImporterAddNewDll((char*)szDLLName, FirstThunk);
@@ -1686,14 +1666,6 @@ protected:
     static long GetAddedAPICount()
     {
         return UE::ImporterGetAddedAPICount();
-    }
-    static const char* GetLastAddedDLLName()
-    {
-        return (const char*)UE::ImporterGetLastAddedDLLName();
-    }
-    static void MoveIAT()
-    {
-        UE::ImporterMoveIAT();
     }
     static bool ExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap)
     {
@@ -1770,10 +1742,6 @@ protected:
     static long long GetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
     {
         return UE::ImporterGetRemoteDLLBase(hProcess, LocalModuleBase);
-    }
-    static bool RelocateWriteLocation(ULONG_PTR AddValue)
-    {
-        return UE::ImporterRelocateWriteLocation(AddValue);
     }
     static bool IsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
     {
@@ -1892,18 +1860,11 @@ public:
     using ImporterX::fImportEnumCallBack;
     using ImporterX::fImportFixCallback;
 
-    using ImporterX::Cleanup;
-    using ImporterX::SetImageBase;
-    using ImporterX::SetUnknownDelta;
-    using ImporterX::GetCurrentDelta;
-    using ImporterX::Init;
     using ImporterX::AddNewDll;
     using ImporterX::AddNewAPI;
     using ImporterX::AddNewOrdinalAPI;
     using ImporterX::GetAddedDllCount;
     using ImporterX::GetAddedAPICount;
-    using ImporterX::GetLastAddedDLLName;
-    using ImporterX::MoveIAT;
     using ImporterX::ExportIAT;
     using ImporterX::EstimatedSize;
     using ImporterA::ExportIATEx;
@@ -1925,7 +1886,6 @@ public:
     using ImporterX::GetDLLIndexEx;
     using ImporterX::GetDLLIndex;
     using ImporterX::GetRemoteDLLBase;
-    using ImporterX::RelocateWriteLocation;
     using ImporterX::IsForwardedAPI;
     using ImporterX::GetForwardedAPIName;
     using ImporterX::GetForwardedDLLName;

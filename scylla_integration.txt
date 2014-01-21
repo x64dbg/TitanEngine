@@ -1,21 +1,30 @@
-scylla-integration TODO
+obsolete/removed vars:
+
+impDLLNumber
+impDeltaStart
+impDeltaCurrent
+impImageBase
+impAllocSize
+impDLLNumber
+impMoveIAT
+impDLLDataList    
+impDLLStringList
+impOrdinalList
 
 
-obsolete functions:
+obsolete/removed functions:
 
-Init
-SetImageBase
-Cleanup
-MoveIAT
-RelocateWriteLocation  //only used for MoveIAT
-SetUnknownDelta  //only used for MoveIAT
-GetCurrentDelta  //only used for MoveIAT
-GetDLLIndexEx // no benefit in my eyes. can be done by enumAddedData
-GetDLLIndex
+__declspec(dllexport) void TITCALL ImporterCleanup()
+__declspec(dllexport) void TITCALL ImporterSetImageBase(ULONG_PTR ImageBase)
+__declspec(dllexport) void TITCALL ImporterSetUnknownDelta(ULONG_PTR DeltaAddress)
+__declspec(dllexport) long long TITCALL ImporterGetCurrentDelta()
+__declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR ImageBase
+__declspec(dllexport) bool TITCALL ImporterRelocateWriteLocation(ULONG_PTR AddValue)
+__declspec(dllexport) void TITCALL ImporterMoveIAT()
+__declspec(dllexport) void TITCALL getLastAddedDLLName()
 
 defunct until scylla-enabled:
 
-GetLastAddedDLLName -> no scylla export needed, just rewrite
 * LoadImportTable
 * MoveOriginalIAT
 

@@ -239,18 +239,11 @@ __declspec(dllexport) void TITCALL FindOEPInit();
 __declspec(dllexport) bool TITCALL FindOEPGenerically(char* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack);
 __declspec(dllexport) bool TITCALL FindOEPGenericallyW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack);
 // TitanEngine.Importer.functions:
-__declspec(dllexport) void TITCALL ImporterCleanup();
-__declspec(dllexport) void TITCALL ImporterSetImageBase(ULONG_PTR ImageBase);
-__declspec(dllexport) void TITCALL ImporterSetUnknownDelta(ULONG_PTR DeltaAddress);
-__declspec(dllexport) long long TITCALL ImporterGetCurrentDelta();
-__declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR ImageBase);
 __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk);
 __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR ThunkValue);
 __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue);
 __declspec(dllexport) long TITCALL ImporterGetAddedDllCount();
 __declspec(dllexport) long TITCALL ImporterGetAddedAPICount();
-__declspec(dllexport) void* TITCALL ImporterGetLastAddedDLLName();
-__declspec(dllexport) void TITCALL ImporterMoveIAT();
 __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap);
 __declspec(dllexport) long TITCALL ImporterEstimatedSize();
 __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, char* szExportFileName, char* szSectionName);
@@ -273,7 +266,6 @@ __declspec(dllexport) long TITCALL ImporterGetDLLIndexEx(ULONG_PTR APIAddress, U
 __declspec(dllexport) long TITCALL ImporterGetDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList);
 __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase);
 __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName);
-__declspec(dllexport) bool TITCALL ImporterRelocateWriteLocation(ULONG_PTR AddValue);
 __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllexport) void* TITCALL ImporterGetForwardedAPIName(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllexport) void* TITCALL ImporterGetForwardedDLLName(HANDLE hProcess, ULONG_PTR APIAddress);

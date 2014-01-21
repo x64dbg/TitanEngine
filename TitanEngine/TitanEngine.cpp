@@ -52,15 +52,6 @@ DWORD ProcessExitCode = 0;
 LPVOID hListProcess = 0;
 LPVOID hListThread = 0;
 LPVOID hListLibrary = 0;
-ULONG_PTR impDeltaStart = NULL;
-ULONG_PTR impDeltaCurrent = NULL;
-ULONG_PTR impImageBase = 0;
-DWORD impAllocSize = 20 * 1024;
-DWORD impDLLNumber = 0;
-bool impMoveIAT = false;
-ULONG_PTR impDLLDataList[1000][2];
-ULONG_PTR impDLLStringList[1000][2];
-ULONG_PTR impOrdinalList[1000][2];
 LPVOID expTableData = NULL;
 LPVOID expTableDataCWP = NULL;
 ULONG_PTR expImageBase = 0;
@@ -18496,69 +18487,6 @@ __declspec(dllexport) bool TITCALL FindOEPGenericallyW(wchar_t* szFileName, LPVO
     return(false);
 }
 // TitanEngine.Importer.functions:
-__declspec(dllexport) void TITCALL ImporterCleanup()
-{
-    //TODO scylla obsoleted this
-    return;
-    /*
-    int i = 0;
-
-    for(i = 0; i < 1000; i++)
-    {
-        if(impDLLDataList[i][0] != NULL)
-        {
-            VirtualFree((LPVOID)(impDLLDataList[i][0]), NULL, MEM_RELEASE);
-            impDLLDataList[i][0] = 0;
-            impDLLDataList[i][1] = 0;
-        }
-        if(impDLLStringList[i][0] != NULL)
-        {
-            VirtualFree((LPVOID)(impDLLStringList[i][0]), NULL, MEM_RELEASE);
-            impDLLStringList[i][0] = 0;
-            impDLLStringList[i][1] = 0;
-        }
-        impOrdinalList[i][0] = 0;
-        impOrdinalList[i][1] = 0;
-    }
-    */
-}
-__declspec(dllexport) void TITCALL ImporterSetImageBase(ULONG_PTR ImageBase)
-{
-    // scylla obsoleted this
-    impImageBase = ImageBase;
-}
-__declspec(dllexport) void TITCALL ImporterSetUnknownDelta(ULONG_PTR DeltaAddress)
-{
-    //scylla obsoleted this
-    impDeltaStart = DeltaAddress;
-    impDeltaCurrent = DeltaAddress;
-}
-__declspec(dllexport) long long TITCALL ImporterGetCurrentDelta()
-{
-    //scylla obsoleted this
-    return((ULONG_PTR)impDeltaCurrent);
-}
-__declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR ImageBase)
-{
-    //TODO scylla obsoleted this
-    return;
-    /*
-    impImageBase = ImageBase;
-    if(MemorySize != NULL)
-    {
-        impAllocSize = MemorySize;
-    }
-    else
-    {
-        impAllocSize = 20 * 1024;
-    }
-    ImporterCleanup();
-    impMoveIAT = false;
-    impDLLNumber = 0xFFFFFFFF;
-    impDeltaStart = NULL;
-    impDeltaCurrent = NULL;
-    */
-}
 __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk)
 {
     wchar_t uniDLLName[MAX_PATH] = {};
@@ -18595,24 +18523,6 @@ __declspec(dllexport) long TITCALL ImporterGetAddedDllCount()
 __declspec(dllexport) long TITCALL ImporterGetAddedAPICount()
 {
     return scylla_getImportCount();
-}
-__declspec(dllexport) void* TITCALL ImporterGetLastAddedDLLName()
-{
-    //TODO scylla enable
-    return NULL;
-    /*
-    if(impDLLNumber != 0xFFFFFFFF && impDLLNumber < 1000)
-    {
-        return((void*)impDLLStringList[impDLLNumber][0]);
-    }
-    else
-    {
-        return(NULL);
-    }*/
-}
-__declspec(dllexport) void TITCALL ImporterMoveIAT()
-{
-    impMoveIAT = true;
 }
 __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap)
 {
@@ -18835,40 +18745,6 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProce
         }
     }
     return(NULL);
-}
-__declspec(dllexport) bool TITCALL ImporterRelocateWriteLocation(ULONG_PTR AddValue)
-{
-    //TODO scylla obsoleted this
-    /*
-    unsigned int i;
-    ULONG_PTR RealignData = NULL;
-
-    if(impDLLNumber >= NULL)
-    {
-        for(i = 0; i < impDLLNumber + 1; i++)
-        {
-            RtlMoveMemory(&RealignData, (LPVOID)impDLLDataList[i][0], sizeof ULONG_PTR);
-            RealignData = RealignData + AddValue;
-            RtlMoveMemory((LPVOID)impDLLDataList[i][0], &RealignData, sizeof ULONG_PTR);
-            RtlMoveMemory(&RealignData, (LPVOID)((ULONG_PTR)impDLLDataList[i][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
-            RealignData = RealignData + AddValue;
-            RtlMoveMemory((LPVOID)((ULONG_PTR)impDLLDataList[i][0] + sizeof ULONG_PTR), &RealignData, sizeof ULONG_PTR);
-        }
-        for(i = 0; i < 1000; i++)
-        {
-            if(impOrdinalList[i][0] != NULL && impOrdinalList[i][1] != NULL)
-            {
-                impOrdinalList[i][0] = impOrdinalList[i][0] + AddValue;
-            }
-        }
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
-    */
-    return(false);
 }
 __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
 {
@@ -26407,6 +26283,7 @@ void EngineSimplifyLoadLibraryCallBack()
     if(!EngineUnpackerFileImporterInit)
     {
         EngineUnpackerFileImporterInit = true;
+        /* broken since scylla integration but we dont care
         if(EngineUnpackerFileStatus.FileIsDLL)
         {
             ImporterInit(50 * 1024, (ULONG_PTR)GetDebuggedDLLBaseAddress());
@@ -26414,7 +26291,7 @@ void EngineSimplifyLoadLibraryCallBack()
         else
         {
             ImporterInit(50 * 1024, (ULONG_PTR)GetDebuggedFileBaseAddress());
-        }
+        }*/
     }
     for(int i = 0; i < (int)EngineUnpackerBreakInfo.size(); i++)
     {
@@ -26689,7 +26566,8 @@ void EngineSimplifyEntryPointCallBack()
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
         ForceClose();
-        ImporterCleanup();
+        //broken since scylla integration but we dont care
+        //ImporterCleanup();
         if(FileMapVA > NULL)
         {
             StaticFileUnloadW(szEngineUnpackerOutputFile, false, FileHandle, FileSize, FileMap, FileMapVA);

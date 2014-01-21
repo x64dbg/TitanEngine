@@ -158,7 +158,6 @@ AutoDebugEx
 AutoDebugExW
 IsFileBeingDebugged
 SetErrorModel
-ImporterInit
 ImporterAddNewDll
 ImporterAddNewAPI
 ImporterAddNewOrdinalAPI
@@ -166,14 +165,8 @@ ImporterExportIAT
 ImporterExportIATEx
 ImporterExportIATExW
 ImporterEstimatedSize
-ImporterSetImageBase
-ImporterSetUnknownDelta
-ImporterGetCurrentDelta
-ImporterCleanup
 ImporterGetAddedDllCount
 ImporterGetAddedAPICount
-ImporterGetLastAddedDLLName
-ImporterMoveIAT
 ImporterFindAPIWriteLocation
 ImporterFindOrdinalAPIWriteLocation
 ImporterFindAPIByWriteLocation
@@ -192,7 +185,6 @@ ImporterGetDLLIndexEx
 ImporterGetDLLIndex
 ImporterGetRemoteDLLBase
 ImporterGetRemoteDLLBaseEx
-ImporterRelocateWriteLocation
 ImporterIsForwardedAPI
 ImporterAutoSearchIAT
 ImporterAutoSearchIATW
@@ -215,6 +207,7 @@ ImporterLoadImportTableW
 ImporterMoveOriginalIAT
 ImporterMoveOriginalIATW
 ImporterEnumAddedData
+ImporterDeleteAPI
 HooksSafeTransition
 HooksSafeTransitionEx
 HooksIsAddressRedirected
