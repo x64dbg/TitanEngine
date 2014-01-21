@@ -1,4 +1,4 @@
-scylla-integration possible TODO
+scylla-integration TODO
 
 
 obsolete functions:
@@ -10,17 +10,13 @@ MoveIAT
 RelocateWriteLocation  //only used for MoveIAT
 SetUnknownDelta  //only used for MoveIAT
 GetCurrentDelta  //only used for MoveIAT
+GetDLLIndexEx // no benefit in my eyes. can be done by enumAddedData
+GetDLLIndex
 
 defunct until scylla-enabled:
 
-* AddNewDLL
-* AddNewAPI
-AddNewOrdinal -> AddNewAPI
 GetLastAddedDLLName -> no scylla export needed, just rewrite
-* GetDLLIndexEx 
-* GetDLLIndex
-* FindAPIWriteLocation
-FindOrdinalAPIWriteLocation -> FindAPIWriteLocation
+* FindAPIWriteLocation, FindOrdinalAPIWriteLocation
 * FindAPIByWriteLocation
 * FindDLLByWriteLocation
 * LoadImportTable

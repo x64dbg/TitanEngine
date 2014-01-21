@@ -12,6 +12,8 @@ extern "C" {
 #endif /*__cplusplus*/
 int scylla_searchIAT(DWORD pid, DWORD_PTR &iatStart, DWORD &iatSize, DWORD_PTR searchStart, bool advancedSearch);
 int scylla_getImports(DWORD_PTR iatAddr, DWORD iatSize, DWORD pid, LPVOID invalidImportCallback = NULL);
+bool scylla_addModule(const WCHAR* moduleName, DWORD_PTR firstThunkRVA);
+bool scylla_addImport(const WCHAR* importName, DWORD_PTR thunkVA);
 bool scylla_importsValid();
 bool scylla_cutImport(DWORD_PTR apiAddr);
 int scylla_fixDump(WCHAR* dumpFile, WCHAR* iatFixFile, WCHAR* sectionName = L".scy");

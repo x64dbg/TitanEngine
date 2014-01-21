@@ -18561,108 +18561,23 @@ __declspec(dllexport) void TITCALL ImporterInit(DWORD MemorySize, ULONG_PTR Imag
 }
 __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk)
 {
-    //TODO scylla enable
-    return;
-    /*
-    int CopyDummy = 1;
+    wchar_t uniDLLName[MAX_PATH] = {};
 
-    impDLLNumber++;
-    if(impDLLNumber>=1000)
-    {
-        impDLLNumber--;
-        return;
-    }
-    impDLLDataList[impDLLNumber][0] = (ULONG_PTR)(VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE));
-    impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][0];
-    impDLLStringList[impDLLNumber][0] = (ULONG_PTR)(VirtualAlloc(NULL, impAllocSize, MEM_COMMIT, PAGE_READWRITE));
-    impDLLStringList[impDLLNumber][1] = impDLLStringList[impDLLNumber][0];
-    RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1]), &FirstThunk, sizeof ULONG_PTR);
-    RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1] + sizeof ULONG_PTR), &FirstThunk, sizeof ULONG_PTR);
-    RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1] + 2 * sizeof ULONG_PTR), &CopyDummy, 4);
-    #if !defined(_WIN64)
-    impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][0] + 12;
-    #else
-    impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][0] + 20;
-    #endif
-    RtlMoveMemory((LPVOID)(impDLLStringList[impDLLNumber][1]), szDLLName, lstrlenA((LPCSTR)szDLLName));
-    impDLLStringList[impDLLNumber][1] = impDLLStringList[impDLLNumber][1] + lstrlenA((LPCSTR)szDLLName) + 3;
-    if(FirstThunk == NULL && impDeltaStart != NULL)
-    {
-        impDeltaCurrent = impDeltaCurrent + sizeof ULONG_PTR;
-    }*/
+    MultiByteToWideChar(CP_ACP, NULL, szDLLName, lstrlenA(szDLLName)+1, uniDLLName, sizeof(uniDLLName)/(sizeof(uniDLLName[0])));
+
+    scylla_addModule(uniDLLName, FirstThunk);
 }
 __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR ThunkValue)
 {
-    //TODO scylla enable
-    return;
-    /*
-    int i = NULL;
-    int CopyDummy = NULL;
-    ULONG_PTR LastThunkValue = NULL;
+    wchar_t uniAPIName[MAX_PATH] = {};
 
-    RtlMoveMemory(&LastThunkValue, (LPVOID)(impDLLDataList[impDLLNumber][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
-    if(ThunkValue == NULL && impDeltaCurrent != NULL)
-    {
-        ThunkValue = impDeltaCurrent;
-        impDeltaCurrent = impDeltaCurrent + sizeof ULONG_PTR;
-    }
-    if(LastThunkValue != NULL && LastThunkValue != ThunkValue)
-    {
-        ImporterAddNewDll((char*)(LPVOID)impDLLStringList[impDLLNumber][0], ThunkValue);
-    }
-    else
-    {
-        if(LastThunkValue != NULL)
-        {
-            LastThunkValue = LastThunkValue + sizeof ULONG_PTR;
-        }
-        else
-        {
-            RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][0]), &ThunkValue, sizeof ULONG_PTR);
-            LastThunkValue = ThunkValue + sizeof ULONG_PTR;
-        }
-        RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][0] + sizeof ULONG_PTR), &LastThunkValue, sizeof ULONG_PTR);
-    }
-    CopyDummy = (int)(impDLLStringList[impDLLNumber][1] - impDLLStringList[impDLLNumber][0]);
-    RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][1]), &CopyDummy, 4);
-    impDLLDataList[impDLLNumber][1] = impDLLDataList[impDLLNumber][1] + 4;
-    if((ULONG_PTR)szAPIName > 0x10000)
-    {
-        RtlMoveMemory((LPVOID)(impDLLStringList[impDLLNumber][1] + 2), szAPIName, lstrlenA((LPCSTR)szAPIName));
-        impDLLStringList[impDLLNumber][1] = impDLLStringList[impDLLNumber][1] + lstrlenA((LPCSTR)szAPIName) + 3;
-    }
-    else
-    {
-        for(i = 0; i < 1000; i++)
-        {
-            if(impOrdinalList[i][0] == NULL && impOrdinalList[i][1] == NULL)
-            {
-                break;
-            }
-        }
-        if(i < 1000)
-        {
-            impOrdinalList[i][0] = ThunkValue;
-            if(sizeof ULONG_PTR == 4)
-            {
-                impOrdinalList[i][1] = (ULONG_PTR)szAPIName ^ IMAGE_ORDINAL_FLAG32;
-            }
-            else
-            {
-                impOrdinalList[i][1] = (ULONG_PTR)((ULONG_PTR)szAPIName ^ IMAGE_ORDINAL_FLAG64);
-            }
-        }
-    }
-    RtlMoveMemory(&CopyDummy, (LPVOID)(impDLLDataList[impDLLNumber][0] + 2 * sizeof ULONG_PTR), 4);
-    CopyDummy++;
-    RtlMoveMemory((LPVOID)(impDLLDataList[impDLLNumber][0] + 2 * sizeof ULONG_PTR), &CopyDummy, 4);
-    */
+    MultiByteToWideChar(CP_ACP, NULL, szAPIName, lstrlenA(szAPIName)+1, uniAPIName, sizeof(uniAPIName)/(sizeof(uniAPIName[0])));
+
+    scylla_addImport(uniAPIName, ThunkValue);
 }
 __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue)
 {
-    //TODO scylla enable
-    return;
-    /*
+
     if(OrdinalNumber & IMAGE_ORDINAL_FLAG)
     {
         OrdinalNumber = OrdinalNumber ^ IMAGE_ORDINAL_FLAG;
@@ -18672,7 +18587,6 @@ __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNum
     {
         ImporterAddNewAPI((char*)OrdinalNumber, ThunkValue);
     }
-    */
 }
 __declspec(dllexport) long TITCALL ImporterGetAddedDllCount()
 {
@@ -19415,7 +19329,7 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar
     //we also try to automatically read imports so following call to ExportIAT has a chance
     if(iatStart != NULL && iatSize != NULL)
     {
-        scylla_getImports(iatStart, iatSize, ProcessId);
+        scylla_getImports(0x5f2724, iatSize, ProcessId);
     }
 
     RtlMoveMemory(pIATStart, &iatStart, sizeof ULONG_PTR);
