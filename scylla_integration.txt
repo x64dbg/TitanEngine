@@ -16,9 +16,6 @@ GetDLLIndex
 defunct until scylla-enabled:
 
 GetLastAddedDLLName -> no scylla export needed, just rewrite
-* FindAPIWriteLocation, FindOrdinalAPIWriteLocation
-* FindAPIByWriteLocation
-* FindDLLByWriteLocation
 * LoadImportTable
 * MoveOriginalIAT
 
@@ -47,3 +44,10 @@ no change required:
 CopyOriginalIAT
 GetRemoteAPIAddressEX
 GetRemoteDLLBaseEX
+
+
+fixup exception handling:
+
+- enumaddeddata; around callback call
+- autofixiat: around fixer callback
+- exportiat

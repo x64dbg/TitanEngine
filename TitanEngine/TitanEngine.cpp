@@ -18657,134 +18657,19 @@ __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName,
 }
 __declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPIName)
 {
-    //TODO scylla enable
-    /*
-    int i = 0;
-    int j = 0;
-    DWORD DLLNumber = NULL;
-    DWORD NumberOfAPIs = NULL;
-    LPVOID NameReadPlace = NULL;
-    ULONG_PTR CurrentAPILocation = NULL;
-    DWORD APINameRelativeOffset = NULL;
-    ULONG_PTR APIWriteLocation = NULL;
-
-    if(ImporterGetAddedDllCount() > NULL)
-    {
-        if((ULONG_PTR)szAPIName > 0x10000)
-        {
-            DLLNumber = impDLLNumber + 1;
-            while(DLLNumber > NULL)
-            {
-    #if !defined(_WIN64)
-                NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-    #else
-                NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-    #endif
-                RtlMoveMemory(&CurrentAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
-                RtlMoveMemory(&NumberOfAPIs, (LPVOID)(impDLLDataList[i][0] + 2 * sizeof ULONG_PTR), 4);
-                while(NumberOfAPIs > NULL)
-                {
-                    RtlMoveMemory(&APINameRelativeOffset, NameReadPlace, 4);
-                    if(lstrcmpiA((LPCSTR)((ULONG_PTR)impDLLStringList[i][0] + APINameRelativeOffset + 2), (LPCSTR)szAPIName) == NULL)
-                    {
-                        APIWriteLocation = CurrentAPILocation;
-                        break;
-                    }
-                    CurrentAPILocation = CurrentAPILocation + sizeof ULONG_PTR;
-                    NameReadPlace = (LPVOID)((ULONG_PTR)NameReadPlace + sizeof ULONG_PTR);
-                    NumberOfAPIs--;
-                }
-                DLLNumber--;
-                i++;
-            }
-            return(APIWriteLocation);
-        }
-        else
-        {
-            for(j = 0; j < 1000; j++)
-            {
-                if(impOrdinalList[j][1] == ((ULONG_PTR)szAPIName ^ IMAGE_ORDINAL_FLAG))
-                {
-                    return(impOrdinalList[j][0]);
-                }
-            }
-        }
-    }
-    */
-    return(NULL);
+    return(scylla_findImportWriteLocation(szAPIName));
 }
 __declspec(dllexport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
 {
-    return(ImporterFindAPIWriteLocation((char*)OrdinalNumber));
+    return(scylla_findOrdinalImportWriteLocation(OrdinalNumber));
 }
 __declspec(dllexport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
 {
-    //TODO scylla enable
-    /*
-    int i = 0;
-    DWORD DLLNumber = NULL;
-    LPVOID NameReadPlace = NULL;
-    ULONG_PTR MinAPILocation = NULL;
-    ULONG_PTR MaxAPILocation = NULL;
-    DWORD APINameRelativeOffset = NULL;
-    ULONG_PTR APINameOffset = NULL;
-
-    if(ImporterGetAddedDllCount() > NULL)
-    {
-        DLLNumber = impDLLNumber + 1;
-        while(DLLNumber > NULL)
-        {
-    #if !defined(_WIN64)
-            NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-    #else
-            NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-    #endif
-            RtlMoveMemory(&MinAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
-            RtlMoveMemory(&MaxAPILocation, (LPVOID)(impDLLDataList[i][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
-            if(MinAPILocation <= APIWriteLocation && APIWriteLocation <= MaxAPILocation)
-            {
-                RtlMoveMemory(&APINameRelativeOffset, (LPVOID)((ULONG_PTR)NameReadPlace + (APIWriteLocation - MinAPILocation)), 4);
-                return((ULONG_PTR)(impDLLStringList[i][0] + APINameRelativeOffset + 2));
-            }
-            DLLNumber--;
-            i++;
-        }
-    }*/
-    return(NULL);
+    return(scylla_findImportNameByWriteLocation(APIWriteLocation));
 }
 __declspec(dllexport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
 {
-    //TODO scylla enable
-    /*
-    int i = 0;
-    DWORD DLLNumber = NULL;
-    LPVOID NameReadPlace = NULL;
-    ULONG_PTR MinAPILocation = NULL;
-    ULONG_PTR MaxAPILocation = NULL;
-    DWORD APINameRelativeOffset = NULL;
-    ULONG_PTR APINameOffset = NULL;
-
-    if(ImporterGetAddedDllCount() > NULL)
-    {
-        DLLNumber = impDLLNumber + 1;
-        while(DLLNumber > NULL)
-        {
-    #if !defined(_WIN64)
-            NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 12);
-    #else
-            NameReadPlace = (LPVOID)(impDLLDataList[i][0] + 20);
-    #endif
-            RtlMoveMemory(&MinAPILocation, (LPVOID)(impDLLDataList[i][0]), sizeof ULONG_PTR);
-            RtlMoveMemory(&MaxAPILocation, (LPVOID)(impDLLDataList[i][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
-            if(MinAPILocation <= APIWriteLocation && APIWriteLocation <= MaxAPILocation)
-            {
-                return((ULONG_PTR)(impDLLStringList[i][0]));
-            }
-            DLLNumber--;
-            i++;
-        }
-    }*/
-    return(NULL);
+    return scylla_findModuleNameByWriteLocation(APIWriteLocation);
 }
 __declspec(dllexport) void* TITCALL ImporterGetDLLName(ULONG_PTR APIAddress)
 {
@@ -19329,7 +19214,7 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATW(DWORD ProcessId, wchar
     //we also try to automatically read imports so following call to ExportIAT has a chance
     if(iatStart != NULL && iatSize != NULL)
     {
-        scylla_getImports(0x5f2724, iatSize, ProcessId);
+        scylla_getImports(iatStart, iatSize, ProcessId);
     }
 
     RtlMoveMemory(pIATStart, &iatStart, sizeof ULONG_PTR);
