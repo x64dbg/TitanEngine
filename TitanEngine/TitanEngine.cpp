@@ -625,12 +625,20 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
             {
                 i = MaxDisassmSize;
             }
+            else
+            {
+                MaxDisassmSize = 512;
+            }
+        }
+        else
+        {
+            MaxDisassmSize = 512;
         }
 
-		TestChar = *((BYTE*)PossibleStringPtr);
+	TestChar = *((BYTE*)PossibleStringPtr);
         while(i > NULL && StringIsValid == true && TestChar != 0x00)
         {
-			TestChar = *((BYTE*)PossibleStringPtr);
+	    TestChar = *((BYTE*)PossibleStringPtr);
 
             if(TestChar < 32 || TestChar > 126)
             {
@@ -3909,6 +3917,10 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
 					{
 						if(!WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
 							return false;
+					}
+					else
+					{
+                        return false;
 					}
 					else
 					{
@@ -18716,6 +18728,38 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProce
         }
     }
     return(NULL);
+}
+__declspec(dllexport) bool TITCALL ImporterRelocateWriteLocation(ULONG_PTR AddValue)
+{
+
+    unsigned int i;
+    ULONG_PTR RealignData = NULL;
+
+    if(impDLLNumber)
+    {
+        for(i = 0; i < impDLLNumber + 1; i++)
+        {
+            RtlMoveMemory(&RealignData, (LPVOID)impDLLDataList[i][0], sizeof ULONG_PTR);
+            RealignData = RealignData + AddValue;
+            RtlMoveMemory((LPVOID)impDLLDataList[i][0], &RealignData, sizeof ULONG_PTR);
+            RtlMoveMemory(&RealignData, (LPVOID)((ULONG_PTR)impDLLDataList[i][0] + sizeof ULONG_PTR), sizeof ULONG_PTR);
+            RealignData = RealignData + AddValue;
+            RtlMoveMemory((LPVOID)((ULONG_PTR)impDLLDataList[i][0] + sizeof ULONG_PTR), &RealignData, sizeof ULONG_PTR);
+        }
+        for(i = 0; i < 1000; i++)
+        {
+            if(impOrdinalList[i][0] != NULL && impOrdinalList[i][1] != NULL)
+            {
+                impOrdinalList[i][0] = impOrdinalList[i][0] + AddValue;
+            }
+        }
+        return(true);
+    }
+    else
+    {
+        return(false);
+    }
+    return(false);
 }
 __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
 {
