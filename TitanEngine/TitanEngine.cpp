@@ -17310,7 +17310,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
                 {
                     ULONG_PTR addr=BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                    
+
                     bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
 
                     if(((BreakPointBuffer[MaximumBreakPoints].BreakPointType >= UE_MEMORY) && (BreakPointBuffer[MaximumBreakPoints].BreakPointType <= UE_MEMORY_EXECUTE)) && bpaddr>=addr && bpaddr<(addr+BreakPointBuffer[MaximumBreakPoints].BreakPointSize))
@@ -17444,7 +17444,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
                                 if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && //read flag
-                                    (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
+                                        (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
                                     RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
                             }
                             else
@@ -27415,6 +27415,7 @@ bool APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         {
             engineReservedMemoryLeft[i] = NULL;
         }
+        break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
