@@ -114,7 +114,7 @@ typedef struct
 {
     BYTE BreakPointActive;
     ULONG_PTR BreakPointAddress;
-    DWORD BreakPointSize;
+    SIZE_T BreakPointSize;
     BYTE OriginalByte[10];
     int BreakPointType;
     int AdvancedBreakPointType;

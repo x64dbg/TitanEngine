@@ -20,8 +20,8 @@
 // Global.Engine:
 #include "definitions.h"
 #include "resource.h"
-// 3rd party
-#include "3rdparty-definitions.h"
+// scylla wrapper
+#include "scylla_wrapper.h"
 
 #define TE_VER_MAJOR 2
 #define TE_VER_MIDDLE 1
@@ -189,8 +189,8 @@ bool EngineCloseHandle(HANDLE myHandle)
             return(true);
         }
     }
-    
-	return(false);
+
+    return(false);
 }
 // Global.Mapping.functions:
 bool MapFileEx(char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD FileSize, LPHANDLE FileMap, LPVOID FileMapVA, DWORD SizeModifier)
@@ -610,7 +610,7 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
 
     bool StringIsValid = true;
     unsigned int i = 512;
-	MEMORY_BASIC_INFORMATION MemInfo = {0};
+    MEMORY_BASIC_INFORMATION MemInfo = {0};
     DWORD MaxDisassmSize = 512;
     BYTE TestChar;
 
@@ -635,10 +635,10 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
             MaxDisassmSize = 512;
         }
 
-	TestChar = *((BYTE*)PossibleStringPtr);
+        TestChar = *((BYTE*)PossibleStringPtr);
         while(i > NULL && StringIsValid == true && TestChar != 0x00)
         {
-	    TestChar = *((BYTE*)PossibleStringPtr);
+            TestChar = *((BYTE*)PossibleStringPtr);
 
             if(TestChar < 32 || TestChar > 126)
             {
@@ -679,10 +679,10 @@ int EnginePointedMemoryStringLength(ULONG_PTR PossibleStringPtr)
             }
         }
 
-		TestChar = *((BYTE*)PossibleStringPtr);
+        TestChar = *((BYTE*)PossibleStringPtr);
         while(i > NULL && StringIsValid == true && TestChar != 0x00)
         {
-			TestChar = *((BYTE*)PossibleStringPtr);
+            TestChar = *((BYTE*)PossibleStringPtr);
 
             if(TestChar < 32 || TestChar > 126)
             {
@@ -794,11 +794,11 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
         LPVOID lpPossibleStringPtr = (LPVOID)PossibleStringPtr;
         BYTE TestChar;
 
-		TestChar = *((BYTE*)PossibleStringPtr);
+        TestChar = *((BYTE*)PossibleStringPtr);
 
         while(TestChar != 0x2E && TestChar != 0x00)
         {
-			TestChar = *((BYTE*)PossibleStringPtr);
+            TestChar = *((BYTE*)PossibleStringPtr);
             PossibleStringPtr++;
         }
         if(TestChar == 0x00)
@@ -809,7 +809,7 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
         RtlCopyMemory(szFwdDLLName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
         lstrcatA((LPSTR)szFwdDLLName, ".dll");
         lpPossibleStringPtr = (LPVOID)(PossibleStringPtr + 1);
-		TestChar = *((BYTE*)PossibleStringPtr);
+        TestChar = *((BYTE*)PossibleStringPtr);
 
         if(TestChar == 0x23)
         {
@@ -817,7 +817,7 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
         }
         while(TestChar != 0x00)
         {
-			TestChar = *((BYTE*)PossibleStringPtr);
+            TestChar = *((BYTE*)PossibleStringPtr);
             PossibleStringPtr++;
         }
         RtlCopyMemory(szFwdAPIName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
@@ -952,7 +952,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
 
     int i,j;
     HANDLE hFile;
-	wchar_t szTryFileName[512] = {0};
+    wchar_t szTryFileName[512] = {0};
 
     if(szPresentInFolder != NULL)
     {
@@ -1028,7 +1028,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
 
     int i,j;
     HANDLE hFile;
-	char szTryFileName[512] = {0};
+    char szTryFileName[512] = {0};
 
     if(szFileName != NULL)
     {
@@ -1136,7 +1136,7 @@ long EngineHashMemory(char* MemoryAddress, int MemorySize, DWORD InitialHashValu
 bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize)
 {
 
-	MEMORY_BASIC_INFORMATION MemInfo = {0};
+    MEMORY_BASIC_INFORMATION MemInfo = {0};
 
     while(DataSize > NULL)
     {
@@ -1178,20 +1178,20 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
             {
                 if(!EngineIsBadReadPtrEx(ResourceData, ResourceSize))
                 {
-					*((LONG*)lParam) = ReturnData;
+                    *((LONG*)lParam) = ReturnData;
                     return(false);
                 }
             }
             else
             {
-				*((LONG*)lParam) = ReturnData;
+                *((LONG*)lParam) = ReturnData;
                 return(false);
             }
         }
         return(true);
     }
 
-	*((LONG*)lParam) = ReturnData;
+    *((LONG*)lParam) = ReturnData;
     return(false);
 }
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile)
@@ -1201,7 +1201,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     DWORD MemorySize = NULL;
     PIMAGE_NT_HEADERS32 PEHeader32;
     IMAGE_NT_HEADERS32 RemotePEHeader32;
-	MEMORY_BASIC_INFORMATION MemoryInfo={0};
+    MEMORY_BASIC_INFORMATION MemoryInfo= {0};
     ULONG_PTR NumberOfBytesRW = NULL;
 
     if(IsFile)
@@ -1418,8 +1418,8 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
     PIMAGE_EXPORT_DIRECTORY PEExports;
     PEXPORTED_DATA ExportedFunctionNames;
     ULONG_PTR ConvertedExport = NULL;
-	char szFileRemoteProc[1024]={0};
-	char szDLLFileLocation[512]={0};
+    char szFileRemoteProc[1024]= {0};
+    char szDLLFileLocation[512]= {0};
     char* szTranslatedProcName=0;
 
     GetProcessImageFileNameA(hProcess, szFileRemoteProc, sizeof(szFileRemoteProc));
@@ -1692,11 +1692,11 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     HANDLE hProcess = NULL;
     ULONG_PTR EnumeratedModules[0x2000];
     ULONG_PTR LoadedModules[1000][4];
-	char RemoteDLLName[MAX_PATH]={0};
-    char FullRemoteDLLName[MAX_PATH]={0};
-    char szWindowsSideBySide[MAX_PATH]={0};
-    char szWindowsSideBySideCmp[MAX_PATH]={0};
-    char szWindowsKernelBase[MAX_PATH]={0};
+    char RemoteDLLName[MAX_PATH]= {0};
+    char FullRemoteDLLName[MAX_PATH]= {0};
+    char szWindowsSideBySide[MAX_PATH]= {0};
+    char szWindowsSideBySideCmp[MAX_PATH]= {0};
+    char szWindowsKernelBase[MAX_PATH]= {0};
     HANDLE hLoadedModule = NULL;
     HANDLE ModuleHandle = NULL;
     PIMAGE_DOS_HEADER DOSHeader;
@@ -1715,8 +1715,8 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     unsigned int FoundIndex = 0;
     unsigned int FoundOrdinalNumber = 0;
     ULONG_PTR FileMapVA;
-	char szFwdDLLName[512] = {0};
-	char szFwdAPIName[512] = {0};
+    char szFwdDLLName[512] = {0};
+    char szFwdAPIName[512] = {0};
     ULONG_PTR RealignedAPIAddress;
     ULONG_PTR ForwarderData = NULL;
     unsigned int ClosestAPI = 0x1000;
@@ -2946,7 +2946,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
         }
     }
 
-	return(false);
+    return(false);
 }
 __declspec(dllexport) bool TITCALL DumpRegions(HANDLE hProcess, char* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
@@ -3047,7 +3047,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
         }
     }
 
-	return(false);
+    return(false);
 }
 __declspec(dllexport) bool TITCALL DumpModule(HANDLE hProcess, LPVOID ModuleBase, char* szDumpFileName)
 {
@@ -3117,7 +3117,7 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
         }
     }
 
-	return(false);
+    return(false);
 }
 __declspec(dllexport) bool TITCALL PastePEHeader(HANDLE hProcess, LPVOID ImageBase, char* szDebuggedFileName)
 {
@@ -3808,35 +3808,35 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                     SetFilePointer(hFile, OverlayStart, NULL, FILE_BEGIN);
                     while(OverlaySize > 0)
                     {
-						RtlZeroMemory(ueReadBuffer, 0x2000);
+                        RtlZeroMemory(ueReadBuffer, 0x2000);
 
                         if(OverlaySize > 0x1000)
                         {
                             if(ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
-							{
-								if(!WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
-									return false;
-							}
-							else
-							{
-								return false;
-							}
+                            {
+                                if(!WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
+                                    return false;
+                            }
+                            else
+                            {
+                                return false;
+                            }
 
-							OverlaySize = OverlaySize - 0x1000;
+                            OverlaySize = OverlaySize - 0x1000;
                         }
                         else
                         {
                             if(ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
-							{
-								if(!WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
-									return false;
-							}
-							else
-							{
-								return false;
-							}
+                            {
+                                if(!WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
+                                    return false;
+                            }
+                            else
+                            {
+                                return false;
+                            }
 
-							OverlaySize = 0;
+                            OverlaySize = 0;
                         }
                     }
                     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
@@ -3895,33 +3895,33 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
             SetFilePointer(hFile, FileSize, NULL, FILE_BEGIN);
             while(OverlaySize > 0)
             {
-				RtlZeroMemory(ueReadBuffer, 0x2000);
+                RtlZeroMemory(ueReadBuffer, 0x2000);
 
                 if(OverlaySize > 0x1000)
                 {
                     if(ReadFile(hFileRead, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
-					{
-						if(!WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
-							return false;
-					}
-					else
-					{
-						return false;
-					}
+                    {
+                        if(!WriteFile(hFile, ueReadBuffer, 0x1000, &uedNumberOfBytesRead, NULL))
+                            return false;
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
                     OverlaySize = OverlaySize - 0x1000;
                 }
                 else
                 {
                     if(ReadFile(hFileRead, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
-					{
-						if(!WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
-							return false;
-					}
-					else
-					{
+                    {
+                        if(!WriteFile(hFile, ueReadBuffer, OverlaySize, &uedNumberOfBytesRead, NULL))
+                            return false;
+                    }
+                    else
+                    {
                         return false;
-					}
+                    }
 
                     OverlaySize = 0;
                 }
@@ -15898,7 +15898,7 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, D
         return false;
     }
 
-    uintdr7(GetContextData(UE_DR7), &dr7);
+    uintdr7((ULONG_PTR)GetContextData(UE_DR7), &dr7);
 
     DebugRegister[hwbpIndex].DrxExecution=false;
 
@@ -16065,7 +16065,7 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread,
         return false;
     }
 
-    uintdr7(GetContextDataEx(hActiveThread, UE_DR7), &dr7);
+    uintdr7((ULONG_PTR)GetContextDataEx(hActiveThread, UE_DR7), &dr7);
 
     DebugRegister[hwbpIndex].DrxExecution=false;
 
@@ -16236,7 +16236,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     fCustomBreakPoint myCustomBreakPoint;
     fFindOEPHandler myFindOEPHandler;
     ULONG_PTR MemoryBpxCallBack = 0;
-    DWORD ResetBPXSize = 0;
+    SIZE_T ResetBPXSize = 0;
     ULONG_PTR ResetBPXAddressTo =  0;
     ULONG_PTR ResetMemBPXAddress = 0;
     SIZE_T ResetMemBPXSize = 0;
@@ -18857,9 +18857,9 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
                     }
                 }
             }
-			UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
+            UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
         }
-		UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+        UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     }
 
     return(false);
@@ -21448,7 +21448,7 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     LPVOID TracerReadMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-	DWORD MaximumReadSize=0x1000;
+    DWORD MaximumReadSize=0x1000;
     if(!TracerReadMemory)
         return (NULL);
     cMem = (PMEMORY_CMP_HANDLER)TracerReadMemory;
@@ -26939,7 +26939,7 @@ __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies()
     if(engineDependencyFiles != NULL)
     {
         engineDependencyFilesCWP = engineDependencyFiles;
-		while(*((char*)engineDependencyFilesCWP) != 0)
+        while(*((char*)engineDependencyFilesCWP) != 0)
         {
             RtlZeroMemory(&szTempName, sizeof szTempName);
             RtlZeroMemory(&szTempFolder, sizeof szTempFolder);
