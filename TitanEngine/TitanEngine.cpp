@@ -13422,7 +13422,7 @@ __declspec(dllexport) bool TITCALL SafeDeleteAPIBreakPoint(char* szDLLName, char
 {
     return(DeleteAPIBreakPoint(szDLLName, szAPIName, bpxPlace));
 }
-__declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory, LPVOID bpxCallBack)
+__declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, LPVOID bpxCallBack)
 {
     int i = 0;
     int j = -1;
@@ -13481,7 +13481,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, DWORD Siz
         return(false);
     }
 }
-__declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
+__declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
 {
 
     int i = 0;
@@ -13542,7 +13542,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD S
         return(false);
     }
 }
-__declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory)
+__declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory)
 {
 
     int i = 0;

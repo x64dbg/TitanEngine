@@ -1236,15 +1236,15 @@ protected:
     {
         return UE::SafeDeleteAPIBreakPoint((char*)szDLLName, (char*)szAPIName, bpxPlace);
     }
-    static bool SetMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory, fBreakPointCallback bpxCallBack)
+    static bool SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, fBreakPointCallback bpxCallBack)
     {
         return UE::SetMemoryBPX(MemoryStart, SizeOfMemory, (void*)bpxCallBack);
     }
-    static bool SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD SizeOfMemory, eMemoryBPType BreakPointType, bool RestoreOnHit, fBreakPointCallback bpxCallBack)
+    static bool SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, eMemoryBPType BreakPointType, bool RestoreOnHit, fBreakPointCallback bpxCallBack)
     {
         return UE::SetMemoryBPXEx(MemoryStart, SizeOfMemory, BreakPointType, RestoreOnHit, (void*)bpxCallBack);
     }
-    static bool RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory)
+    static bool RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory)
     {
         return UE::RemoveMemoryBPX(MemoryStart, SizeOfMemory);
     }

@@ -838,13 +838,13 @@ PROCESS_INFORMATION = alien.defstruct{
 -- __declspec(dllexport) bool __stdcall SafeDeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace);
 	TitanEngine.SafeDeleteAPIBreakPoint:types {"string","string","long",abi="stdcall",ret="byte"}
 	TE_SafeDeleteAPIBreakPoint = TitanEngine.SafeDeleteAPIBreakPoint
--- __declspec(dllexport) bool __stdcall SetMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory, LPVOID bpxCallBack);
+-- __declspec(dllexport) bool __stdcall SetMemoryBPX(ULONG_PTR MemoryStart, ULONG_PTR SizeOfMemory, LPVOID bpxCallBack);
 	TitanEngine.SetMemoryBPX:types {"long","long","callback",abi="stdcall",ret="byte"}
 	TE_SetMemoryBPX = TitanEngine.SetMemoryBPX
--- __declspec(dllexport) bool __stdcall SetMemoryBPXEx(ULONG_PTR MemoryStart, DWORD SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack);
+-- __declspec(dllexport) bool __stdcall SetMemoryBPXEx(ULONG_PTR MemoryStart, ULONG_PTR SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack);
 	TitanEngine.SetMemoryBPXEx:types {"long","long","long","long","callback",abi="stdcall",ret="byte"}
 	TE_SetMemoryBPXEx = TitanEngine.SetMemoryBPXEx
--- __declspec(dllexport) bool __stdcall RemoveMemoryBPX(ULONG_PTR MemoryStart, DWORD SizeOfMemory);
+-- __declspec(dllexport) bool __stdcall RemoveMemoryBPX(ULONG_PTR MemoryStart, ULONG_PTR SizeOfMemory);
 	TitanEngine.RemoveMemoryBPX:types {"long","long",abi="stdcall",ret="byte"}
 	TE_RemoveMemoryBPX = TitanEngine.RemoveMemoryBPX
 -- __declspec(dllexport) bool __stdcall GetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea);
