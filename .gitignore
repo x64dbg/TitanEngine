@@ -154,3 +154,4 @@ $RECYCLE.BIN/
 *.bmarks
 *.depend
 *.layout
+*.orig
