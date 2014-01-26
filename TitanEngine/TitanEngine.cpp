@@ -17310,11 +17310,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
                 {
                     ULONG_PTR addr=BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                    if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1)
-                        bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
-                    else
-                        bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
-                    if(((BreakPointBuffer[MaximumBreakPoints].BreakPointType >= UE_MEMORY) && (BreakPointBuffer[MaximumBreakPoints].BreakPointType <= UE_MEMORY_EXECUTE)) && bpaddr>=addr && bpaddr<=(addr+BreakPointBuffer[MaximumBreakPoints].BreakPointSize))
+                    
+                    bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
+
+                    if(((BreakPointBuffer[MaximumBreakPoints].BreakPointType >= UE_MEMORY) && (BreakPointBuffer[MaximumBreakPoints].BreakPointType <= UE_MEMORY_EXECUTE)) && bpaddr>=addr && bpaddr<(addr+BreakPointBuffer[MaximumBreakPoints].BreakPointSize))
                     {
                         MemoryBpxFound = true;
                         break;
@@ -17324,10 +17323,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 {
                     if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE) //memory breakpoint is active
                     {
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_ALL;
                         GetThreadContext(hActiveThread, &myDBGContext);
-                        DBGCode = DBG_CONTINUE;
+                        DBGCode = DBG_CONTINUE; //debugger handled the exception
                         MemoryBpxCallBack = BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack;
                         if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY) //READ|WRITE|EXECUTE
                         {
@@ -17358,12 +17357,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_READ) //READ
                         {
-                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
+                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1) //do not restore the memory breakpoint
                             {
                                 if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
                                     RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
                             }
-                            else
+                            else //restore the memory breakpoint
                             {
                                 if(!(myDBGContext.EFlags & 0x100))
                                 {
@@ -17428,7 +17427,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                                 }
                             }
-                            else
+                            else //no write operation, restore breakpoint
                             {
                                 if(!(myDBGContext.EFlags & 0x100))
                                 {
@@ -17444,7 +17443,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
                             if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
                             {
-                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress >= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress <= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress + BreakPointBuffer[MaximumBreakPoints].BreakPointSize) //read operation
+                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && //read flag
+                                    (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
                                     RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
                             }
                             else
@@ -17458,7 +17458,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                 ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
                                 ResetMemBPX = true;
                             }
-                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress >= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress && (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress <= BreakPointBuffer[MaximumBreakPoints].BreakPointAddress + BreakPointBuffer[MaximumBreakPoints].BreakPointSize) //read operation
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0 && //read flag
+                                    (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
                             {
                                 myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
                                 __try
@@ -17486,7 +17487,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                     else
                     {
-                        DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                        DBGCode = DBG_EXCEPTION_NOT_HANDLED; //debugger did not handle the exception
                     }
                 }
                 else //no memory breakpoint found
