@@ -1164,7 +1164,7 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
     HGLOBAL hResourceGlobal;
     DWORD ResourceSize;
     LPVOID ResourceData;
-    BYTE ReturnData = UE_FILED_FIXABLE_CRITICAL;
+    BYTE ReturnData = UE_FIELD_FIXABLE_CRITICAL;
 
     hResource = FindResourceA(hModule, (LPCSTR)lpszName, (LPCSTR)lpszType);
     if(hResource != NULL)
@@ -6678,7 +6678,7 @@ void SetOverallFileStatus(PFILE_STATUS_INFO myFileInfo, BYTE FiledStatus, bool F
 
     if(myFileInfo->OveralEvaluation == UE_RESULT_FILE_OK || myFileInfo->OveralEvaluation == UE_RESULT_FILE_INVALID_BUT_FIXABLE)
     {
-        if(FiledStatus == UE_FILED_FIXABLE_CRITICAL || FiledStatus == UE_FIELD_BROKEN_FIXABLE_FOR_STATIC_USE || FiledStatus == UE_FIELD_BROKEN_BUT_CAN_BE_EMULATED)
+        if(FiledStatus == UE_FIELD_FIXABLE_CRITICAL || FiledStatus == UE_FIELD_BROKEN_FIXABLE_FOR_STATIC_USE || FiledStatus == UE_FIELD_BROKEN_BUT_CAN_BE_EMULATED)
         {
             myFileInfo->OveralEvaluation = UE_RESULT_FILE_INVALID_BUT_FIXABLE;
         }
@@ -7521,13 +7521,13 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             }
                             else
                             {
-                                myFileStatusInfo.SizeOfImage = UE_FILED_FIXABLE_NON_CRITICAL;
+                                myFileStatusInfo.SizeOfImage = UE_FIELD_FIXABLE_NON_CRITICAL;
                             }
                         }
                     }
                     else
                     {
-                        myFileStatusInfo.SectionAlignment = UE_FILED_FIXABLE_CRITICAL;
+                        myFileStatusInfo.SectionAlignment = UE_FIELD_FIXABLE_CRITICAL;
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SectionAlignment, true);
                     if(PEHeader32->OptionalHeader.ImageBase % 0x1000 == NULL)
@@ -7545,7 +7545,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     else
                     {
-                        myFileStatusInfo.FileAlignment = UE_FILED_FIXABLE_CRITICAL;
+                        myFileStatusInfo.FileAlignment = UE_FIELD_FIXABLE_CRITICAL;
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.FileAlignment, false);
                     /*
@@ -7775,7 +7775,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                                 {
-                                    myFileStatusInfo.RelocationTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                                    myFileStatusInfo.RelocationTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                                 }
                             }
                             SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.RelocationTable, false);
@@ -7813,7 +7813,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                     }
                                     else
                                     {
-                                        myFileStatusInfo.ImportTableSection = UE_FILED_FIXABLE_CRITICAL;
+                                        myFileStatusInfo.ImportTableSection = UE_FIELD_FIXABLE_CRITICAL;
                                     }
                                     if(CheckDepth == UE_DEPTH_DEEP)
                                     {
@@ -7883,7 +7883,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                                                         if(EngineGetProcAddress((ULONG_PTR)hLoadedModule, (char*)ImportNamePtr) == NULL)
                                                                         {
                                                                             myFileStatusInfo.MissingDeclaredAPIs = true;
-                                                                            SetOverallFileStatus(&myFileStatusInfo, UE_FILED_FIXABLE_CRITICAL, true);
+                                                                            SetOverallFileStatus(&myFileStatusInfo, UE_FIELD_FIXABLE_CRITICAL, true);
                                                                         }
                                                                     }
                                                                 }
@@ -7931,33 +7931,33 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress > CorrectedImageSize || PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                            myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                             else
                             {
                                 PETls32 = (PIMAGE_TLS_DIRECTORY32)ConvertedAddress;
                                 if(PETls32->StartAddressOfRawData != NULL && (PETls32->StartAddressOfRawData < PEHeader32->OptionalHeader.ImageBase || PETls32->StartAddressOfRawData > CorrectedImageSize + PEHeader32->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 else if(PETls32->EndAddressOfRawData != NULL && (PETls32->EndAddressOfRawData < PEHeader32->OptionalHeader.ImageBase || PETls32->EndAddressOfRawData > CorrectedImageSize + PEHeader32->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 else if(PETls32->AddressOfIndex != NULL && (PETls32->AddressOfIndex < PEHeader32->OptionalHeader.ImageBase || PETls32->AddressOfIndex > CorrectedImageSize + PEHeader32->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 else if(PETls32->AddressOfCallBacks != NULL && (PETls32->AddressOfCallBacks < PEHeader32->OptionalHeader.ImageBase || PETls32->AddressOfCallBacks > CorrectedImageSize + PEHeader32->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 if(PETls32->AddressOfCallBacks != NULL && CheckDepth == UE_DEPTH_DEEP)
                                 {
@@ -7969,7 +7969,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                             RtlMoveMemory(&ReadData, (LPVOID)ConvertedAddress, 4);
                                             if(ReadData < PEHeader32->OptionalHeader.ImageBase || ReadData > CorrectedImageSize + PEHeader32->OptionalHeader.ImageBase)
                                             {
-                                                myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                                myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                             }
                                             ConvertedAddress = ConvertedAddress + 4;
                                         }
@@ -7990,14 +7990,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress > CorrectedImageSize || PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.LoadConfigTable = UE_FILED_FIXABLE_CRITICAL;
+                            myFileStatusInfo.LoadConfigTable = UE_FIELD_FIXABLE_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.LoadConfigTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.LoadConfigTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                         }
                     }
@@ -8013,14 +8013,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress > CorrectedImageSize || PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                            myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress + FileMapVA;
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                             else
                             {
@@ -8029,11 +8029,11 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 {
                                     if(BoundIID->OffsetModuleName > PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size)
                                     {
-                                        myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                                        myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                                     }
                                     else if(!EngineIsPointedMemoryString(ConvertedAddress + BoundIID->OffsetModuleName))
                                     {
-                                        myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                                        myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                                     }
                                     BoundIID = (PIMAGE_BOUND_IMPORT_DESCRIPTOR)((ULONG_PTR)BoundIID + sizeof IMAGE_BOUND_IMPORT_DESCRIPTOR);
                                 }
@@ -8052,14 +8052,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress > CorrectedImageSize || PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.IATTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                            myFileStatusInfo.IATTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.IATTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                                myFileStatusInfo.IATTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                             }
                         }
                     }
@@ -8075,14 +8075,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress > CorrectedImageSize || PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.COMHeaderTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                            myFileStatusInfo.COMHeaderTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.COMHeaderTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                                myFileStatusInfo.COMHeaderTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                             }
                         }
                     }
@@ -8098,7 +8098,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress > CorrectedImageSize || PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.ResourceTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                            myFileStatusInfo.ResourceTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                         }
                         else
                         {
@@ -8158,7 +8158,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + sizeof IMAGE_SECTION_HEADER);
                             if(SectionVirtualSize > PESections->VirtualAddress || SectionVirtualSizeFixed > PESections->VirtualAddress)
                             {
-                                myFileStatusInfo.SectionTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.SectionTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                         }
                         NumberOfSections--;
@@ -8170,7 +8170,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     SectionVirtualSizeFixed = SectionVirtualSizeFixed + 0xF000;
                     if(PEHeader32->OptionalHeader.SizeOfImage > SectionVirtualSizeFixed)
                     {
-                        myFileStatusInfo.SizeOfImage = UE_FILED_FIXABLE_CRITICAL;
+                        myFileStatusInfo.SizeOfImage = UE_FIELD_FIXABLE_CRITICAL;
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SizeOfImage, true);
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SectionTable, true);
@@ -8260,13 +8260,13 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             }
                             else
                             {
-                                myFileStatusInfo.SizeOfImage = UE_FILED_FIXABLE_NON_CRITICAL;
+                                myFileStatusInfo.SizeOfImage = UE_FIELD_FIXABLE_NON_CRITICAL;
                             }
                         }
                     }
                     else
                     {
-                        myFileStatusInfo.SectionAlignment = UE_FILED_FIXABLE_CRITICAL;
+                        myFileStatusInfo.SectionAlignment = UE_FIELD_FIXABLE_CRITICAL;
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SectionAlignment, true);
                     if((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase % 0x1000 == NULL)
@@ -8284,7 +8284,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     else
                     {
-                        myFileStatusInfo.FileAlignment = UE_FILED_FIXABLE_CRITICAL;
+                        myFileStatusInfo.FileAlignment = UE_FIELD_FIXABLE_CRITICAL;
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.FileAlignment, false);
                     /*
@@ -8514,7 +8514,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                                 {
-                                    myFileStatusInfo.RelocationTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                                    myFileStatusInfo.RelocationTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                                 }
                             }
                             SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.RelocationTable, false);
@@ -8552,7 +8552,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                     }
                                     else
                                     {
-                                        myFileStatusInfo.ImportTableSection = UE_FILED_FIXABLE_CRITICAL;
+                                        myFileStatusInfo.ImportTableSection = UE_FIELD_FIXABLE_CRITICAL;
                                     }
                                     if(CheckDepth == UE_DEPTH_DEEP)
                                     {
@@ -8622,7 +8622,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                                                         if(EngineGetProcAddress((ULONG_PTR)hLoadedModule, (char*)ImportNamePtr) == NULL)
                                                                         {
                                                                             myFileStatusInfo.MissingDeclaredAPIs = true;
-                                                                            SetOverallFileStatus(&myFileStatusInfo, UE_FILED_FIXABLE_CRITICAL, true);
+                                                                            SetOverallFileStatus(&myFileStatusInfo, UE_FIELD_FIXABLE_CRITICAL, true);
                                                                         }
                                                                     }
                                                                 }
@@ -8670,33 +8670,33 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress > CorrectedImageSize || PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                            myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                             else
                             {
                                 PETls64 = (PIMAGE_TLS_DIRECTORY64)ConvertedAddress;
                                 if(PETls64->StartAddressOfRawData != NULL && (PETls64->StartAddressOfRawData < (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase || PETls64->StartAddressOfRawData > CorrectedImageSize + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 else if(PETls64->EndAddressOfRawData != NULL && (PETls64->EndAddressOfRawData < (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase || PETls64->EndAddressOfRawData > CorrectedImageSize + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 else if(PETls64->AddressOfIndex != NULL && (PETls64->AddressOfIndex < (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase || PETls64->AddressOfIndex > CorrectedImageSize + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 else if(PETls64->AddressOfCallBacks != NULL && (PETls64->AddressOfCallBacks < (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase || PETls64->AddressOfCallBacks > CorrectedImageSize + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase))
                                 {
-                                    myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                    myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                 }
                                 if(PETls64->AddressOfCallBacks != NULL && CheckDepth == UE_DEPTH_DEEP)
                                 {
@@ -8708,7 +8708,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                             RtlMoveMemory(&ReadData, (LPVOID)ConvertedAddress, 8);
                                             if(ReadData < (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase || ReadData > CorrectedImageSize + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase)
                                             {
-                                                myFileStatusInfo.TLSTable = UE_FILED_FIXABLE_CRITICAL;
+                                                myFileStatusInfo.TLSTable = UE_FIELD_FIXABLE_CRITICAL;
                                             }
                                             ConvertedAddress = ConvertedAddress + 8;
                                         }
@@ -8729,14 +8729,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress > CorrectedImageSize || PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.LoadConfigTable = UE_FILED_FIXABLE_CRITICAL;
+                            myFileStatusInfo.LoadConfigTable = UE_FIELD_FIXABLE_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.LoadConfigTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.LoadConfigTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                         }
                     }
@@ -8752,14 +8752,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress > CorrectedImageSize || PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                            myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress + FileMapVA;
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                             else
                             {
@@ -8768,11 +8768,11 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 {
                                     if(BoundIID->OffsetModuleName > PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].Size)
                                     {
-                                        myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                                        myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                                     }
                                     else if(!EngineIsPointedMemoryString(ConvertedAddress + BoundIID->OffsetModuleName))
                                     {
-                                        myFileStatusInfo.BoundImportTable = UE_FILED_FIXABLE_CRITICAL;
+                                        myFileStatusInfo.BoundImportTable = UE_FIELD_FIXABLE_CRITICAL;
                                     }
                                     BoundIID = (PIMAGE_BOUND_IMPORT_DESCRIPTOR)((ULONG_PTR)BoundIID + sizeof IMAGE_BOUND_IMPORT_DESCRIPTOR);
                                 }
@@ -8791,14 +8791,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress > CorrectedImageSize || PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.IATTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                            myFileStatusInfo.IATTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.IATTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                                myFileStatusInfo.IATTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                             }
                         }
                     }
@@ -8814,14 +8814,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress > CorrectedImageSize || PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.COMHeaderTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                            myFileStatusInfo.COMHeaderTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                         }
                         else
                         {
                             ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                             if(ConvertedAddress == NULL || ConvertedAddress - FileMapVA > FileSize)
                             {
-                                myFileStatusInfo.COMHeaderTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                                myFileStatusInfo.COMHeaderTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                             }
                         }
                     }
@@ -8837,7 +8837,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     {
                         if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress > CorrectedImageSize || PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size > CorrectedImageSize)
                         {
-                            myFileStatusInfo.ResourceTable = UE_FILED_FIXABLE_NON_CRITICAL;
+                            myFileStatusInfo.ResourceTable = UE_FIELD_FIXABLE_NON_CRITICAL;
                         }
                         else
                         {
@@ -8897,7 +8897,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + sizeof IMAGE_SECTION_HEADER);
                             if(SectionVirtualSize > PESections->VirtualAddress || SectionVirtualSizeFixed > PESections->VirtualAddress)
                             {
-                                myFileStatusInfo.SectionTable = UE_FILED_FIXABLE_CRITICAL;
+                                myFileStatusInfo.SectionTable = UE_FIELD_FIXABLE_CRITICAL;
                             }
                         }
                         NumberOfSections--;
@@ -8909,7 +8909,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     SectionVirtualSizeFixed = SectionVirtualSizeFixed + 0xF000;
                     if(PEHeader64->OptionalHeader.SizeOfImage > SectionVirtualSizeFixed)
                     {
-                        myFileStatusInfo.SizeOfImage = UE_FILED_FIXABLE_CRITICAL;
+                        myFileStatusInfo.SizeOfImage = UE_FIELD_FIXABLE_CRITICAL;
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SizeOfImage, true);
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SectionTable, true);
