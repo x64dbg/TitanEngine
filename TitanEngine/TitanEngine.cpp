@@ -16296,6 +16296,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     {
         EngineExecutePluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_PREDEBUG);
     }
+
     while(!BreakDBG) //actual debug loop
     {
         WaitForDebugEvent(&DBGEvent, engineWaitForDebugEventTimeOut);
@@ -16759,6 +16760,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
         case EXCEPTION_DEBUG_EVENT:
         {
+            DBGCode = DBG_EXCEPTION_NOT_HANDLED; //let the debuggee handle exceptions per default
             printf("Exception: 0x%X\n", DBGEvent.u.Exception.ExceptionRecord.ExceptionCode);
             //NOTE: useless callback?
             if(DBGCustomHandler->chEverythingElse != NULL)
@@ -17554,7 +17556,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_ACCESS_VIOLATION:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chAccessViolation != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chAccessViolation);
@@ -17789,7 +17790,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_NONCONTINUABLE_EXCEPTION:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chNonContinuableException != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chNonContinuableException);
@@ -17807,7 +17807,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_ARRAY_BOUNDS_EXCEEDED:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chArrayBoundsException != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chArrayBoundsException);
@@ -17825,7 +17824,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_FLOAT_DENORMAL_OPERAND:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chFloatDenormalOperand != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chFloatDenormalOperand);
@@ -17843,7 +17841,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_FLOAT_DIVIDE_BY_ZERO:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chFloatDevideByZero != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chFloatDevideByZero);
@@ -17861,7 +17858,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_INTEGER_DIVIDE_BY_ZERO:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chIntegerDevideByZero != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chIntegerDevideByZero);
@@ -17879,7 +17875,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_INTEGER_OVERFLOW:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chIntegerOverflow != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chIntegerOverflow);
@@ -17897,7 +17892,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_PRIVILEGED_INSTRUCTION:
             {
-                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chPrivilegedInstruction != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chPrivilegedInstruction);
