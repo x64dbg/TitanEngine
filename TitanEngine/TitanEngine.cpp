@@ -10451,9 +10451,26 @@ __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR Fil
     }
     return(false);
 }
+
+static bool isAtleastVista()
+{
+    static bool isAtleastVista=false;
+    static bool isSet=false;
+    if(isSet)
+        return isAtleastVista;
+    OSVERSIONINFO versionInfo= {0};
+    versionInfo.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
+    GetVersionEx(&versionInfo);
+    isAtleastVista=versionInfo.dwMajorVersion >= 6;
+    isSet=true;
+    return isAtleastVista;
+}
+
 // Global.Engine.Hider.functions:
 bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
 {
+    static ULONG OldHeapFlags=0;
+    static ULONG OldForceFlag=0;
     ULONG_PTR AddressOfPEB = NULL;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     BYTE patchCheckRemoteDebuggerPresent[5] = {0x33, 0xC0, 0xC2, 0x08, 0x00};
@@ -10472,6 +10489,9 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
             {
                 myPEB.BeingDebugged = false;
                 myPEB.NtGlobalFlag = NULL;
+                //Fix heap flags: https://github.com/eschweiler/ProReversing
+                BYTE* Heap=(BYTE*)myPEB.ProcessHeap;
+
                 if(WriteProcessMemory(hProcess, (void*)AddressOfPEB, (void*)&myPEB, sizeof NTPEB, &ueNumberOfBytesRead))
                 {
                     if(PatchAPILevel == UE_HIDE_BASIC)
@@ -12434,7 +12454,7 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
     if(szCommandLine == NULL)
     {
-        if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS+DEBUG_ONLY_THIS_PROCESS+DebugConsoleFlag+CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
+        if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
             engineAttachedToProcess = false;
             engineAttachedProcessCallBack = NULL;
@@ -12450,7 +12470,7 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     else
     {
         wsprintfW(szCreateWithCmdLine, L"\"%s\" %s", szFileName, szCommandLine);
-        if(CreateProcessW(NULL, szCreateWithCmdLine, NULL, NULL, false, DEBUG_PROCESS+DEBUG_ONLY_THIS_PROCESS+DebugConsoleFlag+CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
+        if(CreateProcessW(NULL, szCreateWithCmdLine, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
             engineAttachedToProcess = false;
             engineAttachedProcessCallBack = NULL;
@@ -16296,7 +16316,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             }
         }
-        if(DBGEvent.dwDebugEventCode == CREATE_PROCESS_DEBUG_EVENT) //debuggee is created
+
+        //Debug event
+        switch(DBGEvent.dwDebugEventCode)
+        {
+        case CREATE_PROCESS_DEBUG_EVENT:
         {
             if(DBGFileHandle == NULL) //we didn't set the handle yet
             {
@@ -16407,8 +16431,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
+        case EXIT_PROCESS_DEBUG_EVENT:
         {
             ProcessExitCode = DBGEvent.u.ExitProcess.dwExitCode;
             DBGCode = DBG_CONTINUE;
@@ -16429,8 +16454,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == CREATE_THREAD_DEBUG_EVENT)
+        case CREATE_THREAD_DEBUG_EVENT:
         {
             //maintain thread list
             if(hListThread == NULL)
@@ -16468,8 +16494,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == EXIT_THREAD_DEBUG_EVENT)
+        case EXIT_THREAD_DEBUG_EVENT:
         {
             //custom handler
             if(DBGCustomHandler->chExitThread != NULL)
@@ -16512,8 +16539,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 hListThreadPtr->ThreadStartAddress = NULL;
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT)
+        case LOAD_DLL_DEBUG_EVENT:
         {
             //maintain library list
             if(hListLibrary == NULL)
@@ -16627,8 +16655,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == UNLOAD_DLL_DEBUG_EVENT)
+        case UNLOAD_DLL_DEBUG_EVENT:
         {
             //unload DLL callback
             if(DBGCustomHandler->chUnloadDll != NULL)
@@ -16706,8 +16735,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
+        case OUTPUT_DEBUG_STRING_EVENT:
         {
             //debug string callback
             if(DBGCustomHandler->chOutputDebugString != NULL)
@@ -16723,9 +16753,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
             }
         }
+        break;
 
-        else if(DBGEvent.dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
+        case EXCEPTION_DEBUG_EVENT:
         {
+            printf("Exception: 0x%X\n", DBGEvent.u.Exception.ExceptionRecord.ExceptionCode);
             //NOTE: useless callback?
             if(DBGCustomHandler->chEverythingElse != NULL)
             {
@@ -16755,8 +16787,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             //handle different exception codes
 
-            //NOTE: breakpoint exception
-            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_BREAKPOINT)
+            switch(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode)
+            {
+            case STATUS_BREAKPOINT:
             {
                 MaximumBreakPoints = 0;
                 for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
@@ -16990,7 +17023,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         if(engineAutoHideFromDebugger)
                         {
-                            HideDebugger(dbgProcessInformation.hProcess, UE_HIDE_BASIC);
+                            HideDebugger(dbgProcessInformation.hProcess, UE_HIDE_PEBONLY);
                         }
                         if(DebugExeFileEntryPointCallBack != NULL) //set entry breakpoint
                         {
@@ -17025,8 +17058,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: single step exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_SINGLE_STEP)
+            break;
+
+            case STATUS_SINGLE_STEP:
             {
                 if(ResetBPX == true || ResetHwBPX == true || ResetMemBPX == true) //restore breakpoints (internal step)
                 {
@@ -17301,8 +17335,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: guard page exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_GUARD_PAGE_VIOLATION)
+            break;
+
+            case STATUS_GUARD_PAGE_VIOLATION:
             {
                 MemoryBpxFound = false;
                 MaximumBreakPoints = 0;
@@ -17513,8 +17548,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: access violation exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_ACCESS_VIOLATION)
+            break;
+
+            case STATUS_ACCESS_VIOLATION:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chAccessViolation != NULL)
@@ -17530,8 +17566,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: illegal instruction exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_ILLEGAL_INSTRUCTION)
+            break;
+
+            case STATUS_ILLEGAL_INSTRUCTION:
             {
                 //UD2 breakpoint
                 MaximumBreakPoints = 0;
@@ -17746,8 +17783,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: uncontinuable exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_NONCONTINUABLE_EXCEPTION)
+            break;
+
+            case STATUS_NONCONTINUABLE_EXCEPTION;
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chNonContinuableException != NULL)
@@ -17763,8 +17801,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: array bounds exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_ARRAY_BOUNDS_EXCEEDED)
+            break;
+
+            case STATUS_ARRAY_BOUNDS_EXCEEDED:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chArrayBoundsException != NULL)
@@ -17780,8 +17819,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: float denormal operand exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_FLOAT_DENORMAL_OPERAND)
+            break;
+
+            case STATUS_FLOAT_DENORMAL_OPERAND:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chFloatDenormalOperand != NULL)
@@ -17797,8 +17837,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: float devide by zero exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_FLOAT_DIVIDE_BY_ZERO)
+            break;
+
+            case STATUS_FLOAT_DIVIDE_BY_ZERO:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chFloatDevideByZero != NULL)
@@ -17814,8 +17855,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: devide by zero exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_INTEGER_DIVIDE_BY_ZERO)
+            break;
+
+            case STATUS_INTEGER_DIVIDE_BY_ZERO:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chIntegerDevideByZero != NULL)
@@ -17831,8 +17873,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: integer overflow exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_INTEGER_OVERFLOW)
+            break;
+
+            case STATUS_INTEGER_OVERFLOW:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chIntegerOverflow != NULL)
@@ -17848,8 +17891,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
-            //NOTE: privileged instruction exception
-            else if(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_PRIVILEGED_INSTRUCTION)
+            break;
+
+            case STATUS_PRIVILEGED_INSTRUCTION:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chPrivilegedInstruction != NULL)
@@ -17864,6 +17908,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         DBGCustomHandler->chPrivilegedInstruction = NULL;
                     }
                 }
+            }
+            break;
             }
 
             //general unhandled exception callback
@@ -17896,6 +17942,14 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DBGCustomHandler->chAfterException = NULL;
                 }
             }
+        }
+        break;
+
+        case RIP_EVENT:
+        {
+            //TODO: RIP event
+        }
+        break;
         }
 
         if(engineResumeProcessIfNoThreadIsActive)
