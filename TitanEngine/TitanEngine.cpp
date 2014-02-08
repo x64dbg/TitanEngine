@@ -15551,6 +15551,10 @@ __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
     {
         DBGCustomHandler->chUnhandledException = (ULONG_PTR)CallBack;
     }
+    else if(ExceptionId == UE_CH_RIPEVENT)
+    {
+        DBGCustomHandler->chRipEvent = (ULONG_PTR)CallBack;
+    }
     else if(ExceptionId == UE_CH_ALLEVENTS)
     {
         DBGCustomHandler->chEverythingElse = (ULONG_PTR)CallBack;
@@ -15562,6 +15566,7 @@ __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
         DBGCustomHandler->chUnloadDll = (ULONG_PTR)CallBack;
         DBGCustomHandler->chOutputDebugString = (ULONG_PTR)CallBack;
         DBGCustomHandler->chSystemBreakpoint = (ULONG_PTR)CallBack;
+        DBGCustomHandler->chRipEvent = (ULONG_PTR)CallBack;
     }
 }
 __declspec(dllexport) void TITCALL ForceClose()
@@ -16761,8 +16766,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
         case EXCEPTION_DEBUG_EVENT:
         {
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //let the debuggee handle exceptions per default
-            printf("Exception: 0x%X\n", DBGEvent.u.Exception.ExceptionRecord.ExceptionCode);
-            //NOTE: useless callback?
+
             if(DBGCustomHandler->chEverythingElse != NULL)
             {
                 myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chEverythingElse);
@@ -16790,7 +16794,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
 
             //handle different exception codes
-
             switch(DBGEvent.u.Exception.ExceptionRecord.ExceptionCode)
             {
             case STATUS_BREAKPOINT:
@@ -17944,7 +17947,19 @@ __declspec(dllexport) void TITCALL DebugLoop()
         case RIP_EVENT:
         {
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //fix an anti-debug trick
-            //TODO: RIP event
+            //system breakpoint callback
+            if(DBGCustomHandler->chRipEvent != NULL)
+            {
+                myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chRipEvent);
+                __try
+                {
+                    myCustomHandler(&DBGEvent);
+                }
+                __except(EXCEPTION_EXECUTE_HANDLER)
+                {
+                    DBGCustomHandler->chSystemBreakpoint = NULL;
+                }
+            }
         }
         break;
         }
