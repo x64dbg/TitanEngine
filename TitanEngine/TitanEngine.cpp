@@ -16752,6 +16752,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DBGCustomHandler->chOutputDebugString = NULL;
                 }
             }
+            //http://maximumcrack.wordpress.com/2009/06/22/outputdebugstring-awesomeness/ (the final advice is incorrect, but still helpful)
+            DBGCode = DBG_EXCEPTION_NOT_HANDLED; //pass exception to debuggee
         }
         break;
 
@@ -17785,7 +17787,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
             break;
 
-            case STATUS_NONCONTINUABLE_EXCEPTION;
+            case STATUS_NONCONTINUABLE_EXCEPTION:
             {
                 DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                 if(DBGCustomHandler->chNonContinuableException != NULL)
