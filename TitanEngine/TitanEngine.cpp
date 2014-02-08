@@ -17949,6 +17949,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
         case RIP_EVENT:
         {
+            DBGCode = DBG_EXCEPTION_NOT_HANDLED; //fix an anti-debug trick
             //TODO: RIP event
         }
         break;
