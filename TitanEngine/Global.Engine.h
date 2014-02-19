@@ -11,13 +11,7 @@ extern HMODULE engineHandle;
 extern bool engineAlowModuleLoading;
 extern bool engineCheckForwarders;
 
-extern std::vector<PluginInformation> Plugin;
-
-
 //Global.Engine.Functions
-void EngineExecutePluginReleaseCallBack();
-void EngineExecutePluginResetCallBack();
-void EngineExecutePluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReason);
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister);
 bool EngineFileExists(char* szFileName);
 char* EngineExtractPath(char* szFileName);

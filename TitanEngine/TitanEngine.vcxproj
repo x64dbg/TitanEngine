@@ -216,6 +216,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Global.Engine.cpp" />
+    <ClCompile Include="Global.Engine.Extension.cpp" />
     <ClCompile Include="Global.Handle.cpp" />
     <ClCompile Include="Global.Mapping.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -232,6 +233,7 @@
     <ClInclude Include="aplib.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="distorm.h" />
+    <ClInclude Include="Global.Engine.Extension.h" />
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Handle.h" />
     <ClInclude Include="Global.Mapping.h" />

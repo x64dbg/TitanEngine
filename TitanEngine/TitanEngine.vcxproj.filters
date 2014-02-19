@@ -51,6 +51,9 @@
     <ClCompile Include="Global.Engine.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Global.Engine.Extension.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -90,6 +93,9 @@
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
     <ClInclude Include="Global.Engine.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.Extension.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>

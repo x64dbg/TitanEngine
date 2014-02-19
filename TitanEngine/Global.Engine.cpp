@@ -12,83 +12,12 @@ char engineFoundDLLName[512];
 char engineFoundAPIName[512];
 char engineExtractedFileName[512];
 wchar_t engineExtractedFileNameW[512];
-std::vector<PluginInformation> Plugin;
 HMODULE engineHandle;
 bool engineCheckForwarders = true;
 bool engineAlowModuleLoading = false;
 bool engineCreatePathForFiles = true; // hardcoded
 
 // Global.Engine.functions:
-void EngineExecutePluginReleaseCallBack()
-{
-    typedef void(TITCALL *fPluginReleaseExec)();
-    fPluginReleaseExec myPluginReleaseExec;
-
-    for(unsigned int i = 0; i < Plugin.size(); i++)
-    {
-        __try
-        {
-            if(Plugin.at(i).TitanReleasePlugin != NULL)
-            {
-                myPluginReleaseExec = (fPluginReleaseExec)Plugin[i].TitanReleasePlugin;
-                myPluginReleaseExec();
-            }
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-
-        }
-    }
-}
-
-void EngineExecutePluginResetCallBack()
-{
-
-    typedef void(TITCALL *fPluginResetExec)();
-    fPluginResetExec myPluginResetExec;
-
-    for(unsigned int i = 0; i < Plugin.size(); i++)
-    {
-        __try
-        {
-            if(Plugin.at(i).TitanResetPlugin != NULL)
-            {
-                myPluginResetExec = (fPluginResetExec)Plugin[i].TitanResetPlugin;
-                myPluginResetExec();
-            }
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-
-        }
-    }
-}
-
-void EngineExecutePluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReason)
-{
-    typedef void(TITCALL *fPluginDebugExec)(LPDEBUG_EVENT debugEvent, int CallReason);
-    fPluginDebugExec myPluginDebugExec;
-
-    for(unsigned int i = 0; i < Plugin.size(); i++)
-    {
-        __try
-        {
-            if(!Plugin.at(i).PluginDisabled)
-            {
-                if(Plugin.at(i).TitanDebuggingCallBack != NULL)
-                {
-                    myPluginDebugExec = (fPluginDebugExec)Plugin[i].TitanDebuggingCallBack;
-                    myPluginDebugExec(debugEvent, CallReason);
-                }
-            }
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-
-        }
-    }
-}
-
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
 {
 
