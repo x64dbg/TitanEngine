@@ -215,6 +215,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Global.Engine.cpp" />
+    <ClCompile Include="Global.Handle.cpp" />
+    <ClCompile Include="Global.Mapping.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -223,17 +226,22 @@
     </ClCompile>
     <ClCompile Include="TitanEngine.cpp" />
     <ClCompile Include="LzmaDec.cpp" />
+    <ClCompile Include="TitanEngine.Dumper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aplib.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="distorm.h" />
+    <ClInclude Include="Global.Engine.h" />
+    <ClInclude Include="Global.Handle.h" />
+    <ClInclude Include="Global.Mapping.h" />
     <ClInclude Include="LzmaDec.h" />
     <ClInclude Include="LzmaTypes.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="scylla_wrapper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TitanEngine.Dumper.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TitanEngine.rc" />

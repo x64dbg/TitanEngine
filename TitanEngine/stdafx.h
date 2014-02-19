@@ -239,7 +239,7 @@ typedef struct MEMORY_COMPARE_HANDLER
     } Array;
 } MEMORY_COMPARE_HANDLER, *PMEMORY_COMPARE_HANDLER;
 
-#define MAX_DEBUG_DATA 512
+#define MAX_DEBUG_DATA 65536
 
 typedef struct
 {

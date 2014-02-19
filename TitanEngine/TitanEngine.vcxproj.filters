@@ -22,6 +22,12 @@
     <Filter Include="Resource Files\Images">
       <UniqueIdentifier>{b4e0243e-1a54-40fe-be40-e7cc7a16c3e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TitanEngine">
+      <UniqueIdentifier>{e6d39ee2-6c2c-444f-a68e-26a14ba4b11a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TitanEngine">
+      <UniqueIdentifier>{11622163-c50b-481a-9db8-1993dc220a72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -32,6 +38,18 @@
     </ClCompile>
     <ClCompile Include="LzmaDec.cpp">
       <Filter>Source Files\ThirdParty</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Dumper.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Mapping.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Handle.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Engine.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +79,18 @@
     </ClInclude>
     <ClInclude Include="aplib.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TitanEngine.Dumper.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Mapping.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Handle.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.h">
+      <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
