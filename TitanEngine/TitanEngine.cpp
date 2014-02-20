@@ -9473,7 +9473,7 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                     if(ThreadEntry.th32OwnerProcessID == ProcessId)
                     {
                         hListThreadPtr->dwThreadId = ThreadEntry.th32ThreadID;
-                        hListThreadPtr->hThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION+THREAD_SUSPEND_RESUME, false, hListThreadPtr->dwThreadId);
+                        hListThreadPtr->hThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION|THREAD_SUSPEND_RESUME, false, hListThreadPtr->dwThreadId);
                         hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
                     }
                 }
@@ -11650,7 +11650,7 @@ __declspec(dllexport) long long TITCALL GetContextData(DWORD IndexOfRegister)
     HANDLE hActiveThread = 0;
     long long ContextReturn;
 
-    hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+    hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
     ContextReturn = GetContextDataEx(hActiveThread, IndexOfRegister);
     EngineCloseHandle(hActiveThread);
     return(ContextReturn);
@@ -14845,7 +14845,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else
                         {
-                            hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                             myDBGContext.ContextFlags = CONTEXT_CONTROL;
                             GetThreadContext(hActiveThread, &myDBGContext);
                             if(!(myDBGContext.EFlags & 0x100))
@@ -14938,9 +14938,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                     else //handle hardware breakpoints
                     {
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
-                        myDBGContext.ContextFlags = CONTEXT_CONTROL;
-                        GetThreadContext(hActiveThread, &myDBGContext);
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS;
                         if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
                         {
                             if(DebugRegister[0].DrxEnabled)
@@ -15337,7 +15336,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &BreakPointBuffer[MaximumBreakPoints].OriginalByte[0], BreakPointBuffer[MaximumBreakPoints].BreakPointSize, &NumberOfBytesReadWritten))
                         {
                             DBGCode = DBG_CONTINUE;
-                            hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                             myDBGContext.ContextFlags = CONTEXT_CONTROL;
                             GetThreadContext(hActiveThread, &myDBGContext);
                             if(BreakPointBuffer[MaximumBreakPoints].BreakPointType != UE_SINGLESHOOT)
@@ -15837,7 +15836,7 @@ __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
         ThreaderPauseProcess();
         while(hListThreadPtr->hThread != NULL)
         {
-            hActiveThread = OpenThread(THREAD_GET_CONTEXT+THREAD_SET_CONTEXT+THREAD_QUERY_INFORMATION, false, hListThreadPtr->dwThreadId);
+            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, hListThreadPtr->dwThreadId);
             myDBGContext.ContextFlags = CONTEXT_CONTROL;
             GetThreadContext(hActiveThread, &myDBGContext);
             if((myDBGContext.EFlags & 0x100))
