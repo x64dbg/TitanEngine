@@ -1003,3 +1003,374 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
         return(false);
     }
 }
+
+__declspec(dllexport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex)
+{
+    return(EngineIsThereFreeHardwareBreakSlot(RegisterIndex));
+}
+
+__declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack)
+{
+    HWBP_SIZE hwbpSize;
+    HWBP_MODE hwbpMode;
+    HWBP_TYPE hwbpType;
+    int hwbpIndex=-1;
+    DR7 dr7;
+
+    switch(bpxSize)
+    {
+    case UE_HARDWARE_SIZE_1:
+        hwbpSize=SIZE_1;
+        break;
+    case UE_HARDWARE_SIZE_2:
+        hwbpSize=SIZE_2;
+        if((bpxAddress%2)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_4:
+        hwbpSize=SIZE_4;
+        if((bpxAddress%4)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_8:
+        hwbpSize=SIZE_8;
+        if((bpxAddress%8)!=0)
+            return false;
+        break;
+    default:
+        return false;
+    }
+
+    if(!IndexOfRegister)
+    {
+        if(!DebugRegister[0].DrxEnabled)
+            IndexOfRegister = UE_DR0;
+        else if(!DebugRegister[1].DrxEnabled)
+            IndexOfRegister = UE_DR1;
+        else if(!DebugRegister[2].DrxEnabled)
+            IndexOfRegister = UE_DR2;
+        else if(!DebugRegister[3].DrxEnabled)
+            IndexOfRegister = UE_DR3;
+        else
+            return false;
+    }
+
+    switch(IndexOfRegister)
+    {
+    case UE_DR0:
+        hwbpIndex=0;
+        break;
+    case UE_DR1:
+        hwbpIndex=1;
+        break;
+    case UE_DR2:
+        hwbpIndex=2;
+        break;
+    case UE_DR3:
+        hwbpIndex=3;
+        break;
+    default:
+        return false;
+    }
+
+    uintdr7((ULONG_PTR)GetContextData(UE_DR7), &dr7);
+
+    DebugRegister[hwbpIndex].DrxExecution=false;
+
+    switch(bpxType)
+    {
+    case UE_HARDWARE_EXECUTE:
+        hwbpSize=SIZE_1;
+        hwbpType=TYPE_EXECUTE;
+        DebugRegister[hwbpIndex].DrxExecution=true;
+        break;
+    case UE_HARDWARE_WRITE:
+        hwbpType=TYPE_WRITE;
+        break;
+    case UE_HARDWARE_READWRITE:
+        hwbpType=TYPE_READWRITE;
+        break;
+    default:
+        return false;
+    }
+
+    hwbpMode=MODE_LOCAL;
+
+    dr7.HWBP_MODE[hwbpIndex]=hwbpMode;
+    dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
+    dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
+
+    SetContextData(UE_DR7, dr7uint(&dr7)); //NOTE: MUST SET THIS FIRST FOR X64!
+    SetContextData(IndexOfRegister, (ULONG_PTR)bpxAddress);
+
+    DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
+    DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
+    DebugRegister[hwbpIndex].DrxEnabled=true;
+    DebugRegister[hwbpIndex].DrxBreakAddress=(ULONG_PTR)bpxAddress;
+    DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
+
+    return true;
+}
+
+__declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegister)
+{
+
+    ULONG_PTR HardwareBPX = NULL;
+    ULONG_PTR bpxAddress = NULL;
+
+    if(IndexOfRegister == UE_DR0)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 0);
+        HardwareBPX = HardwareBPX &~ (1 << 1);
+        SetContextData(UE_DR0, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[0].DrxEnabled = false;
+        DebugRegister[0].DrxBreakAddress = NULL;
+        DebugRegister[0].DrxCallBack = NULL;
+        return(true);
+    }
+    else if(IndexOfRegister == UE_DR1)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 2);
+        HardwareBPX = HardwareBPX &~ (1 << 3);
+        SetContextData(UE_DR1, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[1].DrxEnabled = false;
+        DebugRegister[1].DrxBreakAddress = NULL;
+        DebugRegister[1].DrxCallBack = NULL;
+        return(true);
+    }
+    else if(IndexOfRegister == UE_DR2)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 4);
+        HardwareBPX = HardwareBPX &~ (1 << 5);
+        SetContextData(UE_DR2, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[2].DrxEnabled = false;
+        DebugRegister[2].DrxBreakAddress = NULL;
+        DebugRegister[2].DrxCallBack = NULL;
+        return(true);
+    }
+    else if(IndexOfRegister == UE_DR3)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 6);
+        HardwareBPX = HardwareBPX &~ (1 << 7);
+        SetContextData(UE_DR3, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[3].DrxEnabled = false;
+        DebugRegister[3].DrxBreakAddress = NULL;
+        DebugRegister[3].DrxCallBack = NULL;
+        return(true);
+    }
+    else
+    {
+        return(false);
+    }
+    return(false);
+}
+
+__declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister)
+{
+    HWBP_SIZE hwbpSize;
+    HWBP_MODE hwbpMode;
+    HWBP_TYPE hwbpType;
+    int hwbpIndex=-1;
+    DR7 dr7;
+
+    switch(bpxSize)
+    {
+    case UE_HARDWARE_SIZE_1:
+        hwbpSize=SIZE_1;
+        break;
+    case UE_HARDWARE_SIZE_2:
+        hwbpSize=SIZE_2;
+        if((bpxAddress%2)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_4:
+        hwbpSize=SIZE_4;
+        if((bpxAddress%4)!=0)
+            return false;
+        break;
+    case UE_HARDWARE_SIZE_8:
+        hwbpSize=SIZE_8;
+        if((bpxAddress%8)!=0)
+            return false;
+        break;
+    default:
+        return false;
+    }
+
+    if(!IndexOfRegister)
+    {
+        if(!DebugRegister[0].DrxEnabled)
+            IndexOfRegister = UE_DR0;
+        else if(!DebugRegister[1].DrxEnabled)
+            IndexOfRegister = UE_DR1;
+        else if(!DebugRegister[2].DrxEnabled)
+            IndexOfRegister = UE_DR2;
+        else if(!DebugRegister[3].DrxEnabled)
+            IndexOfRegister = UE_DR3;
+        else
+            return false;
+    }
+
+    if(IndexOfSelectedRegister)
+        *IndexOfSelectedRegister=IndexOfRegister;
+
+    switch(IndexOfRegister)
+    {
+    case UE_DR0:
+        hwbpIndex=0;
+        break;
+    case UE_DR1:
+        hwbpIndex=1;
+        break;
+    case UE_DR2:
+        hwbpIndex=2;
+        break;
+    case UE_DR3:
+        hwbpIndex=3;
+        break;
+    default:
+        return false;
+    }
+
+    uintdr7((ULONG_PTR)GetContextDataEx(hActiveThread, UE_DR7), &dr7);
+
+    DebugRegister[hwbpIndex].DrxExecution=false;
+
+    switch(bpxType)
+    {
+    case UE_HARDWARE_EXECUTE:
+        hwbpSize=SIZE_1;
+        hwbpType=TYPE_EXECUTE;
+        DebugRegister[hwbpIndex].DrxExecution=true;
+        break;
+    case UE_HARDWARE_WRITE:
+        hwbpType=TYPE_WRITE;
+        break;
+    case UE_HARDWARE_READWRITE:
+        hwbpType=TYPE_READWRITE;
+        break;
+    default:
+        return false;
+    }
+
+    hwbpMode=MODE_LOCAL;
+
+    dr7.HWBP_MODE[hwbpIndex]=hwbpMode;
+    dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
+    dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
+
+    SetContextDataEx(hActiveThread, UE_DR7, dr7uint(&dr7));
+    SetContextDataEx(hActiveThread, IndexOfRegister, (ULONG_PTR)bpxAddress);
+
+    DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
+    DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
+    DebugRegister[hwbpIndex].DrxEnabled=true;
+    DebugRegister[hwbpIndex].DrxBreakAddress=(ULONG_PTR)bpxAddress;
+    DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
+
+    return true;
+}
+
+__declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
+{
+
+    int i = 0;
+    int CurrentBreakPointSetCount = -1;
+
+    if(RemoveOption == UE_OPTION_REMOVEALL)
+    {
+        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        {
+            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT)
+            {
+                DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
+            }
+            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_EXECUTE)
+            {
+                RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
+            }
+            else if(CurrentBreakPointSetCount == -1 && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
+            {
+                CurrentBreakPointSetCount = BreakPointSetCount;
+            }
+            RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
+        }
+        DeleteHardwareBreakPoint(UE_DR0);
+        DeleteHardwareBreakPoint(UE_DR1);
+        DeleteHardwareBreakPoint(UE_DR2);
+        DeleteHardwareBreakPoint(UE_DR3);
+        BreakPointSetCount = 0;
+        return(true);
+    }
+    else if(RemoveOption == UE_OPTION_DISABLEALL)
+    {
+        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        {
+            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
+            {
+                DisableBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
+            }
+            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_EXECUTE)
+            {
+                RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
+                RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
+            }
+        }
+        return(true);
+    }
+    else if(RemoveOption == UE_OPTION_REMOVEALLDISABLED)
+    {
+        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        {
+            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT && BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE)
+            {
+                DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
+            }
+            else if(CurrentBreakPointSetCount == -1 && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
+            {
+                CurrentBreakPointSetCount = BreakPointSetCount;
+            }
+        }
+        if(CurrentBreakPointSetCount == -1)
+        {
+            BreakPointSetCount = 0;
+        }
+        else
+        {
+            BreakPointSetCount = CurrentBreakPointSetCount;
+        }
+        return(true);
+    }
+    else if(RemoveOption == UE_OPTION_REMOVEALLENABLED)
+    {
+        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        {
+            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
+            {
+                DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
+            }
+            else if(CurrentBreakPointSetCount == -1 && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
+            {
+                CurrentBreakPointSetCount = BreakPointSetCount;
+            }
+        }
+        if(CurrentBreakPointSetCount == -1)
+        {
+            BreakPointSetCount = 0;
+        }
+        else
+        {
+            BreakPointSetCount = CurrentBreakPointSetCount;
+        }
+        return(true);
+    }
+    return(false);
+}

@@ -13,15 +13,28 @@ LPVOID DebugModuleEntryPointCallBack;
 LPVOID DebugExeFileEntryPointCallBack;
 ULONG_PTR DebugModuleEntryPoint;
 ULONG_PTR DebugModuleImageBase;
-
-ULONG_PTR engineAttachedProcessCallBack = NULL;
-ULONG_PTR engineReserveModuleBase = NULL;
-unsigned long long engineDebuggingMainModuleBase = NULL;
-ULONG_PTR engineDebuggingDLLBase = NULL;
-bool engineAttachedToProcess = false;
-bool engineDebuggingDLL = false;
-wchar_t* engineDebuggingDLLFullFileName;
-wchar_t* engineDebuggingDLLFileName;
+ULONG_PTR DebugAttachedProcessCallBack = NULL;
+ULONG_PTR DebugReserveModuleBase = NULL;
+ULONG_PTR DebugDebuggingMainModuleBase = NULL;
+ULONG_PTR DebugDebuggingDLLBase = NULL;
+bool DebugAttachedToProcess = false;
+bool DebugDebuggingDLL = false;
+wchar_t* DebugDebuggingDLLFullFileName;
+wchar_t* DebugDebuggingDLLFileName;
+DEBUG_EVENT DBGEvent = {};
+DEBUG_EVENT TerminateDBGEvent = {};
+DWORD ProcessExitCode = 0;
+HANDLE DBGFileHandle;
+ULONG_PTR tlsCallBackList[100];
+LPVOID hListProcess = 0;
+int engineStepCount = INFINITE;
+LPVOID engineStepCallBack = NULL;
+bool engineStepActive = false;
+bool engineProcessIsNowDetached = false;
+DWORD DBGCode = DBG_CONTINUE;
+bool engineFileIsBeingDebugged = false;
+ULONG_PTR engineFakeDLLHandle = NULL;
+LPVOID engineAttachedProcessDebugInfo = NULL;
 
 // Global.Debugger.functions:
 long DebugLoopInSecondThread(LPVOID InputParameter)

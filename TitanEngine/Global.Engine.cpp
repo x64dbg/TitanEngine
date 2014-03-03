@@ -15,6 +15,9 @@ bool engineBackupForCriticalFunctions = true;
 bool engineResumeProcessIfNoThreadIsActive = false;
 bool engineResetCustomHandler = true;
 bool engineRemoveConsoleForDebugee = false;
+bool enginePassAllExceptions = true;
+bool engineExecutePluginCallBack = true;
+bool engineAutoHideFromDebugger = false; // hardcoded
 
 char engineExtractedFolderName[512];
 char engineFoundDLLName[512];

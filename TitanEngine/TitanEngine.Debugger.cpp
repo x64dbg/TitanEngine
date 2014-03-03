@@ -59,8 +59,8 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     {
         if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
-            engineAttachedToProcess = false;
-            engineAttachedProcessCallBack = NULL;
+            DebugAttachedToProcess = false;
+            DebugAttachedProcessCallBack = NULL;
             RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
             return(&dbgProcessInformation);
         }
@@ -75,8 +75,8 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         wsprintfW(szCreateWithCmdLine, L"\"%s\" %s", szFileName, szCommandLine);
         if(CreateProcessW(NULL, szCreateWithCmdLine, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
-            engineAttachedToProcess = false;
-            engineAttachedProcessCallBack = NULL;
+            DebugAttachedToProcess = false;
+            DebugAttachedProcessCallBack = NULL;
             RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
             return(&dbgProcessInformation);
         }
@@ -137,7 +137,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
     int i = NULL;
     int j = NULL;
     bool ReturnData = false;
-    engineReserveModuleBase = NULL;
+    DebugReserveModuleBase = NULL;
 
     RtlZeroMemory(&szDebuggerName, sizeof szDebuggerName);
     if(lstrlenW(szFileName) < 512)
@@ -187,7 +187,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
 #endif
     if(ReturnData)
     {
-        engineDebuggingDLL = true;
+        DebugDebuggingDLL = true;
         i = lstrlenW(szFileName);
         while(szFileName[i] != 0x5C && i >= NULL)
         {
@@ -198,13 +198,13 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         {
             j--;
         }*/
-        engineDebuggingDLLBase = NULL;
-        engineDebuggingMainModuleBase = NULL;
-        engineDebuggingDLLFullFileName = szFileName;
-        engineDebuggingDLLFileName = &szFileName[i+1];
-        //engineDebuggingDLLReserveFileName = &szReserveModuleName[j+1];
+        DebugDebuggingDLLBase = NULL;
+        DebugDebuggingMainModuleBase = NULL;
+        DebugDebuggingDLLFullFileName = szFileName;
+        DebugDebuggingDLLFileName = &szFileName[i+1];
+        //DebugDebuggingDLLReserveFileName = &szReserveModuleName[j+1];
         DebugModuleImageBase = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_IMAGEBASE);
-        engineReserveModuleBase = DebugModuleImageBase;
+        DebugReserveModuleBase = DebugModuleImageBase;
         DebugModuleEntryPoint = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_OEP);
         DebugModuleEntryPointCallBack = EntryCallBack;
         /*if(ReserveModuleBase)

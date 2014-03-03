@@ -114,6 +114,27 @@
     <ClCompile Include="Global.Breakpoints.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.Context.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.Memory.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.Helper.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.Data.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.DebugLoop.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Librarian.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.TLS.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -168,6 +189,12 @@
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
     <ClInclude Include="Global.Breakpoints.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Librarian.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.TLS.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>

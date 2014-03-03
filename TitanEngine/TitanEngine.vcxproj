@@ -222,9 +222,11 @@
     <ClCompile Include="Global.Engine.Hash.cpp" />
     <ClCompile Include="Global.Engine.Hider.cpp" />
     <ClCompile Include="Global.Handle.cpp" />
+    <ClCompile Include="Global.Librarian.cpp" />
     <ClCompile Include="Global.Mapping.cpp" />
     <ClCompile Include="Global.Realigner.cpp" />
     <ClCompile Include="Global.Threader.cpp" />
+    <ClCompile Include="Global.TLS.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -234,7 +236,11 @@
     <ClCompile Include="TitanEngine.Breakpoints.cpp" />
     <ClCompile Include="TitanEngine.cpp" />
     <ClCompile Include="LzmaDec.cpp" />
+    <ClCompile Include="TitanEngine.Debugger.Context.cpp" />
     <ClCompile Include="TitanEngine.Debugger.cpp" />
+    <ClCompile Include="TitanEngine.Debugger.Data.cpp" />
+    <ClCompile Include="TitanEngine.Debugger.Helper.cpp" />
+    <ClCompile Include="TitanEngine.Debugger.Memory.cpp" />
     <ClCompile Include="TitanEngine.Disassembler.cpp" />
     <ClCompile Include="TitanEngine.Dumper.cpp" />
     <ClCompile Include="TitanEngine.Hider.cpp" />
@@ -256,9 +262,11 @@
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Engine.Hider.h" />
     <ClInclude Include="Global.Handle.h" />
+    <ClInclude Include="Global.Librarian.h" />
     <ClInclude Include="Global.Mapping.h" />
     <ClInclude Include="Global.Realigner.h" />
     <ClInclude Include="Global.Threader.h" />
+    <ClInclude Include="Global.TLS.h" />
     <ClInclude Include="LzmaDec.h" />
     <ClInclude Include="LzmaTypes.h" />
     <ClInclude Include="resource.h" />
@@ -284,6 +292,9 @@
       <FileType>Document</FileType>
     </ClCompile>
     <ClCompile Include="TitanEngine.PE.Overlay.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.DebugLoop.cpp">
       <FileType>Document</FileType>
     </ClCompile>
   </ItemGroup>
