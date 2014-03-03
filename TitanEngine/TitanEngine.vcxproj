@@ -218,8 +218,11 @@
     <ClCompile Include="Global.Engine.cpp" />
     <ClCompile Include="Global.Engine.Extension.cpp" />
     <ClCompile Include="Global.Engine.Hash.cpp" />
+    <ClCompile Include="Global.Engine.Hider.cpp" />
     <ClCompile Include="Global.Handle.cpp" />
     <ClCompile Include="Global.Mapping.cpp" />
+    <ClCompile Include="Global.Realigner.cpp" />
+    <ClCompile Include="Global.Threader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -229,6 +232,14 @@
     <ClCompile Include="TitanEngine.cpp" />
     <ClCompile Include="LzmaDec.cpp" />
     <ClCompile Include="TitanEngine.Dumper.cpp" />
+    <ClCompile Include="TitanEngine.Hider.cpp" />
+    <ClCompile Include="TitanEngine.PE.Convert.cpp" />
+    <ClCompile Include="TitanEngine.PE.cpp" />
+    <ClCompile Include="TitanEngine.PE.Fixer.cpp" />
+    <ClCompile Include="TitanEngine.Realigner.cpp" />
+    <ClCompile Include="TitanEngine.Relocator.cpp" />
+    <ClCompile Include="TitanEngine.Resourcer.cpp" />
+    <ClCompile Include="TitanEngine.Threader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aplib.h" />
@@ -236,15 +247,17 @@
     <ClInclude Include="distorm.h" />
     <ClInclude Include="Global.Engine.Extension.h" />
     <ClInclude Include="Global.Engine.h" />
+    <ClInclude Include="Global.Engine.Hider.h" />
     <ClInclude Include="Global.Handle.h" />
     <ClInclude Include="Global.Mapping.h" />
+    <ClInclude Include="Global.Realigner.h" />
+    <ClInclude Include="Global.Threader.h" />
     <ClInclude Include="LzmaDec.h" />
     <ClInclude Include="LzmaTypes.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="scylla_wrapper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TitanEngine.Dumper.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TitanEngine.rc" />
@@ -259,6 +272,13 @@
     <None Include="LOGO.bmp" />
     <None Include="MAINICON.ico" />
     <None Include="ReadMe.txt" />
+    <ClCompile Include="TitanEngine.PE.Data.cpp" />
+    <ClCompile Include="TitanEngine.PE.Section.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.PE.Overlay.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

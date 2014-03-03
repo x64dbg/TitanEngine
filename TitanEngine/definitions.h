@@ -1,7 +1,6 @@
 #ifndef definitions_h__
 #define definitions_h__
 
-
 #define TITCALL
 
 // Global.Function.Declaration:

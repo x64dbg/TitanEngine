@@ -57,6 +57,48 @@
     <ClCompile Include="Global.Engine.Hash.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="TitanEngine.PE.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.PE.Section.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.PE.Overlay.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.PE.Data.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.PE.Convert.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Realigner.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Realigner.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.PE.Fixer.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Engine.Hider.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Hider.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Relocator.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Resourcer.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Threader.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Threader.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -86,9 +128,6 @@
     <ClInclude Include="aplib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TitanEngine.Dumper.h">
-      <Filter>Header Files\TitanEngine</Filter>
-    </ClInclude>
     <ClInclude Include="Global.Mapping.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
@@ -99,6 +138,15 @@
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
     <ClInclude Include="Global.Engine.Extension.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Realigner.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.Hider.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Threader.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>

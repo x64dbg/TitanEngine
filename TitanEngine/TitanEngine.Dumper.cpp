@@ -1,8 +1,7 @@
 #include "stdafx.h"
-#include "TitanEngine.Dumper.h"
+#include "definitions.h"
 #include "Global.Engine.h"
 #include "Global.Handle.h"
-#include "definitions.h"
 #include <psapi.h>
 
 //TitanEngine.Dumper.functions:

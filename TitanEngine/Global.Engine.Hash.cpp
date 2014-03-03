@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "definitions.h"
 #include "Global.Engine.Hash.h"
 
 static unsigned long Crc32Table[256];

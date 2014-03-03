@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "definitions.h"
 #include "Global.Handle.h"
 
 // Global.Handle.functions:

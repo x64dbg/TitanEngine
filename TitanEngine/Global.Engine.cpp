@@ -21,6 +21,10 @@ HMODULE engineHandle;
 bool engineCheckForwarders = true;
 bool engineAlowModuleLoading = false;
 bool engineCreatePathForFiles = true; // hardcoded
+bool engineBackupForCriticalFunctions = true;
+bool engineResumeProcessIfNoThreadIsActive = false;
+
+LPVOID engineExitThreadOneShootCallBack = NULL;
 
 // Global.Engine.functions:
 void EngineInit()

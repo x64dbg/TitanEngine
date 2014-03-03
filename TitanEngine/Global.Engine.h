@@ -10,8 +10,12 @@ extern HMODULE engineHandle;
 
 extern bool engineAlowModuleLoading;
 extern bool engineCheckForwarders;
+extern bool engineBackupForCriticalFunctions;
+extern bool engineResumeProcessIfNoThreadIsActive;
 
 extern wchar_t engineSzEngineGarbageFolder[MAX_PATH];
+
+extern LPVOID engineExitThreadOneShootCallBack;
 
 //Global.Engine.Functions
 void EngineInit();
