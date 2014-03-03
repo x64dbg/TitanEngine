@@ -2,6 +2,7 @@
 #include "definitions.h"
 #include "Global.Mapping.h"
 #include "Global.Engine.h"
+#include "Global.Garbage.h"
 
 static LPVOID RelocationData = NULL;
 LPVOID RelocationLastPage = NULL;

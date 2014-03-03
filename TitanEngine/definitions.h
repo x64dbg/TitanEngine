@@ -3,16 +3,6 @@
 
 #define TITCALL
 
-// Global.Function.Declaration:
-void BreakPointManager();
-void GenericOEPTraceHited();
-
-// Global.Garbage.functions:
-bool CreateGarbageItem(void* outGargabeItem, int MaxGargabeStringSize);
-bool RemoveGarbageItem(wchar_t* szGarbageItem, bool RemoveFolder);
-bool FillGarbageItem(wchar_t* szGarbageItem, wchar_t* szFileName, void* outGargabeItem, int MaxGargabeStringSize);
-void EmptyGarbage();
-
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/

@@ -118,7 +118,7 @@
       <SetChecksum>false</SetChecksum>
       <TargetMachine>MachineX86</TargetMachine>
       <CLRThreadAttribute>DefaultThreadingAttribute</CLRThreadAttribute>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -152,7 +152,7 @@
       <SetChecksum>false</SetChecksum>
       <TargetMachine>MachineX64</TargetMachine>
       <CLRThreadAttribute>STAThreadingAttribute</CLRThreadAttribute>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -177,7 +177,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -211,7 +211,7 @@
       <TargetMachine>MachineX64</TargetMachine>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -221,11 +221,17 @@
     <ClCompile Include="Global.Engine.Extension.cpp" />
     <ClCompile Include="Global.Engine.Hash.cpp" />
     <ClCompile Include="Global.Engine.Hider.cpp" />
+    <ClCompile Include="Global.Engine.Hook.cpp" />
+    <ClCompile Include="Global.Engine.Simplification.cpp" />
+    <ClCompile Include="Global.Garbage.cpp" />
     <ClCompile Include="Global.Handle.cpp" />
+    <ClCompile Include="Global.Injector.cpp" />
     <ClCompile Include="Global.Librarian.cpp" />
     <ClCompile Include="Global.Mapping.cpp" />
+    <ClCompile Include="Global.OEPFinder.cpp" />
     <ClCompile Include="Global.Realigner.cpp" />
     <ClCompile Include="Global.Threader.cpp" />
+    <ClCompile Include="Global.Engine.GUI.cpp" />
     <ClCompile Include="Global.TLS.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -237,20 +243,35 @@
     <ClCompile Include="TitanEngine.cpp" />
     <ClCompile Include="LzmaDec.cpp" />
     <ClCompile Include="TitanEngine.Debugger.Context.cpp" />
+    <ClCompile Include="TitanEngine.Debugger.Control.cpp" />
     <ClCompile Include="TitanEngine.Debugger.cpp" />
     <ClCompile Include="TitanEngine.Debugger.Data.cpp" />
     <ClCompile Include="TitanEngine.Debugger.Helper.cpp" />
     <ClCompile Include="TitanEngine.Debugger.Memory.cpp" />
     <ClCompile Include="TitanEngine.Disassembler.cpp" />
     <ClCompile Include="TitanEngine.Dumper.cpp" />
+    <ClCompile Include="TitanEngine.Engine.cpp" />
+    <ClCompile Include="TitanEngine.Engine.Simplification.cpp" />
+    <ClCompile Include="TitanEngine.Exporter.cpp" />
+    <ClCompile Include="TitanEngine.Handler.cpp" />
     <ClCompile Include="TitanEngine.Hider.cpp" />
+    <ClCompile Include="TitanEngine.Hooks.cpp" />
+    <ClCompile Include="TitanEngine.Importer.cpp" />
+    <ClCompile Include="TitanEngine.Injector.cpp" />
+    <ClCompile Include="TitanEngine.Librarian.cpp" />
+    <ClCompile Include="TitanEngine.OEPFinder.cpp" />
     <ClCompile Include="TitanEngine.PE.Convert.cpp" />
     <ClCompile Include="TitanEngine.PE.cpp" />
     <ClCompile Include="TitanEngine.PE.Fixer.cpp" />
+    <ClCompile Include="TitanEngine.Process.cpp" />
     <ClCompile Include="TitanEngine.Realigner.cpp" />
     <ClCompile Include="TitanEngine.Relocator.cpp" />
     <ClCompile Include="TitanEngine.Resourcer.cpp" />
+    <ClCompile Include="TitanEngine.Static.cpp" />
     <ClCompile Include="TitanEngine.Threader.cpp" />
+    <ClCompile Include="TitanEngine.TLS.cpp" />
+    <ClCompile Include="TitanEngine.Tracer.cpp" />
+    <ClCompile Include="TitanEngine.TranslateName.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aplib.h" />
@@ -261,11 +282,17 @@
     <ClInclude Include="Global.Engine.Extension.h" />
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Engine.Hider.h" />
+    <ClInclude Include="Global.Engine.Hook.h" />
+    <ClInclude Include="Global.Engine.Simplification.h" />
+    <ClInclude Include="Global.Garbage.h" />
     <ClInclude Include="Global.Handle.h" />
+    <ClInclude Include="Global.Injector.h" />
     <ClInclude Include="Global.Librarian.h" />
     <ClInclude Include="Global.Mapping.h" />
+    <ClInclude Include="Global.OEPFinder.h" />
     <ClInclude Include="Global.Realigner.h" />
     <ClInclude Include="Global.Threader.h" />
+    <ClInclude Include="Global.Engine.GUI.h" />
     <ClInclude Include="Global.TLS.h" />
     <ClInclude Include="LzmaDec.h" />
     <ClInclude Include="LzmaTypes.h" />

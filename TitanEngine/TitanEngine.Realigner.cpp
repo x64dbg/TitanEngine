@@ -2,6 +2,7 @@
 #include "definitions.h"
 #include "Global.Engine.h"
 #include "Global.Mapping.h"
+#include "Global.Garbage.h"
 #include <imagehlp.h>
 
 // TitanEngine.Realigner.functions:

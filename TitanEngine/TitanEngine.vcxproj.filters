@@ -135,6 +135,69 @@
     <ClCompile Include="Global.TLS.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.Control.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.OEPFinder.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.OEPFinder.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Importer.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Hooks.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Tracer.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Exporter.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Librarian.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Process.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.TLS.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.TranslateName.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Handler.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Injector.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Injector.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Static.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Engine.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Engine.Hook.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Engine.GUI.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Engine.Simplification.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Engine.Simplification.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Garbage.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -195,6 +258,24 @@
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
     <ClInclude Include="Global.TLS.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.OEPFinder.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Injector.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.Hook.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.GUI.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.Simplification.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Garbage.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>

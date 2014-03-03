@@ -3,6 +3,7 @@
 #include "Global.Engine.h"
 #include "Global.Handle.h"
 #include "Global.Mapping.h"
+#include "Global.Garbage.h"
 
 __declspec(dllexport) bool TITCALL ExtractSection(char* szFileName, char* szDumpFileName, DWORD SectionNumber)
 {

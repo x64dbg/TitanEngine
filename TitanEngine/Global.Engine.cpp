@@ -25,10 +25,12 @@ char engineFoundAPIName[512];
 char engineExtractedFileName[512];
 wchar_t engineExtractedFileNameW[512];
 wchar_t engineSzEngineFile[MAX_PATH];
-wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 wchar_t engineSzEngineFolder[MAX_PATH];
 HMODULE engineHandle;
 LPVOID engineExitThreadOneShootCallBack = NULL;
+LPVOID engineDependencyFiles;
+LPVOID engineDependencyFilesCWP;
+void* EngineStartUnpackingCallBack;
 
 // Global.Engine.functions:
 void EngineInit()

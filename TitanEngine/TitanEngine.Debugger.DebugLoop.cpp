@@ -42,7 +42,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
     typedef void(TITCALL *fFindOEPHandler)(LPPROCESS_INFORMATION fProcessInfo, LPVOID fCallBack);
     fCustomHandler myCustomHandler;
     fCustomBreakPoint myCustomBreakPoint;
-    fFindOEPHandler myFindOEPHandler;
     ULONG_PTR MemoryBpxCallBack = 0;
     SIZE_T ResetBPXSize = 0;
     ULONG_PTR ResetBPXAddressTo =  0;

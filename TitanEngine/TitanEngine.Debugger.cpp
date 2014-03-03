@@ -2,7 +2,9 @@
 #include "definitions.h"
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
+#include "Global.Handle.h"
 #include "Global.Breakpoints.h"
+#include "Global.Threader.h"
 
 static wchar_t szBackupDebuggedFileName[512];
 static wchar_t szDebuggerName[512];
@@ -230,5 +232,190 @@ __declspec(dllexport) bool TITCALL StopDebug()
     else
     {
         return(false);
+    }
+}
+
+__declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
+{
+
+    typedef void(WINAPI *fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
+    fDebugSetProcessKillOnExit myDebugSetProcessKillOnExit;
+    LPVOID funcDebugSetProcessKillOnExit = NULL;
+
+    if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
+    {
+        RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
+        if(DebugActiveProcess(ProcessId))
+        {
+            if(KillOnExit)
+            {
+                funcDebugSetProcessKillOnExit = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugSetProcessKillOnExit");
+                if(funcDebugSetProcessKillOnExit != NULL)
+                {
+                    myDebugSetProcessKillOnExit = (fDebugSetProcessKillOnExit)(funcDebugSetProcessKillOnExit);
+                    myDebugSetProcessKillOnExit(KillOnExit);
+                }
+            }
+            BreakPointSetCount = 0;
+            DebugDebuggingDLL = false;
+            DebugAttachedToProcess = true;
+            DebugAttachedProcessCallBack = (ULONG_PTR)CallBack;
+            engineAttachedProcessDebugInfo = DebugInfo;
+            dbgProcessInformation.dwProcessId = ProcessId;
+            DebugLoop();
+            DebugAttachedToProcess = false;
+            DebugAttachedProcessCallBack = NULL;
+            return(true);
+        }
+    }
+    else
+    {
+        return(false);
+    }
+    return(false);
+}
+
+__declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
+{
+    typedef bool(WINAPI *fDebugActiveProcessStop)(DWORD dwProcessId);
+    fDebugActiveProcessStop myDebugActiveProcessStop;
+    LPVOID funcDebugActiveProcessStop = NULL;
+    bool FuncReturn = false;
+
+    if(ProcessId != NULL)
+    {
+        funcDebugActiveProcessStop = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugActiveProcessStop");
+        if(funcDebugActiveProcessStop != NULL)
+        {
+            myDebugActiveProcessStop = (fDebugActiveProcessStop)(funcDebugActiveProcessStop);
+            FuncReturn = myDebugActiveProcessStop(ProcessId);
+            engineProcessIsNowDetached = true;
+            Sleep(250);
+        }
+        DebugAttachedToProcess = false;
+        if(FuncReturn)
+        {
+            return(true);
+        }
+        else
+        {
+            return(false);
+        }
+    }
+    return(false);
+}
+
+__declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
+{
+
+    HANDLE hActiveThread;
+    CONTEXT myDBGContext;
+    PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
+
+    if(hListThreadPtr != NULL)
+    {
+        ThreaderPauseProcess();
+        while(hListThreadPtr->hThread != NULL)
+        {
+            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, hListThreadPtr->dwThreadId);
+            myDBGContext.ContextFlags = CONTEXT_CONTROL;
+            GetThreadContext(hActiveThread, &myDBGContext);
+            if((myDBGContext.EFlags & 0x100))
+            {
+                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+            }
+            if(!(myDBGContext.EFlags & 0x10000))
+            {
+                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
+            }
+            SetThreadContext(hActiveThread, &myDBGContext);
+            EngineCloseHandle(hActiveThread);
+            hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
+        }
+        ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBG_CONTINUE);
+        ThreaderResumeProcess();
+        return(DetachDebugger(ProcessId));
+    }
+    else
+    {
+        return(false);
+    }
+}
+
+__declspec(dllexport) void TITCALL AutoDebugEx(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
+{
+
+    wchar_t* PtrUniFileName = NULL;
+    wchar_t uniFileName[MAX_PATH] = {};
+    wchar_t* PtrUniCommandLine = NULL;
+    wchar_t uniCommandLine[MAX_PATH] = {};
+    wchar_t* PtrUniCurrentFolder = NULL;
+    wchar_t uniCurrentFolder[MAX_PATH] = {};
+
+    if(szFileName != NULL)
+    {
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine)+1, uniCommandLine, sizeof(uniCommandLine)/(sizeof(uniCommandLine[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder)+1, uniCurrentFolder, sizeof(uniCurrentFolder)/(sizeof(uniCurrentFolder[0])));
+        if(szFileName != NULL)
+        {
+            PtrUniFileName = &uniFileName[0];
+        }
+        if(szCommandLine != NULL)
+        {
+            PtrUniCommandLine = &uniCommandLine[0];
+        }
+        if(szCurrentFolder != NULL)
+        {
+            PtrUniCurrentFolder = &uniCurrentFolder[0];
+        }
+        return(AutoDebugExW(PtrUniFileName, ReserveModuleBase, PtrUniCommandLine, PtrUniCurrentFolder, TimeOut, EntryCallBack));
+    }
+}
+
+__declspec(dllexport) void TITCALL AutoDebugExW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
+{
+    DebugReserveModuleBase = NULL;
+    DWORD ThreadId;
+    DWORD ExitCode = 0;
+    HANDLE hSecondThread;
+    bool FileIsDll = false;
+#if !defined(_WIN64)
+    PE32Struct PEStructure;
+#else
+    PE64Struct PEStructure;
+#endif
+
+    if(TimeOut == NULL)
+    {
+        TimeOut = INFINITE;
+    }
+
+    if(szFileName != NULL)
+    {
+        RtlZeroMemory(&expertDebug, sizeof ExpertDebug);
+        expertDebug.ExpertModeActive = true;
+        expertDebug.szFileName = szFileName;
+        expertDebug.szCommandLine = szCommandLine;
+        expertDebug.szCurrentFolder = szCurrentFolder;
+        expertDebug.ReserveModuleBase = ReserveModuleBase;
+        expertDebug.EntryCallBack = EntryCallBack;
+        GetPE32DataExW(szFileName, (LPVOID)&PEStructure);
+        if(PEStructure.Characteristics & 0x2000)
+        {
+            FileIsDll = true;
+        }
+        SetDebugLoopTimeOut(TimeOut);
+        hSecondThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)DebugLoopInSecondThread, (LPVOID)FileIsDll, NULL, &ThreadId);
+        WaitForSingleObject(hSecondThread, INFINITE);
+        if(GetExitCodeThread(hSecondThread, &ExitCode))
+        {
+            if(ExitCode == -1)
+            {
+                ForceClose();
+            }
+        }
+        RtlZeroMemory(&expertDebug, sizeof ExpertDebug);
+        SetDebugLoopTimeOut(INFINITE);
     }
 }

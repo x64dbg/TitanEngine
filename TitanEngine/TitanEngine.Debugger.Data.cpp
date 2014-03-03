@@ -9,6 +9,7 @@ __declspec(dllexport) void TITCALL ClearExceptionNumber()
 {
     CurrentExceptionsNumber = 0;
 }
+
 __declspec(dllexport) long TITCALL CurrentExceptionNumber()
 {
     return(CurrentExceptionsNumber);
@@ -18,18 +19,22 @@ __declspec(dllexport) void* TITCALL GetDebugData()
 {
     return(&DBGEvent);
 }
+
 __declspec(dllexport) void* TITCALL GetTerminationData()
 {
     return(&TerminateDBGEvent);
 }
+
 __declspec(dllexport) long TITCALL GetExitCode()
 {
     return(ProcessExitCode);
 }
+
 __declspec(dllexport) long long TITCALL GetDebuggedDLLBaseAddress()
 {
     return((ULONG_PTR)DebugDebuggingDLLBase);
 }
+
 __declspec(dllexport) unsigned long long TITCALL GetDebuggedFileBaseAddress()
 {
     return (unsigned long long)DebugDebuggingMainModuleBase;
@@ -153,7 +158,26 @@ __declspec(dllexport) void* TITCALL GetProcessInformation()
 {
     return(&dbgProcessInformation);
 }
+
 __declspec(dllexport) void* TITCALL GetStartupInformation()
 {
     return(&dbgStartupInfo);
+}
+
+__declspec(dllexport) bool TITCALL IsFileBeingDebugged()
+{
+    return(engineFileIsBeingDebugged);
+}
+
+__declspec(dllexport) void TITCALL SetErrorModel(bool DisplayErrorMessages)
+{
+
+    if(DisplayErrorMessages)
+    {
+        SetErrorMode(NULL);
+    }
+    else
+    {
+        SetErrorMode(SEM_FAILCRITICALERRORS);
+    }
 }
