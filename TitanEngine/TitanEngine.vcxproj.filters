@@ -99,6 +99,21 @@
     <ClCompile Include="Global.Threader.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Global.Debugger.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Disassembler.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Debugger.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="TitanEngine.Breakpoints.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.Breakpoints.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -147,6 +162,12 @@
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
     <ClInclude Include="Global.Threader.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Debugger.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Breakpoints.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include "definitions.h"
 #include "Global.Engine.Hider.h"
 #include "Global.Engine.h"
+#include "Global.Debugger.h"
 
 // Global.Engine.Hider.functions:
 static bool isAtleastVista()

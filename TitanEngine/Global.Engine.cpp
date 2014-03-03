@@ -5,10 +5,17 @@
 #include "Global.Mapping.h"
 #include "Global.Engine.Extension.h"
 #include "Global.Engine.Hash.h"
+#include "Global.Debugger.h"
 #include <psapi.h>
 
-HARDWARE_DATA DebugRegister[4] = {};
-PROCESS_INFORMATION dbgProcessInformation = {};
+bool engineCheckForwarders = true;
+bool engineAlowModuleLoading = false;
+bool engineCreatePathForFiles = true; // hardcoded
+bool engineBackupForCriticalFunctions = true;
+bool engineResumeProcessIfNoThreadIsActive = false;
+bool engineResetCustomHandler = true;
+bool engineRemoveConsoleForDebugee = false;
+
 char engineExtractedFolderName[512];
 char engineFoundDLLName[512];
 char engineFoundAPIName[512];
@@ -18,12 +25,6 @@ wchar_t engineSzEngineFile[MAX_PATH];
 wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 wchar_t engineSzEngineFolder[MAX_PATH];
 HMODULE engineHandle;
-bool engineCheckForwarders = true;
-bool engineAlowModuleLoading = false;
-bool engineCreatePathForFiles = true; // hardcoded
-bool engineBackupForCriticalFunctions = true;
-bool engineResumeProcessIfNoThreadIsActive = false;
-
 LPVOID engineExitThreadOneShootCallBack = NULL;
 
 // Global.Engine.functions:

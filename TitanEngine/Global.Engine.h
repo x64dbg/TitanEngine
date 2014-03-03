@@ -4,14 +4,14 @@
 #include <vector>
 
 //Global.Engine.Variables
-extern PROCESS_INFORMATION dbgProcessInformation;
-extern HARDWARE_DATA DebugRegister[4];
 extern HMODULE engineHandle;
 
 extern bool engineAlowModuleLoading;
 extern bool engineCheckForwarders;
 extern bool engineBackupForCriticalFunctions;
 extern bool engineResumeProcessIfNoThreadIsActive;
+extern bool engineResetCustomHandler;
+extern bool engineRemoveConsoleForDebugee;
 
 extern wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 

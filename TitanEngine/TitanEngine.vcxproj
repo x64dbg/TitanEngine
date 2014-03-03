@@ -215,6 +215,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Global.Breakpoints.cpp" />
+    <ClCompile Include="Global.Debugger.cpp" />
     <ClCompile Include="Global.Engine.cpp" />
     <ClCompile Include="Global.Engine.Extension.cpp" />
     <ClCompile Include="Global.Engine.Hash.cpp" />
@@ -229,8 +231,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TitanEngine.Breakpoints.cpp" />
     <ClCompile Include="TitanEngine.cpp" />
     <ClCompile Include="LzmaDec.cpp" />
+    <ClCompile Include="TitanEngine.Debugger.cpp" />
+    <ClCompile Include="TitanEngine.Disassembler.cpp" />
     <ClCompile Include="TitanEngine.Dumper.cpp" />
     <ClCompile Include="TitanEngine.Hider.cpp" />
     <ClCompile Include="TitanEngine.PE.Convert.cpp" />
@@ -245,6 +250,8 @@
     <ClInclude Include="aplib.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="distorm.h" />
+    <ClInclude Include="Global.Breakpoints.h" />
+    <ClInclude Include="Global.Debugger.h" />
     <ClInclude Include="Global.Engine.Extension.h" />
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Engine.Hider.h" />
