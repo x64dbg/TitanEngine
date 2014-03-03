@@ -967,6 +967,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+                        GetThreadContext(hActiveThread, &myDBGContext);
                         if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
                         {
                             if(DebugRegister[0].DrxEnabled)

@@ -59,7 +59,6 @@ void EngineInit()
 
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
 {
-
     if(DebugRegister[0].DrxEnabled == false)
     {
         if(FreeRegister != NULL)
