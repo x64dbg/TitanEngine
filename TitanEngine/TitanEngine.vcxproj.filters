@@ -54,6 +54,9 @@
     <ClCompile Include="Global.Engine.Extension.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Global.Engine.Hash.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -127,5 +130,8 @@
       <Filter>Resource Files\Images</Filter>
     </None>
     <None Include="ReadMe.txt" />
+    <None Include="Global.Engine.Hash.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </None>
   </ItemGroup>
 </Project>

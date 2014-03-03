@@ -28,6 +28,7 @@
 #include "Global.Handle.h"
 #include "Global.Mapping.h"
 #include "Global.Engine.Extension.h"
+#include "Global.Engine.Hash.h"
 
 #define TE_VER_MAJOR 2
 #define TE_VER_MIDDLE 1
@@ -131,10 +132,6 @@ wchar_t szBackupDebuggedFileName[512];
 //wchar_t szReserveModuleName[512];
 wchar_t szDebuggerName[512];
 char szParameterString[512];
-// Global.Engine.Strings:
-wchar_t engineSzEngineFile[MAX_PATH];
-wchar_t engineSzEngineFolder[MAX_PATH];
-wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 // Global.Engine.Librarian:
 LIBRARY_ITEM_DATA LibraryInfoData = {};
 LPVOID LibrarianData = VirtualAlloc(NULL, MAX_LIBRARY_BPX * sizeof LIBRARY_BREAK_DATA, MEM_COMMIT, PAGE_READWRITE);
@@ -171,40 +168,9 @@ void* CwpBuffPatchedEntry;
 void* buffPatchedEntry;
 std::vector<HOOK_ENTRY> hookEntry;
 
-// Global.Engine.Hash:
-unsigned long Crc32Table[256];
-
 // Global.Engine.Constants:
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;
-
-// Global.Engine.Hash.functions:
-unsigned long EngineCrc32Reflect(unsigned long ulReflect, const char cChar)
-{
-
-    unsigned long ulValue = 0;
-
-    // Swap bit 0 for bit 7, bit 1 For bit 6, etc....
-    for(int iPos = 1; iPos < (cChar + 1); iPos++)
-    {
-        if(ulReflect & 1)
-        {
-            ulValue |= (1 << (cChar - iPos));
-        }
-        ulReflect >>= 1;
-    }
-    return ulValue;
-}
-void EngineCrc32PartialCRC(unsigned long *ulCRC, const unsigned char *sData, unsigned long ulDataLength)
-{
-
-    while(ulDataLength--)
-    {
-        //If your compiler complains about the following line, try changing each
-        //	occurrence of *ulCRC with "((unsigned long)*ulCRC)" or "*(unsigned long *)ulCRC".
-        *(unsigned long *)ulCRC = ((*(unsigned long *)ulCRC) >> 8) ^ Crc32Table[((*(unsigned long *)ulCRC) & 0xFF) ^ *sData++];
-    }
-}
 
 // TitanEngine.Dumper.functions:
 __declspec(dllexport) bool TITCALL DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
@@ -10285,11 +10251,19 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
     if(i > NULL)
     {
         szDebuggerName[i+1] = 0x00;
-        lstrcatW(szDebuggerName, L"DLLLoader.exe");
+#ifdef _WIN64
+        lstrcpyW(szDebuggerName, L"DLLLoader64.exe");
+#else
+        lstrcpyW(szDebuggerName, L"DLLLoader32.exe");
+#endif
     }
     else
     {
-        lstrcpyW(szDebuggerName, L"DLLLoader.exe");
+#ifdef _WIN64
+        lstrcpyW(szDebuggerName, L"DLLLoader64.exe");
+#else
+        lstrcpyW(szDebuggerName, L"DLLLoader32.exe");
+#endif
     }
     //RtlZeroMemory(&szReserveModuleName, sizeof szReserveModuleName);
     //lstrcpyW(szReserveModuleName, szFileName);
@@ -24947,43 +24921,7 @@ void EmptyGarbage()
 {
     RemoveGarbageItem(engineSzEngineGarbageFolder, false);
 }
-// Global.Engine.Functions:
 
-void EngineInit()
-{
-
-    int i;
-    unsigned long ulPolynomial = 0x04C11DB7; //0x04C11DB7 is the official polynomial used by PKZip, WinZip and Ethernet.
-
-    RtlZeroMemory(&engineSzEngineFile, sizeof engineSzEngineFile);
-    RtlZeroMemory(&engineSzEngineFolder, sizeof engineSzEngineFolder);
-    if(GetModuleFileNameW(engineHandle, engineSzEngineFile, MAX_PATH) > NULL)
-    {
-        lstrcpyW(engineSzEngineFolder, engineSzEngineFile);
-        i = lstrlenW(engineSzEngineFolder);
-        while(i > NULL && engineSzEngineFolder[i] != 0x5C)
-        {
-            engineSzEngineFolder[i] = 0x00;
-            i--;
-        }
-        if(i > NULL)
-        {
-            lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
-            lstrcatW(engineSzEngineGarbageFolder, L"garbage\\");
-        }
-        EngineInitPlugins(engineSzEngineFolder);
-    }
-    // CRC32 table initialization
-    for(int iCodes = 0; iCodes <= 0xFF; iCodes++)
-    {
-        Crc32Table[iCodes] = EngineCrc32Reflect(iCodes, 8) << 24;
-        for(int iPos = 0; iPos < 8; iPos++)
-        {
-            Crc32Table[iCodes] = (Crc32Table[iCodes] << 1) ^ ((Crc32Table[iCodes] & (1 << 31)) ? ulPolynomial : 0);
-        }
-        Crc32Table[iCodes] = EngineCrc32Reflect(Crc32Table[iCodes], 32);
-    }
-}
 // Global.Engine.Entry:
 bool APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {

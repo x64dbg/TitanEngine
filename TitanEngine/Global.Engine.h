@@ -11,7 +11,10 @@ extern HMODULE engineHandle;
 extern bool engineAlowModuleLoading;
 extern bool engineCheckForwarders;
 
+extern wchar_t engineSzEngineGarbageFolder[MAX_PATH];
+
 //Global.Engine.Functions
+void EngineInit();
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister);
 bool EngineFileExists(char* szFileName);
 char* EngineExtractPath(char* szFileName);

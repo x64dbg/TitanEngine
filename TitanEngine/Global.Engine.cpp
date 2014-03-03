@@ -3,6 +3,8 @@
 #include "Global.Engine.h"
 #include "Global.Handle.h"
 #include "Global.Mapping.h"
+#include "Global.Engine.Extension.h"
+#include "Global.Engine.Hash.h"
 #include <psapi.h>
 
 HARDWARE_DATA DebugRegister[4] = {};
@@ -12,12 +14,39 @@ char engineFoundDLLName[512];
 char engineFoundAPIName[512];
 char engineExtractedFileName[512];
 wchar_t engineExtractedFileNameW[512];
+wchar_t engineSzEngineFile[MAX_PATH];
+wchar_t engineSzEngineGarbageFolder[MAX_PATH];
+wchar_t engineSzEngineFolder[MAX_PATH];
 HMODULE engineHandle;
 bool engineCheckForwarders = true;
 bool engineAlowModuleLoading = false;
 bool engineCreatePathForFiles = true; // hardcoded
 
 // Global.Engine.functions:
+void EngineInit()
+{
+    int i;
+    RtlZeroMemory(&engineSzEngineFile, sizeof engineSzEngineFile);
+    RtlZeroMemory(&engineSzEngineFolder, sizeof engineSzEngineFolder);
+    if(GetModuleFileNameW(engineHandle, engineSzEngineFile, MAX_PATH) > NULL)
+    {
+        lstrcpyW(engineSzEngineFolder, engineSzEngineFile);
+        i = lstrlenW(engineSzEngineFolder);
+        while(i > NULL && engineSzEngineFolder[i] != 0x5C)
+        {
+            engineSzEngineFolder[i] = 0x00;
+            i--;
+        }
+        if(i > NULL)
+        {
+            lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
+            lstrcatW(engineSzEngineGarbageFolder, L"garbage\\");
+        }
+        EngineInitPlugins(engineSzEngineFolder);
+    }
+    HashInit();
+}
+
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
 {
 
