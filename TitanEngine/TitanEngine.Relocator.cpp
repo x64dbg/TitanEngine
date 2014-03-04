@@ -134,7 +134,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocation(ULONG_PTR StorePlac
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        return(false);
+        return false;
     }
 
     DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
@@ -153,7 +153,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocation(ULONG_PTR StorePlac
         else
         {
             RelocationData = NULL;
-            return(false);
+            return false;
         }
         if(!FileIs64)
         {
@@ -168,10 +168,10 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocation(ULONG_PTR StorePlac
             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = (DWORD)((ULONG_PTR)RelocationWritePosition - (ULONG_PTR)RelocationData);
         }
         RelocationData = NULL;
-        return(true);
+        return true;
     }
     RelocationData = NULL;
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RelocaterExportRelocationEx(char* szFileName, char* szSectionName)
 {
@@ -185,7 +185,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocationEx(char* szFileName,
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RelocaterExportRelocationExW(wchar_t* szFileName, char* szSectionName)
@@ -209,21 +209,21 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocationExW(wchar_t* szFileN
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             if(ReturnValue)
             {
-                return(true);
+                return true;
             }
             else
             {
-                return(false);
+                return false;
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTable(HANDLE hProcess, ULONG_PTR MemoryStart, DWORD MemorySize)
@@ -242,10 +242,10 @@ __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTable(HANDLE hProcess,
         {
             RelocationWritePosition = (LPVOID)((ULONG_PTR)RelocationData + MemorySize);
             RelocationStartPosition = (LPVOID)(-1);
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTableEx(HANDLE hProcess, ULONG_PTR MemoryStart, ULONG_PTR MemorySize, DWORD NtSizeOfImage)
 {
@@ -287,10 +287,10 @@ __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTableEx(HANDLE hProces
         else
         {
             VirtualFree(ReadMemoryStorage, NULL, MEM_RELEASE);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL RelocaterMakeSnapshot(HANDLE hProcess, char* szSaveFileName, LPVOID MemoryStart, ULONG_PTR MemorySize)
@@ -315,7 +315,7 @@ __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshots(HANDLE hProcess,
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshotsW(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, wchar_t* szDumpFile1, wchar_t* szDumpFile2, ULONG_PTR MemStart)
@@ -421,15 +421,15 @@ __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshotsW(HANDLE hProcess
                     RelocaterCleanup();
                     UnMapFileEx(FileHandle2, FileSize2, FileMap2, FileMapVA2);
                     UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
-                    return(false);
+                    return false;
                 }
             }
             UnMapFileEx(FileHandle2, FileSize2, FileMap2, FileMapVA2);
         }
         UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RelocaterChangeFileBase(char* szFileName, ULONG_PTR NewImageBase)
 {
@@ -443,7 +443,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBase(char* szFileName, ULO
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName, ULONG_PTR NewImageBase)
@@ -501,7 +501,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName,
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -509,7 +509,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName,
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(true);
+                    return true;
                 }
                 RelocData = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader32->OptionalHeader.ImageBase), true);
                 RelocSize = PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
@@ -520,7 +520,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName,
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(true);
+                    return true;
                 }
                 RelocData = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader64->OptionalHeader.ImageBase), true);
                 RelocSize = PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
@@ -575,35 +575,35 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName,
                     if(CopyFileW(szBackupFile, szFileName, false))
                     {
                         RemoveGarbageItem(szBackupItem, true);
-                        return(true);
+                        return true;
                     }
                     else
                     {
                         RemoveGarbageItem(szBackupItem, true);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
-                    return(true);
+                    return true;
                 }
             }
             __except(EXCEPTION_EXECUTE_HANDLER)
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             RemoveGarbageItem(szBackupItem, true);
-            return(false);
+            return false;
         }
     }
     RemoveGarbageItem(szBackupItem, true);
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RelocaterRelocateMemoryBlock(ULONG_PTR FileMapVA, ULONG_PTR MemoryLocation, void* RelocateMemory, DWORD RelocateMemorySize, ULONG_PTR CurrentLoadedBase, ULONG_PTR RelocateBase)
 {
@@ -638,13 +638,13 @@ __declspec(dllexport) bool TITCALL RelocaterRelocateMemoryBlock(ULONG_PTR FileMa
         }
         else
         {
-            return(false);
+            return false;
         }
         if(!FileIs64)
         {
             if(PEHeader32->OptionalHeader.ImageBase == (DWORD)RelocateBase)
             {
-                return(true);
+                return true;
             }
             RelocData = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader32->OptionalHeader.ImageBase), true);
             RelocSize = PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
@@ -653,7 +653,7 @@ __declspec(dllexport) bool TITCALL RelocaterRelocateMemoryBlock(ULONG_PTR FileMa
         {
             if((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase == RelocateBase)
             {
-                return(true);
+                return true;
             }
             RelocData = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader64->OptionalHeader.ImageBase), true);
             RelocSize = PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
@@ -698,18 +698,18 @@ __declspec(dllexport) bool TITCALL RelocaterRelocateMemoryBlock(ULONG_PTR FileMa
                     RelocData = RelocData + 2;
                 }
             }
-            return(true);
+            return true;
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTable(char* szFileName)
 {
@@ -723,7 +723,7 @@ __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTable(char* szFileName
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTableW(wchar_t* szFileName)
@@ -758,7 +758,7 @@ __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTableW(wchar_t* szFile
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -784,5 +784,5 @@ __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTableW(wchar_t* szFile
             }
         }
     }
-    return(false);
+    return false;
 }

@@ -63,23 +63,23 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
             {
                 if(memCmp->Array.bArrayEntry[i] != memPattern->Array.bArrayEntry[i] && memPattern->Array.bArrayEntry[i] != *WildCard)
                 {
-                    return(false);
+                    return false;
                 }
                 SizeOfPatternToMatch--;
                 i++;
             }
             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            return(true);
+            return true;
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
@@ -224,9 +224,9 @@ __declspec(dllexport) bool TITCALL FillEx(HANDLE hProcess, LPVOID MemoryStart, D
             MemoryStart = (LPVOID)((ULONG_PTR)MemoryStart + 1);
         }
         VirtualProtectEx(hProcess, MemoryStart, MemorySize, OldProtect, &OldProtect);
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL Fill(LPVOID MemoryStart, DWORD MemorySize, PBYTE FillByte)
 {
@@ -289,9 +289,9 @@ __declspec(dllexport) bool TITCALL PatchEx(HANDLE hProcess, LPVOID MemoryStart, 
             WriteProcessMemory(hProcess, MemoryStart, ReplacePattern, ReplaceSize, &ueNumberOfBytesRead);
         }
         VirtualProtectEx(hProcess, MemoryStart, MemorySize, OldProtect, &OldProtect);
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL Patch(LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
 {
@@ -338,11 +338,11 @@ __declspec(dllexport) bool TITCALL ReplaceEx(HANDLE hProcess, LPVOID MemoryStart
     VirtualFree(lpReadMemory, NULL, MEM_RELEASE);
     if(NumberOfRepetitions != NULL)
     {
-        return(false);
+        return false;
     }
     else
     {
-        return(true);
+        return true;
     }
 }
 __declspec(dllexport) bool TITCALL Replace(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)

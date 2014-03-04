@@ -2,8 +2,7 @@
 #include "definitions.h"
 #include "Global.Breakpoints.h"
 
-int BreakPointSetCount = 0;
-extern BreakPointDetail BreakPointBuffer[MAXIMUM_BREAKPOINTS] = {};
+std::vector<BreakPointDetail> BreakPointBuffer;
 
 ULONG_PTR dr7uint(DR7* dr7)
 {

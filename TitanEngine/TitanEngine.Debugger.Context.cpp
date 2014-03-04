@@ -319,7 +319,7 @@ __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, voi
         RtlZeroMemory(&DBGContext, sizeof CONTEXT);
         DBGContext.ContextFlags = CONTEXT_ALL;
         if(!GetThreadContext(hActiveThread, &DBGContext))
-            return(false);
+            return false;
 #ifndef _WIN64
         RtlMoveMemory(&DBGContext.FloatSave, FPUSaveArea, sizeof FLOATING_SAVE_AREA);
 #else

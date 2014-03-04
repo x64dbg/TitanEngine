@@ -73,7 +73,7 @@ __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, cha
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, wchar_t* szSectionName)
@@ -271,11 +271,11 @@ __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG
 {
     if((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_DLLINDEX) > NULL)
     {
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) void* TITCALL ImporterGetForwardedAPIName(HANDLE hProcess, ULONG_PTR APIAddress)
@@ -316,7 +316,7 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIAT(char* szOriginalFile,
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile)
@@ -362,7 +362,7 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
-                    return(false);
+                    return false;
                 }
                 if(!FileIs64)
                 {
@@ -388,13 +388,13 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
                         SetPE32DataForMappedFile(FileMapVA1, NULL, UE_IMPORTTABLESIZE, (ULONG_PTR)IATHeaderData);
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         UnMapFileEx(FileHandle1, FileSize1, FileMap1, FileMapVA1);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -403,7 +403,7 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     }
 
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ImporterLoadImportTable(char* szFileName)
 {
@@ -417,7 +417,7 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTable(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
@@ -456,7 +456,7 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -495,13 +495,13 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
                             ImportIID = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportIID + sizeof IMAGE_IMPORT_DESCRIPTOR);
                         }
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         ImporterCleanup();
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -542,13 +542,13 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
                             ImportIID = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportIID + sizeof IMAGE_IMPORT_DESCRIPTOR);
                         }
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         ImporterCleanup();
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -556,15 +556,15 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTableW(wchar_t* szFileName)
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-    return(false);
+    return false;
     */
 }
 __declspec(dllexport) bool TITCALL ImporterMoveOriginalIAT(char* szOriginalFile, char* szDumpFile, char* szSectionName)
@@ -574,7 +574,7 @@ __declspec(dllexport) bool TITCALL ImporterMoveOriginalIAT(char* szOriginalFile,
     {
         return(ImporterExportIATEx(szDumpFile, szSectionName));
     }*/
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ImporterMoveOriginalIATW(wchar_t* szOriginalFile, wchar_t* szDumpFile, char* szSectionName)
 {
@@ -583,7 +583,7 @@ __declspec(dllexport) bool TITCALL ImporterMoveOriginalIATW(wchar_t* szOriginalF
     {
         return(ImporterExportIATExW(szDumpFile, szSectionName));
     }*/
-    return(false);
+    return false;
 }
 __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* szFileName, ULONG_PTR SearchStart, LPVOID pIATStart, LPVOID pIATSize)
 {

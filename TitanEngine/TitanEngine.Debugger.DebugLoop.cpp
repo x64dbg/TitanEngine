@@ -17,7 +17,6 @@ static DWORD engineWaitForDebugEventTimeOut = INFINITE;
 
 __declspec(dllexport) void TITCALL DebugLoop()
 {
-    int i = NULL;
     int j = NULL;
     int k = NULL;
     bool FirstBPX = true;
@@ -47,7 +46,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     ULONG_PTR ResetBPXAddressTo =  0;
     ULONG_PTR ResetMemBPXAddress = 0;
     SIZE_T ResetMemBPXSize = 0;
-    int MaximumBreakPoints = 0;
+    //int MaximumBreakPoints = 0;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     MEMORY_BASIC_INFORMATION MemInfo;
     HANDLE hActiveThread;
@@ -348,7 +347,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     hListLibraryPtr->hFileMappingView = hFileMappingView;
                     if(GetMappedFileNameW(GetCurrentProcess(), hFileMappingView, DLLDebugFileName, sizeof(DLLDebugFileName)/sizeof(DLLDebugFileName[0])) > NULL)
                     {
-                        i = lstrlenW(DLLDebugFileName);
+                        int i = lstrlenW(DLLDebugFileName);
                         while(DLLDebugFileName[i] != 0x5C && i >= NULL)
                         {
                             i--;
@@ -567,201 +566,75 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
             case STATUS_BREAKPOINT:
             {
-                MaximumBreakPoints = 0;
-                for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
+                bool bFoundBreakPoint=false;
+                BreakPointDetail FoundBreakPoint;
+                int bpcount=BreakPointBuffer.size();
+                for(int i=0; i<bpcount; i++)
                 {
-                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress - (BreakPointBuffer[MaximumBreakPoints].BreakPointSize - 1))
+                    if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress - (BreakPointBuffer.at(i).BreakPointSize - 1) &&
+                            (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) &&
+                            BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
+                        FoundBreakPoint=BreakPointBuffer.at(i);
+                        bFoundBreakPoint=true;
                         break;
                     }
                 }
-                if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE && MaximumBreakPoints < MAXIMUM_BREAKPOINTS)
+                if(bFoundBreakPoint) //breakpoint found
                 {
-                    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                    OldProtect = MemInfo.Protect;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_BREAKPOINT || BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_SINGLESHOOT) && (BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions == -1 || BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions > 0))
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
+                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, &FoundBreakPoint.OriginalByte[0], FoundBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
                     {
-                        if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &BreakPointBuffer[MaximumBreakPoints].OriginalByte[0], BreakPointBuffer[MaximumBreakPoints].BreakPointSize, &NumberOfBytesReadWritten))
+                        DBGCode = DBG_CONTINUE;
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                        myDBGContext.ContextFlags = CONTEXT_CONTROL;
+                        GetThreadContext(hActiveThread, &myDBGContext);
+                        if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
                         {
-                            DBGCode = DBG_CONTINUE;
-                            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
-                            myDBGContext.ContextFlags = CONTEXT_CONTROL;
-                            GetThreadContext(hActiveThread, &myDBGContext);
-                            if(BreakPointBuffer[MaximumBreakPoints].BreakPointType != UE_SINGLESHOOT)
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            if(!(myDBGContext.EFlags & 0x10000))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
-                            }
+                        }
+                        if(!(myDBGContext.EFlags & 0x10000))
+                        {
+                            myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
+                        }
 #if defined(_WIN64)
-                            myDBGContext.Rip = myDBGContext.Rip - BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                        myDBGContext.Rip = myDBGContext.Rip - FoundBreakPoint.BreakPointSize;
 #else
-                            myDBGContext.Eip = myDBGContext.Eip - BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
+                        myDBGContext.Eip = myDBGContext.Eip - FoundBreakPoint.BreakPointSize;
 #endif
-                            SetThreadContext(hActiveThread, &myDBGContext);
-                            EngineCloseHandle(hActiveThread);
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
-                            myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack);
-                            if(BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != -1 && BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != 0)
-                            {
-                                BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions--;
-                            }
-                            if(BreakPointBuffer[MaximumBreakPoints].CmpCondition != UE_CMP_NOCONDITION)
-                            {
-                                CompareResult = false;
-                                CmpValue1 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpRegister);
-                                myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].CompareCallBack);
-                                if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_EQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 == CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_NOTEQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 != CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_GREATER)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 > CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_GREATEROREQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 >= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_LOWER)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 < CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_LOWEROREQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 <= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_EQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 == CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_NOTEQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 != CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_GREATER)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 > CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_GREATEROREQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 >= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_LOWER)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 < CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_LOWEROREQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 <= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                if(CompareResult)
-                                {
-                                    __try
-                                    {
-                                        myCustomBreakPoint();
-                                    }
-                                    __except(EXCEPTION_EXECUTE_HANDLER)
-                                    {
+                        SetThreadContext(hActiveThread, &myDBGContext);
+                        EngineCloseHandle(hActiveThread);
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
+                        myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
+                        //execute callback
+                        __try
+                        {
+                            myCustomBreakPoint();
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
 
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                __try
-                                {
-                                    myCustomBreakPoint();
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                            }
-                            if(BreakPointBuffer[MaximumBreakPoints].BreakPointType != UE_SINGLESHOOT)
-                            {
-                                DisableBPX((ULONG_PTR)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress);
-                                ResetBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize - 1;
-                                ResetBPXAddressTo = (ULONG_PTR)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetBPX = true;
-                            }
-                            else
-                            {
-                                DeleteBPX((ULONG_PTR)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress);
-                                ResetBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize - 1;
-                                ResetBPXAddressTo = NULL;
-                                ResetBPX = false;
-                            }
+                        }
+                        if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
+                        {
+                            DisableBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
+                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
+                            ResetBPXAddressTo = (ULONG_PTR)FoundBreakPoint.BreakPointAddress;
+                            ResetBPX = true;
                         }
                         else
                         {
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
-                            DBGCode = DBG_CONTINUE;
+                            DeleteBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
+                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
+                            ResetBPXAddressTo = NULL;
+                            ResetBPX = false;
                         }
                     }
                     else
-                    {
-                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
-                        DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                    }
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
                 }
                 else //breakpoint not in list
                 {
@@ -807,7 +680,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         if(engineTLSBreakOnCallBack) //set TLS callback breakpoints
                         {
-                            i = NULL;
+                            int i = NULL;
                             while(tlsCallBackList[i] != NULL)
                             {
                                 SetBPX((ULONG_PTR)tlsCallBackList[i], UE_SINGLESHOOT, (LPVOID)engineTLSBreakOnCallBackAddress);
@@ -1115,47 +988,80 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_GUARD_PAGE_VIOLATION:
             {
-                MemoryBpxFound = false;
-                MaximumBreakPoints = 0;
                 ULONG_PTR bpaddr;
-                for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
+                bool bFoundBreakPoint=false;
+                BreakPointDetail FoundBreakPoint;
+                int bpcount=BreakPointBuffer.size();
+                for(int i=0; i<bpcount; i++)
                 {
-                    ULONG_PTR addr=BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-
+                    ULONG_PTR addr=BreakPointBuffer.at(i).BreakPointAddress;
                     bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
-
-                    if(((BreakPointBuffer[MaximumBreakPoints].BreakPointType >= UE_MEMORY) && (BreakPointBuffer[MaximumBreakPoints].BreakPointType <= UE_MEMORY_EXECUTE)) && bpaddr>=addr && bpaddr<(addr+BreakPointBuffer[MaximumBreakPoints].BreakPointSize))
+                    if(bpaddr>=addr && bpaddr<(addr+BreakPointBuffer.at(i).BreakPointSize) &&
+                            (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                             BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                             BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                             BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE) &&
+                            BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
-                        MemoryBpxFound = true;
+                        FoundBreakPoint=BreakPointBuffer.at(i);
+                        bFoundBreakPoint=true;
                         break;
                     }
                 }
-                if(MaximumBreakPoints < MAXIMUM_BREAKPOINTS || MemoryBpxFound == true) //found memory breakpoint
+                if(bFoundBreakPoint) //found memory breakpoint
                 {
-                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE) //memory breakpoint is active
+                    hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                    myDBGContext.ContextFlags = CONTEXT_CONTROL;
+                    GetThreadContext(hActiveThread, &myDBGContext);
+                    DBGCode = DBG_CONTINUE; //debugger handled the exception
+                    MemoryBpxCallBack = FoundBreakPoint.ExecuteCallBack;
+                    if(FoundBreakPoint.BreakPointType == UE_MEMORY) //READ|WRITE|EXECUTE
                     {
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
-                        myDBGContext.ContextFlags = CONTEXT_CONTROL;
-                        GetThreadContext(hActiveThread, &myDBGContext);
-                        DBGCode = DBG_CONTINUE; //debugger handled the exception
-                        MemoryBpxCallBack = BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack;
-                        if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY) //READ|WRITE|EXECUTE
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1)
                         {
-                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
+                            RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else
+                        {
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            else
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
+                        __try
+                        {
+                            myCustomHandler((void*)bpaddr);
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
+
+                        }
+                    }
+                    else if(FoundBreakPoint.BreakPointType == UE_MEMORY_READ) //READ
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1) //do not restore the memory breakpoint
+                        {
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
+                                RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else //restore the memory breakpoint
+                        {
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
+                        {
                             myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
                             __try
                             {
@@ -1166,140 +1072,105 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                             }
                         }
-                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_READ) //READ
+                        else //no read operation, restore breakpoint
                         {
-                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1) //do not restore the memory breakpoint
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
-                                    RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            else //restore the memory breakpoint
-                            {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
-                            }
-                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
-                            {
-                                myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)bpaddr);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                            }
-                            else //no read operation, restore breakpoint
-                            {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
-                            }
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
                         }
-                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_WRITE) //WRITE
+                    }
+                    else if(FoundBreakPoint.BreakPointType == UE_MEMORY_WRITE) //WRITE
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1) //remove breakpoint
                         {
-                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1) //remove breakpoint
-                            {
-                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
-                                    RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
-                            }
-                            else //restore breakpoint after trap flag
-                            {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
-                            }
                             if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
+                                RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else //restore breakpoint after trap flag
+                        {
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)bpaddr);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            else //no write operation, restore breakpoint
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
+                        {
+                            myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
+                            __try
                             {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
+                                myCustomHandler((void*)bpaddr);
+                            }
+                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            {
+
                             }
                         }
-                        else if(BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_MEMORY_EXECUTE) //EXECUTE
+                        else //no write operation, restore breakpoint
                         {
-                            if(BreakPointBuffer[MaximumBreakPoints].MemoryBpxRestoreOnHit != 1)
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 && //data execution prevention (DEP) violation
-                                        (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
-                                    RemoveMemoryBPX(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize);
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            else
-                            {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
-                            }
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                    }
+                    else if(FoundBreakPoint.BreakPointType == UE_MEMORY_EXECUTE) //EXECUTE
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1)
+                        {
                             if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 && //data execution prevention (DEP) violation
                                     (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
+                                RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else
+                        {
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)bpaddr);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            else //no execute operation, restore breakpoint
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 && //data execution prevention (DEP) violation
+                                (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
+                        {
+                            myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
+                            __try
                             {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                ResetMemBPXAddress = BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetMemBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize;
-                                ResetMemBPX = true;
+                                myCustomHandler((void*)bpaddr);
+                            }
+                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            {
+
                             }
                         }
-                        EngineCloseHandle(hActiveThread);
+                        else //no execute operation, restore breakpoint
+                        {
+                            if(!(myDBGContext.EFlags & 0x100))
+                            {
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
+                            }
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
                     }
-                    else
-                    {
-                        DBGCode = DBG_EXCEPTION_NOT_HANDLED; //debugger did not handle the exception
-                    }
+                    EngineCloseHandle(hActiveThread);
                 }
                 else //no memory breakpoint found
                 {
@@ -1346,201 +1217,74 @@ __declspec(dllexport) void TITCALL DebugLoop()
             case STATUS_ILLEGAL_INSTRUCTION:
             {
                 //UD2 breakpoint
-                MaximumBreakPoints = 0;
-                for(MaximumBreakPoints = 0; MaximumBreakPoints < BreakPointSetCount; MaximumBreakPoints++)
+                bool bFoundBreakPoint=false;
+                BreakPointDetail FoundBreakPoint;
+                int bpcount=BreakPointBuffer.size();
+                for(int i=0; i<bpcount; i++)
                 {
-                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress)
+                    if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress &&
+                        (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) &&
+                        BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
+                        FoundBreakPoint=BreakPointBuffer.at(i);
+                        bFoundBreakPoint=true;
                         break;
                     }
                 }
-                if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE && MaximumBreakPoints < MAXIMUM_BREAKPOINTS)
+                if(bFoundBreakPoint) //found ud2 breakpoint
                 {
-                    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                    OldProtect = MemInfo.Protect;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-                    if(BreakPointBuffer[MaximumBreakPoints].BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_BREAKPOINT || BreakPointBuffer[MaximumBreakPoints].BreakPointType == UE_SINGLESHOOT) && (BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions == -1 || BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions > 0))
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
+                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, &FoundBreakPoint.OriginalByte[0], FoundBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
                     {
-                        if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, &BreakPointBuffer[MaximumBreakPoints].OriginalByte[0], BreakPointBuffer[MaximumBreakPoints].BreakPointSize, &NumberOfBytesReadWritten))
+                        DBGCode = DBG_CONTINUE;
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        myDBGContext.ContextFlags = CONTEXT_CONTROL;
+                        GetThreadContext(hActiveThread, &myDBGContext);
+                        if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
                         {
-                            DBGCode = DBG_CONTINUE;
-                            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
-                            myDBGContext.ContextFlags = CONTEXT_CONTROL;
-                            GetThreadContext(hActiveThread, &myDBGContext);
-                            if(BreakPointBuffer[MaximumBreakPoints].BreakPointType != UE_SINGLESHOOT)
+                            if(!(myDBGContext.EFlags & 0x100))
                             {
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
+                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
                             }
-                            if(!(myDBGContext.EFlags & 0x10000))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
-                            }
-                            SetThreadContext(hActiveThread, &myDBGContext);
-                            EngineCloseHandle(hActiveThread);
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
-                            myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].ExecuteCallBack);
-                            if(BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != -1 && BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions != 0)
-                            {
-                                BreakPointBuffer[MaximumBreakPoints].NumberOfExecutions--;
-                            }
-                            if(BreakPointBuffer[MaximumBreakPoints].CmpCondition != UE_CMP_NOCONDITION)
-                            {
-                                CompareResult = false;
-                                CmpValue1 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpRegister);
-                                myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[MaximumBreakPoints].CompareCallBack);
-                                if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_EQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 == CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_NOTEQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 != CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_GREATER)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 > CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_GREATEROREQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 >= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_LOWER)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 < CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_LOWEROREQUAL)
-                                {
-                                    CmpValue2 = BreakPointBuffer[MaximumBreakPoints].CmpValue;
-                                    if(CmpValue1 <= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_EQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 == CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_NOTEQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 != CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_GREATER)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 > CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_GREATEROREQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 >= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_LOWER)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 < CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                else if(BreakPointBuffer[MaximumBreakPoints].CmpCondition == UE_CMP_REG_LOWEROREQUAL)
-                                {
-                                    CmpValue2 = (ULONG_PTR)GetContextData((DWORD)BreakPointBuffer[MaximumBreakPoints].CmpValue);
-                                    if(CmpValue1 <= CmpValue2)
-                                    {
-                                        CompareResult = true;
-                                    }
-                                }
-                                if(CompareResult)
-                                {
-                                    __try
-                                    {
-                                        myCustomBreakPoint();
-                                    }
-                                    __except(EXCEPTION_EXECUTE_HANDLER)
-                                    {
+                        }
+                        if(!(myDBGContext.EFlags & 0x10000))
+                        {
+                            myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
+                        }
+                        SetThreadContext(hActiveThread, &myDBGContext);
+                        EngineCloseHandle(hActiveThread);
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
+                        myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
+                        //execute callback
+                        __try
+                        {
+                            myCustomBreakPoint();
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
 
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                __try
-                                {
-                                    myCustomBreakPoint();
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                            }
-                            if(BreakPointBuffer[MaximumBreakPoints].BreakPointType != UE_SINGLESHOOT)
-                            {
-                                DisableBPX((ULONG_PTR)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress);
-                                ResetBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize - 1;
-                                ResetBPXAddressTo = (ULONG_PTR)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress;
-                                ResetBPX = true;
-                            }
-                            else
-                            {
-                                DeleteBPX((ULONG_PTR)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress);
-                                ResetBPXSize = BreakPointBuffer[MaximumBreakPoints].BreakPointSize - 1;
-                                ResetBPXAddressTo = NULL;
-                                ResetBPX = false;
-                            }
+                        }
+                        if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
+                        {
+                            DisableBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
+                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
+                            ResetBPXAddressTo = (ULONG_PTR)FoundBreakPoint.BreakPointAddress;
+                            ResetBPX = true;
                         }
                         else
                         {
-                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
-                            DBGCode = DBG_CONTINUE;
+                            DeleteBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
+                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
+                            ResetBPXAddressTo = NULL;
+                            ResetBPX = false;
                         }
                     }
                     else
-                    {
-                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)BreakPointBuffer[MaximumBreakPoints].BreakPointAddress, BreakPointBuffer[MaximumBreakPoints].BreakPointSize, OldProtect, &OldProtect);
-                        DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                    }
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
                 }
                 else
-                {
-                    DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                }
+                    DBGCode=DBG_EXCEPTION_NOT_HANDLED;
+
                 //application-generated exception
                 if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
                 {

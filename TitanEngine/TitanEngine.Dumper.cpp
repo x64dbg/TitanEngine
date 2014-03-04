@@ -64,7 +64,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             {
                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                return(false);
+                return false;
             }
             else
             {
@@ -92,7 +92,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             {
                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -176,14 +176,14 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 EngineCloseHandle(hFile);
                                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                                 VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return(true);
+                                return true;
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
                                 EngineCloseHandle(hFile);
                                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                                 VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return(false);
+                                return false;
                             }
                         }
                         else
@@ -191,14 +191,14 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             EngineCloseHandle(hFile);
                             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
                         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -284,13 +284,13 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 EngineCloseHandle(hFile);
                                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                                 VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return(true);
+                                return true;
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
                                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                                 VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return(false);
+                                return false;
                             }
                         }
                         else
@@ -298,7 +298,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             EngineCloseHandle(hFile);
                             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                            return(false);
+                            return false;
                         }
                     }
                     else
@@ -306,7 +306,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                         EngineCloseHandle(hFile);
                         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -315,16 +315,16 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         {
             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return(false);
+            return false;
         }
     }
     else
     {
         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
         VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DumpProcessEx(DWORD ProcessId, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
@@ -339,7 +339,7 @@ __declspec(dllexport) bool TITCALL DumpProcessEx(DWORD ProcessId, LPVOID ImageBa
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -356,16 +356,16 @@ __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageB
         EngineCloseHandle(hProcess);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -381,7 +381,7 @@ __declspec(dllexport) bool TITCALL DumpMemory(HANDLE hProcess, LPVOID MemoryStar
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -434,15 +434,15 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
             }
             EngineCloseHandle(hFile);
             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return(true);
+            return true;
         }
         else
         {
             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return(false);
+            return false;
         }
     }
-    return(true);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL DumpMemoryEx(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
@@ -457,7 +457,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryEx(DWORD ProcessId, LPVOID MemorySt
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -474,11 +474,11 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
         EngineCloseHandle(hProcess);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
     }
 
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DumpRegions(HANDLE hProcess, char* szDumpFolder, bool DumpAboveImageBaseOnly)
@@ -493,7 +493,7 @@ __declspec(dllexport) bool TITCALL DumpRegions(HANDLE hProcess, char* szDumpFold
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -545,9 +545,9 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
             }
             DumpAddress = DumpAddress + (ULONG_PTR)MemInfo.RegionSize;
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DumpRegionsEx(DWORD ProcessId, char* szDumpFolder, bool DumpAboveImageBaseOnly)
@@ -562,7 +562,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsEx(DWORD ProcessId, char* szDumpFo
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -579,11 +579,11 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
         EngineCloseHandle(hProcess);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
     }
 
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DumpModule(HANDLE hProcess, LPVOID ModuleBase, char* szDumpFileName)
@@ -598,7 +598,7 @@ __declspec(dllexport) bool TITCALL DumpModule(HANDLE hProcess, LPVOID ModuleBase
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -621,7 +621,7 @@ __declspec(dllexport) bool TITCALL DumpModuleW(HANDLE hProcess, LPVOID ModuleBas
             }
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DumpModuleEx(DWORD ProcessId, LPVOID ModuleBase, char* szDumpFileName)
@@ -636,7 +636,7 @@ __declspec(dllexport) bool TITCALL DumpModuleEx(DWORD ProcessId, LPVOID ModuleBa
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -653,9 +653,9 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
         EngineCloseHandle(hProcess);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
     }
 
-    return(false);
+    return false;
 }

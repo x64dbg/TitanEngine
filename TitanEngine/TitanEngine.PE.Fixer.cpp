@@ -15,7 +15,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidEx(char* szFileName, DWORD Che
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -84,7 +84,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     RtlMoveMemory(FileStatusInfo, &myFileStatusInfo, sizeof FILE_STATUS_INFO);
                 }
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -809,7 +809,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     if(myFileStatusInfo.OveralEvaluation == UE_RESULT_FILE_OK)
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
@@ -822,7 +822,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         RtlMoveMemory(FileStatusInfo, &myFileStatusInfo, sizeof FILE_STATUS_INFO);
                     }
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -1548,7 +1548,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     if(myFileStatusInfo.OveralEvaluation == UE_RESULT_FILE_OK)
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
@@ -1561,7 +1561,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         RtlMoveMemory(FileStatusInfo, &myFileStatusInfo, sizeof FILE_STATUS_INFO);
                     }
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -1574,14 +1574,14 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                 RtlMoveMemory(FileStatusInfo, &myFileStatusInfo, sizeof FILE_STATUS_INFO);
             }
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
     if(FileStatusInfo != NULL)
     {
         RtlMoveMemory(FileStatusInfo, &myFileStatusInfo, sizeof FILE_STATUS_INFO);
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL FixBrokenPE32FileEx(char* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
 {
@@ -1595,7 +1595,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileEx(char* szFileName, LPVOID 
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPVOID FileStatusInfo, LPVOID FileFixInfo)
@@ -1667,37 +1667,37 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                 else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 if(myFileStatusInfo->SignatureMZ != UE_FIELD_OK)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 else if(myFileStatusInfo->SignaturePE != UE_FIELD_OK)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 else if(myFileStatusInfo->SectionAlignment != UE_FIELD_OK)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 else if(myFileStatusInfo->FileAlignment != UE_FIELD_OK)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 else if(myFileStatusInfo->ImportTable != UE_FIELD_OK)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 else if(myFileStatusInfo->ImportTableData != UE_FIELD_OK)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 if(!FileIs64)
                 {
@@ -1733,7 +1733,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                     if(!SetPE32DataForMappedFile(FileMapVA, SectionAttributes, UE_SECTIONFLAGS, 0xE0000020))
                                     {
                                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                        return(false);
+                                        return false;
                                     }
                                 }
                                 if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress != NULL)
@@ -2269,7 +2269,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                     if(!SetPE32DataForMappedFile(FileMapVA, SectionNumber, UE_SECTIONFLAGS, 0xE0000020))
                                     {
                                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                        return(false);
+                                        return false;
                                     }
                                 }
                             }
@@ -2283,13 +2283,13 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             myFileFixInfo->OveralEvaluation = UE_RESULT_FILE_OK;
                             myFileFixInfo->FileFixPerformed = FileFixed;
                         }
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         myFileFixInfo->FixingTerminatedByException = true;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
@@ -2326,7 +2326,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                     if(!SetPE32DataForMappedFile(FileMapVA, SectionAttributes, UE_SECTIONFLAGS, 0xE0000020))
                                     {
                                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                        return(false);
+                                        return false;
                                     }
                                 }
                                 if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress != NULL)
@@ -2862,7 +2862,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                     if(!SetPE32DataForMappedFile(FileMapVA, SectionNumber, UE_SECTIONFLAGS, 0xE0000020))
                                     {
                                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                        return(false);
+                                        return false;
                                     }
                                 }
                             }
@@ -2876,20 +2876,20 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             myFileFixInfo->OveralEvaluation = UE_RESULT_FILE_OK;
                             myFileFixInfo->FileFixPerformed = FileFixed;
                         }
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         myFileFixInfo->FixingTerminatedByException = true;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
             }
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
         }
     }
@@ -2913,7 +2913,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                 else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
                 if(!FileIs64)
                 {
@@ -3002,9 +3002,9 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                     }
                 }
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }

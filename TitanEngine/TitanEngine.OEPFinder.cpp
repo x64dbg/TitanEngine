@@ -19,7 +19,7 @@ __declspec(dllexport) bool TITCALL FindOEPGenerically(char* szFileName, LPVOID T
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL FindOEPGenericallyW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID CallBack)
@@ -36,5 +36,5 @@ __declspec(dllexport) bool TITCALL FindOEPGenericallyW(wchar_t* szFileName, LPVO
             VirtualFree(glbEntryTracerData.SectionData[i].AllocatedSection, NULL, MEM_RELEASE);
         }
     }
-    return(false);
+    return false;
 }

@@ -119,7 +119,7 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             if(SetBPX(fPatternLocation, UE_BREAKPOINT, &EngineSimplifyLoadLibraryCallBack))
             {
                 EngineUnpackerBreakInfo.push_back(fUnpackerInformation);
-                return(true);
+                return true;
             }
         }
         else if(BreakType == UE_UNPACKER_CONDITION_GETPROCADDRESS)
@@ -127,7 +127,7 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             if(SetBPX(fPatternLocation, UE_BREAKPOINT, &EngineSimplifyGetProcAddressCallBack))
             {
                 EngineUnpackerBreakInfo.push_back(fUnpackerInformation);
-                return(true);
+                return true;
             }
         }
         else if(BreakType == UE_UNPACKER_CONDITION_ENTRYPOINTBREAK)
@@ -135,7 +135,7 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             if(SetBPX(fPatternLocation, UE_BREAKPOINT, &EngineSimplifyGetProcAddressCallBack))
             {
                 EngineUnpackerBreakInfo.push_back(fUnpackerInformation);
-                return(true);
+                return true;
             }
         }
         else if(BreakType == UE_UNPACKER_CONDITION_RELOCSNAPSHOT1)
@@ -144,7 +144,7 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             {
                 fUnpackerInformation.SnapShotNumber = 1;
                 EngineUnpackerBreakInfo.push_back(fUnpackerInformation);
-                return(true);
+                return true;
             }
         }
         else if(BreakType == UE_UNPACKER_CONDITION_RELOCSNAPSHOT2)
@@ -153,7 +153,7 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             {
                 fUnpackerInformation.SnapShotNumber = 2;
                 EngineUnpackerBreakInfo.push_back(fUnpackerInformation);
-                return(true);
+                return true;
             }
         }
         else
@@ -161,11 +161,11 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             if(SetBPX(fPatternLocation, fBreakPointType, (void*)BreakType))
             {
                 EngineUnpackerBreakInfo.push_back(fUnpackerInformation);
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void TITCALL EngineUnpackerSetEntryPointAddress(ULONG_PTR UnpackedEntryPointAddress)
 {

@@ -821,9 +821,6 @@ PROCESS_INFORMATION = alien.defstruct{
 -- __declspec(dllexport) bool __stdcall SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bpxCallBack);
 	TitanEngine.SetBPX:types {"long","long","callback",abi="stdcall",ret="byte"}
 	TE_SetBPX = TitanEngine.SetBPX
--- __declspec(dllexport) bool __stdcall SetBPXEx(ULONG_PTR bpxAddress, DWORD bpxType, DWORD NumberOfExecution, DWORD CmpRegister, DWORD CmpCondition, ULONG_PTR CmpValue, LPVOID bpxCallBack, LPVOID bpxCompareCallBack, LPVOID bpxRemoveCallBack);
-	TitanEngine.SetBPXEx:types {"long","long","long","long","long","long","callback","callback","callback",abi="stdcall",ret="byte"}
-	TE_SetBPXEx = TitanEngine.SetBPXEx
 -- __declspec(dllexport) bool __stdcall DeleteBPX(ULONG_PTR bpxAddress);
 	TitanEngine.DeleteBPX:types {"long",abi="stdcall",ret="byte"}
 	TE_DeleteBPX = TitanEngine.DeleteBPX

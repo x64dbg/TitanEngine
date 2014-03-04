@@ -406,7 +406,7 @@ __declspec(dllexport) bool TITCALL GetPE32DataFromMappedFileEx(ULONG_PTR FileMap
             }
             else
             {
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -436,7 +436,7 @@ __declspec(dllexport) bool TITCALL GetPE32DataFromMappedFileEx(ULONG_PTR FileMap
                 PE32Structure->SubSystem = PEHeader32->OptionalHeader.Subsystem;
                 PE32Structure->Characteristics = PEHeader32->FileHeader.Characteristics;
                 PE32Structure->NumberOfRvaAndSizes = PEHeader32->OptionalHeader.NumberOfRvaAndSizes;
-                return(true);
+                return true;
             }
             else
             {
@@ -466,15 +466,15 @@ __declspec(dllexport) bool TITCALL GetPE32DataFromMappedFileEx(ULONG_PTR FileMap
                 PE64Structure->SubSystem = PEHeader64->OptionalHeader.Subsystem;
                 PE64Structure->Characteristics = PEHeader64->FileHeader.Characteristics;
                 PE64Structure->NumberOfRvaAndSizes = PEHeader64->OptionalHeader.NumberOfRvaAndSizes;
-                return(true);
+                return true;
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL GetPE32DataEx(char* szFileName, LPVOID DataStorage)
 {
@@ -491,16 +491,16 @@ __declspec(dllexport) bool TITCALL GetPE32DataEx(char* szFileName, LPVOID DataSt
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL GetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
@@ -518,16 +518,16 @@ __declspec(dllexport) bool TITCALL GetPE32DataExW(wchar_t* szFileName, LPVOID Da
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
@@ -557,7 +557,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
             }
             else
             {
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -570,131 +570,131 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                         if(WhichData == UE_PE_OFFSET)
                         {
                             DOSHeader->e_lfanew = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_IMAGEBASE)
                         {
                             PEHeader32->OptionalHeader.ImageBase = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_OEP)
                         {
                             PEHeader32->OptionalHeader.AddressOfEntryPoint = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_BASEOFCODE)
                         {
                             PEHeader32->OptionalHeader.BaseOfCode = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_BASEOFDATA)
                         {
                             PEHeader32->OptionalHeader.BaseOfData = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SIZEOFIMAGE)
                         {
                             PEHeader32->OptionalHeader.SizeOfImage = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SIZEOFHEADERS)
                         {
                             PEHeader32->OptionalHeader.SizeOfHeaders = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SIZEOFOPTIONALHEADER)
                         {
                             PEHeader32->FileHeader.SizeOfOptionalHeader = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SECTIONALIGNMENT)
                         {
                             PEHeader32->OptionalHeader.SectionAlignment = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_IMPORTTABLEADDRESS)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_IMPORTTABLESIZE)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RESOURCETABLEADDRESS)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RESOURCETABLESIZE)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_EXPORTTABLEADDRESS)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_EXPORTTABLESIZE)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_TLSTABLEADDRESS)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_TLSTABLESIZE)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RELOCATIONTABLEADDRESS)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RELOCATIONTABLESIZE)
                         {
                             PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_TIMEDATESTAMP)
                         {
                             PEHeader32->FileHeader.TimeDateStamp = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SECTIONNUMBER)
                         {
                             PEHeader32->FileHeader.NumberOfSections = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_CHECKSUM)
                         {
                             PEHeader32->OptionalHeader.CheckSum = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SUBSYSTEM)
                         {
                             PEHeader32->OptionalHeader.Subsystem = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_CHARACTERISTICS)
                         {
                             PEHeader32->FileHeader.Characteristics = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_NUMBEROFRVAANDSIZES)
                         {
                             PEHeader32->OptionalHeader.NumberOfRvaAndSizes = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else
                         {
-                            return(false);
+                            return false;
                         }
                     }
                     else
@@ -705,45 +705,45 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                             if(WhichData == UE_SECTIONNAME)
                             {
                                 memcpy(PESections->Name, (void*)NewDataValue, 8);
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                             {
                                 PESections->VirtualAddress = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONVIRTUALSIZE)
                             {
                                 PESections->Misc.VirtualSize = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONRAWOFFSET)
                             {
                                 PESections->PointerToRawData = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONRAWSIZE)
                             {
                                 PESections->SizeOfRawData = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONFLAGS)
                             {
                                 PESections->Characteristics = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else
                             {
-                                return(false);
+                                return false;
                             }
                         }
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    return(false);
+                    return false;
                 }
-                return(false);
+                return false;
             }
             else
             {
@@ -756,127 +756,127 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                         if(WhichData == UE_PE_OFFSET)
                         {
                             DOSHeader->e_lfanew = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_IMAGEBASE)
                         {
                             PEHeader64->OptionalHeader.ImageBase = NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_OEP)
                         {
                             PEHeader64->OptionalHeader.AddressOfEntryPoint = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_BASEOFCODE)
                         {
                             PEHeader64->OptionalHeader.BaseOfCode = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_BASEOFDATA)
                         {
                             //non-existant in IMAGE_OPTIONAL_HEADER64
-                            return(false);
+                            return false;
                         }
                         else if(WhichData == UE_SIZEOFIMAGE)
                         {
                             PEHeader64->OptionalHeader.SizeOfImage = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SIZEOFHEADERS)
                         {
                             PEHeader64->OptionalHeader.SizeOfHeaders = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SIZEOFOPTIONALHEADER)
                         {
                             PEHeader64->FileHeader.SizeOfOptionalHeader = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SECTIONALIGNMENT)
                         {
                             PEHeader64->OptionalHeader.SectionAlignment = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_IMPORTTABLEADDRESS)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_IMPORTTABLESIZE)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RESOURCETABLEADDRESS)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RESOURCETABLESIZE)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_EXPORTTABLEADDRESS)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_EXPORTTABLESIZE)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_TLSTABLEADDRESS)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_TLSTABLESIZE)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RELOCATIONTABLEADDRESS)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_RELOCATIONTABLESIZE)
                         {
                             PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_TIMEDATESTAMP)
                         {
                             PEHeader64->FileHeader.TimeDateStamp = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SECTIONNUMBER)
                         {
                             PEHeader64->FileHeader.NumberOfSections = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_CHECKSUM)
                         {
                             PEHeader64->OptionalHeader.CheckSum = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_SUBSYSTEM)
                         {
                             PEHeader64->OptionalHeader.Subsystem = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_CHARACTERISTICS)
                         {
                             PEHeader64->FileHeader.Characteristics = (WORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else if(WhichData == UE_NUMBEROFRVAANDSIZES)
                         {
                             PEHeader64->OptionalHeader.NumberOfRvaAndSizes = (DWORD)NewDataValue;
-                            return(true);
+                            return true;
                         }
                         else
                         {
@@ -890,53 +890,53 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                             PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + WhichSection * IMAGE_SIZEOF_SECTION_HEADER);
                             if(WhichData == UE_SECTIONNAME)
                             {
-                                return(false);
+                                return false;
                             }
                             else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                             {
                                 PESections->VirtualAddress = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONVIRTUALSIZE)
                             {
                                 PESections->Misc.VirtualSize = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONRAWOFFSET)
                             {
                                 PESections->PointerToRawData = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONRAWSIZE)
                             {
                                 PESections->SizeOfRawData = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else if(WhichData == UE_SECTIONFLAGS)
                             {
                                 PESections->Characteristics = (DWORD)NewDataValue;
-                                return(true);
+                                return true;
                             }
                             else
                             {
-                                return(false);
+                                return false;
                             }
                         }
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    return(false);
+                    return false;
                 }
-                return(false);
+                return false;
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL SetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
 {
@@ -953,16 +953,16 @@ __declspec(dllexport) bool TITCALL SetPE32Data(char* szFileName, DWORD WhichSect
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL SetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData, ULONG_PTR NewDataValue)
@@ -980,16 +980,16 @@ __declspec(dllexport) bool TITCALL SetPE32DataW(wchar_t* szFileName, DWORD Which
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL SetPE32DataForMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage)
@@ -1019,7 +1019,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFileEx(ULONG_PTR FileMapV
             }
             else
             {
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -1051,11 +1051,11 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFileEx(ULONG_PTR FileMapV
                     PEHeader32->OptionalHeader.Subsystem = PE32Structure->SubSystem;
                     PEHeader32->FileHeader.Characteristics = PE32Structure->Characteristics;
                     PEHeader32->OptionalHeader.NumberOfRvaAndSizes = PE32Structure->NumberOfRvaAndSizes;
-                    return(true);
+                    return true;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -1087,20 +1087,20 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFileEx(ULONG_PTR FileMapV
                     PEHeader64->OptionalHeader.Subsystem = PE64Structure->SubSystem;
                     PEHeader64->FileHeader.Characteristics = PE64Structure->Characteristics;
                     PEHeader64->OptionalHeader.NumberOfRvaAndSizes = PE64Structure->NumberOfRvaAndSizes;
-                    return(true);
+                    return true;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    return(false);
+                    return false;
                 }
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL SetPE32DataEx(char* szFileName, LPVOID DataStorage)
 {
@@ -1117,16 +1117,16 @@ __declspec(dllexport) bool TITCALL SetPE32DataEx(char* szFileName, LPVOID DataSt
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL SetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage)
@@ -1144,16 +1144,16 @@ __declspec(dllexport) bool TITCALL SetPE32DataExW(wchar_t* szFileName, LPVOID Da
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -1164,17 +1164,17 @@ __declspec(dllexport) bool TITCALL IsFileDLL(char* szFileName, ULONG_PTR FileMap
     {
         if((DWORD)GetPE32Data(szFileName, NULL, UE_CHARACTERISTICS) & 0x2000)
         {
-            return(true);
+            return true;
         }
     }
     else if(FileMapVA != NULL)
     {
         if((DWORD)GetPE32DataFromMappedFile(FileMapVA, NULL, UE_CHARACTERISTICS) & 0x2000)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR FileMapVA)
@@ -1184,15 +1184,15 @@ __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR Fil
     {
         if((DWORD)GetPE32DataW(szFileName, NULL, UE_CHARACTERISTICS) & 0x2000)
         {
-            return(true);
+            return true;
         }
     }
     else if(FileMapVA != NULL)
     {
         if((DWORD)GetPE32DataFromMappedFile(FileMapVA, NULL, UE_CHARACTERISTICS) & 0x2000)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }

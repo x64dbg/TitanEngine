@@ -14,7 +14,7 @@ __declspec(dllexport) bool TITCALL StaticFileLoad(char* szFileName, DWORD Desire
     {
         if(MapFileEx(szFileName, DesiredAccess, FileHandle, LoadedSize, FileMap, FileMapVA, NULL))
         {
-            return(true);
+            return true;
         }
     }
     else
@@ -25,10 +25,10 @@ __declspec(dllexport) bool TITCALL StaticFileLoad(char* szFileName, DWORD Desire
             *LoadedSize = (DWORD)GetPE32DataFromMappedFile(*FileMapVA, NULL, UE_SIZEOFIMAGE);
             *FileHandle = NULL;
             *FileMap = NULL;
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticFileLoadW(wchar_t* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
 {
@@ -37,7 +37,7 @@ __declspec(dllexport) bool TITCALL StaticFileLoadW(wchar_t* szFileName, DWORD De
     {
         if(MapFileExW(szFileName, DesiredAccess, FileHandle, LoadedSize, FileMap, FileMapVA, NULL))
         {
-            return(true);
+            return true;
         }
     }
     else
@@ -48,10 +48,10 @@ __declspec(dllexport) bool TITCALL StaticFileLoadW(wchar_t* szFileName, DWORD De
             *LoadedSize = (DWORD)GetPE32DataFromMappedFile(*FileMapVA, NULL, UE_SIZEOFIMAGE);
             *FileHandle = NULL;
             *FileMap = NULL;
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticFileUnload(char* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
 {
@@ -65,7 +65,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnload(char* szFileName, bool Commi
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
@@ -88,7 +88,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
     if(FileHandle != NULL && FileMap != NULL)
     {
         UnMapFileEx(FileHandle, LoadedSize, FileMap, FileMapVA);
-        return(true);
+        return true;
     }
     else
     {
@@ -117,7 +117,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                     {
                         ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                         UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
-                        return(false);
+                        return false;
                     }
                     if(!FileIs64)
                     {
@@ -133,7 +133,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                         }
                         ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                         UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
-                        return(true);
+                        return true;
                     }
                     else
                     {
@@ -149,19 +149,19 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                         }
                         ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                         UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
-                        return(true);
+                        return true;
                     }
                 }
                 else
                 {
                     ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                     UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticFileOpen(char* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
 {
@@ -175,7 +175,7 @@ __declspec(dllexport) bool TITCALL StaticFileOpen(char* szFileName, DWORD Desire
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticFileOpenW(wchar_t* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
@@ -187,16 +187,16 @@ __declspec(dllexport) bool TITCALL StaticFileOpenW(wchar_t* szFileName, DWORD De
         if(FileHandle != INVALID_HANDLE_VALUE)
         {
             *FileSizeLow = GetFileSize(*FileHandle, FileSizeHigh);
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticFileGetContent(HANDLE FileHandle, DWORD FilePositionLow, LPDWORD FilePositionHigh, void* Buffer, DWORD Size)
@@ -210,7 +210,7 @@ __declspec(dllexport) bool TITCALL StaticFileGetContent(HANDLE FileHandle, DWORD
         {
             if(rfNumberOfBytesRead == Size)
             {
-                return(true);
+                return true;
             }
             else
             {
@@ -218,7 +218,7 @@ __declspec(dllexport) bool TITCALL StaticFileGetContent(HANDLE FileHandle, DWORD
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void TITCALL StaticFileClose(HANDLE FileHandle)
 {
@@ -419,11 +419,11 @@ __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD So
 #if !defined (_WIN64)
         if(aP_depack_asm_safe(Source, SourceSize, Destination, DestinationSize) != APLIB_ERROR)
         {
-            return(true);
+            return true;
         }
         else if(aPsafe_depack(Source, SourceSize, Destination, DestinationSize) != APLIB_ERROR)
         {
-            return(true);
+            return true;
         }
 #endif
     }
@@ -431,10 +431,10 @@ __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD So
     {
         if(LzmaDecode((unsigned char*)Destination, (size_t*)DestinationSize, (unsigned char*)Source, (size_t*)SourceSize, (unsigned char*)&lzProps, LZMA_PROPS_SIZE, LZMA_FINISH_ANY, &lzStatus, &lzAlloc) == SZ_OK)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, char* szDumpFileName)
 {
@@ -448,7 +448,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR F
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, wchar_t* szDumpFileName)
@@ -529,7 +529,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
                             EngineCloseHandle(hReadFile);
                             EngineCloseHandle(hWriteFile);
                             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                            return(true);
+                            return true;
                         }
                         else
                         {
@@ -541,7 +541,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
             EngineCloseHandle(hReadFile);
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
 {
@@ -555,7 +555,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD Raw
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
@@ -624,7 +624,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                         EngineCloseHandle(hReadFile);
                         EngineCloseHandle(hWriteFile);
                         VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return(true);
+                        return true;
                     }
                     else
                     {
@@ -635,7 +635,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
         }
         EngineCloseHandle(hReadFile);
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName)
 {
@@ -649,7 +649,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, wchar_t* szDumpFileName)
@@ -722,7 +722,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
                         EngineCloseHandle(hReadFile);
                         EngineCloseHandle(hWriteFile);
                         VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return(true);
+                        return true;
                     }
                     else
                     {
@@ -733,7 +733,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
         }
         EngineCloseHandle(hReadFile);
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD SizeOfMemory, void* HashDigest, bool OutputString, int Algorithm)
 {
@@ -756,7 +756,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
         {
             if(!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
             {
-                return(false);
+                return false;
             }
         }
         if(Algorithm == UE_STATIC_HASH_MD5)
@@ -770,7 +770,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
         if(!CryptCreateHash(hProv, hashAlgo, NULL, NULL, &hHash))
         {
             CryptReleaseContext(hProv, NULL);
-            return(false);
+            return false;
         }
         else
         {
@@ -778,7 +778,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
             {
                 CryptReleaseContext(hProv, NULL);
                 CryptDestroyHash(hHash);
-                return(false);
+                return false;
             }
         }
         if(Algorithm == UE_STATIC_HASH_MD5)
@@ -788,7 +788,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
             {
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
-                return(false);
+                return false;
             }
             else
             {
@@ -811,11 +811,11 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
                 {
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
-                    return(false);
+                    return false;
                 }
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
-                return(true);
+                return true;
             }
         }
         else if(Algorithm == UE_STATIC_HASH_SHA1)
@@ -825,7 +825,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
             {
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
-                return(false);
+                return false;
             }
             else
             {
@@ -849,11 +849,11 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
                 {
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
-                    return(false);
+                    return false;
                 }
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
-                return(true);
+                return true;
             }
         }
     }
@@ -869,9 +869,9 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
         {
             RtlMoveMemory(HashDigest, &crc32, sizeof crc32);
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL StaticHashFile(char* szFileName, char* HashDigest, bool OutputString, int Algorithm)
 {
@@ -885,7 +885,7 @@ __declspec(dllexport) bool TITCALL StaticHashFile(char* szFileName, char* HashDi
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* HashDigest, bool OutputString, int Algorithm)
@@ -909,7 +909,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
     hFile = CreateFileW(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
     if(hFile == INVALID_HANDLE_VALUE || HashDigest == NULL)
     {
-        return(false);
+        return false;
     }
     if(Algorithm != UE_STATIC_HASH_CRC32)
     {
@@ -918,7 +918,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
             if(!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
             {
                 CloseHandle(hFile);
-                return(false);
+                return false;
             }
         }
         if(Algorithm == UE_STATIC_HASH_MD5)
@@ -933,7 +933,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
         {
             CloseHandle(hFile);
             CryptReleaseContext(hProv, NULL);
-            return(false);
+            return false;
         }
         while(bResult)
         {
@@ -950,7 +950,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 CryptReleaseContext(hProv, NULL);
                 CryptDestroyHash(hHash);
                 CloseHandle(hFile);
-                return(false);
+                return false;
             }
         }
         if(!bResult)
@@ -958,7 +958,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
             CryptReleaseContext(hProv, NULL);
             CryptDestroyHash(hHash);
             CloseHandle(hFile);
-            return(false);
+            return false;
         }
         if(Algorithm == UE_STATIC_HASH_MD5)
         {
@@ -968,7 +968,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
-                return(false);
+                return false;
             }
             else
             {
@@ -992,12 +992,12 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
                     CloseHandle(hFile);
-                    return(false);
+                    return false;
                 }
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
         else if(Algorithm == UE_STATIC_HASH_SHA1)
@@ -1008,7 +1008,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
-                return(false);
+                return false;
             }
             else
             {
@@ -1033,12 +1033,12 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
                     CloseHandle(hFile);
-                    return(false);
+                    return false;
                 }
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
     }
@@ -1066,8 +1066,8 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
             RtlMoveMemory(HashDigest, &crc32, sizeof crc32);
         }
         CloseHandle(hFile);
-        return(true);
+        return true;
     }
     CloseHandle(hFile);
-    return(false);
+    return false;
 }

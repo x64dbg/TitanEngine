@@ -20,9 +20,9 @@ __declspec(dllexport) bool TITCALL LibrarianSetBreakPoint(char* szLibraryName, D
         ptrLibrarianData->bpxCallBack = bpxCallBack;
         ptrLibrarianData->bpxSingleShoot = SingleShoot;
         ptrLibrarianData->bpxType = bpxType;
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL LibrarianRemoveBreakPoint(char* szLibraryName, DWORD bpxType)
@@ -45,9 +45,9 @@ __declspec(dllexport) bool TITCALL LibrarianRemoveBreakPoint(char* szLibraryName
             ptrLibrarianData = (PLIBRARY_BREAK_DATA)((ULONG_PTR)ptrLibrarianData + sizeof LIBRARY_BREAK_DATA);
             i--;
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfo(char* szLibraryName)

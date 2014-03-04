@@ -88,7 +88,6 @@ StopDebug
 SetBPXOptions
 IsBPXEnabled
 SetBPX
-SetBPXEx
 DisableBPX
 EnableBPX
 DeleteBPX

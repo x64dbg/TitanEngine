@@ -92,10 +92,10 @@ __declspec(dllexport) bool TITCALL HandlerIsHandleOpen(DWORD ProcessId, HANDLE h
         VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
         if(HandleActive)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
 {
@@ -453,7 +453,7 @@ __declspec(dllexport) bool TITCALL HandlerCloseRemoteHandle(HANDLE hProcess, HAN
         DuplicateHandle(hProcess, hHandle, GetCurrentProcess(), &myHandle, NULL, false, DUPLICATE_CLOSE_SOURCE);
         EngineCloseHandle(myHandle);
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) long TITCALL HandlerEnumerateLockHandles(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated, LPVOID HandleDataBuffer, DWORD MaxHandleCount)
 {
@@ -595,7 +595,7 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandles(char* szFileOrFold
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
@@ -704,16 +704,16 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
         if(AllHandled)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     VirtualFree(HandleFullName, NULL, MEM_RELEASE);
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HandlerIsFileLocked(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
 {
@@ -727,7 +727,7 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLocked(char* szFileOrFolderName,
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
@@ -821,7 +821,7 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
                                 VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
                                 VirtualFree(HandleFullName, NULL, MEM_RELEASE);
                                 EngineCloseHandle(myHandle);
-                                return(true);
+                                return true;
                             }
                         }
                         EngineCloseHandle(myHandle);
@@ -834,11 +834,11 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
         VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
         VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
-        return(false);
+        return false;
     }
     VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     VirtualFree(HandleFullName, NULL, MEM_RELEASE);
-    return(false);
+    return false;
 }
 // TitanEngine.Handler[Mutex].functions:
 __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, DWORD ProcessId, LPVOID HandleBuffer, DWORD MaxHandleCount)

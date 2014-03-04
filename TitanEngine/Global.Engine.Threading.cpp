@@ -11,7 +11,8 @@ MutexLocker::MutexLocker(const char* name)
 
 MutexLocker::~MutexLocker()
 {
-    ReleaseMutex(gMutex);
+    if(!bUnlocked)
+        ReleaseMutex(gMutex);
 }
 
 void MutexLocker::relock()

@@ -72,6 +72,8 @@
 		<Unit filename="Global.Engine.Hook.h" />
 		<Unit filename="Global.Engine.Simplification.cpp" />
 		<Unit filename="Global.Engine.Simplification.h" />
+		<Unit filename="Global.Engine.Threading.cpp" />
+		<Unit filename="Global.Engine.Threading.h" />
 		<Unit filename="Global.Engine.cpp" />
 		<Unit filename="Global.Engine.h" />
 		<Unit filename="Global.Garbage.cpp" />

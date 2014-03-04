@@ -75,7 +75,7 @@ __declspec(dllexport) bool TITCALL ExporterAddNewExport(char* szExportName, DWOR
         {
             if(expNameHashes[i] == NameHash)
             {
-                return(true);
+                return true;
             }
         }
         expExportAddress[expExportNumber] = ExportRelativeAddress;
@@ -85,9 +85,9 @@ __declspec(dllexport) bool TITCALL ExporterAddNewExport(char* szExportName, DWOR
         RtlMoveMemory(expTableDataCWP, szExportName, lstrlenA(szExportName));
         expTableDataCWP = (LPVOID)((ULONG_PTR)expTableDataCWP + lstrlenA(szExportName) + 2);
         expExportNumber++;
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ExporterAddNewOrdinalExport(DWORD OrdinalNumber, DWORD ExportRelativeAddress)
 {
@@ -119,15 +119,15 @@ __declspec(dllexport) bool TITCALL ExporterAddNewOrdinalExport(DWORD OrdinalNumb
                     wsprintfA(szExportFunctionName, "Func%d", expExportNumber + 1);
                     ExporterAddNewExport(szExportFunctionName, ExportRelativeAddress);
                 }
-                return(true);
+                return true;
             }
             else
             {
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) long TITCALL ExporterGetAddedExportCount()
 {
@@ -212,7 +212,7 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
         {
             VirtualFree(expBuildExportData, NULL, MEM_RELEASE);
             ExporterCleanup();
-            return(false);
+            return false;
         }
 
         if(FileMapVA != NULL)
@@ -248,9 +248,9 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
         }
         VirtualFree(expBuildExportData, NULL, MEM_RELEASE);
         ExporterCleanup();
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ExporterBuildExportTableEx(char* szExportFileName, char* szSectionName)
 {
@@ -264,7 +264,7 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTableEx(char* szExportFile
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ExporterBuildExportTableExW(wchar_t* szExportFileName, char* szSectionName)
@@ -288,21 +288,21 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTableExW(wchar_t* szExport
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             if(ReturnValue)
             {
-                return(true);
+                return true;
             }
             else
             {
-                return(false);
+                return false;
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ExporterLoadExportTable(char* szFileName)
@@ -317,7 +317,7 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTable(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ExporterLoadExportTableW(wchar_t* szFileName)
@@ -360,7 +360,7 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTableW(wchar_t* szFileName)
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -426,24 +426,24 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTableW(wchar_t* szFileName)
                     ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + 4);
                 }
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(true);
+                return true;
             }
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-    return(false);
+    return false;
 }

@@ -43,10 +43,10 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                 while(Thread32Next(hSnapShot, &ThreadEntry));
             }
             EngineCloseHandle(hSnapShot);
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void* TITCALL ThreaderGetThreadInfo(HANDLE hThread, DWORD ThreadId)
 {
@@ -123,20 +123,20 @@ __declspec(dllexport) bool TITCALL ThreaderPauseThread(HANDLE hThread)
             {
                 if(SuspendThread(hThread) != -1)
                 {
-                    return(true);
+                    return true;
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
             {
-                return(false);
+                return false;
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderResumeThread(HANDLE hThread)
 {
@@ -155,20 +155,20 @@ __declspec(dllexport) bool TITCALL ThreaderResumeThread(HANDLE hThread)
             {
                 if(ResumeThread(hThread) != -1)
                 {
-                    return(true);
+                    return true;
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
             {
-                return(false);
+                return false;
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderTerminateThread(HANDLE hThread, DWORD ThreadExitCode)
 {
@@ -191,20 +191,20 @@ __declspec(dllexport) bool TITCALL ThreaderTerminateThread(HANDLE hThread, DWORD
                     hListThreadPtr->dwThreadId = NULL;
                     hListThreadPtr->ThreadLocalBase = NULL;
                     hListThreadPtr->ThreadStartAddress = NULL;
-                    return(true);
+                    return true;
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
             {
-                return(false);
+                return false;
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderPauseAllThreads(bool LeaveMainRunning)
 {
@@ -228,9 +228,9 @@ __declspec(dllexport) bool TITCALL ThreaderPauseAllThreads(bool LeaveMainRunning
             }
             hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderResumeAllThreads(bool LeaveMainPaused)
 {
@@ -254,9 +254,9 @@ __declspec(dllexport) bool TITCALL ThreaderResumeAllThreads(bool LeaveMainPaused
             }
             hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderPauseProcess()
 {
@@ -298,14 +298,14 @@ __declspec(dllexport) bool TITCALL ThreaderInjectAndExecuteCode(LPVOID InjectCod
         if(WriteProcessMemory(dbgProcessInformation.hProcess, ThreadBase, InjectCode, InjectSize, &ueNumberOfBytesRead))
         {
             ThreaderCreateRemoteThread((ULONG_PTR)((ULONG_PTR)InjectCode + StartDelta), true, NULL, NULL);
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) long long TITCALL ThreaderCreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
 {
@@ -339,14 +339,14 @@ __declspec(dllexport) bool TITCALL ThreaderInjectAndExecuteCodeEx(HANDLE hProces
         if(WriteProcessMemory(hProcess, ThreadBase, InjectCode, InjectSize, &ueNumberOfBytesRead))
         {
             ThreaderCreateRemoteThread((ULONG_PTR)((ULONG_PTR)InjectCode + StartDelta), true, NULL, NULL);
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void TITCALL ThreaderSetCallBackForNextExitThreadEvent(LPVOID exitThreadCallBack)
 {
@@ -361,11 +361,11 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadStillRunning(HANDLE hThread)
     myDBGContext.ContextFlags = CONTEXT_ALL;
     if(GetThreadContext(hThread, &myDBGContext))
     {
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
@@ -373,9 +373,9 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
     if(SuspendThread(hThread)) //if previous suspend count is above 0 (which means thread is suspended)
     {
         ResumeThread(hThread); //decrement suspend count
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()
 {
@@ -390,13 +390,13 @@ __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()
             {
                 if(ThreaderIsThreadActive(hListThreadPtr->hThread))
                 {
-                    return(true);
+                    return true;
                 }
             }
             hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads()
 {
@@ -404,9 +404,9 @@ __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads()
     if(ThreaderPauseProcess())
     {
         engineResumeProcessIfNoThreadIsActive = true;
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) long long TITCALL ThreaderGetOpenHandleForThread(DWORD ThreadId)
 {
@@ -438,7 +438,7 @@ __declspec(dllexport) bool TITCALL ThreaderIsExceptionInMainThread()
     myDBGEvent = (LPDEBUG_EVENT)GetDebugData();
     if(myDBGEvent->dwThreadId == dbgProcessInformation.dwThreadId)
     {
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }

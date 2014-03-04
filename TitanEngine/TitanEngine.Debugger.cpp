@@ -5,6 +5,7 @@
 #include "Global.Handle.h"
 #include "Global.Breakpoints.h"
 #include "Global.Threader.h"
+#include <vector>
 
 static wchar_t szBackupDebuggedFileName[512];
 static wchar_t szDebuggerName[512];
@@ -55,15 +56,14 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     {
         DebugConsoleFlag = CREATE_NO_WINDOW;
     }
-    BreakPointSetCount = 0;
-    RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
+    std::vector<BreakPointDetail>().swap(BreakPointBuffer);
     if(szCommandLine == NULL)
     {
         if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
-            RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
+            std::vector<BreakPointDetail>().swap(BreakPointBuffer);
             return(&dbgProcessInformation);
         }
         else
@@ -79,7 +79,7 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         {
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
-            RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
+            std::vector<BreakPointDetail>().swap(BreakPointBuffer);
             return(&dbgProcessInformation);
         }
         else
@@ -227,11 +227,11 @@ __declspec(dllexport) bool TITCALL StopDebug()
     {
         TerminateThread(dbgProcessInformation.hThread, NULL);
         TerminateProcess(dbgProcessInformation.hProcess, NULL);
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -244,7 +244,7 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 
     if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
-        RtlZeroMemory(&BreakPointBuffer, sizeof BreakPointBuffer);
+        std::vector<BreakPointDetail>().swap(BreakPointBuffer);
         if(DebugActiveProcess(ProcessId))
         {
             if(KillOnExit)
@@ -256,7 +256,7 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
                     myDebugSetProcessKillOnExit(KillOnExit);
                 }
             }
-            BreakPointSetCount = 0;
+            std::vector<BreakPointDetail>().swap(BreakPointBuffer);
             DebugDebuggingDLL = false;
             DebugAttachedToProcess = true;
             DebugAttachedProcessCallBack = (ULONG_PTR)CallBack;
@@ -265,14 +265,14 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
             DebugLoop();
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
-            return(true);
+            return true;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
@@ -295,14 +295,14 @@ __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
         DebugAttachedToProcess = false;
         if(FuncReturn)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
@@ -338,7 +338,7 @@ __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 

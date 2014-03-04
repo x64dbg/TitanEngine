@@ -115,18 +115,11 @@ typedef struct
     BYTE BreakPointActive;
     ULONG_PTR BreakPointAddress;
     SIZE_T BreakPointSize;
-    BYTE OriginalByte[10];
+    BYTE OriginalByte[UE_MAX_BREAKPOINT_SIZE];
     int BreakPointType;
     int AdvancedBreakPointType;
     int MemoryBpxRestoreOnHit;
-    DWORD NumberOfExecutions;
-    DWORD CmpRegister;
-    int CmpCondition;
-    ULONG_PTR CmpValue;
     ULONG_PTR ExecuteCallBack;
-    ULONG_PTR CompareCallBack;
-    ULONG_PTR RemoveCallBack;
-    DWORD UniqueLinkId;
 } BreakPointDetail, *PBreakPointDetail;
 
 typedef struct

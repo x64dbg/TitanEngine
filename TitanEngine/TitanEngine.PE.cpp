@@ -15,7 +15,7 @@ __declspec(dllexport) bool TITCALL PastePEHeader(HANDLE hProcess, LPVOID ImageBa
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -69,7 +69,7 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                     {
                         EngineCloseHandle(hFile);
                         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        return(false);
+                        return false;
                     }
                 }
                 if(PEHeader32->OptionalHeader.Magic == 0x10B)
@@ -92,7 +92,7 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                 {
                     EngineCloseHandle(hFile);
                     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                    return(false);
+                    return false;
                 }
                 if(!FileIs64)
                 {
@@ -104,20 +104,20 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                             EngineCloseHandle(hFile);
                             VirtualProtectEx(hProcess, ImageBase, PEHeaderSize, OldProtect, &OldProtect);
                             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             EngineCloseHandle(hFile);
                             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
                         EngineCloseHandle(hFile);
                         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        return(false);
+                        return false;
                     }
                 }
                 else
@@ -130,20 +130,20 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                             EngineCloseHandle(hFile);
                             VirtualProtectEx(hProcess, ImageBase, PEHeaderSize, OldProtect, &OldProtect);
                             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             EngineCloseHandle(hFile);
                             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
                         EngineCloseHandle(hFile);
                         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -151,21 +151,21 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
             {
                 EngineCloseHandle(hFile);
                 VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                return(false);
+                return false;
             }
         }
         else
         {
             EngineCloseHandle(hFile);
             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            return(false);
+            return false;
         }
     }
     else
     {
         EngineCloseHandle(hFile);
         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }

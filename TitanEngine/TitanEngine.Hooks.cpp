@@ -22,7 +22,7 @@ static bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginal
 
     RtlMoveMemory(&MyhookEntry, HookDetails, sizeof HOOK_ENTRY);
     hookEntry.push_back(MyhookEntry);
-    return(true);
+    return true;
 }
 
 // Global.Engine.Hook.functions:
@@ -86,15 +86,15 @@ __declspec(dllexport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray
                     VirtualFree(hListThread, NULL, MEM_RELEASE);
                     hListThread = NULL;
                 }
-                return(true);
+                return true;
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HooksSafeTransition(LPVOID HookAddress, bool TransitionStart)
 {
@@ -111,10 +111,10 @@ __declspec(dllexport) bool TITCALL HooksIsAddressRedirected(LPVOID HookAddress)
     {
         if(hookEntry[i].HookAddress == HookAddress && hookEntry[i].IATHook == false && hookEntry[i].HookIsEnabled == true)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void* TITCALL HooksGetTrampolineAddress(LPVOID HookAddress)
 {
@@ -243,11 +243,11 @@ __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress,
                             returnData = HooksInsertNewRedirection(HookAddress, RedirectTo, HookType);
                             if(returnData)
                             {
-                                return(true);
+                                return true;
                             }
                             else
                             {
-                                return(false);
+                                return false;
                             }
                         }
                     }
@@ -382,7 +382,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress,
                 RtlMoveMemory(&myHook.HookBytes[0], HookAddress, TEE_MAXIMUM_HOOK_SIZE);
                 VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                 hookEntry.push_back(myHook);
-                return(true);
+                return true;
             }
 #else
             if(VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, PAGE_EXECUTE_READWRITE, &OldProtect))
@@ -394,7 +394,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress,
                 RtlMoveMemory(&myHook.HookBytes[0], HookAddress, TEE_MAXIMUM_HOOK_SIZE);
                 VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                 hookEntry.push_back(myHook);
-                return(true);
+                return true;
             }
 #endif
         }
@@ -409,7 +409,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress,
                 RtlMoveMemory(&myHook.HookBytes[0], HookAddress, TEE_MAXIMUM_HOOK_SIZE);
                 VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                 hookEntry.push_back(myHook);
-                return(true);
+                return true;
             }
 #else
             if(VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, PAGE_EXECUTE_READWRITE, &OldProtect))
@@ -421,12 +421,12 @@ __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress,
                 RtlMoveMemory(&myHook.HookBytes[0], HookAddress, TEE_MAXIMUM_HOOK_SIZE);
                 VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                 hookEntry.push_back(myHook);
-                return(true);
+                return true;
             }
 #endif
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR FileMapVA, ULONG_PTR LoadedModuleBase, char* szHookFunction, LPVOID RedirectTo)
 {
@@ -466,7 +466,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR File
             }
             else
             {
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -509,11 +509,11 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR File
                             }
                             ImportIID = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportIID + sizeof IMAGE_IMPORT_DESCRIPTOR);
                         }
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -558,25 +558,25 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR File
                             }
                             ImportIID = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportIID + sizeof IMAGE_IMPORT_DESCRIPTOR);
                         }
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
-                        return(false);
+                        return false;
                     }
                 }
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirection(char* szModuleName, char* szHookFunction, LPVOID RedirectTo)
 {
@@ -597,7 +597,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirection(char* szModuleNa
             if(HooksInsertNewIATRedirectionEx(FileMapVA, (ULONG_PTR)SelectedModule, szHookFunction, RedirectTo))
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(true);
+                return true;
             }
             else
             {
@@ -605,7 +605,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirection(char* szModuleNa
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HooksRemoveRedirection(LPVOID HookAddress, bool RemoveAll)
 {
@@ -623,11 +623,11 @@ __declspec(dllexport) bool TITCALL HooksRemoveRedirection(LPVOID HookAddress, bo
                     RtlMoveMemory(HookAddress, &hookEntry[i].OriginalBytes, hookEntry[i].HookSize);
                     VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                     hookEntry.erase(hookEntry.begin() + i);
-                    return(true);
+                    return true;
                 }
             }
         }
-        return(false);
+        return false;
     }
     else
     {
@@ -640,7 +640,7 @@ __declspec(dllexport) bool TITCALL HooksRemoveRedirection(LPVOID HookAddress, bo
             }
         }
         hookEntry.clear();
-        return(true);
+        return true;
     }
 }
 __declspec(dllexport) bool TITCALL HooksRemoveRedirectionsForModule(HMODULE ModuleBase)
@@ -669,14 +669,14 @@ __declspec(dllexport) bool TITCALL HooksRemoveRedirectionsForModule(HMODULE Modu
         }
         if(j == NULL)
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(true);
+    return true;
 }
 __declspec(dllexport) bool TITCALL HooksRemoveIATRedirection(char* szModuleName, char* szHookFunction, bool RemoveAll)
 {
@@ -702,7 +702,7 @@ __declspec(dllexport) bool TITCALL HooksRemoveIATRedirection(char* szModuleName,
             i--;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HooksDisableRedirection(LPVOID HookAddress, bool DisableAll)
 {
@@ -720,11 +720,11 @@ __declspec(dllexport) bool TITCALL HooksDisableRedirection(LPVOID HookAddress, b
                     RtlMoveMemory(HookAddress, &hookEntry[i].OriginalBytes, hookEntry[i].HookSize);
                     VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                     hookEntry[i].HookIsEnabled = false;
-                    return(true);
+                    return true;
                 }
             }
         }
-        return(false);
+        return false;
     }
     else
     {
@@ -737,7 +737,7 @@ __declspec(dllexport) bool TITCALL HooksDisableRedirection(LPVOID HookAddress, b
                 hookEntry[i].HookIsEnabled = false;
             }
         }
-        return(true);
+        return true;
     }
 }
 __declspec(dllexport) bool TITCALL HooksDisableRedirectionsForModule(HMODULE ModuleBase)
@@ -766,14 +766,14 @@ __declspec(dllexport) bool TITCALL HooksDisableRedirectionsForModule(HMODULE Mod
         }
         if(j == NULL)
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(true);
+    return true;
 }
 __declspec(dllexport) bool TITCALL HooksDisableIATRedirection(char* szModuleName, char* szHookFunction, bool DisableAll)
 {
@@ -802,7 +802,7 @@ __declspec(dllexport) bool TITCALL HooksDisableIATRedirection(char* szModuleName
             i--;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL HooksEnableRedirection(LPVOID HookAddress, bool EnableAll)
 {
@@ -820,11 +820,11 @@ __declspec(dllexport) bool TITCALL HooksEnableRedirection(LPVOID HookAddress, bo
                     RtlMoveMemory(HookAddress, &hookEntry[i].HookBytes, hookEntry[i].HookSize);
                     VirtualProtect(HookAddress, TEE_MAXIMUM_HOOK_SIZE, OldProtect, &OldProtect);
                     hookEntry[i].HookIsEnabled = true;
-                    return(true);
+                    return true;
                 }
             }
         }
-        return(false);
+        return false;
     }
     else
     {
@@ -837,7 +837,7 @@ __declspec(dllexport) bool TITCALL HooksEnableRedirection(LPVOID HookAddress, bo
                 hookEntry[i].HookIsEnabled = true;
             }
         }
-        return(true);
+        return true;
     }
 }
 __declspec(dllexport) bool TITCALL HooksEnableRedirectionsForModule(HMODULE ModuleBase)
@@ -866,14 +866,14 @@ __declspec(dllexport) bool TITCALL HooksEnableRedirectionsForModule(HMODULE Modu
         }
         if(j == NULL)
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(true);
+    return true;
 }
 __declspec(dllexport) bool TITCALL HooksEnableIATRedirection(char* szModuleName, char* szHookFunction, bool EnableAll)
 {
@@ -902,7 +902,7 @@ __declspec(dllexport) bool TITCALL HooksEnableIATRedirection(char* szModuleName,
             i--;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) void TITCALL HooksScanModuleMemory(HMODULE ModuleBase, LPVOID CallBack)
 {

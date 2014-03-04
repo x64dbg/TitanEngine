@@ -35,11 +35,11 @@ bool EngineGetFileDialog(char* GlobalBuffer)
     if(!GetOpenFileNameA(&sOpenFileName))
     {
         RtlZeroMemory(&GlobalBuffer[0], 1024);
-        return(false);
+        return false;
     }
     else
     {
-        return(true);
+        return true;
     }
 }
 

@@ -28,11 +28,11 @@ __declspec(dllexport) bool TITCALL TLSBreakOnCallBack(LPVOID ArrayOfCallBacks, D
         }
         engineTLSBreakOnCallBackAddress = (ULONG_PTR)bpxCallBack;
         engineTLSBreakOnCallBack = true;
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSGrabCallBackData(char* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
@@ -47,7 +47,7 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackData(char* szFileName, LPVOID 
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
@@ -86,7 +86,7 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -106,20 +106,20 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
                         }
                         *NumberOfCallBacks = NumberOfTLSCallBacks;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(true);
+                        return true;
                     }
                     else
                     {
                         *NumberOfCallBacks = NULL;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     *NumberOfCallBacks = NULL;
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -140,20 +140,20 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
                         }
                         *NumberOfCallBacks = NumberOfTLSCallBacks;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(true);
+                        return true;
                     }
                     else
                     {
                         *NumberOfCallBacks = NULL;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     *NumberOfCallBacks = NULL;
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -161,10 +161,10 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
         {
             *NumberOfCallBacks = NULL;
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSBreakOnCallBackEx(char* szFileName, LPVOID bpxCallBack)
 {
@@ -178,7 +178,7 @@ __declspec(dllexport) bool TITCALL TLSBreakOnCallBackEx(char* szFileName, LPVOID
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSBreakOnCallBackExW(wchar_t* szFileName, LPVOID bpxCallBack)
@@ -193,16 +193,16 @@ __declspec(dllexport) bool TITCALL TLSBreakOnCallBackExW(wchar_t* szFileName, LP
         if(TLSGrabCallBackDataW(szFileName, &TlsArrayOfCallBacks, &TlsNumberOfCallBacks))
         {
             TLSBreakOnCallBack(&TlsArrayOfCallBacks, TlsNumberOfCallBacks, bpxCallBack);
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSRemoveCallback(char* szFileName)
@@ -217,7 +217,7 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallback(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
@@ -253,7 +253,7 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -267,24 +267,24 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
                         {
                             TLSDirectoryX86->AddressOfCallBacks = NULL;
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(false);
+                            return false;
                         }
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -299,34 +299,34 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
                         {
                             TLSDirectoryX64->AddressOfCallBacks = NULL;
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(false);
+                            return false;
                         }
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSRemoveTable(char* szFileName)
 {
@@ -340,7 +340,7 @@ __declspec(dllexport) bool TITCALL TLSRemoveTable(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
@@ -376,7 +376,7 @@ __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -390,18 +390,18 @@ __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
                         PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = NULL;
                         RtlZeroMemory(TLSDirectoryX86, sizeof IMAGE_TLS_DIRECTORY32);
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -416,28 +416,28 @@ __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
                         PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = NULL;
                         RtlZeroMemory(TLSDirectoryX64, sizeof IMAGE_TLS_DIRECTORY64);
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(true);
+                        return true;
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSBackupData(char* szFileName)
 {
@@ -451,7 +451,7 @@ __declspec(dllexport) bool TITCALL TLSBackupData(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
@@ -496,7 +496,7 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -521,27 +521,27 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
                             }
                             *NumberOfCallBacks = NumberOfTLSCallBacks;
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             *NumberOfCallBacks = NULL;
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(false);
+                            return false;
                         }
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         *NumberOfCallBacks = NULL;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     *NumberOfCallBacks = NULL;
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -567,27 +567,27 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
                             }
                             *NumberOfCallBacks = NumberOfTLSCallBacks;
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             *NumberOfCallBacks = NULL;
                             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                            return(false);
+                            return false;
                         }
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         *NumberOfCallBacks = NULL;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
                     *NumberOfCallBacks = NULL;
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -595,10 +595,10 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
         {
             *NumberOfCallBacks = NULL;
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSRestoreData()
 {
@@ -616,13 +616,13 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX64.AddressOfCallBacks + GetDebuggedFileBaseAddress()), engineBackupArrayOfCallBacks, sizeof IMAGE_TLS_DIRECTORY64, &ueNumberOfBytesRead))
                     {
                         engineBackupTLSAddress = NULL;
-                        return(true);
+                        return true;
                     }
                 }
                 else
                 {
                     engineBackupTLSAddress = NULL;
-                    return(true);
+                    return true;
                 }
             }
         }
@@ -635,18 +635,18 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX86.AddressOfCallBacks + GetDebuggedFileBaseAddress()), engineBackupArrayOfCallBacks, sizeof IMAGE_TLS_DIRECTORY32, &ueNumberOfBytesRead))
                     {
                         engineBackupTLSAddress = NULL;
-                        return(true);
+                        return true;
                     }
                 }
                 else
                 {
                     engineBackupTLSAddress = NULL;
-                    return(true);
+                    return true;
                 }
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_PTR StorePlace, ULONG_PTR StorePlaceRVA, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
@@ -676,7 +676,7 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_P
             }
             else
             {
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -690,11 +690,11 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_P
                     TLSDirectoryX86->AddressOfIndex = (DWORD)TLSWriteData + 0x14;
                     TLSDirectoryX86->AddressOfCallBacks = (DWORD)TLSWriteData  + sizeof IMAGE_TLS_DIRECTORY32 + 8;
                     RtlMoveMemory((LPVOID)(StorePlace + sizeof IMAGE_TLS_DIRECTORY32 + 8), ArrayOfCallBacks, NumberOfCallBacks * 4);
-                    return(true);
+                    return true;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -709,20 +709,20 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_P
                     TLSDirectoryX64->AddressOfIndex = TLSWriteData + 0x28;
                     TLSDirectoryX64->AddressOfCallBacks = TLSWriteData  + sizeof IMAGE_TLS_DIRECTORY64 + 12;
                     RtlMoveMemory((LPVOID)(StorePlace + sizeof IMAGE_TLS_DIRECTORY64 + 12), ArrayOfCallBacks, NumberOfCallBacks * 8);
-                    return(true);
+                    return true;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    return(false);
+                    return false;
                 }
             }
         }
         else
         {
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSBuildNewTableEx(char* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
@@ -736,7 +736,7 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTableEx(char* szFileName, char* sz
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL TLSBuildNewTableExW(wchar_t* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
@@ -760,15 +760,15 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTableExW(wchar_t* szFileName, char
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }

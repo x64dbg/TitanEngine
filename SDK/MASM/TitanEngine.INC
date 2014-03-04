@@ -583,7 +583,6 @@ IsBPXEnabled proto stdcall :DWORD
 EnableBPX proto stdcall :DWORD
 DisableBPX proto stdcall :DWORD
 SetBPX proto stdcall :DWORD, :DWORD, :LPVOID
-SetBPXEx proto stdcall :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :LPVOID, :LPVOID, :LPVOID
 DeleteBPX proto stdcall :DWORD
 SafeDeleteBPX proto stdcall :DWORD
 SetAPIBreakPoint proto stdcall :ptr SBYTE, :ptr SBYTE, :DWORD, :DWORD, :LPVOID

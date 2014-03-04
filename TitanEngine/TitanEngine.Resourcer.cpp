@@ -19,11 +19,11 @@ __declspec(dllexport) bool TITCALL ResourcerFreeLoadedFile(LPVOID LoadedFileBase
 {
     if(VirtualFree(LoadedFileBase, NULL, MEM_RELEASE))
     {
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -55,13 +55,13 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileEx(ULONG_PTR 
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFile(char* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
@@ -79,10 +79,10 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFile(char* szFile
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(bReturn)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileW(wchar_t* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
@@ -100,10 +100,10 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileW(wchar_t* sz
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(bReturn)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ResourcerFindResource(char* szFileName, char* szResourceType, DWORD ResourceType, char* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
@@ -138,7 +138,7 @@ __declspec(dllexport) bool TITCALL ResourcerFindResource(char* szFileName, char*
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -157,14 +157,14 @@ __declspec(dllexport) bool TITCALL ResourcerFindResourceW(wchar_t* szFileName, w
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
-            return(true);
+            return true;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ResourcerFindResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
@@ -215,7 +215,7 @@ __declspec(dllexport) bool TITCALL ResourcerFindResourceEx(ULONG_PTR FileMapVA, 
                                     {
                                         *pResourceData = PEResourceItem->OffsetToData;
                                         *pResourceSize = PEResourceItem->Size;
-                                        return(true);
+                                        return true;
                                     }
                                     PEResourceDir2 = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG_PTR)PEResourceDir2 + sizeof IMAGE_RESOURCE_DIRECTORY_ENTRY);
                                     n--;
@@ -240,14 +240,14 @@ __declspec(dllexport) bool TITCALL ResourcerFindResourceEx(ULONG_PTR FileMapVA, 
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
 
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) void TITCALL ResourcerEnumerateResource(char* szFileName, void* CallBack)

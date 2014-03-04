@@ -65,7 +65,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         {
             *FreeRegister = UE_DR0;
         }
-        return(true);
+        return true;
     }
     else if(DebugRegister[1].DrxEnabled == false)
     {
@@ -73,7 +73,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         {
             *FreeRegister = UE_DR1;
         }
-        return(true);
+        return true;
     }
     else if(DebugRegister[2].DrxEnabled == false)
     {
@@ -81,7 +81,7 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         {
             *FreeRegister = UE_DR2;
         }
-        return(true);
+        return true;
     }
     else if(DebugRegister[3].DrxEnabled == false)
     {
@@ -89,9 +89,9 @@ bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister)
         {
             *FreeRegister = UE_DR3;
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 bool EngineFileExists(char* szFileName)
@@ -101,11 +101,11 @@ bool EngineFileExists(char* szFileName)
     if(hFile != INVALID_HANDLE_VALUE)
     {
         EngineCloseHandle(hFile);
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -187,7 +187,7 @@ bool EngineCreatePathForFile(char* szFileName)
             }
         }
     }
-    return(true);
+    return true;
 }
 
 bool EngineCreatePathForFileW(wchar_t* szFileName)
@@ -225,7 +225,7 @@ bool EngineCreatePathForFileW(wchar_t* szFileName)
             }
         }
     }
-    return(true);
+    return true;
 }
 
 wchar_t* EngineExtractFileNameW(wchar_t* szFileName)
@@ -304,10 +304,10 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
         }
         if(StringIsValid == true && MaxDisassmSize - i > 4)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 int EnginePointedMemoryStringLength(ULONG_PTR PossibleStringPtr)
@@ -366,9 +366,9 @@ bool EngineCompareResourceString(wchar_t* String1, wchar_t* String2)
     RtlMoveMemory(&StringCmp[0], &String1[0], memData->Array.wArrayEntry[0] * 2);
     if(lstrcmpiW(StringCmp, String2) == NULL)
     {
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 long long EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA)
@@ -459,7 +459,7 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
         }
         if(TestChar == 0x00)
         {
-            return(false);
+            return false;
         }
         PossibleStringPtr--;
         RtlCopyMemory(szFwdDLLName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
@@ -477,11 +477,11 @@ bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName
             PossibleStringPtr++;
         }
         RtlCopyMemory(szFwdAPIName, lpPossibleStringPtr, PossibleStringPtr - (ULONG_PTR)lpPossibleStringPtr);
-        return(true);
+        return true;
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        return(false);
+        return false;
     }
 }
 
@@ -522,13 +522,13 @@ bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName)
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
         }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char* szPresentInFolder)
@@ -549,7 +549,7 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
         if(hFile != INVALID_HANDLE_VALUE)
         {
             EngineCloseHandle(hFile);
-            return(true);
+            return true;
         }
     }
 
@@ -559,7 +559,7 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
         if(hFile != INVALID_HANDLE_VALUE)
         {
             EngineCloseHandle(hFile);
-            return(true);
+            return true;
         }
         if(GetSystemDirectoryA(szTryFileName, 512) > NULL)
         {
@@ -569,7 +569,7 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
             if(hFile != INVALID_HANDLE_VALUE)
             {
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
         if(GetWindowsDirectoryA(szTryFileName, 512) > NULL)
@@ -580,7 +580,7 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
             if(hFile != INVALID_HANDLE_VALUE)
             {
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
         if(szDependencyForFile != NULL)
@@ -600,11 +600,11 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
             if(hFile != INVALID_HANDLE_VALUE)
             {
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }
 
 bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFile, wchar_t* szPresentInFolder)
@@ -626,7 +626,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
         if(hFile != INVALID_HANDLE_VALUE)
         {
             EngineCloseHandle(hFile);
-            return(true);
+            return true;
         }
     }
     if(szFileName != NULL)
@@ -635,7 +635,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
         if(hFile != INVALID_HANDLE_VALUE)
         {
             EngineCloseHandle(hFile);
-            return(true);
+            return true;
         }
         if(GetSystemDirectoryW(szTryFileName, 512) > NULL)
         {
@@ -645,7 +645,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
             if(hFile != INVALID_HANDLE_VALUE)
             {
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
 
@@ -657,7 +657,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
             if(hFile != INVALID_HANDLE_VALUE)
             {
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
 
@@ -677,11 +677,11 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
             if(hFile != INVALID_HANDLE_VALUE)
             {
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }
 
 bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize)
@@ -702,7 +702,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                 RtlCopyMemory(szLocationOfTheFile, szFileName, lstrlenA(szFileName));
             }
             EngineCloseHandle(hFile);
-            return(true);
+            return true;
         }
         if(GetSystemDirectoryA(szTryFileName, 512) > NULL)
         {
@@ -717,7 +717,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                     RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
                 }
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
         if(GetWindowsDirectoryA(szTryFileName, 512) > NULL)
@@ -733,7 +733,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                     RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
                 }
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
         if(szDependencyForFile != NULL)
@@ -758,11 +758,11 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
                     RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
                 }
                 EngineCloseHandle(hFile);
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }
 
 long EngineHashString(char* szStringToHash)
@@ -807,7 +807,7 @@ bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize)
         VirtualQuery(DataPointer, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
         if(MemInfo.AllocationProtect == MEM_FREE || MemInfo.AllocationProtect == MEM_PRIVATE)
         {
-            return(false);
+            return false;
         }
         DataPointer = (LPVOID)((ULONG_PTR)DataPointer + MemInfo.RegionSize);
         if(MemInfo.RegionSize > DataSize)
@@ -819,7 +819,7 @@ bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize)
             DataSize = DataSize - (DWORD)MemInfo.RegionSize;
         }
     }
-    return(true);
+    return true;
 }
 
 bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, LONG_PTR lParam)
@@ -844,20 +844,20 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
                 if(!EngineIsBadReadPtrEx(ResourceData, ResourceSize))
                 {
                     *((LONG*)lParam) = ReturnData;
-                    return(false);
+                    return false;
                 }
             }
             else
             {
                 *((LONG*)lParam) = ReturnData;
-                return(false);
+                return false;
             }
         }
-        return(true);
+        return true;
     }
 
     *((LONG*)lParam) = ReturnData;
-    return(false);
+    return false;
 }
 
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile)
@@ -891,26 +891,26 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
                     PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
                     if(PEHeader32->Signature != 0x4550)
                     {
-                        return(false);
+                        return false;
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
             {
-                return(false);
+                return false;
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            return(false);
+            return false;
         }
     }
     else
@@ -928,31 +928,31 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
                         PEHeader32 = (PIMAGE_NT_HEADERS32)(&RemotePEHeader32);
                         if(PEHeader32->Signature != 0x4550)
                         {
-                            return(false);
+                            return false;
                         }
                         else
                         {
-                            return(true);
+                            return true;
                         }
                     }
                     else
                     {
-                        return(false);
+                        return false;
                     }
                 }
                 else
                 {
-                    return(false);
+                    return false;
                 }
             }
             else
             {
-                return(false);
+                return false;
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            return(false);
+            return false;
         }
     }
 }
@@ -1328,7 +1328,7 @@ bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, L
         }
         else
         {
-            return(false);
+            return false;
         }
         if(!FileIs64)
         {
@@ -1342,16 +1342,16 @@ bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, L
             *ptrOrdinalBase = PEExports->Base;
             *ptrOrdinalCount = PEExports->NumberOfNames;
         }
-        return(true);
+        return true;
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
 
-long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, char* szAPIName, DWORD ReturnType)
+long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType)
 {
 
     unsigned int i = 0;

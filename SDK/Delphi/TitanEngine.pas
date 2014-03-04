@@ -533,7 +533,6 @@ const
   function EnableBPX(bpxAddress:LongInt): boolean; stdcall; external 'TitanEngine.dll' name 'EnableBPX';
   function DisableBPX(bpxAddress:LongInt): boolean; stdcall; external 'TitanEngine.dll' name 'DisableBPX';
   function SetBPX(bpxAddress,bpxType:LongInt; bpxCallBack:Pointer): boolean; stdcall; external 'TitanEngine.dll' name 'SetBPX';
-  function SetBPXEx(bpxAddress,bpxType,NumberOfExecution,CmpRegister,CmpCondition,CmpValue:LongInt; bpxCallBack,bpxCompareCallBack,bpxRemoveCallBack:Pointer): boolean; stdcall; external 'TitanEngine.dll' name 'SetBPXEx';
   function DeleteBPX(bpxAddress:LongInt): boolean; stdcall; external 'TitanEngine.dll' name 'DeleteBPX';
   function SafeDeleteBPX(bpxAddress:LongInt): boolean; stdcall; external 'TitanEngine.dll' name 'SafeDeleteBPX';
   function SetAPIBreakPoint(szDLLName,szAPIName:PAnsiChar; bpxType,bpxPlace:LongInt; bpxCallBack:Pointer):boolean; stdcall; external 'TitanEngine.dll' name 'SetAPIBreakPoint';

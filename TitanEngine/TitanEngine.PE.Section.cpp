@@ -18,7 +18,7 @@ __declspec(dllexport) bool TITCALL ExtractSection(char* szFileName, char* szDump
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -55,7 +55,7 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -73,20 +73,20 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
                                 WriteFile(hFile, (LPCVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData, &NumberOfBytesWritten, NULL);
                                 EngineCloseHandle(hFile);
                                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                return(true);
+                                return true;
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
                                 EngineCloseHandle(hFile);
                                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                                 DeleteFileW(szDumpFileName);
-                                return(false);
+                                return false;
                             }
                         }
                     }
                 }
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             else
             {
@@ -104,29 +104,29 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
                                 WriteFile(hFile, (LPCVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData, &NumberOfBytesWritten, NULL);
                                 EngineCloseHandle(hFile);
                                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                return(true);
+                                return true;
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
                                 EngineCloseHandle(hFile);
                                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                                 DeleteFileW(szDumpFileName);
-                                return(false);
+                                return false;
                             }
                         }
                     }
                 }
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ResortFileSections(char* szFileName)
@@ -141,7 +141,7 @@ __declspec(dllexport) bool TITCALL ResortFileSections(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -198,7 +198,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -248,17 +248,17 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
@@ -266,7 +266,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     VirtualFree(sortedFileName, NULL, MEM_RELEASE);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -317,17 +317,17 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
@@ -335,7 +335,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     VirtualFree(sortedFileName, NULL, MEM_RELEASE);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -343,11 +343,11 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             RemoveGarbageItem(szBackupItem, true);
-            return(false);
+            return false;
         }
     }
     RemoveGarbageItem(szBackupItem, true);
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL MakeAllSectionsRWE(char* szFileName)
@@ -362,7 +362,7 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWE(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -414,7 +414,7 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -434,25 +434,25 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
-                    return(true);
+                    return true;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -473,25 +473,25 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
-                    return(true);
+                    return true;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -499,11 +499,11 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             RemoveGarbageItem(szBackupItem, true);
-            return(false);
+            return false;
         }
     }
     RemoveGarbageItem(szBackupItem, true);
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) long TITCALL AddNewSectionEx(char* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
@@ -903,7 +903,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSection(char* szFileName, DWORD Num
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -957,7 +957,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
                 FileSize = FileSize - NumberOfExpandBytes;
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -1009,23 +1009,23 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
                         RemoveGarbageItem(szBackupItem, true);
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
-                            return(true);
+                            return true;
                         }
                         else
                         {
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -1078,24 +1078,24 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
                         if(CopyFileW(szBackupFile, szFileName, false))
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(true);
+                            return true;
                         }
                         else
                         {
                             RemoveGarbageItem(szBackupItem, true);
-                            return(false);
+                            return false;
                         }
                     }
                     else
                     {
-                        return(true);
+                        return true;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -1104,11 +1104,11 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
             FileSize = FileSize - NumberOfExpandBytes;
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             RemoveGarbageItem(szBackupItem, true);
-            return(false);
+            return false;
         }
     }
     RemoveGarbageItem(szBackupItem, true);
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DeleteLastSection(char* szFileName)
@@ -1123,7 +1123,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSection(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -1175,7 +1175,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -1196,31 +1196,31 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
                             if(CopyFileW(szBackupFile, szFileName, false))
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(true);
+                                return true;
                             }
                             else
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(false);
+                                return false;
                             }
                         }
                         else
                         {
-                            return(true);
+                            return true;
                         }
                     }
                     else
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         RemoveGarbageItem(szBackupItem, true);
-                        return(false);
+                        return false;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -1242,31 +1242,31 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
                             if(CopyFileW(szBackupFile, szFileName, false))
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(true);
+                                return true;
                             }
                             else
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(false);
+                                return false;
                             }
                         }
                         else
                         {
-                            return(true);
+                            return true;
                         }
                     }
                     else
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         RemoveGarbageItem(szBackupItem, true);
-                        return(false);
+                        return false;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
-                    return(false);
+                    return false;
                 }
             }
         }
@@ -1274,11 +1274,11 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             RemoveGarbageItem(szBackupItem, true);
-            return(false);
+            return false;
         }
     }
     RemoveGarbageItem(szBackupItem, true);
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DeleteLastSectionEx(char* szFileName, DWORD NumberOfSections)
@@ -1289,7 +1289,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionEx(char* szFileName, DWORD N
         DeleteLastSection(szFileName);
         NumberOfSections--;
     }
-    return(true);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL DeleteLastSectionExW(wchar_t* szFileName, DWORD NumberOfSections)
@@ -1300,7 +1300,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionExW(wchar_t* szFileName, DWO
         DeleteLastSectionW(szFileName);
         NumberOfSections--;
     }
-    return(true);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL WipeSection(char* szFileName, int WipeSectionNumber, bool RemovePhysically)
@@ -1315,7 +1315,7 @@ __declspec(dllexport) bool TITCALL WipeSection(char* szFileName, int WipeSection
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSectionNumber, bool RemovePhysically)
@@ -1375,7 +1375,7 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 RemoveGarbageItem(szBackupItem, true);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -1433,24 +1433,24 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
                             if(CopyFileW(szBackupFile, szFileName, false))
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(true);
+                                return true;
                             }
                             else
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(false);
+                                return false;
                             }
                         }
                         else
                         {
-                            return(true);
+                            return true;
                         }
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         RemoveGarbageItem(szBackupItem, true);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -1519,24 +1519,24 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
                             if(CopyFileW(szBackupFile, szFileName, false))
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(true);
+                                return true;
                             }
                             else
                             {
                                 RemoveGarbageItem(szBackupItem, true);
-                                return(false);
+                                return false;
                             }
                         }
                         else
                         {
-                            return(true);
+                            return true;
                         }
                     }
                     __except(EXCEPTION_EXECUTE_HANDLER)
                     {
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         RemoveGarbageItem(szBackupItem, true);
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -1545,10 +1545,10 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             RemoveGarbageItem(szBackupItem, true);
-            return(false);
+            return false;
         }
     }
     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     RemoveGarbageItem(szBackupItem, true);
-    return(false);
+    return false;
 }

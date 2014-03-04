@@ -3,6 +3,7 @@
 #include "Global.Breakpoints.h"
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
+#include "Global.Engine.Threading.h"
 
 static long engineDefaultBreakPointType = UE_BREAKPOINT_INT3;
 static BYTE UD2BreakPoint[2] = {0x0F, 0x0B};
@@ -13,86 +14,74 @@ __declspec(dllexport) void TITCALL SetBPXOptions(long DefaultBreakPointType)
 {
     engineDefaultBreakPointType = DefaultBreakPointType;
 }
+
 __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
 {
-
-    int i;
+    MutexLocker lock("BreakPointBuffer");
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     BYTE ReadData[10] = {};
-
-    for(i = 0; i < BreakPointSetCount; i++)
+    int bpcount=BreakPointBuffer.size();
+    for(int i=0; i<bpcount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress)
+        if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
-            if(BreakPointBuffer[i].BreakPointActive != UE_BPXINACTIVE && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
+            if(BreakPointBuffer.at(i).BreakPointActive != UE_BPXINACTIVE)
             {
                 if(ReadProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &ReadData[0], UE_MAX_BREAKPOINT_SIZE, &NumberOfBytesReadWritten))
                 {
-                    if(BreakPointBuffer[i].AdvancedBreakPointType == UE_BREAKPOINT_INT3 && ReadData[0] == INT3BreakPoint)
-                    {
-                        return(true);
-                    }
-                    else if(BreakPointBuffer[i].AdvancedBreakPointType == UE_BREAKPOINT_LONG_INT3 && ReadData[0] == INT3LongBreakPoint[0] && ReadData[1] == INT3LongBreakPoint[1])
-                    {
-                        return(true);
-                    }
-                    else if(BreakPointBuffer[i].AdvancedBreakPointType == UE_BREAKPOINT_UD2 && ReadData[0] == UD2BreakPoint[0] && ReadData[1] == UD2BreakPoint[1])
-                    {
-                        return(true);
-                    }
-                    else
-                    {
-                        return(false);
-                    }
+                    if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_INT3 && ReadData[0] == INT3BreakPoint)
+                        return true;
+                    else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_LONG_INT3 && ReadData[0] == INT3LongBreakPoint[0] && ReadData[1] == INT3LongBreakPoint[1])
+                        return true;
+                    else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_UD2 && ReadData[0] == UD2BreakPoint[0] && ReadData[1] == UD2BreakPoint[1])
+                        return true;
+                    else //TODO: delete breakpoint from list?
+                        return false;
                 }
                 else
-                {
-                    return(false);
-                }
+                    return false;
             }
             else
-            {
-                return(false);
-            }
+                return false;
         }
     }
-    return(false);
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
 {
-
-    int i;
+    MutexLocker lock("BreakPointBuffer");
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     bool testWrite = false;
     DWORD OldProtect;
-
-    for(i = 0; i < BreakPointSetCount; i++)
+    int bpcount=BreakPointBuffer.size();
+    for(int i=0; i<bpcount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress)
+        if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
             VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
             OldProtect = MemInfo.Protect;
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-            if(BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE && (BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT || BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT))
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
+            if(BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE && (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT))
             {
-                if(BreakPointBuffer[i].AdvancedBreakPointType == UE_BREAKPOINT_INT3)
+                if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_INT3)
                 {
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3BreakPoint, 1, &NumberOfBytesReadWritten))
                     {
                         testWrite = true;
                     }
                 }
-                else if(BreakPointBuffer[i].AdvancedBreakPointType == UE_BREAKPOINT_LONG_INT3)
+                else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_LONG_INT3)
                 {
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3LongBreakPoint, 2, &NumberOfBytesReadWritten))
                     {
                         testWrite = true;
                     }
                 }
-                else if(BreakPointBuffer[i].AdvancedBreakPointType == UE_BREAKPOINT_UD2)
+                else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_UD2)
                 {
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &UD2BreakPoint, 2, &NumberOfBytesReadWritten))
                     {
@@ -101,69 +90,68 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
                 }
                 if(testWrite)
                 {
-                    BreakPointBuffer[i].BreakPointActive = UE_BPXACTIVE;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                    return(true);
+                    BreakPointBuffer.at(i).BreakPointActive = UE_BPXACTIVE;
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                    return true;
                 }
                 else
                 {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                    return(false);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                    return false;
                 }
             }
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(false);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                return false;
             }
         }
     }
-    return(false);
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
 {
-
-    int i;
+    MutexLocker lock("BreakPointBuffer");
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     DWORD OldProtect;
-
-    for(i = 0; i < BreakPointSetCount; i++)
+    int bpcount=BreakPointBuffer.size();
+    for(int i=0; i<bpcount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress)
+        if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
             VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
             OldProtect = MemInfo.Protect;
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-            if(BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT || BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT))
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
+            if(BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT))
             {
-                if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer[i].OriginalByte[0], BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
+                if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer.at(i).OriginalByte[0], BreakPointBuffer.at(i).BreakPointSize, &NumberOfBytesReadWritten))
                 {
-                    BreakPointBuffer[i].BreakPointActive = UE_BPXINACTIVE;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                    return(true);
+                    BreakPointBuffer.at(i).BreakPointActive = UE_BPXINACTIVE;
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                    return true;
                 }
                 else
                 {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                    return(false);
+                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                    return false;
                 }
             }
             else
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(false);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                return false;
             }
         }
     }
-    return(false);
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bpxCallBack)
 {
-
-    int i = 0;
-    int j = -1;
+    MutexLocker lock("BreakPointBuffer");
     void* bpxDataPrt;
     PMEMORY_COMPARE_HANDLER bpxDataCmpPtr;
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -174,339 +162,137 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
 
     if(bpxCallBack == NULL)
     {
-        return(false);
+        return false;
     }
-    for(i = 0; i < BreakPointSetCount; i++)
+    int bpcount=BreakPointBuffer.size();
+    //search for breakpoint
+    for(int i=0; i<bpcount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT || BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT))
+        if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT || BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT))
+            return false;
+        else if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress && BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE && (BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT || BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT))
         {
-            return(false);
-        }
-        else if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE && (BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT || BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT))
-        {
-            return(EnableBPX(bpxAddress));
-        }
-        else if(j == -1 && BreakPointBuffer[i].BreakPointActive == UE_BPXREMOVED)
-        {
-            j = i;
+            lock.unlock();
+            return EnableBPX(bpxAddress);
         }
     }
-    if(j == -1)
+    //setup new breakpoint structure
+    BreakPointDetail NewBreakPoint;
+    memset(&NewBreakPoint, 0, sizeof(BreakPointDetail));
+    if(bpxType < UE_BREAKPOINT_TYPE_INT3)
     {
-        BreakPointSetCount++;
-    }
-    else
-    {
-        i = j;
-    }
-    if(i < MAXIMUM_BREAKPOINTS)
-    {
-        RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-        if(bpxType < UE_BREAKPOINT_TYPE_INT3)
+        if(engineDefaultBreakPointType == UE_BREAKPOINT_INT3)
         {
-            if(engineDefaultBreakPointType == UE_BREAKPOINT_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_INT3;
-                BreakPointBuffer[i].BreakPointSize = 1;
-                bpxDataPrt = &INT3BreakPoint;
-            }
-            else if(engineDefaultBreakPointType == UE_BREAKPOINT_LONG_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &INT3LongBreakPoint;
-            }
-            else if(engineDefaultBreakPointType == UE_BREAKPOINT_UD2)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_UD2;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &UD2BreakPoint;
-            }
+            SelectedBreakPointType = UE_BREAKPOINT_INT3;
+            NewBreakPoint.BreakPointSize = 1;
+            bpxDataPrt = &INT3BreakPoint;
         }
-        else
+        else if(engineDefaultBreakPointType == UE_BREAKPOINT_LONG_INT3)
         {
-            checkBpxType = bpxType >> 24;
-            checkBpxType = checkBpxType << 24;
-            if(checkBpxType == UE_BREAKPOINT_TYPE_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_INT3;
-                BreakPointBuffer[i].BreakPointSize = 1;
-                bpxDataPrt = &INT3BreakPoint;
-            }
-            else if(checkBpxType == UE_BREAKPOINT_TYPE_LONG_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &INT3LongBreakPoint;
-            }
-            else if(checkBpxType == UE_BREAKPOINT_TYPE_UD2)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_UD2;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &UD2BreakPoint;
-            }
+            SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
+            NewBreakPoint.BreakPointSize = 2;
+            bpxDataPrt = &INT3LongBreakPoint;
         }
-        bpxDataCmpPtr = (PMEMORY_COMPARE_HANDLER)bpxDataPrt;
-        VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        OldProtect = MemInfo.Protect;
-        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-        if(ReadProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer[i].OriginalByte[0], BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
+        else if(engineDefaultBreakPointType == UE_BREAKPOINT_UD2)
         {
-            /*if(BreakPointBuffer[i].OriginalByte[0] != bpxDataCmpPtr->Array.bArrayEntry[0])
-            {*/
-            if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, bpxDataPrt, BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
-            {
-                BreakPointBuffer[i].AdvancedBreakPointType = (BYTE)SelectedBreakPointType;
-                BreakPointBuffer[i].BreakPointActive = UE_BPXACTIVE;
-                BreakPointBuffer[i].BreakPointAddress = bpxAddress;
-                BreakPointBuffer[i].BreakPointType = (BYTE)bpxType;
-                BreakPointBuffer[i].NumberOfExecutions = -1;
-                BreakPointBuffer[i].ExecuteCallBack = (ULONG_PTR)bpxCallBack;
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(true);
-            }
-            else
-            {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(false);
-            }
-            /*}
-            else
-            {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(false);
-            }*/
-        }
-        else
-        {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-            return(false);
+            SelectedBreakPointType = UE_BREAKPOINT_UD2;
+            NewBreakPoint.BreakPointSize = 2;
+            bpxDataPrt = &UD2BreakPoint;
         }
     }
     else
     {
-        BreakPointSetCount--;
-        return(false);
+        checkBpxType = bpxType >> 24;
+        checkBpxType = checkBpxType << 24;
+        if(checkBpxType == UE_BREAKPOINT_TYPE_INT3)
+        {
+            SelectedBreakPointType = UE_BREAKPOINT_INT3;
+            NewBreakPoint.BreakPointSize = 1;
+            bpxDataPrt = &INT3BreakPoint;
+        }
+        else if(checkBpxType == UE_BREAKPOINT_TYPE_LONG_INT3)
+        {
+            SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
+            NewBreakPoint.BreakPointSize = 2;
+            bpxDataPrt = &INT3LongBreakPoint;
+        }
+        else if(checkBpxType == UE_BREAKPOINT_TYPE_UD2)
+        {
+            SelectedBreakPointType = UE_BREAKPOINT_UD2;
+            NewBreakPoint.BreakPointSize = 2;
+            bpxDataPrt = &UD2BreakPoint;
+        }
     }
+    //set breakpoint in process
+    bpxDataCmpPtr = (PMEMORY_COMPARE_HANDLER)bpxDataPrt;
+    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
+    OldProtect = MemInfo.Protect;
+    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, NewBreakPoint.BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
+    if(ReadProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &NewBreakPoint.OriginalByte[0], NewBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
+    {
+        if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, bpxDataPrt, NewBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
+        {
+            //add new breakpoint to the list
+            NewBreakPoint.AdvancedBreakPointType = SelectedBreakPointType&0xFF;
+            NewBreakPoint.BreakPointActive = UE_BPXACTIVE;
+            NewBreakPoint.BreakPointAddress = bpxAddress;
+            NewBreakPoint.BreakPointType = bpxType&0xFF;
+            NewBreakPoint.ExecuteCallBack = (ULONG_PTR)bpxCallBack;
+            BreakPointBuffer.push_back(NewBreakPoint);
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, NewBreakPoint.BreakPointSize, OldProtect, &OldProtect);
+            return true;
+        }
+        else
+        {
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, NewBreakPoint.BreakPointSize, OldProtect, &OldProtect);
+            return false;
+        }
+    }
+    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, NewBreakPoint.BreakPointSize, OldProtect, &OldProtect);
+    return false;
 }
-__declspec(dllexport) bool TITCALL SetBPXEx(ULONG_PTR bpxAddress, DWORD bpxType, DWORD NumberOfExecution, DWORD CmpRegister, DWORD CmpCondition, ULONG_PTR CmpValue, LPVOID bpxCallBack, LPVOID bpxCompareCallBack, LPVOID bpxRemoveCallBack)
-{
 
-    int i = 0;
-    int j = -1;
-    void* bpxDataPrt;
-    PMEMORY_COMPARE_HANDLER bpxDataCmpPtr;
-    MEMORY_BASIC_INFORMATION MemInfo;
-    ULONG_PTR NumberOfBytesReadWritten = 0;
-    BYTE SelectedBreakPointType;
-    DWORD checkBpxType;
-    DWORD OldProtect;
-
-    if(bpxCallBack == NULL)
-    {
-        return(false);
-    }
-    for(i = 0; i < BreakPointSetCount; i++)
-    {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
-        {
-            return(true);
-        }
-        else if(BreakPointBuffer[i].BreakPointAddress == bpxAddress && BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE)
-        {
-            return(EnableBPX(bpxAddress));
-        }
-        else if(j == -1 && BreakPointBuffer[i].BreakPointActive == UE_BPXREMOVED)
-        {
-            j = i;
-        }
-    }
-    if(j == -1)
-    {
-        BreakPointSetCount++;
-    }
-    else
-    {
-        i = j;
-    }
-    if(i < MAXIMUM_BREAKPOINTS)
-    {
-        RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-        if(bpxType < UE_BREAKPOINT_TYPE_INT3)
-        {
-            if(engineDefaultBreakPointType == UE_BREAKPOINT_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_INT3;
-                BreakPointBuffer[i].BreakPointSize = 1;
-                bpxDataPrt = &INT3BreakPoint;
-            }
-            else if(engineDefaultBreakPointType == UE_BREAKPOINT_LONG_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &INT3LongBreakPoint;
-            }
-            else if(engineDefaultBreakPointType == UE_BREAKPOINT_UD2)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_UD2;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &UD2BreakPoint;
-            }
-        }
-        else
-        {
-            checkBpxType = bpxType >> 24;
-            checkBpxType = checkBpxType << 24;
-            if(checkBpxType == UE_BREAKPOINT_TYPE_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_INT3;
-                BreakPointBuffer[i].BreakPointSize = 1;
-                bpxDataPrt = &INT3BreakPoint;
-            }
-            else if(checkBpxType == UE_BREAKPOINT_TYPE_LONG_INT3)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &INT3LongBreakPoint;
-            }
-            else if(checkBpxType == UE_BREAKPOINT_TYPE_UD2)
-            {
-                SelectedBreakPointType = UE_BREAKPOINT_UD2;
-                BreakPointBuffer[i].BreakPointSize = 2;
-                bpxDataPrt = &UD2BreakPoint;
-            }
-        }
-        bpxDataCmpPtr = (PMEMORY_COMPARE_HANDLER)bpxDataPrt;
-        VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        OldProtect = MemInfo.Protect;
-        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-        if(ReadProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer[i].OriginalByte[0], BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
-        {
-            /*if(BreakPointBuffer[i].OriginalByte[0] != bpxDataCmpPtr->Array.bArrayEntry[0])
-            {*/
-            if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, bpxDataPrt, BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
-            {
-                BreakPointBuffer[i].AdvancedBreakPointType = (BYTE)SelectedBreakPointType;
-                BreakPointBuffer[i].BreakPointActive = UE_BPXACTIVE;
-                BreakPointBuffer[i].BreakPointAddress = bpxAddress;
-                BreakPointBuffer[i].BreakPointType = (BYTE)bpxType;
-                BreakPointBuffer[i].NumberOfExecutions = NumberOfExecution;
-                BreakPointBuffer[i].CmpRegister = CmpRegister;
-                BreakPointBuffer[i].CmpCondition = (BYTE)CmpCondition;
-                BreakPointBuffer[i].CmpValue = CmpValue;
-                BreakPointBuffer[i].ExecuteCallBack = (ULONG_PTR)bpxCallBack;
-                BreakPointBuffer[i].RemoveCallBack = (ULONG_PTR)bpxRemoveCallBack;
-                BreakPointBuffer[i].CompareCallBack = (ULONG_PTR)bpxCompareCallBack;
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(true);
-            }
-            else
-            {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(false);
-            }
-            /*}
-            else
-            {
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                return(false);
-            }*/
-        }
-        else
-        {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-            return(false);
-        }
-    }
-    else
-    {
-        BreakPointSetCount--;
-        return(false);
-    }
-}
 __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
 {
-
-    int i;
-    typedef void(TITCALL *fCustomBreakPoint)(void* myBreakPointAddress);
-    fCustomBreakPoint myCustomBreakPoint;
-    MEMORY_BASIC_INFORMATION MemInfo;
+    MutexLocker lock("BreakPointBuffer");
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD OldProtect;
-
-    for(i = 0; i < BreakPointSetCount; i++)
+    int bpcount=BreakPointBuffer.size();
+    int found=-1;
+    for(int i=0; i<bpcount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == bpxAddress)
+        if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress && (BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT || BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT))
         {
-            if(i - 1 == BreakPointSetCount)
-            {
-                BreakPointSetCount--;
-            }
+            found=i;
             break;
         }
     }
-    if(BreakPointBuffer[i].BreakPointAddress == bpxAddress)
+    if(found == -1) //not found
+        return false;
+    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
+    lock.unlock();
+    if(IsBPXEnabled(bpxAddress))
     {
-        VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        OldProtect = MemInfo.Protect;
-        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-        if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT || BreakPointBuffer[i].BreakPointType == UE_SINGLESHOOT)
+        if(!WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer.at(found).OriginalByte[0], BreakPointBuffer.at(found).BreakPointSize, &NumberOfBytesReadWritten))
         {
-            if(BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
-            {
-                if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer[i].OriginalByte[0], BreakPointBuffer[i].BreakPointSize, &NumberOfBytesReadWritten))
-                {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                    if(BreakPointBuffer[i].RemoveCallBack != NULL)
-                    {
-                        __try
-                        {
-                            myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)BreakPointBuffer[i].RemoveCallBack);
-                            myCustomBreakPoint((void*)BreakPointBuffer[i].BreakPointAddress);
-                            RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-                        }
-                        __except(EXCEPTION_EXECUTE_HANDLER)
-                        {
-                            RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-                            return(true);
-                        }
-                    }
-                    else
-                    {
-                        RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-                    }
-                    return(true);
-                }
-                else
-                {
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-                    return(false);
-                }
-            }
-            else
-            {
-                RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-                return(true);
-            }
-        }
-        else
-        {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer[i].BreakPointSize, OldProtect, &OldProtect);
-            return(false);
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
+            return false;
         }
     }
-    else
-    {
-        return(false);
-    }
+    lock.relock();
+    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
+    BreakPointBuffer.erase(BreakPointBuffer.begin()+found);
+    return true;
 }
+
 __declspec(dllexport) bool TITCALL SafeDeleteBPX(ULONG_PTR bpxAddress)
 {
-    return(DeleteBPX(bpxAddress));
+    //TODO: remove?
+    return DeleteBPX(bpxAddress);
 }
-__declspec(dllexport) bool TITCALL SetAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxType, DWORD bpxPlace, LPVOID bpxCallBack)
-{
 
+__declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const char* szAPIName, DWORD bpxType, DWORD bpxPlace, LPVOID bpxCallBack)
+{
     BYTE ReadByte = NULL;
     HMODULE hModule = NULL;
     DWORD ReadMemSize = NULL;
@@ -620,7 +406,7 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(char* szDLLName, char* szAPI
                     {
                         VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                     }
-                    return(false);
+                    return false;
                 }
             }
             if(engineAlowModuleLoading)
@@ -638,7 +424,7 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(char* szDLLName, char* szAPI
                     VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                 }
             }
-            return(SetBPX(APIAddress, bpxType, bpxCallBack));
+            return SetBPX(APIAddress, bpxType, bpxCallBack);
         }
         else
         {
@@ -656,18 +442,18 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(char* szDLLName, char* szAPI
                     VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                 }
             }
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
-__declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace)
-{
 
+__declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, const char* szAPIName, DWORD bpxPlace)
+{
     BYTE ReadByte = NULL;
     HMODULE hModule = NULL;
     DWORD ReadMemSize = NULL;
@@ -781,7 +567,7 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(char* szDLLName, char* sz
                     {
                         VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                     }
-                    return(false);
+                    return false;
                 }
             }
             if(engineAlowModuleLoading)
@@ -817,196 +603,107 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(char* szDLLName, char* sz
                     VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                 }
             }
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
-    return(false);
+    return false;
 }
-__declspec(dllexport) bool TITCALL SafeDeleteAPIBreakPoint(char* szDLLName, char* szAPIName, DWORD bpxPlace)
+
+__declspec(dllexport) bool TITCALL SafeDeleteAPIBreakPoint(const char* szDLLName, const char* szAPIName, DWORD bpxPlace)
 {
-    return(DeleteAPIBreakPoint(szDLLName, szAPIName, bpxPlace));
+    //TODO: remove?
+    return DeleteAPIBreakPoint(szDLLName, szAPIName, bpxPlace);
 }
+
 __declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, LPVOID bpxCallBack)
 {
-    int i = 0;
-    int j = -1;
-    MEMORY_BASIC_INFORMATION MemInfo;
-    ULONG_PTR NumberOfBytesReadWritten = 0;
-    DWORD NewProtect = 0;
-    DWORD OldProtect = 0;
-
-    for(i = 0; i < BreakPointSetCount; i++)
-    {
-        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart)
-        {
-            if(BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
-            {
-                RemoveMemoryBPX(BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
-            }
-            j = i;
-            break;
-        }
-        else if(j == -1 && BreakPointBuffer[i].BreakPointActive == UE_BPXREMOVED)
-        {
-            j = i;
-        }
-    }
-    if(BreakPointBuffer[i].BreakPointAddress != MemoryStart)
-    {
-        if(j != -1)
-        {
-            i = j;
-        }
-        else
-        {
-            BreakPointSetCount++;
-        }
-    }
-    if(i < MAXIMUM_BREAKPOINTS)
-    {
-        RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-        VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        OldProtect = MemInfo.Protect;
-        if(!(OldProtect & PAGE_GUARD))
-        {
-            NewProtect = OldProtect ^ PAGE_GUARD;
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, SizeOfMemory, NewProtect, &OldProtect);
-            BreakPointBuffer[i].BreakPointActive = UE_BPXACTIVE;
-            BreakPointBuffer[i].BreakPointAddress = MemoryStart;
-            BreakPointBuffer[i].BreakPointType = UE_MEMORY;
-            BreakPointBuffer[i].BreakPointSize = SizeOfMemory;
-            BreakPointBuffer[i].NumberOfExecutions = -1;
-            BreakPointBuffer[i].ExecuteCallBack = (ULONG_PTR)bpxCallBack;
-        }
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
+    return SetMemoryBPXEx(MemoryStart, SizeOfMemory, UE_MEMORY, false, bpxCallBack);
 }
+
 __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
 {
-
-    int i = 0;
-    int j = -1;
+    MutexLocker lock("BreakPointBuffer");
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD NewProtect = 0;
     DWORD OldProtect = 0;
-
-    for(i = 0; i < BreakPointSetCount; i++)
+    int bpcount=BreakPointBuffer.size();
+    //search for breakpoint
+    for(int i=0; i<bpcount; i++)
     {
-        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart)
-        {
-            if(BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
-            {
-                RemoveMemoryBPX(BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
-            }
-            j = i;
-            break;
-        }
-        else if(j == -1 && BreakPointBuffer[i].BreakPointActive == UE_BPXREMOVED)
-        {
-            j = i;
-        }
-    }
-    if(BreakPointBuffer[i].BreakPointAddress != MemoryStart)
-    {
-        if(j != -1)
-        {
-            i = j;
-        }
-        else
-        {
-            BreakPointSetCount++;
-        }
-    }
-    if(i < MAXIMUM_BREAKPOINTS)
-    {
-        RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-        VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        OldProtect = MemInfo.Protect;
-        if(!(OldProtect & PAGE_GUARD))
-        {
-            NewProtect = OldProtect ^ PAGE_GUARD;
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, SizeOfMemory, NewProtect, &OldProtect);
-            BreakPointBuffer[i].BreakPointActive = UE_BPXACTIVE;
-            BreakPointBuffer[i].BreakPointAddress = MemoryStart;
-            BreakPointBuffer[i].BreakPointType = BreakPointType;
-            BreakPointBuffer[i].BreakPointSize = SizeOfMemory;
-            BreakPointBuffer[i].NumberOfExecutions = -1;
-            BreakPointBuffer[i].MemoryBpxRestoreOnHit = (BYTE)RestoreOnHit;
-            BreakPointBuffer[i].ExecuteCallBack = (ULONG_PTR)bpxCallBack;
-        }
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
-}
-__declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory)
-{
-
-    int i = 0;
-    MEMORY_BASIC_INFORMATION MemInfo;
-    ULONG_PTR NumberOfBytesReadWritten = 0;
-    DWORD NewProtect = 0;
-    DWORD OldProtect = 0;
-
-    for(i = 0; i < BreakPointSetCount; i++)
-    {
-        if(BreakPointBuffer[i].BreakPointAddress == MemoryStart &&
-                (BreakPointBuffer[i].BreakPointType == UE_MEMORY ||
-                 BreakPointBuffer[i].BreakPointType == UE_MEMORY_READ ||
-                 BreakPointBuffer[i].BreakPointType == UE_MEMORY_WRITE ||
-                 BreakPointBuffer[i].BreakPointType == UE_MEMORY_EXECUTE)
+        if(BreakPointBuffer.at(i).BreakPointAddress == MemoryStart &&
+                (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
           )
         {
-            if(i - 1 == BreakPointSetCount)
-            {
-                BreakPointSetCount--;
-            }
+            return false;
+        }
+    }
+    //add new breakpoint
+    BreakPointDetail NewBreakPoint;
+    memset(&NewBreakPoint, 0, sizeof(BreakPointDetail));
+    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
+    OldProtect = MemInfo.Protect;
+    if(!(OldProtect & PAGE_GUARD))
+    {
+        NewProtect = OldProtect ^ PAGE_GUARD;
+        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, SizeOfMemory, NewProtect, &OldProtect);
+    }
+    NewBreakPoint.BreakPointActive = UE_BPXACTIVE;
+    NewBreakPoint.BreakPointAddress = MemoryStart;
+    NewBreakPoint.BreakPointType = BreakPointType;
+    NewBreakPoint.BreakPointSize = SizeOfMemory;
+    NewBreakPoint.MemoryBpxRestoreOnHit = (BYTE)RestoreOnHit;
+    NewBreakPoint.ExecuteCallBack = (ULONG_PTR)bpxCallBack;
+    BreakPointBuffer.push_back(NewBreakPoint);
+    return true;
+}
+
+__declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory)
+{
+    MutexLocker lock("BreakPointBuffer");
+    MEMORY_BASIC_INFORMATION MemInfo;
+    ULONG_PTR NumberOfBytesReadWritten = 0;
+    DWORD NewProtect = 0;
+    DWORD OldProtect = 0;
+    int bpcount=BreakPointBuffer.size();
+    int found=-1;
+    //search for breakpoint
+    for(int i=0; i<bpcount; i++)
+    {
+        if(BreakPointBuffer.at(i).BreakPointAddress == MemoryStart &&
+                (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
+          )
+        {
+            found=i;
             break;
         }
     }
-    if(BreakPointBuffer[i].BreakPointAddress == MemoryStart)
-    {
-        VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        OldProtect = MemInfo.Protect;
-        if(OldProtect & PAGE_GUARD)
-        {
-            NewProtect = OldProtect ^ PAGE_GUARD;
-        }
-        else
-        {
-            NewProtect = OldProtect;
-        }
-        if(SizeOfMemory != NULL)
-        {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, SizeOfMemory, NewProtect, &OldProtect);
-        }
-        else
-        {
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, BreakPointBuffer[i].BreakPointSize, NewProtect, &OldProtect);
-        }
-        RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
-        return(true);
-    }
+    if(found==-1) //not found
+        return false;
+    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
+    OldProtect = MemInfo.Protect;
+    NewProtect = OldProtect & ~PAGE_GUARD;
+    if(SizeOfMemory)
+        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, SizeOfMemory, NewProtect, &OldProtect);
     else
-    {
-        return(false);
-    }
+        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)MemoryStart, BreakPointBuffer.at(found).BreakPointSize, NewProtect, &OldProtect);
+    BreakPointBuffer.erase(BreakPointBuffer.begin()+found);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex)
 {
-    return(EngineIsThereFreeHardwareBreakSlot(RegisterIndex));
+    return EngineIsThereFreeHardwareBreakSlot(RegisterIndex);
 }
 
 __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack)
@@ -1110,67 +807,6 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, D
     DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
 
     return true;
-}
-
-__declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegister)
-{
-
-    ULONG_PTR HardwareBPX = NULL;
-    ULONG_PTR bpxAddress = NULL;
-
-    if(IndexOfRegister == UE_DR0)
-    {
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 0);
-        HardwareBPX = HardwareBPX &~ (1 << 1);
-        SetContextData(UE_DR0, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister[0].DrxEnabled = false;
-        DebugRegister[0].DrxBreakAddress = NULL;
-        DebugRegister[0].DrxCallBack = NULL;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR1)
-    {
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 2);
-        HardwareBPX = HardwareBPX &~ (1 << 3);
-        SetContextData(UE_DR1, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister[1].DrxEnabled = false;
-        DebugRegister[1].DrxBreakAddress = NULL;
-        DebugRegister[1].DrxCallBack = NULL;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR2)
-    {
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 4);
-        HardwareBPX = HardwareBPX &~ (1 << 5);
-        SetContextData(UE_DR2, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister[2].DrxEnabled = false;
-        DebugRegister[2].DrxBreakAddress = NULL;
-        DebugRegister[2].DrxCallBack = NULL;
-        return(true);
-    }
-    else if(IndexOfRegister == UE_DR3)
-    {
-        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 6);
-        HardwareBPX = HardwareBPX &~ (1 << 7);
-        SetContextData(UE_DR3, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
-        DebugRegister[3].DrxEnabled = false;
-        DebugRegister[3].DrxBreakAddress = NULL;
-        DebugRegister[3].DrxCallBack = NULL;
-        return(true);
-    }
-    else
-    {
-        return(false);
-    }
-    return(false);
 }
 
 __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister)
@@ -1279,98 +915,143 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread,
     return true;
 }
 
+__declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegister)
+{
+    ULONG_PTR HardwareBPX = NULL;
+    ULONG_PTR bpxAddress = NULL;
+
+    if(IndexOfRegister == UE_DR0)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 0);
+        HardwareBPX = HardwareBPX &~ (1 << 1);
+        SetContextData(UE_DR0, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[0].DrxEnabled = false;
+        DebugRegister[0].DrxBreakAddress = NULL;
+        DebugRegister[0].DrxCallBack = NULL;
+        return true;
+    }
+    else if(IndexOfRegister == UE_DR1)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 2);
+        HardwareBPX = HardwareBPX &~ (1 << 3);
+        SetContextData(UE_DR1, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[1].DrxEnabled = false;
+        DebugRegister[1].DrxBreakAddress = NULL;
+        DebugRegister[1].DrxCallBack = NULL;
+        return true;
+    }
+    else if(IndexOfRegister == UE_DR2)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 4);
+        HardwareBPX = HardwareBPX &~ (1 << 5);
+        SetContextData(UE_DR2, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[2].DrxEnabled = false;
+        DebugRegister[2].DrxBreakAddress = NULL;
+        DebugRegister[2].DrxCallBack = NULL;
+        return true;
+    }
+    else if(IndexOfRegister == UE_DR3)
+    {
+        HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
+        HardwareBPX = HardwareBPX &~ (1 << 6);
+        HardwareBPX = HardwareBPX &~ (1 << 7);
+        SetContextData(UE_DR3, (ULONG_PTR)bpxAddress);
+        SetContextData(UE_DR7, HardwareBPX);
+        DebugRegister[3].DrxEnabled = false;
+        DebugRegister[3].DrxBreakAddress = NULL;
+        DebugRegister[3].DrxCallBack = NULL;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    return false;
+}
+
 __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
 {
-
-    int i = 0;
-    int CurrentBreakPointSetCount = -1;
-
+    MutexLocker lock("BreakPointBuffer");
+    int bpcount=BreakPointBuffer.size();
     if(RemoveOption == UE_OPTION_REMOVEALL)
     {
-        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        for(int i=bpcount-1; i>-1; i--)
         {
-            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT)
+            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT)
             {
-                DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
+                lock.unlock();
+                DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
+                lock.relock();
             }
-            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_EXECUTE)
+            else if(BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
             {
-                RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
+                lock.unlock();
+                RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress, BreakPointBuffer.at(i).BreakPointSize);
+                lock.relock();
             }
-            else if(CurrentBreakPointSetCount == -1 && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
-            {
-                CurrentBreakPointSetCount = BreakPointSetCount;
-            }
-            RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
         }
         DeleteHardwareBreakPoint(UE_DR0);
         DeleteHardwareBreakPoint(UE_DR1);
         DeleteHardwareBreakPoint(UE_DR2);
         DeleteHardwareBreakPoint(UE_DR3);
-        BreakPointSetCount = 0;
-        return(true);
+        return true;
     }
     else if(RemoveOption == UE_OPTION_DISABLEALL)
     {
-        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        for(int i=bpcount-1; i>-1; i--)
         {
-            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
+            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
-                DisableBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
+                lock.unlock();
+                DisableBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
+                lock.relock();
             }
-            else if(BreakPointBuffer[i].BreakPointType >= UE_MEMORY && BreakPointBuffer[i].BreakPointType <= UE_MEMORY_EXECUTE)
+            else if(BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
             {
-                RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress, BreakPointBuffer[i].BreakPointSize);
-                RtlZeroMemory(&BreakPointBuffer[i], sizeof BreakPointDetail);
+                lock.unlock();
+                RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress, BreakPointBuffer.at(i).BreakPointSize);
+                lock.relock();
             }
         }
-        return(true);
+        return true;
     }
     else if(RemoveOption == UE_OPTION_REMOVEALLDISABLED)
     {
-        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        for(int i=bpcount-1; i>-1; i--)
         {
-            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT && BreakPointBuffer[i].BreakPointActive == UE_BPXINACTIVE)
+            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE)
             {
-                DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
-            }
-            else if(CurrentBreakPointSetCount == -1 && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
-            {
-                CurrentBreakPointSetCount = BreakPointSetCount;
+                lock.unlock();
+                DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
+                lock.relock();
             }
         }
-        if(CurrentBreakPointSetCount == -1)
-        {
-            BreakPointSetCount = 0;
-        }
-        else
-        {
-            BreakPointSetCount = CurrentBreakPointSetCount;
-        }
-        return(true);
+        return true;
     }
     else if(RemoveOption == UE_OPTION_REMOVEALLENABLED)
     {
-        for(i = BreakPointSetCount - 1; i >= 0; i--)
+        for(int i=bpcount-1; i>-1; i--)
         {
-            if(BreakPointBuffer[i].BreakPointType == UE_BREAKPOINT && BreakPointBuffer[i].BreakPointActive == UE_BPXACTIVE)
+            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
-                DeleteBPX((ULONG_PTR)BreakPointBuffer[i].BreakPointAddress);
-            }
-            else if(CurrentBreakPointSetCount == -1 && BreakPointBuffer[i].BreakPointActive != UE_BPXREMOVED)
-            {
-                CurrentBreakPointSetCount = BreakPointSetCount;
+                lock.unlock();
+                DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
+                lock.relock();
             }
         }
-        if(CurrentBreakPointSetCount == -1)
-        {
-            BreakPointSetCount = 0;
-        }
-        else
-        {
-            BreakPointSetCount = CurrentBreakPointSetCount;
-        }
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }

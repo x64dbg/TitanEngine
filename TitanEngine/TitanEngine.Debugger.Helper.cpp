@@ -32,11 +32,11 @@ __declspec(dllexport) bool TITCALL GetRemoteString(HANDLE hProcess, LPVOID Strin
     RtlZeroMemory(StringStorage, MaximumStringSize);
     if(ReadProcessMemory(hProcess, (LPVOID)StringAddress, StringStorage, StringReadSize, &ueNumberOfBytesRW))
     {
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) long long TITCALL GetFunctionParameter(HANDLE hProcess, DWORD FunctionType, DWORD ParameterNumber, DWORD ParameterType)
@@ -579,242 +579,242 @@ __declspec(dllexport) bool TITCALL IsJumpGoingToExecuteEx(HANDLE hProcess, HANDL
             }
             else if(lstrcmpiA(DisassembledString, "JMP") == NULL)
             {
-                return(true);
+                return true;
             }
             else if(lstrcmpiA(DisassembledString, "JA") == NULL)
             {
                 if(bCF == false && bZF == false)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JAE") == NULL)
             {
                 if(!bCF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JB") == NULL)
             {
                 if(bCF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JBE") == NULL)
             {
                 if(bCF == true || bZF == true)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JC") == NULL)
             {
                 if(bCF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JCXZ") == NULL)
             {
                 if((WORD)GetContextDataEx(hThread, UE_ECX) == NULL)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JECXZ") == NULL)
             {
                 if((DWORD)GetContextDataEx(hThread, UE_ECX) == NULL)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JRCXZ") == NULL)
             {
                 if((ULONG_PTR)GetContextDataEx(hThread, UE_RCX) == NULL)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JZ") == NULL)
             {
                 if(bZF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNZ") == NULL)
             {
                 if(!bZF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JE") == NULL)
             {
                 if(bZF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNE") == NULL)
             {
                 if(!bZF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JG") == NULL)
             {
                 if(bZF == false && bSF == bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JGE") == NULL)
             {
                 if(bSF == bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JL") == NULL)
             {
                 if(bSF != bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JLE") == NULL)
             {
                 if(bZF == true || bSF != bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNA") == NULL)
             {
                 if(bCF == true || bZF == true)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNAE") == NULL)
             {
                 if(bCF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNB") == NULL)
             {
                 if(!bCF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNBE") == NULL)
             {
                 if(bCF == false && bZF == false)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNC") == NULL)
             {
                 if(!bCF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNG") == NULL)
             {
                 if(bZF == true || bSF != bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNGE") == NULL)
             {
                 if(bSF != bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNL") == NULL)
             {
                 if(bSF == bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNLE") == NULL)
             {
                 if(bZF == false && bSF == bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNO") == NULL)
             {
                 if(!bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNP") == NULL)
             {
                 if(!bPF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JNS") == NULL)
             {
                 if(!bSF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JO") == NULL)
             {
                 if(bOF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JP") == NULL)
             {
                 if(bPF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JPE") == NULL)
             {
                 if(bPF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JPO") == NULL)
             {
                 if(!bPF)
                 {
-                    return(true);
+                    return true;
                 }
             }
             else if(lstrcmpiA(DisassembledString, "JS") == NULL)
             {
                 if(bSF)
                 {
-                    return(true);
+                    return true;
                 }
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL IsJumpGoingToExecute()
 {

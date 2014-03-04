@@ -1213,10 +1213,6 @@ protected:
     {
         return UE::SetBPX(bpxAddress, bpxType, (void*)bpxCallBack);
     }
-    static bool SetBPXEx(ULONG_PTR bpxAddress, eBPType bpxType, DWORD NumberOfExecution, eContextData CmpRegister, eCompareCondition CmpCondition, ULONG_PTR CmpValue, fBreakPointCallback bpxCallBack, fBreakPointCallback bpxCompareCallBack, fBreakPointCallback bpxRemoveCallBack)
-    {
-        return UE::SetBPXEx(bpxAddress, bpxType, NumberOfExecution, CmpRegister, CmpCondition, CmpValue, (void*)bpxCallBack, (void*)bpxCompareCallBack, (void*)bpxRemoveCallBack);
-    }
     static bool DeleteBPX(ULONG_PTR bpxAddress)
     {
         return UE::DeleteBPX(bpxAddress);
@@ -1227,15 +1223,15 @@ protected:
     }
     static bool SetAPIBreakPoint(const char* szDLLName, const char* szAPIName, eBPType bpxType, eBPPlace bpxPlace, fBreakPointCallback bpxCallBack)
     {
-        return UE::SetAPIBreakPoint((char*)szDLLName, (char*)szAPIName, bpxType, bpxPlace, (void*)bpxCallBack);
+        return UE::SetAPIBreakPoint(szDLLName, szAPIName, bpxType, bpxPlace, (void*)bpxCallBack);
     }
     static bool DeleteAPIBreakPoint(const char* szDLLName, const char* szAPIName, eBPPlace bpxPlace)
     {
-        return UE::DeleteAPIBreakPoint((char*)szDLLName, (char*)szAPIName, bpxPlace);
+        return UE::DeleteAPIBreakPoint(szDLLName, szAPIName, bpxPlace);
     }
     static bool SafeDeleteAPIBreakPoint(const char* szDLLName, const char* szAPIName, eBPPlace bpxPlace)
     {
-        return UE::SafeDeleteAPIBreakPoint((char*)szDLLName, (char*)szAPIName, bpxPlace);
+        return UE::SafeDeleteAPIBreakPoint(szDLLName, szAPIName, bpxPlace);
     }
     static bool SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, fBreakPointCallback bpxCallBack)
     {
@@ -1529,7 +1525,6 @@ public:
     using DebuggerX::EnableBPX;
     using DebuggerX::DisableBPX;
     using DebuggerX::SetBPX;
-    using DebuggerX::SetBPXEx;
     using DebuggerX::DeleteBPX;
     using DebuggerX::SafeDeleteBPX;
     using DebuggerX::SetAPIBreakPoint;

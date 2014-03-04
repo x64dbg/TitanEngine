@@ -32,12 +32,12 @@ bool CreateGarbageItem(void* outGargabeItem, int MaxGargabeStringSize)
     if(lstrlenW(szGarbageItem) * 2 >= MaxGargabeStringSize)
     {
         RtlMoveMemory(outGargabeItem, &szGarbageItem, MaxGargabeStringSize);
-        return(false);
+        return false;
     }
     else
     {
         RtlMoveMemory(outGargabeItem, &szGarbageItem, lstrlenW(szGarbageItem) * 2);
-        return(true);
+        return true;
     }
 }
 
@@ -99,16 +99,16 @@ bool RemoveGarbageItem(wchar_t* szGarbageItem, bool RemoveFolder)
                     }
                 }
             }
-            return(true);
+            return true;
         }
         else
         {
-            return(false);
+            return false;
         }
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -146,7 +146,7 @@ bool FillGarbageItem(wchar_t* szGarbageItem, wchar_t* szFileName, void* outGarga
             CopyFileW(szFileName, szCopyFileName, false);
         }
     }
-    return(true);
+    return true;
 }
 
 void EmptyGarbage()

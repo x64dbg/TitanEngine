@@ -168,10 +168,10 @@ __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginLoaded(char* szPlugin
     {
         if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
         {
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPluginName)
@@ -183,15 +183,15 @@ __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPlugi
         {
             if(!Plugin[i].PluginDisabled)
             {
-                return(true);
+                return true;
             }
             else
             {
-                return(false);
+                return false;
             }
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerDisableAllPlugins()
@@ -201,7 +201,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerDisableAllPlugins()
     {
         Plugin[i].PluginDisabled = true;
     }
-    return(true);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerDisablePlugin(char* szPluginName)
@@ -212,10 +212,10 @@ __declspec(dllexport) bool TITCALL ExtensionManagerDisablePlugin(char* szPluginN
         if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
         {
             Plugin[i].PluginDisabled = true;
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerEnableAllPlugins()
@@ -225,7 +225,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerEnableAllPlugins()
     {
         Plugin[i].PluginDisabled = false;
     }
-    return(true);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerEnablePlugin(char* szPluginName)
@@ -236,10 +236,10 @@ __declspec(dllexport) bool TITCALL ExtensionManagerEnablePlugin(char* szPluginNa
         if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
         {
             Plugin[i].PluginDisabled = false;
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerUnloadAllPlugins()
@@ -252,7 +252,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadAllPlugins()
             Plugin.erase(Plugin.begin() + i);
         }
     }
-    return(true);
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginName)
@@ -274,7 +274,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginNa
                     if(FreeLibrary(Plugin[i].PluginBaseAddress))
                     {
                         Plugin.erase(Plugin.begin() + i);
-                        return(true);
+                        return true;
                     }
                 }
             }
@@ -283,12 +283,12 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginNa
                 if(FreeLibrary(Plugin[i].PluginBaseAddress))
                 {
                     Plugin.erase(Plugin.begin() + i);
-                    return(true);
+                    return true;
                 }
             }
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(char* szPluginName)

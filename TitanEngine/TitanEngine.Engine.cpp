@@ -96,7 +96,7 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(LogCreatedFiles)
             {
@@ -216,15 +216,15 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                 }
             }
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(true);
+            return true;
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess)
 {
@@ -234,7 +234,7 @@ __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess
         SetAPIBreakPoint("ntdll.dll", "LdrLoadDll", UE_BREAKPOINT, UE_APIEND, (LPVOID)&EngineFakeLoadLibraryReturn);
         SetAPIBreakPoint("ntdll.dll", "LdrGetProcedureAddress", UE_BREAKPOINT, UE_APIEND, (LPVOID)&EngineFakeGetProcAddressReturn);
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies()
 {
@@ -269,9 +269,9 @@ __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies()
         VirtualFree(engineDependencyFiles, NULL, MEM_RELEASE);
         engineDependencyFiles = NULL;
         engineDependencyFilesCWP = NULL;
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack)
@@ -285,11 +285,11 @@ __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpack
     lstrcpyA(szWindowUnpackerName, WindowUnpackerName);
     if(DialogBoxParamA((HINSTANCE)engineHandle, MAKEINTRESOURCEA(IDD_MAINWINDOW), NULL, (DLGPROC)EngineWndProc, NULL) != -1)
     {
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) void TITCALL EngineAddUnpackerWindowLogMessage(char* szLogMessage)

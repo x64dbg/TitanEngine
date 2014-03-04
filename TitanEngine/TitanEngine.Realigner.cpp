@@ -15,11 +15,11 @@ __declspec(dllexport) bool TITCALL FixHeaderCheckSum(char* szFileName)
     if(MapFileAndCheckSumA(szFileName, &HeaderSum, &CheckSum) == NULL)
     {
         SetPE32Data(szFileName, NULL, UE_CHECKSUM, (ULONG_PTR)CheckSum);
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL FixHeaderCheckSumW(wchar_t* szFileName)
@@ -31,11 +31,11 @@ __declspec(dllexport) bool TITCALL FixHeaderCheckSumW(wchar_t* szFileName)
     if(MapFileAndCheckSumW(szFileName, &HeaderSum, &CheckSum) == NULL)
     {
         SetPE32DataW(szFileName, NULL, UE_CHECKSUM, (ULONG_PTR)CheckSum);
-        return(true);
+        return true;
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) long TITCALL RealignPE(ULONG_PTR FileMapVA, DWORD FileSize, DWORD RealingMode)

@@ -13,24 +13,23 @@ GenericOEPTracerData glbEntryTracerData = {};
 // Global.FindOEP.functions:
 void GenericOEPVirtualProtectHit()
 {
-
-    PBreakPointDetail bpxList = (PBreakPointDetail)BreakPointBuffer;
     MEMORY_BASIC_INFORMATION MemInfo;
     DWORD MaximumBreakPoints = 0;
     DWORD NewProtect = 0;
     DWORD OldProtect = 0;
 
-    while(MaximumBreakPoints < MAXIMUM_BREAKPOINTS)
+    int bpcount=BreakPointBuffer.size();
+    for(int i=0; i<bpcount; i++)
     {
-        bpxList = (PBreakPointDetail)((ULONG_PTR)bpxList + sizeof BreakPointDetail);
-        if(bpxList->BreakPointType == UE_MEMORY && bpxList->BreakPointActive == UE_BPXACTIVE)
+        BreakPointDetail curDetail=BreakPointBuffer.at(i);
+        if(curDetail.BreakPointType == UE_MEMORY && curDetail.BreakPointActive == UE_BPXACTIVE)
         {
-            VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxList->BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
+            VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)curDetail.BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
             OldProtect = MemInfo.Protect;
             if(!(OldProtect & PAGE_GUARD))
             {
                 NewProtect = OldProtect ^ PAGE_GUARD;
-                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxList->BreakPointAddress, bpxList->BreakPointSize, NewProtect, &OldProtect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)curDetail.BreakPointAddress, curDetail.BreakPointSize, NewProtect, &OldProtect);
             }
         }
         MaximumBreakPoints++;
@@ -286,11 +285,11 @@ bool GenericOEPFileInitW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID C
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             if(glbEntryTracerData.FileIsDLL)
             {
-                return(false);
+                return false;
             }
             else
             {
-                return(true);
+                return true;
             }
         }
         else
@@ -298,5 +297,5 @@ bool GenericOEPFileInitW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID C
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         }
     }
-    return(false);
+    return false;
 }

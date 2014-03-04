@@ -15,7 +15,7 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibrary(HANDLE hProcess, char* szLi
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RemoteLoadLibraryW(HANDLE hProcess, wchar_t* szLibraryFile, bool WaitForThreadExit)
@@ -68,7 +68,7 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibraryW(HANDLE hProcess, wchar_t* 
                 {
                     if(ExitCode == NULL)
                     {
-                        return(false);
+                        return false;
                     }
                 }
             }
@@ -86,7 +86,7 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibraryW(HANDLE hProcess, wchar_t* 
                 engineReservedMemoryProcess = hProcess;
                 ThreaderSetCallBackForNextExitThreadEvent((LPVOID)&injectedTerminator);
             }
-            return(true);
+            return true;
         }
         else
         {
@@ -94,7 +94,7 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibraryW(HANDLE hProcess, wchar_t* 
             VirtualFreeEx(hProcess, remStringData, NULL, MEM_RELEASE);
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RemoteFreeLibrary(HANDLE hProcess, HMODULE hModule, char* szLibraryFile, bool WaitForThreadExit)
 {
@@ -108,7 +108,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibrary(HANDLE hProcess, HMODULE hM
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE hModule, wchar_t* szLibraryFile, bool WaitForThreadExit)
@@ -165,7 +165,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                     {
                         if(ExitCode == NULL)
                         {
-                            return(false);
+                            return false;
                         }
                     }
                 }
@@ -183,7 +183,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                     engineReservedMemoryProcess = hProcess;
                     ThreaderSetCallBackForNextExitThreadEvent((LPVOID)&injectedTerminator);
                 }
-                return(true);
+                return true;
             }
             else
             {
@@ -211,7 +211,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                     {
                         if(ExitCode == NULL)
                         {
-                            return(false);
+                            return false;
                         }
                     }
                 }
@@ -229,7 +229,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                     engineReservedMemoryProcess = hProcess;
                     ThreaderSetCallBackForNextExitThreadEvent((LPVOID)&injectedTerminator);
                 }
-                return(true);
+                return true;
             }
             else
             {
@@ -238,7 +238,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RemoteExitProcess(HANDLE hProcess, DWORD ExitCode)
 {
@@ -268,7 +268,7 @@ __declspec(dllexport) bool TITCALL RemoteExitProcess(HANDLE hProcess, DWORD Exit
             WriteProcessMemory(hProcess, remStringData, &APIData, sizeof InjectCodeData, &NumberOfBytesWritten);
             hThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)remCodeData, remStringData, NULL, &ThreadId);
             VirtualFreeEx(hProcess, remCodeData, NULL, MEM_RELEASE);
-            return(true);
+            return true;
         }
         else
         {
@@ -276,5 +276,5 @@ __declspec(dllexport) bool TITCALL RemoteExitProcess(HANDLE hProcess, DWORD Exit
             VirtualFreeEx(hProcess, remStringData, NULL, MEM_RELEASE);
         }
     }
-    return(false);
+    return false;
 }

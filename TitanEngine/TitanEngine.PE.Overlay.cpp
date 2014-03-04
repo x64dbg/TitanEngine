@@ -19,7 +19,7 @@ __declspec(dllexport) bool TITCALL FindOverlay(char* szFileName, LPDWORD Overlay
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 
@@ -57,7 +57,7 @@ __declspec(dllexport) bool TITCALL FindOverlayW(wchar_t* szFileName, LPDWORD Ove
             else
             {
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                return(false);
+                return false;
             }
             if(!FileIs64)
             {
@@ -86,17 +86,17 @@ __declspec(dllexport) bool TITCALL FindOverlayW(wchar_t* szFileName, LPDWORD Ove
                             *OverlayStart = (DWORD)(SectionRawOffset + SectionRawSize);
                             *OverlaySize = (DWORD)(FileSize - SectionRawOffset - SectionRawSize);
                         }
-                        return(true);
+                        return true;
                     }
                     else
                     {
-                        return(false);
+                        return false;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
             else
@@ -126,27 +126,27 @@ __declspec(dllexport) bool TITCALL FindOverlayW(wchar_t* szFileName, LPDWORD Ove
                             *OverlayStart = (DWORD)(SectionRawOffset + SectionRawSize);
                             *OverlaySize = (DWORD)(FileSize - SectionRawOffset - SectionRawSize);
                         }
-                        return(true);
+                        return true;
                     }
                     else
                     {
-                        return(false);
+                        return false;
                     }
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    return(false);
+                    return false;
                 }
             }
         }
         else
         {
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL ExtractOverlay(char* szFileName, char* szExtactedFileName)
 {
@@ -162,7 +162,7 @@ __declspec(dllexport) bool TITCALL ExtractOverlay(char* szFileName, char* szExta
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t* szExtactedFileName)
@@ -224,19 +224,19 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                     EngineCloseHandle(hFile);
                     EngineCloseHandle(hFileWrite);
-                    return(true);
+                    return true;
                 }
                 else
                 {
                     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                     EngineCloseHandle(hFile);
-                    return(false);
+                    return false;
                 }
             }
         }
     }
     VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL AddOverlay(char* szFileName, char* szOverlayFileName)
 {
@@ -252,7 +252,7 @@ __declspec(dllexport) bool TITCALL AddOverlay(char* szFileName, char* szOverlayF
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szOverlayFileName)
@@ -310,15 +310,15 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
             }
             EngineCloseHandle(hFile);
             EngineCloseHandle(hFileRead);
-            return(true);
+            return true;
         }
         else
         {
             EngineCloseHandle(hFile);
-            return(false);
+            return false;
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL CopyOverlay(char* szInFileName, char* szOutFileName)
 {
@@ -334,7 +334,7 @@ __declspec(dllexport) bool TITCALL CopyOverlay(char* szInFileName, char* szOutFi
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL CopyOverlayW(wchar_t* szInFileName, wchar_t* szOutFileName)
@@ -351,11 +351,11 @@ __declspec(dllexport) bool TITCALL CopyOverlayW(wchar_t* szInFileName, wchar_t* 
             {
                 AddOverlayW(szOutFileName, szTempName);
                 DeleteFileW(szTempName);
-                return(true);
+                return true;
             }
         }
     }
-    return(false);
+    return false;
 }
 __declspec(dllexport) bool TITCALL RemoveOverlay(char* szFileName)
 {
@@ -369,7 +369,7 @@ __declspec(dllexport) bool TITCALL RemoveOverlay(char* szFileName)
     }
     else
     {
-        return(false);
+        return false;
     }
 }
 __declspec(dllexport) bool TITCALL RemoveOverlayW(wchar_t* szFileName)
@@ -388,10 +388,10 @@ __declspec(dllexport) bool TITCALL RemoveOverlayW(wchar_t* szFileName)
         {
             FileSize = FileSize - OverlaySize;
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return(true);
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 __declspec(dllexport) void TITCALL SetSharedOverlay(char* szFileName)
