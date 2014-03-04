@@ -284,25 +284,6 @@ const
 	UE_PARAMETER_STRING = 8;
 	UE_PARAMETER_UNICODE = 9;
 
-	UE_CMP_NOCONDITION = 0;
-	UE_CMP_EQUAL = 1;
-	UE_CMP_NOTEQUAL = 2;
-	UE_CMP_GREATER = 3;
-	UE_CMP_GREATEROREQUAL = 4;
-	UE_CMP_LOWER = 5;
-	UE_CMP_LOWEROREQUAL = 6;
-	UE_CMP_REG_EQUAL = 7;
-	UE_CMP_REG_NOTEQUAL = 8;
-	UE_CMP_REG_GREATER = 9;
-	UE_CMP_REG_GREATEROREQUAL = 10;
-	UE_CMP_REG_LOWER = 11;
-	UE_CMP_REG_LOWEROREQUAL = 12;
-	UE_CMP_ALWAYSFALSE = 13;
-	UE_OPTION_HANDLER_RETURN_HANDLECOUNT = 1;
-	UE_OPTION_HANDLER_RETURN_ACCESS = 2;
-	UE_OPTION_HANDLER_RETURN_FLAGS = 3;
-	UE_OPTION_HANDLER_RETURN_TYPENAME = 4;
-
 	UE_BREAKPOINT_INT3 = 1;
 	UE_BREAKPOINT_LONG_INT3 = 2;
 	UE_BREAKPOINT_UD2 = 3;
@@ -465,6 +446,7 @@ const
   function IsFileDLL(szFileName:PAnsiChar; FileMapVA:LongInt):boolean; stdcall;  external 'TitanEngine.dll' name 'IsFileDLL';
 {TitanEngine.Hider.functions}
   function GetPEBLocation(hProcess:THandle):LongInt; stdcall;  external 'TitanEngine.dll' name 'GetPEBLocation';
+  function GetPEBLocation64(hProcess:THandle):LongInt; stdcall;  external 'TitanEngine.dll' name 'GetPEBLocation64';
   function HideDebugger(hProcess:THandle; PatchAPILevel:LongInt):boolean; stdcall;  external 'TitanEngine.dll' name 'HideDebugger';
   function UnHideDebugger(hProcess:THandle; PatchAPILevel:LongInt):boolean; stdcall;  external 'TitanEngine.dll' name 'UnHideDebugger';
 {TitanEngine.Relocater.functions}

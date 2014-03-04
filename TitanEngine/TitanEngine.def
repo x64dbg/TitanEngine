@@ -228,6 +228,7 @@ HooksScanModuleMemory
 HooksScanEntireProcessMemory
 HooksScanEntireProcessMemoryEx
 GetPEBLocation
+GetPEBLocation64
 HideDebugger
 UnHideDebugger
 RelocaterInit

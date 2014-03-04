@@ -189,21 +189,6 @@
 #define UE_PARAMETER_STRING 8
 #define UE_PARAMETER_UNICODE 9
 
-#define UE_CMP_NOCONDITION 0
-#define UE_CMP_EQUAL 1
-#define UE_CMP_NOTEQUAL 2
-#define UE_CMP_GREATER 3
-#define UE_CMP_GREATEROREQUAL 4
-#define UE_CMP_LOWER 5
-#define UE_CMP_LOWEROREQUAL 6
-#define UE_CMP_REG_EQUAL 7
-#define UE_CMP_REG_NOTEQUAL 8
-#define UE_CMP_REG_GREATER 9
-#define UE_CMP_REG_GREATEROREQUAL 10
-#define UE_CMP_REG_LOWER 11
-#define UE_CMP_REG_LOWEROREQUAL 12
-#define UE_CMP_ALWAYSFALSE 13
-
 #define UE_EAX 1
 #define UE_EBX 2
 #define UE_ECX 3
@@ -598,6 +583,7 @@ __declspec(dllexport) bool TITCALL IsFileDLL(char* szFileName, ULONG_PTR FileMap
 __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR FileMapVA);
 // TitanEngine.Hider.functions:
 __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess);
+__declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess);
 __declspec(dllexport) bool TITCALL HideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 __declspec(dllexport) bool TITCALL UnHideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 // TitanEngine.Relocater.functions:

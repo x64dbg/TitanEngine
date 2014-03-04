@@ -265,24 +265,6 @@ enum eParameterType : DWORD
     UE_PARAMETER_UNICODE = UE::UE_PARAMETER_UNICODE
 };
 
-enum eCompareCondition : DWORD
-{
-    UE_CMP_NOCONDITION = UE::UE_CMP_NOCONDITION,
-    UE_CMP_EQUAL = UE::UE_CMP_EQUAL,
-    UE_CMP_NOTEQUAL = UE::UE_CMP_NOTEQUAL,
-    UE_CMP_GREATER = UE::UE_CMP_GREATER,
-    UE_CMP_GREATEROREQUAL = UE::UE_CMP_GREATEROREQUAL,
-    UE_CMP_LOWER = UE::UE_CMP_LOWER,
-    UE_CMP_LOWEROREQUAL = UE::UE_CMP_LOWEROREQUAL,
-    UE_CMP_REG_EQUAL = UE::UE_CMP_REG_EQUAL,
-    UE_CMP_REG_NOTEQUAL = UE::UE_CMP_REG_NOTEQUAL,
-    UE_CMP_REG_GREATER = UE::UE_CMP_REG_GREATER,
-    UE_CMP_REG_GREATEROREQUAL = UE::UE_CMP_REG_GREATEROREQUAL,
-    UE_CMP_REG_LOWER = UE::UE_CMP_REG_LOWER,
-    UE_CMP_REG_LOWEROREQUAL = UE::UE_CMP_REG_LOWEROREQUAL,
-    UE_CMP_ALWAYSFALSE = UE::UE_CMP_ALWAYSFALSE
-};
-
 enum eContextData : DWORD
 {
     UE_EAX = UE::UE_EAX,
@@ -828,6 +810,10 @@ public:
     static void* GetPEBLocation(HANDLE hProcess)
     {
         return UE::GetPEBLocation(hProcess);
+    }
+	static void* GetPEBLocation64(HANDLE hProcess)
+    {
+        return UE::GetPEBLocation64(hProcess);
     }
     static bool HideDebugger(HANDLE hProcess, eHideLevel PatchAPILevel)
     {

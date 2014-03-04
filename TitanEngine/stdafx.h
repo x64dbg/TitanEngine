@@ -19,10 +19,6 @@
 #endif
 #include "LzmaDec.h"
 
-#define UE_PLATFORM_x86 1
-#define UE_PLATFORM_x64 2
-#define UE_PLATFORM_ALL 3
-
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L) // ntsubauth
 
 // Engine.Internal:
@@ -436,7 +432,6 @@ typedef struct
     HANDLE hHandle;
 } HandlerArray, *PHandlerArray;
 
-#define UE_BPXREMOVED 0
 #define UE_BPXACTIVE 1
 #define UE_BPXINACTIVE 2
 
@@ -482,21 +477,6 @@ typedef struct
 #define UE_PARAMETER_PTR_QWORD 7
 #define UE_PARAMETER_STRING 8
 #define UE_PARAMETER_UNICODE 9
-
-#define UE_CMP_NOCONDITION 0
-#define UE_CMP_EQUAL 1
-#define UE_CMP_NOTEQUAL 2
-#define UE_CMP_GREATER 3
-#define UE_CMP_GREATEROREQUAL 4
-#define UE_CMP_LOWER 5
-#define UE_CMP_LOWEROREQUAL 6
-#define UE_CMP_REG_EQUAL 7
-#define UE_CMP_REG_NOTEQUAL 8
-#define UE_CMP_REG_GREATER 9
-#define UE_CMP_REG_GREATEROREQUAL 10
-#define UE_CMP_REG_LOWER 11
-#define UE_CMP_REG_LOWEROREQUAL 12
-#define UE_CMP_ALWAYSFALSE 13
 
 #define UE_EAX 1
 #define UE_EBX 2
@@ -873,119 +853,119 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
 template <class T>
 struct LIST_ENTRY_T
 {
-	T Flink;
-	T Blink;
+    T Flink;
+    T Blink;
 };
 
 template <class T>
 struct UNICODE_STRING_T
 {
-	union
-	{
-		struct
-		{
-			WORD Length;
-			WORD MaximumLength;
-		};
-		T dummy;
-	};
-	T _Buffer;
+    union
+    {
+        struct
+        {
+            WORD Length;
+            WORD MaximumLength;
+        };
+        T dummy;
+    };
+    T _Buffer;
 };
 
 template <class T, class NGF, int A>
 struct _PEB_T
 {
-	union
-	{
-		struct
-		{
-			BYTE InheritedAddressSpace;
-			BYTE ReadImageFileExecOptions;
-			BYTE BeingDebugged;
-			BYTE _SYSTEM_DEPENDENT_01;
-		};
-		T dummy01;
-	};
-	T Mutant;
-	T ImageBaseAddress;
-	T Ldr;
-	T ProcessParameters;
-	T SubSystemData;
-	T ProcessHeap;
-	T FastPebLock;
-	T _SYSTEM_DEPENDENT_02;
-	T _SYSTEM_DEPENDENT_03;
-	T _SYSTEM_DEPENDENT_04;
-	union
-	{
-		T KernelCallbackTable;
-		T UserSharedInfoPtr;
-	};
-	DWORD SystemReserved;
-	DWORD _SYSTEM_DEPENDENT_05;
-	T _SYSTEM_DEPENDENT_06;
-	T TlsExpansionCounter;
-	T TlsBitmap;
-	DWORD TlsBitmapBits[2];
-	T ReadOnlySharedMemoryBase;
-	T _SYSTEM_DEPENDENT_07;
-	T ReadOnlyStaticServerData;
-	T AnsiCodePageData;
-	T OemCodePageData;
-	T UnicodeCaseTableData;
-	DWORD NumberOfProcessors;
-	union
-	{
-		DWORD NtGlobalFlag;
-		NGF dummy02;
-	};
-	LARGE_INTEGER CriticalSectionTimeout;
-	T HeapSegmentReserve;
-	T HeapSegmentCommit;
-	T HeapDeCommitTotalFreeThreshold;
-	T HeapDeCommitFreeBlockThreshold;
-	DWORD NumberOfHeaps;
-	DWORD MaximumNumberOfHeaps;
-	T ProcessHeaps;
-	T GdiSharedHandleTable;
-	T ProcessStarterHelper;
-	T GdiDCAttributeList;
-	T LoaderLock;
-	DWORD OSMajorVersion;
-	DWORD OSMinorVersion;
-	WORD OSBuildNumber;
-	WORD OSCSDVersion;
-	DWORD OSPlatformId;
-	DWORD ImageSubsystem;
-	DWORD ImageSubsystemMajorVersion;
-	T ImageSubsystemMinorVersion;
-	union
-	{
-		T ImageProcessAffinityMask;
-		T ActiveProcessAffinityMask;
-	};
-	T GdiHandleBuffer[A];
-	T PostProcessInitRoutine;
-	T TlsExpansionBitmap;
-	DWORD TlsExpansionBitmapBits[32];
-	T SessionId;
-	ULARGE_INTEGER AppCompatFlags;
-	ULARGE_INTEGER AppCompatFlagsUser;
-	T pShimData;
-	T AppCompatInfo;
-	UNICODE_STRING_T<T> CSDVersion;
-	T ActivationContextData;
-	T ProcessAssemblyStorageMap;
-	T SystemDefaultActivationContextData;
-	T SystemAssemblyStorageMap;
-	T MinimumStackCommit;
+    union
+    {
+        struct
+        {
+            BYTE InheritedAddressSpace;
+            BYTE ReadImageFileExecOptions;
+            BYTE BeingDebugged;
+            BYTE _SYSTEM_DEPENDENT_01;
+        };
+        T dummy01;
+    };
+    T Mutant;
+    T ImageBaseAddress;
+    T Ldr;
+    T ProcessParameters;
+    T SubSystemData;
+    T ProcessHeap;
+    T FastPebLock;
+    T _SYSTEM_DEPENDENT_02;
+    T _SYSTEM_DEPENDENT_03;
+    T _SYSTEM_DEPENDENT_04;
+    union
+    {
+        T KernelCallbackTable;
+        T UserSharedInfoPtr;
+    };
+    DWORD SystemReserved;
+    DWORD _SYSTEM_DEPENDENT_05;
+    T _SYSTEM_DEPENDENT_06;
+    T TlsExpansionCounter;
+    T TlsBitmap;
+    DWORD TlsBitmapBits[2];
+    T ReadOnlySharedMemoryBase;
+    T _SYSTEM_DEPENDENT_07;
+    T ReadOnlyStaticServerData;
+    T AnsiCodePageData;
+    T OemCodePageData;
+    T UnicodeCaseTableData;
+    DWORD NumberOfProcessors;
+    union
+    {
+        DWORD NtGlobalFlag;
+        NGF dummy02;
+    };
+    LARGE_INTEGER CriticalSectionTimeout;
+    T HeapSegmentReserve;
+    T HeapSegmentCommit;
+    T HeapDeCommitTotalFreeThreshold;
+    T HeapDeCommitFreeBlockThreshold;
+    DWORD NumberOfHeaps;
+    DWORD MaximumNumberOfHeaps;
+    T ProcessHeaps;
+    T GdiSharedHandleTable;
+    T ProcessStarterHelper;
+    T GdiDCAttributeList;
+    T LoaderLock;
+    DWORD OSMajorVersion;
+    DWORD OSMinorVersion;
+    WORD OSBuildNumber;
+    WORD OSCSDVersion;
+    DWORD OSPlatformId;
+    DWORD ImageSubsystem;
+    DWORD ImageSubsystemMajorVersion;
+    T ImageSubsystemMinorVersion;
+    union
+    {
+        T ImageProcessAffinityMask;
+        T ActiveProcessAffinityMask;
+    };
+    T GdiHandleBuffer[A];
+    T PostProcessInitRoutine;
+    T TlsExpansionBitmap;
+    DWORD TlsExpansionBitmapBits[32];
+    T SessionId;
+    ULARGE_INTEGER AppCompatFlags;
+    ULARGE_INTEGER AppCompatFlagsUser;
+    T pShimData;
+    T AppCompatInfo;
+    UNICODE_STRING_T<T> CSDVersion;
+    T ActivationContextData;
+    T ProcessAssemblyStorageMap;
+    T SystemDefaultActivationContextData;
+    T SystemAssemblyStorageMap;
+    T MinimumStackCommit;
 };
 
 typedef _PEB_T<DWORD, DWORD64, 34> PEB32;
 typedef _PEB_T<DWORD64, DWORD, 30> PEB64;
 
 #ifdef _WIN64
-	typedef PEB64 PEB_CURRENT;
+typedef PEB64 PEB_CURRENT;
 #else
-    typedef PEB32 PEB_CURRENT;
+typedef PEB32 PEB_CURRENT;
 #endif

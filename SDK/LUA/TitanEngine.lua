@@ -183,21 +183,6 @@ UE_PARAMETER_PTR_QWORD = 7
 UE_PARAMETER_STRING = 8
 UE_PARAMETER_UNICODE = 9
 
-UE_CMP_NOCONDITION = 0
-UE_CMP_EQUAL = 1
-UE_CMP_NOTEQUAL = 2
-UE_CMP_GREATER = 3
-UE_CMP_GREATEROREQUAL = 4
-UE_CMP_LOWER = 5
-UE_CMP_LOWEROREQUAL = 6
-UE_CMP_REG_EQUAL = 7
-UE_CMP_REG_NOTEQUAL = 8
-UE_CMP_REG_GREATER = 9
-UE_CMP_REG_GREATEROREQUAL = 10
-UE_CMP_REG_LOWER = 11
-UE_CMP_REG_LOWEROREQUAL = 12
-UE_CMP_ALWAYSFALSE = 13
-
 UE_EAX = 1
 UE_EBX = 2
 UE_ECX = 3
@@ -620,6 +605,9 @@ PROCESS_INFORMATION = alien.defstruct{
 -- __declspec(dllexport) void* __stdcall GetPEBLocation(HANDLE hProcess);
 	TitanEngine.GetPEBLocation:types {"long",abi="stdcall",ret="pointer"}
 	TE_GetPEBLocation = TitanEngine.GetPEBLocation
+-- __declspec(dllexport) void* __stdcall GetPEBLocation64(HANDLE hProcess);
+	TitanEngine.GetPEBLocation64:types {"long",abi="stdcall",ret="pointer"}
+	TE_GetPEBLocation64 = TitanEngine.GetPEBLocation64
 -- __declspec(dllexport) bool __stdcall HideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 	TitanEngine.HideDebugger:types {"long","long",abi="stdcall",ret="byte"}
 	TE_HideDebugger = TitanEngine.HideDebugger

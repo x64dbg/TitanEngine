@@ -1223,8 +1223,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 for(int i=0; i<bpcount; i++)
                 {
                     if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress &&
-                        (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) &&
-                        BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
+                            (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) &&
+                            BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
                         FoundBreakPoint=BreakPointBuffer.at(i);
                         bFoundBreakPoint=true;

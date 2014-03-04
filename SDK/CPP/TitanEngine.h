@@ -189,21 +189,6 @@ const BYTE UE_PARAMETER_PTR_QWORD = 7;
 const BYTE UE_PARAMETER_STRING = 8;
 const BYTE UE_PARAMETER_UNICODE = 9;
 
-const BYTE UE_CMP_NOCONDITION = 0;
-const BYTE UE_CMP_EQUAL = 1;
-const BYTE UE_CMP_NOTEQUAL = 2;
-const BYTE UE_CMP_GREATER = 3;
-const BYTE UE_CMP_GREATEROREQUAL = 4;
-const BYTE UE_CMP_LOWER = 5;
-const BYTE UE_CMP_LOWEROREQUAL = 6;
-const BYTE UE_CMP_REG_EQUAL = 7;
-const BYTE UE_CMP_REG_NOTEQUAL = 8;
-const BYTE UE_CMP_REG_GREATER = 9;
-const BYTE UE_CMP_REG_GREATEROREQUAL = 10;
-const BYTE UE_CMP_REG_LOWER = 11;
-const BYTE UE_CMP_REG_LOWEROREQUAL = 12;
-const BYTE UE_CMP_ALWAYSFALSE = 13;
-
 const BYTE UE_EAX = 1;
 const BYTE UE_EBX = 2;
 const BYTE UE_ECX = 3;
@@ -597,6 +582,7 @@ __declspec(dllimport) bool TITCALL IsFileDLL(char* szFileName, ULONG_PTR FileMap
 __declspec(dllimport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR FileMapVA);
 // TitanEngine.Hider.functions:
 __declspec(dllimport) void* TITCALL GetPEBLocation(HANDLE hProcess);
+__declspec(dllimport) void* TITCALL GetPEBLocation64(HANDLE hProcess);
 __declspec(dllimport) bool TITCALL HideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 __declspec(dllimport) bool TITCALL UnHideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 // TitanEngine.Relocater.functions:
