@@ -869,60 +869,130 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
   RTL_DRIVE_LETTER_CURDIR DLCurrentDirectory[0x20];
 } RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;*/
 
-typedef struct _NTPEB
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+//Evolution of Process Environment Block (PEB) http://blog.rewolf.pl/blog/?p=573
+//March 2, 2013 / ReWolf posted in programming, reverse engineering, source code, x64 /
+
+#pragma pack(push)
+#pragma pack(1)
+template <class T>
+struct LIST_ENTRY_T
 {
-    BOOLEAN                 InheritedAddressSpace;
-    BOOLEAN                 ReadImageFileExecOptions;
-    BOOLEAN                 BeingDebugged;
-    BOOLEAN                 Spare;
-    HANDLE                  Mutant;
-    PVOID                   ImageBaseAddress;
-    PPEB_LDR_DATA           LoaderData;
-    PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-    PVOID                   SubSystemData;
-    PVOID                   ProcessHeap;
-    PVOID                   FastPebLock;
-    void*					  FastPebLockRoutine;
-    void*					  FastPebUnlockRoutine;
-    ULONG                   EnvironmentUpdateCount;
-    PVOID*                  KernelCallbackTable;
-    PVOID                   EventLogSection;
-    PVOID                   EventLog;
-    void*					  FreeList;
-    ULONG                   TlsExpansionCounter;
-    PVOID                   TlsBitmap;
-    ULONG                   TlsBitmapBits[0x2];
-    PVOID                   ReadOnlySharedMemoryBase;
-    PVOID                   ReadOnlySharedMemoryHeap;
-    PVOID*                  ReadOnlyStaticServerData;
-    PVOID                   AnsiCodePageData;
-    PVOID                   OemCodePageData;
-    PVOID                   UnicodeCaseTableData;
-    ULONG                   NumberOfProcessors;
-    ULONG                   NtGlobalFlag;
-    BYTE                    Spare2[0x4];
-    LARGE_INTEGER           CriticalSectionTimeout;
-    ULONG                   HeapSegmentReserve;
-    ULONG                   HeapSegmentCommit;
-    ULONG                   HeapDeCommitTotalFreeThreshold;
-    ULONG                   HeapDeCommitFreeBlockThreshold;
-    ULONG                   NumberOfHeaps;
-    ULONG                   MaximumNumberOfHeaps;
-    PVOID*                  *ProcessHeaps;
-    PVOID                   GdiSharedHandleTable;
-    PVOID                   ProcessStarterHelper;
-    PVOID                   GdiDCAttributeList;
-    PVOID                   LoaderLock;
-    ULONG                   OSMajorVersion;
-    ULONG                   OSMinorVersion;
-    ULONG                   OSBuildNumber;
-    ULONG                   OSPlatformId;
-    ULONG                   ImageSubSystem;
-    ULONG                   ImageSubSystemMajorVersion;
-    ULONG                   ImageSubSystemMinorVersion;
-    ULONG                   GdiHandleBuffer[0x22];
-    ULONG                   PostProcessInitRoutine;
-    ULONG                   TlsExpansionBitmap;
-    BYTE                    TlsExpansionBitmapBits[0x80];
-    ULONG                   SessionId;
-} NTPEB, *PNTPEB;
+	T Flink;
+	T Blink;
+};
+
+template <class T>
+struct UNICODE_STRING_T
+{
+	union
+	{
+		struct
+		{
+			WORD Length;
+			WORD MaximumLength;
+		};
+		T dummy;
+	};
+	T _Buffer;
+};
+
+template <class T, class NGF, int A>
+struct _PEB_T
+{
+	union
+	{
+		struct
+		{
+			BYTE InheritedAddressSpace;
+			BYTE ReadImageFileExecOptions;
+			BYTE BeingDebugged;
+			BYTE _SYSTEM_DEPENDENT_01;
+		};
+		T dummy01;
+	};
+	T Mutant;
+	T ImageBaseAddress;
+	T Ldr;
+	T ProcessParameters;
+	T SubSystemData;
+	T ProcessHeap;
+	T FastPebLock;
+	T _SYSTEM_DEPENDENT_02;
+	T _SYSTEM_DEPENDENT_03;
+	T _SYSTEM_DEPENDENT_04;
+	union
+	{
+		T KernelCallbackTable;
+		T UserSharedInfoPtr;
+	};
+	DWORD SystemReserved;
+	DWORD _SYSTEM_DEPENDENT_05;
+	T _SYSTEM_DEPENDENT_06;
+	T TlsExpansionCounter;
+	T TlsBitmap;
+	DWORD TlsBitmapBits[2];
+	T ReadOnlySharedMemoryBase;
+	T _SYSTEM_DEPENDENT_07;
+	T ReadOnlyStaticServerData;
+	T AnsiCodePageData;
+	T OemCodePageData;
+	T UnicodeCaseTableData;
+	DWORD NumberOfProcessors;
+	union
+	{
+		DWORD NtGlobalFlag;
+		NGF dummy02;
+	};
+	LARGE_INTEGER CriticalSectionTimeout;
+	T HeapSegmentReserve;
+	T HeapSegmentCommit;
+	T HeapDeCommitTotalFreeThreshold;
+	T HeapDeCommitFreeBlockThreshold;
+	DWORD NumberOfHeaps;
+	DWORD MaximumNumberOfHeaps;
+	T ProcessHeaps;
+	T GdiSharedHandleTable;
+	T ProcessStarterHelper;
+	T GdiDCAttributeList;
+	T LoaderLock;
+	DWORD OSMajorVersion;
+	DWORD OSMinorVersion;
+	WORD OSBuildNumber;
+	WORD OSCSDVersion;
+	DWORD OSPlatformId;
+	DWORD ImageSubsystem;
+	DWORD ImageSubsystemMajorVersion;
+	T ImageSubsystemMinorVersion;
+	union
+	{
+		T ImageProcessAffinityMask;
+		T ActiveProcessAffinityMask;
+	};
+	T GdiHandleBuffer[A];
+	T PostProcessInitRoutine;
+	T TlsExpansionBitmap;
+	DWORD TlsExpansionBitmapBits[32];
+	T SessionId;
+	ULARGE_INTEGER AppCompatFlags;
+	ULARGE_INTEGER AppCompatFlagsUser;
+	T pShimData;
+	T AppCompatInfo;
+	UNICODE_STRING_T<T> CSDVersion;
+	T ActivationContextData;
+	T ProcessAssemblyStorageMap;
+	T SystemDefaultActivationContextData;
+	T SystemAssemblyStorageMap;
+	T MinimumStackCommit;
+};
+
+typedef _PEB_T<DWORD, DWORD64, 34> PEB32;
+typedef _PEB_T<DWORD64, DWORD, 30> PEB64;
+
+#ifdef _WIN64
+	typedef PEB64 PEB_CURRENT;
+#else
+    typedef PEB32 PEB_CURRENT;
+#endif

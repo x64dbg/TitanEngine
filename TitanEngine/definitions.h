@@ -89,6 +89,9 @@ __declspec(dllexport) bool TITCALL IsFileDLL(char* szFileName, ULONG_PTR FileMap
 __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR FileMapVA);
 // TitanEngine.Hider.functions:
 __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess);
+#ifndef _WIN64
+__declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess);
+#endif
 __declspec(dllexport) bool TITCALL HideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 __declspec(dllexport) bool TITCALL UnHideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 // TitanEngine.Relocater.functions:
