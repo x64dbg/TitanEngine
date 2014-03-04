@@ -5,17 +5,13 @@
 // TitanEngine.Hider.functions:
 __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
 {
+	typedef NTSTATUS(WINAPI *fNtQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
     ULONG RequiredLen = 0;
 	void * PebAddress = 0;
     PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, sizeof(PROCESS_BASIC_INFORMATION) * 4, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
-    if(!myProcessBasicInformation)
+    
+	if(!myProcessBasicInformation)
         return 0;
-
-#if !defined(_WIN64)
-    typedef NTSTATUS(WINAPI *fNtQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
-#else
-    typedef NTSTATUS(__fastcall *fNtQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
-#endif
 
     fNtQueryInformationProcess cNtQueryInformationProcess = (fNtQueryInformationProcess)GetProcAddress(GetModuleHandleA("ntdll.dll"),"NtQueryInformationProcess");
 

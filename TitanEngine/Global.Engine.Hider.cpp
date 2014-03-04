@@ -19,10 +19,16 @@ static bool isAtleastVista()
 	return isAtleastVista;
 }
 
-void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide)
+void FixAntidebugApiInProcess32(HANDLE hProcess, bool Hide)
 {
-	const BYTE patchCheckRemoteDebuggerPresent[5] = {0x33, 0xC0, 0xC2, 0x08, 0x00};
-	const BYTE patchGetTickCount[3] = {0x33, 0xC0, 0xC3};
+	const BYTE patchCheckRemoteDebuggerPresent[5] = {
+		0x33, 0xC0, //XOR EAX,EAX
+		0xC2, 0x08, 0x00}; //RETN 0x8
+
+	const BYTE patchGetTickCount[3] = {
+		0x33, 0xC0, //XOR EAX,EAX
+		0xC3}; //RETN
+
 	ULONG_PTR APIPatchAddress = NULL;
 	DWORD OldProtect;
 	SIZE_T ueNumberOfBytesRead = 0;
@@ -126,7 +132,9 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
 		{
 			if(PatchAPILevel == UE_HIDE_BASIC)
 			{
-				FixAntidebugApiInProcess(hProcess, Hide);
+#ifndef _WIN64
+				FixAntidebugApiInProcess32(hProcess, Hide);
+#endif
 			}
 
 			return true;
