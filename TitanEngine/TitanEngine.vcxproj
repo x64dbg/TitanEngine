@@ -223,6 +223,7 @@
     <ClCompile Include="Global.Engine.Hider.cpp" />
     <ClCompile Include="Global.Engine.Hook.cpp" />
     <ClCompile Include="Global.Engine.Simplification.cpp" />
+    <ClCompile Include="Global.Engine.Threading.cpp" />
     <ClCompile Include="Global.Garbage.cpp" />
     <ClCompile Include="Global.Handle.cpp" />
     <ClCompile Include="Global.Injector.cpp" />
@@ -284,6 +285,7 @@
     <ClInclude Include="Global.Engine.Hider.h" />
     <ClInclude Include="Global.Engine.Hook.h" />
     <ClInclude Include="Global.Engine.Simplification.h" />
+    <ClInclude Include="Global.Engine.Threading.h" />
     <ClInclude Include="Global.Garbage.h" />
     <ClInclude Include="Global.Handle.h" />
     <ClInclude Include="Global.Injector.h" />

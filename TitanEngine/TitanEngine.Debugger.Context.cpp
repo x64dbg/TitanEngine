@@ -3,36 +3,36 @@
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
 #include "Global.Handle.h"
+#include "Global.Engine.Threading.h"
 
 static CONTEXT DBGContext = {};
 
 __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
 {
-
-    if(FPUSaveArea != NULL)
+    MutexLocker locker("DBGContext"); //lock DBGContext
+    if(FPUSaveArea)
     {
         RtlZeroMemory(&DBGContext, sizeof CONTEXT);
         DBGContext.ContextFlags = CONTEXT_ALL;
         if(!GetThreadContext(hActiveThread, &DBGContext))
-            return(false);
-#if !defined (_WIN64)
+            return false;
+#ifndef _WIN64
         RtlMoveMemory(FPUSaveArea, &DBGContext.FloatSave, sizeof FLOATING_SAVE_AREA);
 #else
         RtlMoveMemory(FPUSaveArea, &DBGContext.FltSave, sizeof XMM_SAVE_AREA32);
 #endif
-        return(true);
+        return true;
     }
-    else
-    {
-        return(false);
-    }
+    return false;
 }
+
 __declspec(dllexport) long long TITCALL GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister)
 {
+    MutexLocker locker("DBGContext"); //lock DBGContext
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
     DBGContext.ContextFlags = CONTEXT_ALL;
-#if defined(_WIN64)
     GetThreadContext(hActiveThread, &DBGContext);
+#ifdef _WIN64
     if(IndexOfRegister == UE_EAX)
     {
         return((DWORD)DBGContext.Rax);
@@ -202,7 +202,6 @@ __declspec(dllexport) long long TITCALL GetContextDataEx(HANDLE hActiveThread, D
         return(DBGContext.SegSs);
     }
 #else
-    GetThreadContext(hActiveThread, &DBGContext);
     if(IndexOfRegister == UE_EAX)
     {
         return(DBGContext.Eax);
@@ -300,51 +299,47 @@ __declspec(dllexport) long long TITCALL GetContextDataEx(HANDLE hActiveThread, D
         return(DBGContext.SegSs);
     }
 #endif
-    return(NULL);
+    return NULL;
 }
+
 __declspec(dllexport) long long TITCALL GetContextData(DWORD IndexOfRegister)
 {
-
-    HANDLE hActiveThread = 0;
-    long long ContextReturn;
-
-    hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
-    ContextReturn = GetContextDataEx(hActiveThread, IndexOfRegister);
+    MutexLocker locker("DBGContext"); //lock DBGContext
+    HANDLE hActiveThread = OpenThread(THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
+    long long ContextReturn = GetContextDataEx(hActiveThread, IndexOfRegister);
     EngineCloseHandle(hActiveThread);
     return(ContextReturn);
 }
+
 __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
 {
-
-    if(FPUSaveArea != NULL)
+    MutexLocker locker("DBGContext"); //lock DBGContext
+    if(FPUSaveArea)
     {
         RtlZeroMemory(&DBGContext, sizeof CONTEXT);
         DBGContext.ContextFlags = CONTEXT_ALL;
         if(!GetThreadContext(hActiveThread, &DBGContext))
             return(false);
-#if !defined (_WIN64)
+#ifndef _WIN64
         RtlMoveMemory(&DBGContext.FloatSave, FPUSaveArea, sizeof FLOATING_SAVE_AREA);
 #else
         RtlMoveMemory(&DBGContext.FltSave, FPUSaveArea, sizeof XMM_SAVE_AREA32);
 #endif
         if(SetThreadContext(hActiveThread, &DBGContext))
-        {
-            return(true);
-        }
+            return true;
     }
-    return(false);
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-    SuspendThread(hActiveThread);
+    MutexLocker locker("DBGContext"); //lock DBGContext
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
     DBGContext.ContextFlags = CONTEXT_ALL;
-#ifdef _WIN64
     if(!GetThreadContext(hActiveThread, &DBGContext))
-    {
-        ResumeThread(hActiveThread);
-        return(false);
-    }
+        return false;
+    SuspendThread(hActiveThread);
+#ifdef _WIN64
     if(IndexOfRegister == UE_EAX)
     {
         NewRegisterValue = DBGContext.Rax - (DWORD)DBGContext.Rax + NewRegisterValue;
@@ -522,22 +517,7 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     {
         DBGContext.SegSs = (WORD)NewRegisterValue;
     }
-    else
-    {
-        ResumeThread(hActiveThread);
-        return(false);
-    }
-    if(SetThreadContext(hActiveThread, &DBGContext))
-    {
-        ResumeThread(hActiveThread);
-        return(true);
-    }
 #else
-    if(!GetThreadContext(hActiveThread, &DBGContext))
-    {
-        ResumeThread(hActiveThread);
-        return(false);
-    }
     if(IndexOfRegister == UE_EAX)
     {
         DBGContext.Eax = NewRegisterValue;
@@ -634,28 +614,26 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     {
         DBGContext.SegSs = NewRegisterValue;
     }
+#endif
     else
     {
         ResumeThread(hActiveThread);
-        return(false);
+        return false;
     }
     if(SetThreadContext(hActiveThread, &DBGContext))
     {
         ResumeThread(hActiveThread);
-        return(true);
+        return true;
     }
-#endif
     ResumeThread(hActiveThread);
-    return(false);
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-
-    HANDLE hActiveThread = 0;
-    bool ContextReturn;
-
-    hActiveThread = OpenThread(THREAD_ALL_ACCESS, false, DBGEvent.dwThreadId);
-    ContextReturn = SetContextDataEx(hActiveThread, IndexOfRegister, NewRegisterValue);
+    MutexLocker locker("DBGContext"); //lock DBGContext
+    HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME|THREAD_SET_CONTEXT|THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
+    bool ContextReturn = SetContextDataEx(hActiveThread, IndexOfRegister, NewRegisterValue);
     EngineCloseHandle(hActiveThread);
     return(ContextReturn);
 }
