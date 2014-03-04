@@ -19,8 +19,13 @@ static bool isAtleastVista()
     return isAtleastVista;
 }
 
-static bool isWindows64()
+static bool isWindows64() //TODO: unclear behaviour, will return true when on wow64, but should not return true, because the system structures are x32 in that case
 {
+#ifdef _WIN64
+    return true;
+#else
+    return false;
+#endif;
     SYSTEM_INFO si = {0};
     typedef void (WINAPI *tGetNativeSystemInfo)(LPSYSTEM_INFO lpSystemInfo);
     tGetNativeSystemInfo _GetNativeSystemInfo = (tGetNativeSystemInfo)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetNativeSystemInfo");
@@ -183,6 +188,7 @@ bool FixPebInProcess(HANDLE hProcess, bool Hide)
 
         if(Hide)
         {
+            //TODO: backup GlobalFlag
             myPEB.BeingDebugged = FALSE;
             myPEB.NtGlobalFlag &= ~0x70;
 
@@ -193,7 +199,24 @@ bool FixPebInProcess(HANDLE hProcess, bool Hide)
 
             heapFlagsAddress = (void *)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset());
             heapForceFlagsAddress = (void *)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset());
-            //TODO finish Heap Flag Anti-Anti-Debug
+            //TODO: finish Heap Flag Anti-Anti-Debug
+
+            /*
+            *(ULONG*)flagPtr_ &= HEAP_GROWABLE;
+	        *(ULONG*)forceFlagPtr_ = 0;
+            */
+
+            //TODO: backup heap flags
+            ULONG flagPtr_=0;
+            ReadProcessMemory(hProcess, heapFlagsAddress, &flagPtr_, sizeof(ULONG), 0);
+            ULONG forceFlagPtr_=0;
+            ReadProcessMemory(hProcess, heapForceFlagsAddress, &forceFlagPtr_, sizeof(ULONG), 0);
+
+            flagPtr_&=HEAP_GROWABLE;
+            forceFlagPtr_=0;
+
+            WriteProcessMemory(hProcess, heapFlagsAddress, &flagPtr_, sizeof(ULONG), 0);
+            WriteProcessMemory(hProcess, heapForceFlagsAddress, &forceFlagPtr_, sizeof(ULONG), 0);
         }
         else
         {
