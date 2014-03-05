@@ -50,10 +50,10 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
         0x33, 0xC0, //XOR EAX,EAX
         0xC3        //RETN
     };
-    const BYTE patchCheckRemoteDebuggerPresent64[6] =
+    const BYTE patchCheckRemoteDebuggerPresent64[4] =
     {
         0x48, 0x31, 0xC0, //XOR RAX,RAX
-        0xC2, 0x08, 0x00  //RETN 0x8
+        0xC3  //RETN
     };
     const BYTE patchGetTickCount64[4] =
     {

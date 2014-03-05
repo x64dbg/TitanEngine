@@ -41,8 +41,11 @@ __declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess)
     {
         //Only WOW64 processes have 2 PEBs
         DWORD peb32 = (DWORD)GetPEBLocation(hProcess);
-        peb32 += 0x1000; //PEB64 after PEB32
-        return (void *)peb32;
+		if (peb32)
+		{
+			peb32 += 0x1000; //PEB64 after PEB32
+			return (void *)peb32;
+		}
     }
 #endif //_WIN64
     return 0;

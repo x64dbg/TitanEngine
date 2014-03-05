@@ -927,7 +927,9 @@ struct _PEB_T
     DWORD NumberOfHeaps;
     DWORD MaximumNumberOfHeaps;
     T ProcessHeaps;
-    T GdiSharedHandleTable;
+
+//FULL PEB not needed
+	/*    T GdiSharedHandleTable;
     T ProcessStarterHelper;
     T GdiDCAttributeList;
     T LoaderLock;
@@ -958,7 +960,7 @@ struct _PEB_T
     T ProcessAssemblyStorageMap;
     T SystemDefaultActivationContextData;
     T SystemAssemblyStorageMap;
-    T MinimumStackCommit;
+    T MinimumStackCommit;*/
 };
 
 typedef _PEB_T<DWORD, DWORD64, 34> PEB32;
