@@ -5,33 +5,28 @@
 // TitanEngine.Hider.functions:
 __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
 {
-    typedef NTSTATUS(WINAPI *fNtQueryInformationProcess)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
-    ULONG RequiredLen = 0;
-    void * PebAddress = 0;
-    PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, sizeof(PROCESS_BASIC_INFORMATION) * 4, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+	ULONG RequiredLen = 0;
+	void * PebAddress = 0;
+	PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, sizeof(PROCESS_BASIC_INFORMATION) * 4, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
 
-    if(!myProcessBasicInformation)
-        return 0;
+	if(!myProcessBasicInformation)
+		return 0;
 
-    fNtQueryInformationProcess cNtQueryInformationProcess = (fNtQueryInformationProcess)GetProcAddress(GetModuleHandleA("ntdll.dll"),"NtQueryInformationProcess");
+	if(NtQueryInformationProcess(hProcess, ProcessBasicInformation, myProcessBasicInformation, sizeof(PROCESS_BASIC_INFORMATION), &RequiredLen) == STATUS_SUCCESS)
+	{
+		PebAddress = (void*)myProcessBasicInformation->PebBaseAddress;
+	}
+	else
+	{
+		if(NtQueryInformationProcess(hProcess, ProcessBasicInformation, myProcessBasicInformation, RequiredLen, &RequiredLen) == STATUS_SUCCESS)
+		{
+			PebAddress = (void*)myProcessBasicInformation->PebBaseAddress;
+		}
+	}
 
-    if(cNtQueryInformationProcess != NULL)
-    {
-        if(cNtQueryInformationProcess(hProcess, ProcessBasicInformation, myProcessBasicInformation, sizeof(PROCESS_BASIC_INFORMATION), &RequiredLen) == STATUS_SUCCESS)
-        {
-            PebAddress = (void*)myProcessBasicInformation->PebBaseAddress;
-        }
-        else
-        {
-            if(cNtQueryInformationProcess(hProcess, ProcessBasicInformation, myProcessBasicInformation, RequiredLen, &RequiredLen) == STATUS_SUCCESS)
-            {
-                PebAddress = (void*)myProcessBasicInformation->PebBaseAddress;
-            }
-        }
-    }
 
-    VirtualFree(myProcessBasicInformation, 0, MEM_RELEASE);
-    return PebAddress;
+	VirtualFree(myProcessBasicInformation, 0, MEM_RELEASE);
+	return PebAddress;
 }
 
 __declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess)

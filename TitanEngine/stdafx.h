@@ -12,9 +12,8 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>
-#include <Winternl.h>
-
-
+//#include <winternl.h>
+#include "ntdll.h"
 #include "aplib.h"
 #include "LzmaDec.h"
 
@@ -719,10 +718,6 @@ typedef struct
 
 // UnpackEngine.Handler:
 
-#define NTDLL_SystemHandleInfo 0x10
-#define ObjectBasicInformation 0
-#define ObjectNameInformation 1
-#define ObjectTypeInformation 2
 
 /*typedef enum _POOL_TYPE {
 	NonPagedPool,

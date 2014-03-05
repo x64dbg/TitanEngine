@@ -298,6 +298,7 @@
     <ClInclude Include="Global.TLS.h" />
     <ClInclude Include="LzmaDec.h" />
     <ClInclude Include="LzmaTypes.h" />
+    <ClInclude Include="ntdll.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="scylla_wrapper.h" />
     <ClInclude Include="stdafx.h" />

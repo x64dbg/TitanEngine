@@ -26,13 +26,7 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibraryW(HANDLE hProcess, wchar_t* 
     LPVOID remStringData;
     LPVOID remCodeData;
     ULONG_PTR remInjectSize = (ULONG_PTR)((ULONG_PTR)&injectedRemoteFreeLibrary - (ULONG_PTR)&injectedRemoteLoadLibrary);
-#if !defined(_WIN64)
-    typedef NTSTATUS(WINAPI *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
-#else
-    typedef NTSTATUS(__fastcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
-#endif
-    LPVOID ZwSetInformationThread = (LPVOID)GetProcAddress(GetModuleHandleA("ntdll.dll"),"ZwSetInformationThread");
-    fZwSetInformationThread cZwSetInformationThread = (fZwSetInformationThread)(ZwSetInformationThread);
+
     ULONG_PTR NumberOfBytesWritten;
     DWORD ThreadId;
     HANDLE hThread;
@@ -56,10 +50,9 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibraryW(HANDLE hProcess, wchar_t* 
             if(WaitForThreadExit)
             {
                 hThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)remCodeData, remStringData, CREATE_SUSPENDED, &ThreadId);
-                if(ZwSetInformationThread != NULL)
-                {
-                    cZwSetInformationThread(hThread, 0x11, NULL, NULL);
-                }
+
+                NtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, NULL);
+
                 ResumeThread(hThread);
                 WaitForSingleObject(hThread, INFINITE);
                 VirtualFreeEx(hProcess, remCodeData, NULL, MEM_RELEASE);
@@ -120,13 +113,6 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
     LPVOID remCodeData;
     ULONG_PTR remInjectSize1 = (ULONG_PTR)((ULONG_PTR)&injectedExitProcess - (ULONG_PTR)&injectedRemoteFreeLibrarySimple);
     ULONG_PTR remInjectSize2 = (ULONG_PTR)((ULONG_PTR)&injectedRemoteFreeLibrarySimple - (ULONG_PTR)&injectedRemoteFreeLibrary);
-#if !defined(_WIN64)
-    typedef NTSTATUS(WINAPI *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
-#else
-    typedef NTSTATUS(__fastcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
-#endif
-    LPVOID ZwSetInformationThread = (LPVOID)GetProcAddress(GetModuleHandleA("ntdll.dll"),"ZwSetInformationThread");
-    fZwSetInformationThread cZwSetInformationThread = (fZwSetInformationThread)(ZwSetInformationThread);
     ULONG_PTR NumberOfBytesWritten;
     DWORD ThreadId;
     HANDLE hThread;
@@ -153,10 +139,9 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                 if(WaitForThreadExit)
                 {
                     hThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)remCodeData, remStringData, CREATE_SUSPENDED, &ThreadId);
-                    if(ZwSetInformationThread != NULL)
-                    {
-                        cZwSetInformationThread(hThread, 0x11, NULL, NULL);
-                    }
+
+                    NtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, NULL);
+
                     ResumeThread(hThread);
                     WaitForSingleObject(hThread, INFINITE);
                     VirtualFreeEx(hProcess, remCodeData, NULL, MEM_RELEASE);
@@ -200,10 +185,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                 if(WaitForThreadExit)
                 {
                     hThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)remCodeData, remStringData, CREATE_SUSPENDED, &ThreadId);
-                    if(ZwSetInformationThread != NULL)
-                    {
-                        cZwSetInformationThread(hThread, 0x11, NULL, NULL);
-                    }
+					NtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, NULL);
                     ResumeThread(hThread);
                     WaitForSingleObject(hThread, INFINITE);
                     VirtualFreeEx(hProcess, remCodeData, NULL, MEM_RELEASE);
