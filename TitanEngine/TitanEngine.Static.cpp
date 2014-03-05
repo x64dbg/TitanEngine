@@ -416,7 +416,6 @@ __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD So
 
     if(Algorithm == UE_STATIC_APLIB)
     {
-#if !defined (_WIN64)
         if(aP_depack_asm_safe(Source, SourceSize, Destination, DestinationSize) != APLIB_ERROR)
         {
             return true;
@@ -425,7 +424,6 @@ __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD So
         {
             return true;
         }
-#endif
     }
     else if(Algorithm == UE_STATIC_LZMA)
     {

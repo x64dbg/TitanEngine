@@ -14,9 +14,8 @@
 #include <windows.h>
 #include <Winternl.h>
 
-#if !defined(_WIN64)
+
 #include "aplib.h"
-#endif
 #include "LzmaDec.h"
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L) // ntsubauth
