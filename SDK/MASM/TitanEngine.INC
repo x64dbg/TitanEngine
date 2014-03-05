@@ -549,7 +549,6 @@ ThreaderIsThreadActive proto stdcall :HANDLE
 ThreaderIsAnyThreadActive proto stdcall 
 ThreaderExecuteOnlyInjectedThreads proto stdcall 
 ThreaderGetOpenHandleForThread proto stdcall :DWORD
-ThreaderGetThreadData proto stdcall 
 ThreaderIsExceptionInMainThread proto stdcall 
 StaticDisassembleEx proto stdcall :DWORD, :LPVOID
 StaticDisassemble proto stdcall :LPVOID

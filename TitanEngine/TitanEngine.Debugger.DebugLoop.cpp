@@ -32,7 +32,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     bool hListThreadFirst = true;
     bool hListLibraryFirst = true;
     PPROCESS_ITEM_DATA hListProcessPtr = NULL;
-    PTHREAD_ITEM_DATA hListThreadPtr = NULL;
+    //PTHREAD_ITEM_DATA hListThreadPtr = NULL;
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
     PLIBRARY_ITEM_DATAW hLoadedLibData = NULL;
     PLIBRARY_BREAK_DATA ptrLibrarianData = NULL;
@@ -142,17 +142,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         RtlZeroMemory(hListProcess, MAX_DEBUG_DATA * sizeof PROCESS_ITEM_DATA);
                     }
                 }
-                if(hListThread == NULL)
-                {
-                    hListThread = VirtualAlloc(NULL, MAX_DEBUG_DATA * sizeof THREAD_ITEM_DATA, MEM_COMMIT, PAGE_READWRITE);
-                }
-                else
-                {
-                    if(hListThreadFirst == true)
-                    {
-                        RtlZeroMemory(hListThread, MAX_DEBUG_DATA * sizeof THREAD_ITEM_DATA);
-                    }
-                }
+                if(hListThreadFirst) //clear thread list
+                    ClearThreadList();
+
                 hListProcessPtr = (PPROCESS_ITEM_DATA)hListProcess;
                 hListProcessPtr->hFile = DBGEvent.u.CreateProcessInfo.hFile;
                 hListProcessPtr->hProcess = DBGEvent.u.CreateProcessInfo.hProcess;
@@ -163,11 +155,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 hListProcessPtr->ThreadStartAddress = (void*)DBGEvent.u.CreateProcessInfo.lpStartAddress;
                 hListProcessPtr->ThreadLocalBase = (void*)DBGEvent.u.CreateProcessInfo.lpThreadLocalBase;
 
-                hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-                hListThreadPtr->dwThreadId = DBGEvent.dwThreadId;
-                hListThreadPtr->hThread = DBGEvent.u.CreateProcessInfo.hThread;
-                hListThreadPtr->ThreadStartAddress = (void*)DBGEvent.u.CreateProcessInfo.lpStartAddress;
-                hListThreadPtr->ThreadLocalBase = (void*)DBGEvent.u.CreateProcessInfo.lpThreadLocalBase;
+                THREAD_ITEM_DATA NewThreadData;
+                memset(&NewThreadData, 0, sizeof(THREAD_ITEM_DATA));
+                NewThreadData.dwThreadId = DBGEvent.dwThreadId;
+                NewThreadData.hThread = DBGEvent.u.CreateProcessInfo.hThread;
+                NewThreadData.ThreadStartAddress = (void*)DBGEvent.u.CreateProcessInfo.lpStartAddress;
+                NewThreadData.ThreadLocalBase = (void*)DBGEvent.u.CreateProcessInfo.lpThreadLocalBase;
+                hListThread.push_back(NewThreadData);
                 hListThreadFirst = false;
             }
             else //we have a valid handle already (which means a child process started)
@@ -233,26 +227,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
         case CREATE_THREAD_DEBUG_EVENT:
         {
             //maintain thread list
-            if(hListThread == NULL)
-            {
-                hListThread = VirtualAlloc(NULL, MAX_DEBUG_DATA * sizeof THREAD_ITEM_DATA, MEM_COMMIT, PAGE_READWRITE);
-            }
-            hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-            __try
-            {
-                while(hListThreadPtr->hThread != NULL)
-                {
-                    hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
-                }
-                hListThreadPtr->dwThreadId = DBGEvent.dwThreadId;
-                hListThreadPtr->hThread = DBGEvent.u.CreateThread.hThread;
-                hListThreadPtr->ThreadStartAddress = (void*)DBGEvent.u.CreateThread.lpStartAddress;
-                hListThreadPtr->ThreadLocalBase = (void*)DBGEvent.u.CreateThread.lpThreadLocalBase;
-            }
-            __except(EXCEPTION_EXECUTE_HANDLER)
-            {
-
-            }
+            THREAD_ITEM_DATA NewThreadData;
+            memset(&NewThreadData, 0, sizeof(THREAD_ITEM_DATA));
+            NewThreadData.dwThreadId = DBGEvent.dwThreadId;
+            NewThreadData.hThread = DBGEvent.u.CreateThread.hThread;
+            NewThreadData.ThreadStartAddress = (void*)DBGEvent.u.CreateThread.lpStartAddress;
+            NewThreadData.ThreadLocalBase = (void*)DBGEvent.u.CreateThread.lpThreadLocalBase;
+            hListThread.push_back(NewThreadData);
 
             //custom handler
             if(DBGCustomHandler->chCreateThread != NULL)
@@ -300,17 +281,15 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
 
             //maintain thread list
-            hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-            while(hListThreadPtr->hThread != NULL && hListThreadPtr->dwThreadId != DBGEvent.dwThreadId)
+            int threadcount=hListThread.size();
+            for(int i=0; i<threadcount; i++)
             {
-                hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
-            }
-            if(hListThreadPtr->dwThreadId == DBGEvent.dwThreadId)
-            {
-                hListThreadPtr->hThread = (HANDLE)-1;
-                hListThreadPtr->dwThreadId = NULL;
-                hListThreadPtr->ThreadLocalBase = NULL;
-                hListThreadPtr->ThreadStartAddress = NULL;
+                if(hListThread.at(i).dwThreadId == DBGEvent.dwThreadId) //found the thread to remove
+                {
+                    //TODO: close handle?
+                    hListThread.erase(hListThread.begin()+i);
+                    break;
+                }
             }
         }
         break;
@@ -590,16 +569,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
-                        {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
-                        }
-                        if(!(myDBGContext.EFlags & 0x10000))
-                        {
-                            myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
-                        }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                        myDBGContext.EFlags |= UE_RESUME_FLAG;
 #if defined(_WIN64)
                         myDBGContext.Rip = myDBGContext.Rip - FoundBreakPoint.BreakPointSize;
 #else
@@ -748,10 +719,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                             myDBGContext.ContextFlags = CONTEXT_CONTROL;
                             GetThreadContext(hActiveThread, &myDBGContext);
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             EngineCloseHandle(hActiveThread);
                         }
@@ -846,10 +814,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             if(DebugRegister[0].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
+                                myDBGContext.EFlags |= UE_TRAP_FLAG;
                                 SetThreadContext(hActiveThread, &myDBGContext);
                                 myCustomHandler = (fCustomHandler)(DebugRegister[0].DrxCallBack);
                                 __try
@@ -876,10 +841,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             if(DebugRegister[1].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
+                                myDBGContext.EFlags |= UE_TRAP_FLAG;
                                 SetThreadContext(hActiveThread, &myDBGContext);
                                 myCustomHandler = (fCustomHandler)(DebugRegister[1].DrxCallBack);
                                 __try
@@ -906,10 +868,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             if(DebugRegister[2].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
+                                myDBGContext.EFlags |= UE_TRAP_FLAG;
                                 SetThreadContext(hActiveThread, &myDBGContext);
                                 myCustomHandler = (fCustomHandler)(DebugRegister[2].DrxCallBack);
                                 __try
@@ -936,10 +895,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             if(DebugRegister[3].DrxEnabled)
                             {
                                 DBGCode = DBG_CONTINUE;
-                                if(!(myDBGContext.EFlags & 0x100))
-                                {
-                                    myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                                }
+                                myDBGContext.EFlags |= UE_TRAP_FLAG;
                                 SetThreadContext(hActiveThread, &myDBGContext);
                                 myCustomHandler = (fCustomHandler)(DebugRegister[3].DrxCallBack);
                                 __try
@@ -1023,10 +979,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1051,10 +1004,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else //restore the memory breakpoint
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1074,10 +1024,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else //no read operation, restore breakpoint
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1093,10 +1040,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else //restore breakpoint after trap flag
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1116,10 +1060,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else //no write operation, restore breakpoint
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1136,10 +1077,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1160,10 +1098,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else //no execute operation, restore breakpoint
                         {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
                             SetThreadContext(hActiveThread, &myDBGContext);
                             ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
@@ -1241,16 +1176,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
-                        {
-                            if(!(myDBGContext.EFlags & 0x100))
-                            {
-                                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-                            }
-                        }
-                        if(!(myDBGContext.EFlags & 0x10000))
-                        {
-                            myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
-                        }
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                        myDBGContext.EFlags |= UE_RESUME_FLAG;
                         SetThreadContext(hActiveThread, &myDBGContext);
                         EngineCloseHandle(hActiveThread);
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);

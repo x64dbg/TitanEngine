@@ -644,7 +644,6 @@ TE.GetPEBLocation.restype = c_void_p
 TE.GetPEBLocation64.restype = c_void_p
 
 TE.ThreaderGetThreadInfo.restype = POINTER(THREAD_ITEM_DATA)
-TE.ThreaderGetThreadData.restype = POINTER(THREAD_ITEM_DATA)
 
 TE.InitDebug.restype = POINTER(PROCESS_INFORMATION)
 TE.InitDebugW.restype = POINTER(PROCESS_INFORMATION)

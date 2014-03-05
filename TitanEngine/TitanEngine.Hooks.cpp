@@ -28,66 +28,51 @@ static bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginal
 // Global.Engine.Hook.functions:
 __declspec(dllexport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray, int NumberOfHooks, bool TransitionStart)
 {
-
-    int i;
-    ULONG_PTR CurrentIP;
-    ULONG_PTR HookAddress;
-    PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-    PMEMORY_COMPARE_HANDLER myHookAddressArray;
-
-    if(dbgProcessInformation.hProcess == NULL)
+    if(dbgProcessInformation.hProcess == NULL) //TODO: check
     {
         if(!TransitionStart || ThreaderImportRunningThreadData(GetCurrentProcessId()))
         {
-            hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-            if(hListThreadPtr != NULL)
+            int threadcount=hListThread.size();
+            for(int i=0; i<threadcount; i++)
             {
-                while(hListThreadPtr->hThread != NULL)
+                PTHREAD_ITEM_DATA hListThreadPtr=&hListThread.at(i);
+                if(hListThreadPtr->hThread != INVALID_HANDLE_VALUE)
                 {
-                    if(hListThreadPtr->hThread != INVALID_HANDLE_VALUE)
+                    if(TransitionStart)
                     {
-                        if(TransitionStart)
+                        if(hListThreadPtr->dwThreadId != GetCurrentThreadId())
                         {
-                            if(hListThreadPtr->dwThreadId != GetCurrentThreadId())
+                            SuspendThread(hListThreadPtr->hThread);
+                            ULONG_PTR CurrentIP = (ULONG_PTR)GetContextDataEx(hListThreadPtr->hThread, UE_CIP);
+                            PMEMORY_COMPARE_HANDLER myHookAddressArray = (PMEMORY_COMPARE_HANDLER)HookAddressArray;
+                            for(int j=0; j<NumberOfHooks; j++)
                             {
-                                SuspendThread(hListThreadPtr->hThread);
-                                CurrentIP = (ULONG_PTR)GetContextDataEx(hListThreadPtr->hThread, UE_CIP);
-                                myHookAddressArray = (PMEMORY_COMPARE_HANDLER)HookAddressArray;
-                                for(i = 0; i < NumberOfHooks; i++)
-                                {
 #if defined (_WIN64)
-                                    HookAddress = (ULONG_PTR)myHookAddressArray->Array.qwArrayEntry[0];
-                                    myHookAddressArray = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)myHookAddressArray + sizeof ULONG_PTR);
+                                ULONG_PTR HookAddress = (ULONG_PTR)myHookAddressArray->Array.qwArrayEntry[0];
+                                myHookAddressArray = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)myHookAddressArray + sizeof ULONG_PTR);
 #else
-                                    HookAddress = (ULONG_PTR)myHookAddressArray->Array.dwArrayEntry[0];
-                                    myHookAddressArray = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)myHookAddressArray + sizeof ULONG_PTR);
+                                ULONG_PTR HookAddress = (ULONG_PTR)myHookAddressArray->Array.dwArrayEntry[0];
+                                myHookAddressArray = (PMEMORY_COMPARE_HANDLER)((ULONG_PTR)myHookAddressArray + sizeof ULONG_PTR);
 #endif
-                                    while(CurrentIP >= (ULONG_PTR)HookAddress && CurrentIP <= (ULONG_PTR)HookAddress + 5)
-                                    {
-                                        ResumeThread(hListThreadPtr->hThread);
-                                        Sleep(5);
-                                        SuspendThread(hListThreadPtr->hThread);
-                                        CurrentIP = (ULONG_PTR)GetContextDataEx(hListThreadPtr->hThread, UE_CIP);
-                                        i = 0;
-                                    }
+                                while(CurrentIP >= (ULONG_PTR)HookAddress && CurrentIP <= (ULONG_PTR)HookAddress + 5)
+                                {
+                                    ResumeThread(hListThreadPtr->hThread);
+                                    Sleep(5);
+                                    SuspendThread(hListThreadPtr->hThread);
+                                    CurrentIP = (ULONG_PTR)GetContextDataEx(hListThreadPtr->hThread, UE_CIP);
+                                    j = 0;
                                 }
                             }
                         }
-                        else
-                        {
-                            ResumeThread(hListThreadPtr->hThread);
-                            EngineCloseHandle(hListThreadPtr->hThread);
-                        }
                     }
-                    hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
+                    else
+                    {
+                        ResumeThread(hListThreadPtr->hThread);
+                        EngineCloseHandle(hListThreadPtr->hThread);
+                    }
                 }
-                if(!TransitionStart)
-                {
-                    VirtualFree(hListThread, NULL, MEM_RELEASE);
-                    hListThread = NULL;
-                }
-                return true;
             }
+            return true;
         }
         else
         {

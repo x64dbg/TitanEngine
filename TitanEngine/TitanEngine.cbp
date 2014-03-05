@@ -139,6 +139,7 @@
 		<Unit filename="aplib.h" />
 		<Unit filename="definitions.h" />
 		<Unit filename="distorm.h" />
+		<Unit filename="ntdll.h" />
 		<Unit filename="resource.h" />
 		<Unit filename="scylla_wrapper.h" />
 		<Unit filename="stdafx.cpp" />

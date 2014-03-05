@@ -185,7 +185,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibraryW(HANDLE hProcess, HMODULE h
                 if(WaitForThreadExit)
                 {
                     hThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)remCodeData, remStringData, CREATE_SUSPENDED, &ThreadId);
-					NtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, NULL);
+                    NtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, NULL);
                     ResumeThread(hThread);
                     WaitForSingleObject(hThread, INFINITE);
                     VirtualFreeEx(hProcess, remCodeData, NULL, MEM_RELEASE);

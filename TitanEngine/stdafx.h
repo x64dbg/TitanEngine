@@ -31,6 +31,9 @@
 #define MAXIMUM_INSTRUCTION_SIZE (40)
 #define MAX_RET_SEARCH_INSTRUCTIONS (100)
 
+#define UE_TRAP_FLAG (0x100)
+#define UE_RESUME_FLAG (0x10000)
+
 #define UE_OPTION_IMPORTER_REALIGN_LOCAL_APIADDRESS 0
 #define UE_OPTION_IMPORTER_REALIGN_APIADDRESS 1
 #define UE_OPTION_IMPORTER_RETURN_APINAME 2 //no kernelbase
@@ -923,7 +926,7 @@ struct _PEB_T
     T ProcessHeaps;
 
 //FULL PEB not needed
-	/*    T GdiSharedHandleTable;
+    /*    T GdiSharedHandleTable;
     T ProcessStarterHelper;
     T GdiDCAttributeList;
     T LoaderLock;

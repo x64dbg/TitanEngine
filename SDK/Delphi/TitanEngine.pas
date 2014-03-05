@@ -496,7 +496,6 @@ const
   function ThreaderIsAnyThreadActive():boolean; stdcall;  external 'TitanEngine.dll' name 'ThreaderIsAnyThreadActive';
   function ThreaderExecuteOnlyInjectedThreads():boolean; stdcall;  external 'TitanEngine.dll' name 'ThreaderExecuteOnlyInjectedThreads';
   function ThreaderGetOpenHandleForThread(ThreadId:LongInt):THandle; stdcall;  external 'TitanEngine.dll' name 'ThreaderGetOpenHandleForThread';
-  function ThreaderGetThreadData():Pointer; stdcall;  external 'TitanEngine.dll' name 'ThreaderGetThreadData';
   function ThreaderIsExceptionInMainThread():boolean; stdcall;  external 'TitanEngine.dll' name 'ThreaderIsExceptionInMainThread';
 {TitanEngine.Debugger.functions}
   function StaticDisassembleEx(DisassmStart:LongInt; DisassmAddress:Pointer):PAnsiChar; stdcall;  external 'TitanEngine.dll' name 'StaticDisassembleEx';

@@ -307,39 +307,22 @@ __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
 
 __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
 {
-
-    HANDLE hActiveThread;
-    CONTEXT myDBGContext;
-    PTHREAD_ITEM_DATA hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-
-    if(hListThreadPtr != NULL)
+    ThreaderPauseProcess();
+    int threadcount=hListThread.size();
+    for(int i=0; i<threadcount; i++)
     {
-        ThreaderPauseProcess();
-        while(hListThreadPtr->hThread != NULL)
-        {
-            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, hListThreadPtr->dwThreadId);
-            myDBGContext.ContextFlags = CONTEXT_CONTROL;
-            GetThreadContext(hActiveThread, &myDBGContext);
-            if((myDBGContext.EFlags & 0x100))
-            {
-                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x100;
-            }
-            if(!(myDBGContext.EFlags & 0x10000))
-            {
-                myDBGContext.EFlags = myDBGContext.EFlags ^ 0x10000;
-            }
-            SetThreadContext(hActiveThread, &myDBGContext);
-            EngineCloseHandle(hActiveThread);
-            hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
-        }
-        ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBG_CONTINUE);
-        ThreaderResumeProcess();
-        return(DetachDebugger(ProcessId));
+        HANDLE hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, hListThread.at(i).dwThreadId);
+        CONTEXT myDBGContext;
+        myDBGContext.ContextFlags = CONTEXT_CONTROL;
+        GetThreadContext(hActiveThread, &myDBGContext);
+        myDBGContext.EFlags &= ~UE_TRAP_FLAG;
+        myDBGContext.EFlags &= ~UE_RESUME_FLAG;
+        SetThreadContext(hActiveThread, &myDBGContext);
+        EngineCloseHandle(hActiveThread);
     }
-    else
-    {
-        return false;
-    }
+    ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBG_CONTINUE);
+    ThreaderResumeProcess();
+    return DetachDebugger(ProcessId);
 }
 
 __declspec(dllexport) void TITCALL AutoDebugEx(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)

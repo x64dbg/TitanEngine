@@ -1122,10 +1122,6 @@ public:
     {
         return UE::ThreaderGetOpenHandleForThread(ThreadId);
     }
-    static const THREAD_ITEM_DATA* GetThreadData()
-    {
-        return (const THREAD_ITEM_DATA*)UE::ThreaderGetThreadData();
-    }
     static bool IsExceptionInMainThread()
     {
         return UE::ThreaderIsExceptionInMainThread();

@@ -324,7 +324,6 @@ ThreaderIsThreadActive
 ThreaderIsAnyThreadActive
 ThreaderExecuteOnlyInjectedThreads
 ThreaderGetOpenHandleForThread
-ThreaderGetThreadData
 StaticFileLoad
 StaticFileLoadW
 StaticFileUnload

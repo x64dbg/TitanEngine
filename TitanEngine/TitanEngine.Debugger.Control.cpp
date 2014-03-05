@@ -4,6 +4,7 @@
 #include "Global.Handle.h"
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
+#include <vector>
 
 __declspec(dllexport) void TITCALL ForceClose()
 {
@@ -12,7 +13,7 @@ __declspec(dllexport) void TITCALL ForceClose()
     PPROCESS_ITEM_DATA hListProcessPtr = NULL;
     PTHREAD_ITEM_DATA hListThreadPtr = NULL;
     PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
-
+    //manage lists
     if(hListProcess != NULL)
     {
         hListProcessPtr = (PPROCESS_ITEM_DATA)hListProcess;
@@ -31,35 +32,12 @@ __declspec(dllexport) void TITCALL ForceClose()
         }
         RtlZeroMemory(hListProcess, MAX_DEBUG_DATA * sizeof PROCESS_ITEM_DATA);
     }
-    if(hListThread != NULL)
-    {
-        hListThreadPtr = (PTHREAD_ITEM_DATA)hListThread;
-        while(hListThreadPtr->hThread != NULL)
-        {
-            if(hListThreadPtr->hThread != (HANDLE)-1)
-            {
-                __try
-                {
-                    if(EngineCloseHandle(hListThreadPtr->hThread))
-                    {
-                        hListThreadPtr->hThread = NULL;
-                        hListThreadPtr->dwThreadId = NULL;
-                        hListThreadPtr->ThreadLocalBase = NULL;
-                        hListThreadPtr->ThreadStartAddress = NULL;
-                    }
-                }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    hListThreadPtr->hThread = NULL;
-                    hListThreadPtr->dwThreadId = NULL;
-                    hListThreadPtr->ThreadLocalBase = NULL;
-                    hListThreadPtr->ThreadStartAddress = NULL;
-                }
-            }
-            hListThreadPtr = (PTHREAD_ITEM_DATA)((ULONG_PTR)hListThreadPtr + sizeof THREAD_ITEM_DATA);
-        }
-        RtlZeroMemory(hListThread, MAX_DEBUG_DATA * sizeof THREAD_ITEM_DATA);
-    }
+
+    int threadcount=hListThread.size();
+    for(int i=threadcount-1; i>-1; i--)
+        EngineCloseHandle(hListThread.at(i).hThread);
+    ClearThreadList();
+
     if(hListLibrary != NULL)
     {
         hListLibraryPtr = (PLIBRARY_ITEM_DATAW)hListLibrary;
@@ -70,23 +48,9 @@ __declspec(dllexport) void TITCALL ForceClose()
                 if(hListLibraryPtr->hFileMappingView != NULL)
                 {
                     UnmapViewOfFile(hListLibraryPtr->hFileMappingView);
-                    __try
-                    {
-                        EngineCloseHandle(hListLibraryPtr->hFileMapping);
-                    }
-                    __except(EXCEPTION_EXECUTE_HANDLER)
-                    {
-
-                    }
+                    EngineCloseHandle(hListLibraryPtr->hFileMapping);
                 }
-                __try
-                {
-                    EngineCloseHandle(hListLibraryPtr->hFile);
-                }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-
-                }
+                EngineCloseHandle(hListLibraryPtr->hFile);
             }
             hListLibraryPtr = (PLIBRARY_ITEM_DATAW)((ULONG_PTR)hListLibraryPtr + sizeof LIBRARY_ITEM_DATAW);
         }

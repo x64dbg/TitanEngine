@@ -747,9 +747,6 @@ PROCESS_INFORMATION = alien.defstruct{
 -- __declspec(dllexport) long long __stdcall ThreaderGetOpenHandleForThread(DWORD ThreadId);
 	TitanEngine.ThreaderGetOpenHandleForThread:types {"long",abi="stdcall",ret="long"}
 	TE_ThreaderGetOpenHandleForThread = TitanEngine.ThreaderGetOpenHandleForThread
--- __declspec(dllexport) void* __stdcall ThreaderGetThreadData();
-	TitanEngine.ThreaderGetThreadData:types {abi="stdcall",ret="pointer"}
-	TE_ThreaderGetThreadData = TitanEngine.ThreaderGetThreadData
 -- __declspec(dllexport) bool __stdcall ThreaderIsExceptionInMainThread();
 	TitanEngine.ThreaderIsExceptionInMainThread:types {abi="stdcall",ret="byte"}
 	TE_ThreaderIsExceptionInMainThread = TitanEngine.ThreaderIsExceptionInMainThread

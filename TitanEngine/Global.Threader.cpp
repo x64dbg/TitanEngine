@@ -2,4 +2,9 @@
 #include "definitions.h"
 #include "Global.Threader.h"
 
-LPVOID hListThread = 0;
+std::vector<THREAD_ITEM_DATA> hListThread;
+
+void ClearThreadList()
+{
+    std::vector<THREAD_ITEM_DATA>().swap(hListThread);
+}

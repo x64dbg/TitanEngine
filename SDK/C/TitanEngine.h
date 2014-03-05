@@ -639,7 +639,6 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread);
 __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive();
 __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads();
 __declspec(dllexport) long long TITCALL ThreaderGetOpenHandleForThread(DWORD ThreadId);
-__declspec(dllexport) void* TITCALL ThreaderGetThreadData();
 __declspec(dllexport) bool TITCALL ThreaderIsExceptionInMainThread();
 // TitanEngine.Debugger.functions:
 __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress);
