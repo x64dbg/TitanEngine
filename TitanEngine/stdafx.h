@@ -229,8 +229,6 @@ typedef struct MEMORY_COMPARE_HANDLER
     } Array;
 } MEMORY_COMPARE_HANDLER, *PMEMORY_COMPARE_HANDLER;
 
-#define MAX_DEBUG_DATA 65536
-
 typedef struct
 {
     HANDLE hThread;
@@ -271,7 +269,6 @@ typedef struct
     wchar_t szLibraryName[MAX_PATH];
 } LIBRARY_ITEM_DATAW, *PLIBRARY_ITEM_DATAW;
 
-#define MAX_LIBRARY_BPX 64
 #define UE_ON_LIB_LOAD 1
 #define UE_ON_LIB_UNLOAD 2
 #define UE_ON_LIB_ALL 3

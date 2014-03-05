@@ -127,7 +127,6 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDL
     int i = 0;
     int j = 0;
     char szAnsiLibraryName[MAX_PATH];
-    PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
     ULONG_PTR APIFoundAddress = 0;
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
@@ -136,79 +135,77 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDL
     PEXPORTED_DATA ExportedFunctions;
     PEXPORTED_DATA ExportedFunctionNames;
     PEXPORTED_DATA_WORD ExportedFunctionOrdinals;
+    PLIBRARY_ITEM_DATAW hListLibraryPtr;
     bool FileIs64 = false;
 
-    hListLibraryPtr = (PLIBRARY_ITEM_DATAW)hListLibrary;
-    if(hListLibraryPtr != NULL)
+    int libcount=hListLibrary.size();
+    for(int i=0; i<libcount; i++)
     {
-        while(hListLibraryPtr->hFile != NULL)
+        hListLibraryPtr=&hListLibrary.at(i);
+        WideCharToMultiByte(CP_ACP, NULL, hListLibraryPtr->szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
+        if(lstrcmpiA(szAnsiLibraryName, szDLLName) == NULL)
         {
-            WideCharToMultiByte(CP_ACP, NULL, hListLibraryPtr->szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
-            if(lstrcmpiA(szAnsiLibraryName, szDLLName) == NULL)
+            __try
             {
-                __try
+                DOSHeader = (PIMAGE_DOS_HEADER)hListLibraryPtr->hFileMappingView;
+                PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+                PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+                if(PEHeader32->OptionalHeader.Magic == 0x10B)
                 {
-                    DOSHeader = (PIMAGE_DOS_HEADER)hListLibraryPtr->hFileMappingView;
-                    PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-                    PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-                    if(PEHeader32->OptionalHeader.Magic == 0x10B)
-                    {
-                        FileIs64 = false;
-                    }
-                    else if(PEHeader32->OptionalHeader.Magic == 0x20B)
-                    {
-                        FileIs64 = true;
-                    }
-                    else
-                    {
-                        return(NULL);
-                    }
+                    FileIs64 = false;
+                }
+                else if(PEHeader32->OptionalHeader.Magic == 0x20B)
+                {
+                    FileIs64 = true;
+                }
+                else
+                {
+                    return(NULL);
+                }
+                if(!FileIs64)
+                {
+                    PEExports = (PIMAGE_EXPORT_DIRECTORY)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, true, true));
+                    ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->AddressOfFunctions, true, true));
+                    ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->AddressOfNames, true, true));
+                    ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->AddressOfNameOrdinals, true, true));
+                }
+                else
+                {
+                    PEExports = (PIMAGE_EXPORT_DIRECTORY)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, true, true));
+                    ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->AddressOfFunctions, true, true));
+                    ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->AddressOfNames, true, true));
+                    ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->AddressOfNameOrdinals, true, true));
+                }
+                for(j = 0; j <= (int)PEExports->NumberOfNames; j++)
+                {
                     if(!FileIs64)
                     {
-                        PEExports = (PIMAGE_EXPORT_DIRECTORY)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, true, true));
-                        ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->AddressOfFunctions, true, true));
-                        ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->AddressOfNames, true, true));
-                        ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->AddressOfNameOrdinals, true, true));
+                        if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, ExportedFunctionNames->ExportedItem, true, true))) == NULL)
+                        {
+                            ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
+                            ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
+                            APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)hListLibraryPtr->BaseOfDll;
+                            return((ULONG_PTR)APIFoundAddress);
+                        }
                     }
                     else
                     {
-                        PEExports = (PIMAGE_EXPORT_DIRECTORY)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, true, true));
-                        ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->AddressOfFunctions, true, true));
-                        ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->AddressOfNames, true, true));
-                        ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->AddressOfNameOrdinals, true, true));
-                    }
-                    for(j = 0; j <= (int)PEExports->NumberOfNames; j++)
-                    {
-                        if(!FileIs64)
+                        if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, ExportedFunctionNames->ExportedItem, true, true))) == NULL)
                         {
-                            if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, ExportedFunctionNames->ExportedItem, true, true))) == NULL)
-                            {
-                                ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
-                                ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
-                                APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)hListLibraryPtr->BaseOfDll;
-                                return((ULONG_PTR)APIFoundAddress);
-                            }
+                            ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
+                            ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
+                            APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)hListLibraryPtr->BaseOfDll;
+                            return((ULONG_PTR)APIFoundAddress);
                         }
-                        else
-                        {
-                            if(lstrcmpiA((LPCSTR)szAPIName, (LPCSTR)((ULONG_PTR)ConvertVAtoFileOffsetEx((ULONG_PTR)hListLibraryPtr->hFileMappingView, GetFileSize(hListLibraryPtr->hFile, NULL), (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, ExportedFunctionNames->ExportedItem, true, true))) == NULL)
-                            {
-                                ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + j * 2);
-                                ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + (ExportedFunctionOrdinals->OrdinalNumber) * 4);
-                                APIFoundAddress = ExportedFunctions->ExportedItem + (ULONG_PTR)hListLibraryPtr->BaseOfDll;
-                                return((ULONG_PTR)APIFoundAddress);
-                            }
-                        }
-                        ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctionNames + 4);
                     }
-                    return(NULL);
+                    ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctionNames + 4);
                 }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    return(NULL);
-                }
+                return(NULL);
             }
-            hListLibraryPtr = (PLIBRARY_ITEM_DATAW)((ULONG_PTR)hListLibraryPtr + sizeof LIBRARY_ITEM_DATAW);
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return(NULL);
+            }
         }
     }
     return(NULL);

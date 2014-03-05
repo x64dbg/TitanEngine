@@ -1,6 +1,8 @@
 #ifndef _GLOBAL_DEBUGGER_H
 #define _GLOBAL_DEBUGGER_H
 
+#include <vector>
+
 extern HARDWARE_DATA DebugRegister[4];
 extern PROCESS_INFORMATION dbgProcessInformation;
 extern CustomHandler myDBGCustomHandler;
@@ -24,7 +26,7 @@ extern DEBUG_EVENT TerminateDBGEvent;
 extern DWORD ProcessExitCode;
 extern HANDLE DBGFileHandle;
 extern ULONG_PTR tlsCallBackList[100];
-extern LPVOID hListProcess;
+extern std::vector<PROCESS_ITEM_DATA> hListProcess;
 extern int engineStepCount;
 extern LPVOID engineStepCallBack;
 extern bool engineStepActive;
@@ -36,5 +38,6 @@ extern LPVOID engineAttachedProcessDebugInfo;
 
 long DebugLoopInSecondThread(LPVOID InputParameter);
 void DebuggerReset();
+void ClearProcessList();
 
 #endif //_GLOBAL_DEBUGGER_H

@@ -8,54 +8,35 @@
 
 __declspec(dllexport) void TITCALL ForceClose()
 {
-    /*wchar_t szTempName[MAX_PATH];
-    wchar_t szTempFolder[MAX_PATH];*/
-    PPROCESS_ITEM_DATA hListProcessPtr = NULL;
-    PTHREAD_ITEM_DATA hListThreadPtr = NULL;
-    PLIBRARY_ITEM_DATAW hListLibraryPtr = NULL;
-    //manage lists
-    if(hListProcess != NULL)
+    //manage process list
+    int processcount=hListProcess.size();
+    for(int i=0; i<processcount; i++)
     {
-        hListProcessPtr = (PPROCESS_ITEM_DATA)hListProcess;
-        while(hListProcessPtr->hProcess != NULL)
-        {
-            __try
-            {
-                EngineCloseHandle(hListProcessPtr->hFile);
-                EngineCloseHandle(hListProcessPtr->hProcess);
-            }
-            __except(EXCEPTION_EXECUTE_HANDLER)
-            {
-
-            }
-            hListProcessPtr = (PPROCESS_ITEM_DATA)((ULONG_PTR)hListProcessPtr + sizeof PROCESS_ITEM_DATA);
-        }
-        RtlZeroMemory(hListProcess, MAX_DEBUG_DATA * sizeof PROCESS_ITEM_DATA);
+        EngineCloseHandle(hListProcess.at(i).hFile);
+        EngineCloseHandle(hListProcess.at(i).hProcess);
     }
-
+    ClearProcessList();
+    //manage thread list
     int threadcount=hListThread.size();
-    for(int i=threadcount-1; i>-1; i--)
+    for(int i=0; i<threadcount; i++)
         EngineCloseHandle(hListThread.at(i).hThread);
     ClearThreadList();
-
-    if(hListLibrary != NULL)
+    //manage library list
+    int libcount=hListLibrary.size();
+    for(int i=0; i<libcount; i++)
     {
-        hListLibraryPtr = (PLIBRARY_ITEM_DATAW)hListLibrary;
-        while(hListLibraryPtr->hFile != NULL)
+        if(hListLibrary.at(i).hFile != (HANDLE)-1)
         {
-            if(hListLibraryPtr->hFile != (HANDLE)-1)
+            if(hListLibrary.at(i).hFileMappingView != NULL)
             {
-                if(hListLibraryPtr->hFileMappingView != NULL)
-                {
-                    UnmapViewOfFile(hListLibraryPtr->hFileMappingView);
-                    EngineCloseHandle(hListLibraryPtr->hFileMapping);
-                }
-                EngineCloseHandle(hListLibraryPtr->hFile);
+                UnmapViewOfFile(hListLibrary.at(i).hFileMappingView);
+                EngineCloseHandle(hListLibrary.at(i).hFileMapping);
             }
-            hListLibraryPtr = (PLIBRARY_ITEM_DATAW)((ULONG_PTR)hListLibraryPtr + sizeof LIBRARY_ITEM_DATAW);
+            EngineCloseHandle(hListLibrary.at(i).hFile);
         }
-        RtlZeroMemory(hListLibrary, MAX_DEBUG_DATA * sizeof LIBRARY_ITEM_DATAW);
     }
+    ClearLibraryList();
+
     if(!engineProcessIsNowDetached)
     {
         StopDebug();

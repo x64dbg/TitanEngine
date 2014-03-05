@@ -3,6 +3,10 @@
 #include "Global.Librarian.h"
 
 // Global.Engine.Librarian:
-LIBRARY_ITEM_DATA LibraryInfoData = {};
-LPVOID LibrarianData = VirtualAlloc(NULL, MAX_LIBRARY_BPX * sizeof LIBRARY_BREAK_DATA, MEM_COMMIT, PAGE_READWRITE);
-LPVOID hListLibrary = 0;
+std::vector<LIBRARY_ITEM_DATAW> hListLibrary;
+std::vector<LIBRARY_BREAK_DATA> LibrarianData;
+
+void ClearLibraryList()
+{
+    std::vector<LIBRARY_ITEM_DATAW>().swap(hListLibrary);
+}

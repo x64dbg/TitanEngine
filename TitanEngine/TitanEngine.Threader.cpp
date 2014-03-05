@@ -201,7 +201,7 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadStillRunning(HANDLE hThread)
     CONTEXT myDBGContext;
     memset(&myDBGContext, 0, sizeof(CONTEXT));
     myDBGContext.ContextFlags = CONTEXT_ALL;
-    return GetThreadContext(hThread, &myDBGContext);
+    return (GetThreadContext(hThread, &myDBGContext)==TRUE);
 }
 
 __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
@@ -220,7 +220,7 @@ __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()
     for(int i=0; i<threadcount; i++)
         if(ThreaderIsThreadActive(hListThread.at(i).hThread))
             return true;
-        return false;
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads()
@@ -239,7 +239,7 @@ __declspec(dllexport) long long TITCALL ThreaderGetOpenHandleForThread(DWORD Thr
     for(int i=0; i<threadcount; i++)
         if(hListThread.at(i).dwThreadId == ThreadId)
             return (ULONG_PTR)hListThread.at(i).hThread;
-        return 0;
+    return 0;
 }
 
 __declspec(dllexport) bool TITCALL ThreaderIsExceptionInMainThread()

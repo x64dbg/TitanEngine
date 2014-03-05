@@ -26,7 +26,7 @@ DEBUG_EVENT TerminateDBGEvent = {};
 DWORD ProcessExitCode = 0;
 HANDLE DBGFileHandle;
 ULONG_PTR tlsCallBackList[100];
-LPVOID hListProcess = 0;
+std::vector<PROCESS_ITEM_DATA> hListProcess;
 int engineStepCount = INFINITE;
 LPVOID engineStepCallBack = NULL;
 bool engineStepActive = false;
@@ -64,4 +64,9 @@ void DebuggerReset()
     {
         RtlZeroMemory(&myDBGCustomHandler, sizeof CustomHandler);
     }
+}
+
+void ClearProcessList()
+{
+    std::vector<PROCESS_ITEM_DATA>().swap(hListProcess);
 }
