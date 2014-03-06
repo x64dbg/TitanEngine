@@ -29,6 +29,49 @@ __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
     return PebAddress;
 }
 
+__declspec(dllexport) void* TITCALL GetTEBLocation(HANDLE hThread)
+{
+    ULONG RequiredLen = 0;
+    void * TebAddress = 0;
+    PTHREAD_BASIC_INFORMATION myThreadBasicInformation = (PTHREAD_BASIC_INFORMATION)VirtualAlloc(NULL, sizeof(THREAD_BASIC_INFORMATION) * 4, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+
+    if(!myThreadBasicInformation)
+        return 0;
+
+    if(NtQueryInformationThread(hThread, ThreadBasicInformation, myThreadBasicInformation, sizeof(THREAD_BASIC_INFORMATION), &RequiredLen) == STATUS_SUCCESS)
+    {
+        TebAddress = (void*)myThreadBasicInformation->TebBaseAddress;
+    }
+    else
+    {
+        if(NtQueryInformationThread(hThread, ThreadBasicInformation, myThreadBasicInformation, RequiredLen, &RequiredLen) == STATUS_SUCCESS)
+        {
+            TebAddress = (void*)myThreadBasicInformation->TebBaseAddress;
+        }
+    }
+
+
+    VirtualFree(myThreadBasicInformation, 0, MEM_RELEASE);
+    return TebAddress;
+}
+
+__declspec(dllexport) void* TITCALL GetTEBLocation64(HANDLE hThread)
+{
+#ifndef _WIN64
+    if (IsThisProcessWow64())
+    {
+        //Only WOW64 processes have 2 PEBs and 2 TEBs
+        DWORD teb32 = (DWORD)GetTEBLocation(hThread);
+        if (teb32)
+        {
+            teb32 -= 0x2000; //TEB64 before TEB32
+            return (void *)teb32;
+        }
+    }
+#endif //_WIN64
+    return 0;
+}
+
 __declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess)
 {
 #ifndef _WIN64

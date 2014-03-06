@@ -9,6 +9,12 @@
 #endif
 
 typedef LONG NTSTATUS;
+typedef LONG KPRIORITY;
+
+typedef struct _CLIENT_ID {
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, *PCLIENT_ID;
 
 typedef struct _UNICODE_STRING
 {
@@ -46,6 +52,23 @@ typedef struct _PROCESS_BASIC_INFORMATION
     PVOID Reserved3;
 } PROCESS_BASIC_INFORMATION;
 typedef PROCESS_BASIC_INFORMATION *PPROCESS_BASIC_INFORMATION;
+
+typedef struct _THREAD_BASIC_INFORMATION {
+    NTSTATUS ExitStatus;
+    PVOID TebBaseAddress;
+    CLIENT_ID ClientId;
+    ULONG_PTR AffinityMask;
+    KPRIORITY Priority;
+    LONG BasePriority;
+} THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
+
+typedef
+VOID
+(*PPS_APC_ROUTINE) (
+    __in_opt PVOID ApcArgument1,
+    __in_opt PVOID ApcArgument2,
+    __in_opt PVOID ApcArgument3
+);
 
 typedef enum _PROCESSINFOCLASS
 {
@@ -222,6 +245,16 @@ extern "C" {
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
+NtSetInformationProcess (
+    __in HANDLE ProcessHandle,
+    __in PROCESSINFOCLASS ProcessInformationClass,
+    __in_bcount(ProcessInformationLength) PVOID ProcessInformation,
+    __in ULONG ProcessInformationLength
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
 NtQueryInformationProcess (
     __in HANDLE ProcessHandle,
     __in PROCESSINFOCLASS ProcessInformationClass,
@@ -244,6 +277,15 @@ NtQueryObject (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
+NtSetSystemInformation (
+    __in SYSTEM_INFORMATION_CLASS SystemInformationClass,
+    __in_bcount_opt(SystemInformationLength) PVOID SystemInformation,
+    __in ULONG SystemInformationLength
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
 NtQuerySystemInformation (
     __in SYSTEM_INFORMATION_CLASS SystemInformationClass,
     __out_bcount_opt(SystemInformationLength) PVOID SystemInformation,
@@ -259,6 +301,66 @@ NtSetInformationThread (
     __in THREADINFOCLASS ThreadInformationClass,
     __in_bcount(ThreadInformationLength) PVOID ThreadInformation,
     __in ULONG ThreadInformationLength
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtQueryInformationThread (
+    __in HANDLE ThreadHandle,
+    __in THREADINFOCLASS ThreadInformationClass,
+    __out_bcount(ThreadInformationLength) PVOID ThreadInformation,
+    __in ULONG ThreadInformationLength,
+    __out_opt PULONG ReturnLength
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtUnmapViewOfSection (
+    __in HANDLE ProcessHandle,
+    __in PVOID BaseAddress
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtSuspendThread (
+    __in HANDLE ThreadHandle,
+    __out_opt PULONG PreviousSuspendCount
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtResumeThread (
+    __in HANDLE ThreadHandle,
+    __out_opt PULONG PreviousSuspendCount
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtSuspendProcess (
+    __in HANDLE ProcessHandle
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtResumeProcess (
+    __in HANDLE ProcessHandle
+);
+
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtQueueApcThread (
+    __in HANDLE ThreadHandle,
+    __in PPS_APC_ROUTINE ApcRoutine,
+    __in_opt PVOID ApcArgument1,
+    __in_opt PVOID ApcArgument2,
+    __in_opt PVOID ApcArgument3
 );
 
 #ifdef __cplusplus

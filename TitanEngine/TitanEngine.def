@@ -229,6 +229,8 @@ HooksScanEntireProcessMemory
 HooksScanEntireProcessMemoryEx
 GetPEBLocation
 GetPEBLocation64
+GetTEBLocation
+GetTEBLocation64
 HideDebugger
 UnHideDebugger
 RelocaterInit
