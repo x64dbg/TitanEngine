@@ -7,6 +7,6 @@ bool EngineCloseHandle(HANDLE myHandle)
 {
     DWORD HandleFlags;
     if(GetHandleInformation(myHandle, &HandleFlags) && HandleFlags!=HANDLE_FLAG_PROTECT_FROM_CLOSE)
-        return (CloseHandle(myHandle)==TRUE);
+        return !!CloseHandle(myHandle);
     return false;
 }

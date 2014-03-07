@@ -201,7 +201,7 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadStillRunning(HANDLE hThread)
     CONTEXT myDBGContext;
     memset(&myDBGContext, 0, sizeof(CONTEXT));
     myDBGContext.ContextFlags = CONTEXT_ALL;
-    return (GetThreadContext(hThread, &myDBGContext)==TRUE);
+    return !!GetThreadContext(hThread, &myDBGContext);
 }
 
 __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
