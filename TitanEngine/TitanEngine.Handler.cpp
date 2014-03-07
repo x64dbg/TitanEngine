@@ -138,9 +138,11 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
+
     VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    if(!NameFound)
+    
+	if(!NameFound)
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
         return(NULL);
@@ -150,8 +152,6 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
         return(HandleFullName);
     }
 
-    VirtualFree(HandleFullName, NULL, MEM_RELEASE);
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     return(NULL);
 }
 __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
@@ -218,9 +218,11 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
+
     VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    if(!NameFound)
+    
+	if(!NameFound)
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
         return(NULL);
@@ -230,8 +232,6 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
         return(HandleFullName);
     }
 
-    VirtualFree(HandleFullName, NULL, MEM_RELEASE);
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
     return(NULL);
 }
 __declspec(dllexport) long TITCALL HandlerEnumerateOpenHandles(DWORD ProcessId, LPVOID HandleBuffer, DWORD MaxHandleCount)
