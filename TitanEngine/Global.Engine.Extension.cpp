@@ -17,7 +17,7 @@ void ExtensionManagerPluginReleaseCallBack()
         {
             if(Plugin.at(i).TitanReleasePlugin != NULL)
             {
-                myPluginReleaseExec = (fPluginReleaseExec)Plugin[i].TitanReleasePlugin;
+                myPluginReleaseExec = (fPluginReleaseExec)Plugin.at(i).TitanReleasePlugin;
                 myPluginReleaseExec();
             }
         }
@@ -40,7 +40,7 @@ void ExtensionManagerPluginResetCallBack()
         {
             if(Plugin.at(i).TitanResetPlugin != NULL)
             {
-                myPluginResetExec = (fPluginResetExec)Plugin[i].TitanResetPlugin;
+                myPluginResetExec = (fPluginResetExec)Plugin.at(i).TitanResetPlugin;
                 myPluginResetExec();
             }
         }
@@ -64,7 +64,7 @@ void ExtensionManagerPluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReaso
             {
                 if(Plugin.at(i).TitanDebuggingCallBack != NULL)
                 {
-                    myPluginDebugExec = (fPluginDebugExec)Plugin[i].TitanDebuggingCallBack;
+                    myPluginDebugExec = (fPluginDebugExec)Plugin.at(i).TitanDebuggingCallBack;
                     myPluginDebugExec(debugEvent, CallReason);
                 }
             }
@@ -123,7 +123,7 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
                             NameHasBeenRegistered = false;
                             for(unsigned int i = 0; i < Plugin.size(); i++)
                             {
-                                if(lstrcmpiA(Plugin[i].PluginName, myPluginInfo.PluginName) == NULL)
+                                if(lstrcmpiA(Plugin.at(i).PluginName, myPluginInfo.PluginName) == NULL)
                                 {
                                     NameHasBeenRegistered = true;
                                 }
@@ -166,7 +166,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginLoaded(char* szPlugin
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
+        if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
         {
             return true;
         }
@@ -179,9 +179,9 @@ __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPlugi
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
+        if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
         {
-            if(!Plugin[i].PluginDisabled)
+            if(!Plugin.at(i).PluginDisabled)
             {
                 return true;
             }
@@ -199,7 +199,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerDisableAllPlugins()
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        Plugin[i].PluginDisabled = true;
+        Plugin.at(i).PluginDisabled = true;
     }
     return true;
 }
@@ -209,9 +209,9 @@ __declspec(dllexport) bool TITCALL ExtensionManagerDisablePlugin(char* szPluginN
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
+        if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
         {
-            Plugin[i].PluginDisabled = true;
+            Plugin.at(i).PluginDisabled = true;
             return true;
         }
     }
@@ -223,7 +223,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerEnableAllPlugins()
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        Plugin[i].PluginDisabled = false;
+        Plugin.at(i).PluginDisabled = false;
     }
     return true;
 }
@@ -233,9 +233,9 @@ __declspec(dllexport) bool TITCALL ExtensionManagerEnablePlugin(char* szPluginNa
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
+        if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
         {
-            Plugin[i].PluginDisabled = false;
+            Plugin.at(i).PluginDisabled = false;
             return true;
         }
     }
@@ -247,7 +247,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadAllPlugins()
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(FreeLibrary(Plugin[i].PluginBaseAddress))
+        if(FreeLibrary(Plugin.at(i).PluginBaseAddress))
         {
             Plugin.erase(Plugin.begin() + i);
         }
@@ -263,15 +263,15 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginNa
 
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
+        if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
         {
             __try
             {
-                if(Plugin[i].TitanReleasePlugin != NULL)
+                if(Plugin.at(i).TitanReleasePlugin != NULL)
                 {
-                    myPluginReleaseExec = (fPluginReleaseExec)Plugin[i].TitanReleasePlugin;
+                    myPluginReleaseExec = (fPluginReleaseExec)Plugin.at(i).TitanReleasePlugin;
                     myPluginReleaseExec();
-                    if(FreeLibrary(Plugin[i].PluginBaseAddress))
+                    if(FreeLibrary(Plugin.at(i).PluginBaseAddress))
                     {
                         Plugin.erase(Plugin.begin() + i);
                         return true;
@@ -280,7 +280,7 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginNa
             }
             __except(EXCEPTION_EXECUTE_HANDLER)
             {
-                if(FreeLibrary(Plugin[i].PluginBaseAddress))
+                if(FreeLibrary(Plugin.at(i).PluginBaseAddress))
                 {
                     Plugin.erase(Plugin.begin() + i);
                     return true;
@@ -295,9 +295,9 @@ __declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(char* szPlugin
 {
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
-        if(lstrcmpiA(Plugin[i].PluginName, szPluginName) == NULL)
+        if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
         {
-            return(&Plugin[i]);
+            return(&Plugin.at(i));
         }
     }
     return(NULL);

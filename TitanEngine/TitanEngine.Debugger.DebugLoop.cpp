@@ -53,7 +53,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     HANDLE hFileMapping;
     LPVOID hFileMappingView;
     LPVOID DBGEntryPoint;
-    
+
     wchar_t* szTranslatedNativeName;
 
     DBGFileHandle = NULL;
@@ -1006,7 +1006,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1)
                         {
-                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 && //data execution prevention (DEP) violation
+                            if((DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 || DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) && //data execution prevention (DEP) violation
                                     (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
                                 RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
                         }
@@ -1018,7 +1018,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
                             ResetMemBPX = true;
                         }
-                        if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 && //data execution prevention (DEP) violation
+                        if((DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 || DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) && //data execution prevention (DEP) violation
                                 (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
                         {
                             myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
