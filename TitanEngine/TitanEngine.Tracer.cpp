@@ -1457,13 +1457,6 @@ __declspec(dllexport) long TITCALL TracerFixRedirectionViaImpRecPlugin(HANDLE hP
     ULONG_PTR fImpRecTrace = NULL;
     PMEMORY_CMP_HANDLER cmpModuleName;
     ULONG_PTR remInjectSize = (ULONG_PTR)((ULONG_PTR)&injectedRemoteLoadLibrary - (ULONG_PTR)&injectedImpRec);
-#if !defined(_WIN64)
-    typedef NTSTATUS(WINAPI *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
-#else
-    typedef NTSTATUS(__fastcall *fZwSetInformationThread)(HANDLE fThreadHandle, DWORD fThreadInfoClass, LPVOID fBuffer, ULONG fBufferSize);
-#endif
-    LPVOID ZwSetInformationThread = (LPVOID)GetProcAddress(GetModuleHandleA("ntdll.dll"),"ZwSetInformationThread");
-    fZwSetInformationThread cZwSetInformationThread = (fZwSetInformationThread)(ZwSetInformationThread);
     LPVOID szModuleName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
     LPVOID szGarbageFile = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
     LPVOID cModuleName = szModuleName;
@@ -1519,10 +1512,9 @@ __declspec(dllexport) long TITCALL TracerFixRedirectionViaImpRecPlugin(HANDLE hP
                             WriteProcessMemory(hProcess, remStringData, &APIData, sizeof InjectImpRecCodeData, &NumberOfBytesWritten);
                             WriteProcessMemory(hProcess, (LPVOID)((ULONG_PTR)remStringData + sizeof InjectImpRecCodeData), (LPCVOID)szGarbageFile, lstrlenA((LPSTR)szGarbageFile), &NumberOfBytesWritten);
                             hThread = CreateRemoteThread(hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)remCodeData, remStringData, CREATE_SUSPENDED, &ThreadId);
-                            if(ZwSetInformationThread != NULL)
-                            {
-                                cZwSetInformationThread(hThread, 0x11, NULL, NULL);
-                            }
+
+                            NtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, NULL);
+
                             ResumeThread(hThread);
                             WaitForSingleObject(hThread, INFINITE);
                             if(GetExitCodeThread(hThread, &ExitCode))

@@ -80,11 +80,11 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         {
             PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            if(PEHeader32->OptionalHeader.Magic == 0x10B)
+            if(PEHeader32->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
             {
                 FileIs64 = false;
             }
-            else if(PEHeader32->OptionalHeader.Magic == 0x20B)
+            else if(PEHeader32->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
             {
                 FileIs64 = true;
             }
@@ -350,7 +350,7 @@ __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageB
     BOOL ReturnValue = false;
 
     hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
-    if(hProcess != INVALID_HANDLE_VALUE)
+    if(hProcess)
     {
         ReturnValue = DumpProcessW(hProcess, ImageBase, szDumpFileName, EntryPoint);
         EngineCloseHandle(hProcess);
@@ -467,8 +467,8 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
     HANDLE hProcess = 0;
     BOOL ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ, FALSE, ProcessId);
-    if(hProcess != INVALID_HANDLE_VALUE)
+    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    if(hProcess)
     {
         ReturnValue = DumpMemoryW(hProcess, MemoryStart, MemorySize, szDumpFileName);
         EngineCloseHandle(hProcess);
@@ -506,18 +506,18 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
     wchar_t szDumpFileName[MAX_PATH];
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR DumpAddress = NULL;
-    ULONG_PTR EnumeratedModules[1024];
+    HMODULE EnumeratedModules[1024] = {0};
     bool AddressIsModuleBase = false;
 
     if(hProcess != NULL)
     {
-        EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, sizeof(EnumeratedModules), &Dummy);
+        EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &Dummy);
         while(VirtualQueryEx(hProcess, (LPVOID)DumpAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION) != NULL)
         {
             AddressIsModuleBase = false;
-            for(i = 0; i < 1024; i++)
+            for(i = 0; i < _countof(EnumeratedModules); i++)
             {
-                if(EnumeratedModules[i] == (ULONG_PTR)MemInfo.AllocationBase)
+                if(EnumeratedModules[i] == (HMODULE)MemInfo.AllocationBase)
                 {
                     AddressIsModuleBase = true;
                     i = 1024;
@@ -529,14 +529,14 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
             }
             if(!(MemInfo.Protect & PAGE_NOACCESS) && AddressIsModuleBase == false)
             {
-                if(DumpAboveImageBaseOnly == false || (DumpAboveImageBaseOnly == true && EnumeratedModules[0] < (ULONG_PTR)MemInfo.BaseAddress))
+                if(DumpAboveImageBaseOnly == false || (DumpAboveImageBaseOnly == true && EnumeratedModules[0] < (HMODULE)MemInfo.BaseAddress))
                 {
                     RtlZeroMemory(&szDumpName, MAX_PATH);
                     RtlZeroMemory(&szDumpFileName, MAX_PATH);
                     lstrcpyW(szDumpFileName, szDumpFolder);
-                    if(szDumpFileName[lstrlenW(szDumpFileName)-1] != 0x5C)
+                    if(szDumpFileName[lstrlenW(szDumpFileName)-1] != L'\\')
                     {
-                        szDumpFileName[lstrlenW(szDumpFileName)] = 0x5C;
+                        szDumpFileName[lstrlenW(szDumpFileName)] = L'\\';
                     }
                     wsprintfW(szDumpName, L"Dump-%x_%x.dmp", (ULONG_PTR)MemInfo.BaseAddress, (ULONG_PTR)MemInfo.RegionSize);
                     lstrcatW(szDumpFileName, szDumpName);
@@ -572,8 +572,8 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
     HANDLE hProcess = 0;
     BOOL ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ, FALSE, ProcessId);
-    if(hProcess != INVALID_HANDLE_VALUE)
+    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    if(hProcess)
     {
         ReturnValue = DumpRegionsW(hProcess, szDumpFolder, DumpAboveImageBaseOnly);
         EngineCloseHandle(hProcess);
@@ -608,16 +608,18 @@ __declspec(dllexport) bool TITCALL DumpModuleW(HANDLE hProcess, LPVOID ModuleBas
     int i;
     DWORD Dummy = NULL;
     MODULEINFO RemoteModuleInfo;
-    ULONG_PTR EnumeratedModules[1024];
+    HMODULE EnumeratedModules[1024];
 
-    if(EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, sizeof(EnumeratedModules), &Dummy))
+    if(EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &Dummy))
     {
-        for(i = 0; i < 512; i++)
+        for(i = 0; i < _countof(EnumeratedModules); i++)
         {
-            if(EnumeratedModules[i] == (ULONG_PTR)ModuleBase)
+            if(EnumeratedModules[i] == (HMODULE)ModuleBase)
             {
-                GetModuleInformation(hProcess, (HMODULE)EnumeratedModules[i], &RemoteModuleInfo, sizeof MODULEINFO);
-                return(DumpMemoryW(hProcess, (LPVOID)EnumeratedModules[i], RemoteModuleInfo.SizeOfImage, szDumpFileName));
+                if (GetModuleInformation(hProcess, (HMODULE)EnumeratedModules[i], &RemoteModuleInfo, sizeof(MODULEINFO)))
+                {
+                    return(DumpMemoryW(hProcess, (LPVOID)EnumeratedModules[i], RemoteModuleInfo.SizeOfImage, szDumpFileName));
+                }
             }
         }
     }
@@ -646,8 +648,8 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
     HANDLE hProcess = 0;
     BOOL ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ, FALSE, ProcessId);
-    if(hProcess != INVALID_HANDLE_VALUE)
+    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    if(hProcess) //If the function fails, the return value is NULL. To get extended error information, call GetLastError.
     {
         ReturnValue = DumpModuleW(hProcess, ModuleBase, szDumpFileName);
         EngineCloseHandle(hProcess);

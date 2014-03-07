@@ -88,7 +88,7 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
             {
                 if(bProcessId[i] != NULL)
                 {
-                    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
+                    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
                     if(hProcess != NULL)
                     {
                         RtlZeroMemory(&EnumeratedModules[0], sizeof EnumeratedModules);
