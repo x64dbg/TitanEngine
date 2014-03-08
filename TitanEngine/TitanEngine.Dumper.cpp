@@ -38,8 +38,9 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     LPVOID ReadBase = ImageBase;
     SIZE_T CalculatedHeaderSize = NULL;
     SIZE_T AlignedHeaderSize = NULL;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    DynBuf ueReadBuf, ueCopyBuf;
+    LPVOID ueReadBuffer = ueReadBuf.Allocate(0x2000);
+    LPVOID ueCopyBuffer = ueCopyBuf.Allocate(0x2000);
     MEMORY_BASIC_INFORMATION MemInfo;
 
     if(ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, 0x1000, &ueNumberOfBytesRead))
@@ -56,14 +57,10 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             {
                 AlignedHeaderSize = ((CalculatedHeaderSize / 0x1000) + 1) * 0x1000;
             }
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            ueReadBuffer = VirtualAlloc(NULL, AlignedHeaderSize, MEM_COMMIT, PAGE_READWRITE);
-            ueCopyBuffer = VirtualAlloc(NULL, AlignedHeaderSize, MEM_COMMIT, PAGE_READWRITE);
+            ueReadBuffer = ueReadBuf.Allocate(AlignedHeaderSize);
+            ueCopyBuffer = ueCopyBuf.Allocate(AlignedHeaderSize);
             if(!ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                 return false;
             }
             else
@@ -90,8 +87,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             }
             else
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                 return false;
             }
             if(!FileIs64)
@@ -174,30 +169,22 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                     }
                                 }
                                 EngineCloseHandle(hFile);
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                                 return true;
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
                                 EngineCloseHandle(hFile);
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                                 return false;
                             }
                         }
                         else
                         {
                             EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                             return false;
                         }
                     }
                     else
                     {
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                         return false;
                     }
                 }
@@ -282,30 +269,22 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                     }
                                 }
                                 EngineCloseHandle(hFile);
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                                 return true;
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                                 return false;
                             }
                         }
                         else
                         {
                             EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                             return false;
                         }
                     }
                     else
                     {
                         EngineCloseHandle(hFile);
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                         return false;
                     }
                 }
@@ -313,15 +292,11 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         }
         else
         {
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
             return false;
         }
     }
     else
     {
-        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
         return false;
     }
     return false;

@@ -165,6 +165,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
     ULONG_PTR fileSectionData[MAXIMUM_SECTION_NUMBER][3];
     ULONG_PTR fileSectionTemp;
     LPVOID sortedFileName;
+    DynBuf sortedFileNameBuf;
 
     if(engineBackupForCriticalFunctions && CreateGarbageItem(&szBackupItem, sizeof szBackupItem))
     {
@@ -202,7 +203,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
             }
             if(!FileIs64)
             {
-                sortedFileName = VirtualAlloc(NULL, FileSize, MEM_COMMIT, PAGE_READWRITE);
+                sortedFileName = sortedFileNameBuf.Allocate(FileSize);
                 __try
                 {
                     RtlMoveMemory(sortedFileName, (LPVOID)FileMapVA, FileSize);
@@ -242,7 +243,6 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                     }
                     RtlMoveMemory((LPVOID)FileMapVA, sortedFileName, FileSize);
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    VirtualFree(sortedFileName, NULL, MEM_RELEASE);
                     if(szBackupItem[0] != NULL)
                     {
                         if(CopyFileW(szBackupFile, szFileName, false))
@@ -264,14 +264,13 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    VirtualFree(sortedFileName, NULL, MEM_RELEASE);
                     RemoveGarbageItem(szBackupItem, true);
                     return false;
                 }
             }
             else
             {
-                sortedFileName = VirtualAlloc(NULL, FileSize, MEM_COMMIT, PAGE_READWRITE);
+                sortedFileName = sortedFileNameBuf.Allocate(FileSize);
                 __try
                 {
                     RtlMoveMemory(sortedFileName, (LPVOID)FileMapVA, FileSize);
@@ -311,7 +310,6 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                     }
                     RtlMoveMemory((LPVOID)FileMapVA, sortedFileName, FileSize);
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    VirtualFree(sortedFileName, NULL, MEM_RELEASE);
                     if(szBackupItem[0] != NULL)
                     {
                         if(CopyFileW(szBackupFile, szFileName, false))
@@ -333,7 +331,6 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                    VirtualFree(sortedFileName, NULL, MEM_RELEASE);
                     RemoveGarbageItem(szBackupItem, true);
                     return false;
                 }

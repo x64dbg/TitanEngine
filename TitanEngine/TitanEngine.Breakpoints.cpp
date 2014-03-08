@@ -304,6 +304,7 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
     int currentInstructionLen = NULL;
     bool ModuleLoaded = false;
     void* CmdBuffer = NULL;
+    DynBuf CmdBuf;
     bool RemovedBpx = false;
 
     if(szDLLName != NULL && szAPIName != NULL)
@@ -322,14 +323,13 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                 APIAddress = (ULONG_PTR)EngineGlobalAPIHandler(dbgProcessInformation.hProcess, NULL, NULL, szAPIName, UE_OPTION_IMPORTER_RETURN_APIADDRESS);
                 if(APIAddress != NULL)
                 {
-                    CmdBuffer = VirtualAlloc(NULL, ReadMemSize, MEM_COMMIT, PAGE_READWRITE);
+                    CmdBuffer = CmdBuf.Allocate(ReadMemSize);
                     while(ReadProcessMemory(dbgProcessInformation.hProcess, (void*)APIAddress, CmdBuffer, ReadMemSize, &ueNumberOfReadWrite) == false && ReadMemSize > NULL)
                     {
                         ReadMemSize = ReadMemSize - (MAXIMUM_INSTRUCTION_SIZE * 10);
                     }
                     if(ReadMemSize == NULL)
                     {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                         APIAddress = NULL;
                     }
                     else
@@ -402,10 +402,6 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                     {
                         FreeLibrary(hModule);
                     }
-                    if(CmdBuffer != NULL)
-                    {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                    }
                     return false;
                 }
             }
@@ -417,13 +413,6 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                     FreeLibrary(hModule);
                 }
             }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                }
-            }
             return SetBPX(APIAddress, bpxType, bpxCallBack);
         }
         else
@@ -433,13 +422,6 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                 if(ModuleLoaded)
                 {
                     FreeLibrary(hModule);
-                }
-            }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                 }
             }
             return false;
@@ -465,6 +447,7 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
     int currentInstructionLen = NULL;
     bool ModuleLoaded = false;
     void* CmdBuffer = NULL;
+    DynBuf CmdBuf;
     bool RemovedBpx = false;
 
     if(szDLLName != NULL && szAPIName != NULL)
@@ -483,14 +466,13 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                 APIAddress = (ULONG_PTR)EngineGlobalAPIHandler(dbgProcessInformation.hProcess, NULL, NULL, szAPIName, UE_OPTION_IMPORTER_RETURN_APIADDRESS);
                 if(APIAddress != NULL)
                 {
-                    CmdBuffer = VirtualAlloc(NULL, ReadMemSize, MEM_COMMIT, PAGE_READWRITE);
+                    CmdBuffer = CmdBuf.Allocate(ReadMemSize);
                     while(ReadProcessMemory(dbgProcessInformation.hProcess, (void*)APIAddress, CmdBuffer, ReadMemSize, &ueNumberOfReadWrite) == false && ReadMemSize > NULL)
                     {
                         ReadMemSize = ReadMemSize - (MAXIMUM_INSTRUCTION_SIZE * 10);
                     }
                     if(ReadMemSize == NULL)
                     {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                         APIAddress = NULL;
                     }
                     else
@@ -563,10 +545,6 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                     {
                         FreeLibrary(hModule);
                     }
-                    if(CmdBuffer != NULL)
-                    {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                    }
                     return false;
                 }
             }
@@ -578,13 +556,6 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                     FreeLibrary(hModule);
                 }
             }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                }
-            }
             return(DeleteBPX(APIAddress));
         }
         else
@@ -594,13 +565,6 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                 if(ModuleLoaded)
                 {
                     FreeLibrary(hModule);
-                }
-            }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
                 }
             }
             return false;

@@ -35,7 +35,8 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
     BOOL FileIs64 = false;
     HANDLE hFile = 0;
     SIZE_T CalculatedHeaderSize = NULL;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    DynBuf ueReadBuf;
+    LPVOID ueReadBuffer = ueReadBuf.Allocate(0x2000);
     DWORD OldProtect = PAGE_READWRITE;
 
     hFile = CreateFileW(szDebuggedFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -63,12 +64,10 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                 if(CalculatedHeaderSize > 0x1000)
                 {
                     SetFilePointer(hFile, NULL, NULL, FILE_BEGIN);
-                    VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                    ueReadBuffer = VirtualAlloc(NULL, CalculatedHeaderSize, MEM_COMMIT, PAGE_READWRITE);
+                    ueReadBuffer = ueReadBuf.Allocate(CalculatedHeaderSize);
                     if(!ReadFile(hFile, ueReadBuffer, (DWORD)CalculatedHeaderSize, &uedNumberOfBytesRead, NULL))
                     {
                         EngineCloseHandle(hFile);
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         return false;
                     }
                 }
@@ -91,7 +90,6 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                 else
                 {
                     EngineCloseHandle(hFile);
-                    VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                     return false;
                 }
                 if(!FileIs64)
@@ -103,20 +101,17 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                         {
                             EngineCloseHandle(hFile);
                             VirtualProtectEx(hProcess, ImageBase, PEHeaderSize, OldProtect, &OldProtect);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             return true;
                         }
                         else
                         {
                             EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             return false;
                         }
                     }
                     else
                     {
                         EngineCloseHandle(hFile);
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         return false;
                     }
                 }
@@ -129,20 +124,17 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
                         {
                             EngineCloseHandle(hFile);
                             VirtualProtectEx(hProcess, ImageBase, PEHeaderSize, OldProtect, &OldProtect);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             return true;
                         }
                         else
                         {
                             EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             return false;
                         }
                     }
                     else
                     {
                         EngineCloseHandle(hFile);
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         return false;
                     }
                 }
@@ -150,21 +142,18 @@ __declspec(dllexport) bool TITCALL PastePEHeaderW(HANDLE hProcess, LPVOID ImageB
             else
             {
                 EngineCloseHandle(hFile);
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 return false;
             }
         }
         else
         {
             EngineCloseHandle(hFile);
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             return false;
         }
     }
     else
     {
         EngineCloseHandle(hFile);
-        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
         return false;
     }
     return false;

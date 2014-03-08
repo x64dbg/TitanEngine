@@ -16,6 +16,7 @@ static long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
     int LengthOfValidInstruction = 0;
     int CurrentNumberOfInstructions = 0;
     MEMORY_BASIC_INFORMATION MemInfo;
+    DynBuf tracmem;
     LPVOID TraceMemory, cTraceMemory;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     DWORD LastPushValue = NULL;
@@ -41,7 +42,7 @@ static long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
             {
                 memSize = 0x4000;
             }
-            TraceMemory = VirtualAlloc(NULL, memSize, MEM_COMMIT, PAGE_READWRITE);
+            TraceMemory = tracmem.Allocate(memSize);
             cTraceMemory = TraceMemory;
             if(ReadProcessMemory(hProcess, (LPVOID)MemInfo.BaseAddress, TraceMemory, memSize, &ueNumberOfBytesRead))
             {
@@ -491,7 +492,6 @@ static long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                     }
                     TraceStartAddress = TraceStartAddress + CurrentInstructionSize;
                 }
-                VirtualFree(TraceMemory, NULL, MEM_RELEASE);
                 if(!HashInstructions)
                 {
                     if(FoundValidAPI == true)
@@ -518,7 +518,6 @@ static long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
             }
             else
             {
-                VirtualFree(TraceMemory, NULL, MEM_RELEASE);
             }
         }
     }
@@ -717,6 +716,7 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
     DWORD MemoryHash = NULL;
     DWORD MaximumReadSize = 0;
     DWORD TestAddressX86;
+    DynBuf tracemem;
     LPVOID TraceMemory;
     bool HashCheck = false;
 
@@ -735,7 +735,7 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
         }
         if(sizeof HANDLE == 4)
         {
-            TraceMemory = VirtualAlloc(NULL, MaximumReadSize, MEM_COMMIT, PAGE_READWRITE);
+            TraceMemory = tracemem.Allocate(MaximumReadSize);
             if(!TraceMemory)
             {
                 return (NULL);
@@ -1104,12 +1104,10 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                         }
                     }
                 }
-                VirtualFree(TraceMemory, NULL, MEM_RELEASE);
                 return(KnownRedirectionIndex);
             }
             else
             {
-                VirtualFree(TraceMemory, NULL, MEM_RELEASE);
             }
         }
     }

@@ -2,25 +2,33 @@
 #include "definitions.h"
 #include "Global.Handle.h"
 
+
+void NtQuerySysHandleInfo(DynBuf& buf)
+{
+    DynBuf QSB;
+    ULONG RequiredSize = NULL;
+
+    QSB.Allocate(0x2000);
+    while(NtQuerySystemInformation(SystemHandleInformation, QSB.GetPtr(), QSB.Size(), &RequiredSize) == (NTSTATUS)0xC0000004L)
+    {
+        QSB.Allocate(RequiredSize);
+    }
+}
+
+
 // TitanEngine.Handler.functions:
 __declspec(dllexport) long TITCALL HandlerGetActiveHandleCount(DWORD ProcessId)
 {
 
-    int HandleCount = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
-    ULONG RequiredSize = NULL;
-    ULONG TotalHandleCount = NULL;
-
+    int HandleCount = 0;
+    ULONG TotalHandleCount = 0;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -33,27 +41,19 @@ __declspec(dllexport) long TITCALL HandlerGetActiveHandleCount(DWORD ProcessId)
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    return(HandleCount);
 
-    return(NULL);
+    return(HandleCount);
 }
 __declspec(dllexport) bool TITCALL HandlerIsHandleOpen(DWORD ProcessId, HANDLE hHandle)
 {
     bool HandleActive = false;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
-    ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -67,38 +67,29 @@ __declspec(dllexport) bool TITCALL HandlerIsHandleOpen(DWORD ProcessId, HANDLE h
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    if(HandleActive)
-    {
-        return true;
-    }
 
-    return false;
+    return HandleActive;
 }
 __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
 {
 
     bool NameFound = false;
     HANDLE myHandle = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     PUBLIC_OBJECT_BASIC_INFORMATION ObjectBasicInfo;
-    LPVOID ObjectNameInfo = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ObjectNameInfo[0x2000] = {0};
     PPUBLIC_OBJECT_NAME_INFORMATION pObjectNameInfo = (PPUBLIC_OBJECT_NAME_INFORMATION)ObjectNameInfo;
     LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
     LPVOID tmpHandleFullName = NULL;
 
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -139,9 +130,6 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
         TotalHandleCount--;
     }
 
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    
 	if(!NameFound)
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
@@ -151,33 +139,26 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
     {
         return(HandleFullName);
     }
-
-    return(NULL);
 }
 __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
 {
 
     bool NameFound = false;
     HANDLE myHandle = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     PUBLIC_OBJECT_BASIC_INFORMATION ObjectBasicInfo;
-    LPVOID ObjectNameInfo = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ObjectNameInfo[0x2000] = {0};
     PPUBLIC_OBJECT_NAME_INFORMATION pObjectNameInfo = (PPUBLIC_OBJECT_NAME_INFORMATION)ObjectNameInfo;
     LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
     LPVOID tmpHandleFullName = NULL;
 
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -219,9 +200,6 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
         TotalHandleCount--;
     }
 
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    
 	if(!NameFound)
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
@@ -238,21 +216,15 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenHandles(DWORD ProcessId, 
 {
 
     HANDLE myHandle = NULL;
-    LPVOID QuerySystemBuffer;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     unsigned int HandleCount = NULL;
-    ULONG QuerySystemBufferSize = 0x2000;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -268,35 +240,27 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenHandles(DWORD ProcessId, 
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
     return(HandleCount);
-
-    return(NULL);
 }
 __declspec(dllexport) long long TITCALL HandlerGetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, DWORD InformationReturn)
 {
 
     HANDLE myHandle = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     PUBLIC_OBJECT_BASIC_INFORMATION ObjectBasicInfo;
-    LPVOID HandleFullData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleFullData[0x1000] = {0};
     LPVOID HandleNameData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
     PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
     bool DontFreeStringMemory = false;
     ULONG_PTR ReturnData = NULL;
 
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -325,7 +289,7 @@ __declspec(dllexport) long long TITCALL HandlerGetHandleDetails(HANDLE hProcess,
                     //if(!(HandleInfo->GrantedAccess & SYNCHRONIZE) || ((HandleInfo->GrantedAccess & SYNCHRONIZE) && ((WORD)HandleInfo->GrantedAccess != 0x19F9))){// && (WORD)HandleInfo->GrantedAccess != 0x89))){
                     if(HandleInfo->GrantedAccess != 0x0012019F)
                     {
-                        RtlZeroMemory(HandleFullData, 0x1000);
+                        RtlZeroMemory(HandleFullData, sizeof(HandleFullData));
                         NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                         NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                         RtlZeroMemory(HandleNameData, 0x1000);
@@ -342,7 +306,7 @@ __declspec(dllexport) long long TITCALL HandlerGetHandleDetails(HANDLE hProcess,
                     //if(!(HandleInfo->GrantedAccess & SYNCHRONIZE) || ((HandleInfo->GrantedAccess & SYNCHRONIZE) && ((WORD)HandleInfo->GrantedAccess != 0x19F9))){// && (WORD)HandleInfo->GrantedAccess != 0x89))){
                     if(HandleInfo->GrantedAccess != 0x0012019F)
                     {
-                        RtlZeroMemory(HandleFullData, 0x1000);
+                        RtlZeroMemory(HandleFullData, sizeof(HandleFullData));
                         NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                         NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                         RtlZeroMemory(HandleNameData, 0x1000);
@@ -366,16 +330,7 @@ __declspec(dllexport) long long TITCALL HandlerGetHandleDetails(HANDLE hProcess,
     {
         VirtualFree(HandleNameData, NULL, MEM_RELEASE);
     }
-    VirtualFree(HandleFullData, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
     return(ReturnData);
-
-    if(!DontFreeStringMemory)
-    {
-        VirtualFree(HandleNameData, NULL, MEM_RELEASE);
-    }
-    VirtualFree(HandleFullData, NULL, MEM_RELEASE);
-    return(NULL);
 }
 __declspec(dllexport) bool TITCALL HandlerCloseRemoteHandle(HANDLE hProcess, HANDLE hHandle)
 {
@@ -411,29 +366,24 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandlesW(wchar_t* szFileO
     HANDLE hProcess = NULL;
     HANDLE myHandle = NULL;
     HANDLE CopyHandle = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     DWORD LastProcessId = NULL;
 
-
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     PUBLIC_OBJECT_BASIC_INFORMATION ObjectBasicInfo;
-    LPVOID ObjectNameInfo = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ObjectNameInfo[0x2000] = {0};
     PPUBLIC_OBJECT_NAME_INFORMATION pObjectNameInfo = (PPUBLIC_OBJECT_NAME_INFORMATION)ObjectNameInfo;
-    LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleFullNameB[0x1000] = {0};
+    LPVOID HandleFullName = HandleFullNameB;
     int LenFileOrFolderName = lstrlenW(szFileOrFolderName);
     LPVOID tmpHandleFullName = NULL;
 
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -469,7 +419,6 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandlesW(wchar_t* szFileO
                             tmpHandleFullName = TranslateNativeNameW((wchar_t*)HandleFullName);
                             if(tmpHandleFullName != NULL)
                             {
-                                VirtualFree(HandleFullName, NULL, MEM_RELEASE);
                                 HandleFullName = tmpHandleFullName;
                             }
                         }
@@ -498,9 +447,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandlesW(wchar_t* szFileO
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    VirtualFree(HandleFullName, NULL, MEM_RELEASE);
+
     return(FoundHandles);
 }
 __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandles(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
@@ -525,27 +472,24 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
     HANDLE hProcess = NULL;
     HANDLE myHandle = NULL;
     HANDLE CopyHandle = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     DWORD LastProcessId = NULL;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     PUBLIC_OBJECT_BASIC_INFORMATION ObjectBasicInfo;
-    LPVOID ObjectNameInfo = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ObjectNameInfo[0x2000] = {0};
     PPUBLIC_OBJECT_NAME_INFORMATION pObjectNameInfo = (PPUBLIC_OBJECT_NAME_INFORMATION)ObjectNameInfo;
-    LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleFullNameB[0x1000] = {0};
+    LPVOID HandleFullName = HandleFullNameB;
     int LenFileOrFolderName = lstrlenW(szFileOrFolderName);
     LPVOID tmpHandleFullName = NULL;
 
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -581,7 +525,6 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
                             tmpHandleFullName = TranslateNativeNameW((wchar_t*)HandleFullName);
                             if(tmpHandleFullName != NULL)
                             {
-                                VirtualFree(HandleFullName, NULL, MEM_RELEASE);
                                 HandleFullName = tmpHandleFullName;
                             }
                         }
@@ -607,18 +550,8 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    VirtualFree(HandleFullName, NULL, MEM_RELEASE);
-    if(AllHandled)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 
+    return AllHandled;
 }
 __declspec(dllexport) bool TITCALL HandlerIsFileLocked(char* szFileOrFolderName, bool NameIsFolder, bool NameIsTranslated)
 {
@@ -641,27 +574,24 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
     HANDLE hProcess = NULL;
     HANDLE myHandle = NULL;
     HANDLE CopyHandle = NULL;
-    LPVOID QuerySystemBuffer;
-    ULONG QuerySystemBufferSize = 0x2000;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     DWORD LastProcessId = NULL;
 
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     PUBLIC_OBJECT_BASIC_INFORMATION ObjectBasicInfo;
-    LPVOID ObjectNameInfo = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ObjectNameInfo[0x2000] = {0};
     PPUBLIC_OBJECT_NAME_INFORMATION pObjectNameInfo = (PPUBLIC_OBJECT_NAME_INFORMATION)ObjectNameInfo;
-    LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleFullNameB[0x1000] = {0};
+    LPVOID HandleFullName = HandleFullNameB;
     int LenFileOrFolderName = lstrlenW(szFileOrFolderName);
     LPVOID tmpHandleFullName = NULL;
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -697,7 +627,6 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
                             tmpHandleFullName = TranslateNativeNameW((wchar_t*)HandleFullName);
                             if(tmpHandleFullName != NULL)
                             {
-                                VirtualFree(HandleFullName, NULL, MEM_RELEASE);
                                 HandleFullName = tmpHandleFullName;
                             }
                         }
@@ -710,9 +639,6 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
                         }
                         if(lstrcmpiW((LPCWSTR)HandleFullName, szFileOrFolderName) == NULL)
                         {
-                            VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-                            VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(HandleFullName, NULL, MEM_RELEASE);
                             EngineCloseHandle(myHandle);
                             return true;
                         }
@@ -724,9 +650,6 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-    VirtualFree(HandleFullName, NULL, MEM_RELEASE);
     return false;
 
 }
@@ -736,25 +659,20 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
 
     HANDLE myHandle = NULL;
     HANDLE copyHandle = NULL;
-    LPVOID QuerySystemBuffer;
     ULONG RequiredSize = NULL;
     ULONG TotalHandleCount = NULL;
     unsigned int HandleCount = NULL;
-    ULONG QuerySystemBufferSize = 0x2000;
 
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
-    LPVOID HandleFullData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID HandleNameData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleFullData[0x1000] = {0};
+    char HandleNameDataB[0x1000] = {0};
+    LPVOID HandleNameData = HandleNameDataB;
     PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
 
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -767,7 +685,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
             {
                 if(DuplicateHandle(hProcess, (HANDLE)HandleInfo->hHandle, GetCurrentProcess(), &myHandle, NULL, false, DUPLICATE_SAME_ACCESS))
                 {
-                    RtlZeroMemory(HandleFullData, 0x1000);
+                    RtlZeroMemory(HandleFullData, sizeof(HandleFullData));
                     NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                     NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
                     RtlZeroMemory(HandleNameData, 0x1000);
@@ -789,9 +707,6 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(HandleFullData, NULL, MEM_RELEASE);
-    VirtualFree(HandleNameData, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
     return(HandleCount);
 
 }
@@ -816,7 +731,7 @@ __declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandleW(HANDLE hProce
         return 0;
     int i;
     HANDLE myHandle;
-    LPVOID HandleBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleBuffer[0x1000] = {0};
     LPVOID cHandleBuffer = HandleBuffer;
     int OpenHandleCount = HandlerEnumerateOpenMutexes(hProcess, ProcessId, HandleBuffer, 0x1000 / sizeof HANDLE);
     wchar_t RealMutexName[512] = L"\\BaseNamedObjects\\";
@@ -833,14 +748,12 @@ __declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandleW(HANDLE hProce
             {
                 if(lstrcmpiW(HandleName, RealMutexName) == NULL)
                 {
-                    VirtualFree(HandleBuffer, NULL, MEM_RELEASE);
                     return((ULONG_PTR)myHandle);
                 }
             }
             cHandleBuffer = (LPVOID)((ULONG_PTR)cHandleBuffer + sizeof HANDLE);
         }
     }
-    VirtualFree(HandleBuffer, NULL, MEM_RELEASE);
     return(NULL);
 }
 __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutex(char* szMutexString)
@@ -865,28 +778,24 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
     HANDLE hProcess = NULL;
     DWORD ReturnData = NULL;
     HANDLE myHandle = NULL;
-    LPVOID QuerySystemBuffer;
     ULONG RequiredSize = NULL;
     DWORD LastProcessId = NULL;
     ULONG TotalHandleCount = NULL;
-    ULONG QuerySystemBufferSize = 0x2000;
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
-    LPVOID HandleFullData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID HandleNameData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char HandleFullData[0x1000] = {0};
+    char HandleNameData[0x1000] = {0};
     PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
-    LPVOID ObjectNameInfo = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ObjectNameInfo[0x2000] = {0};
     PPUBLIC_OBJECT_NAME_INFORMATION pObjectNameInfo = (PPUBLIC_OBJECT_NAME_INFORMATION)ObjectNameInfo;
     wchar_t RealMutexName[512] = L"\\BaseNamedObjects\\";
 
 
     lstrcatW(RealMutexName, szMutexString);
-    QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    while(NtQuerySystemInformation(SystemHandleInformation, QuerySystemBuffer, QuerySystemBufferSize, &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QuerySystemBufferSize = RequiredSize;
-        VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
-        QuerySystemBuffer = VirtualAlloc(NULL, QuerySystemBufferSize, MEM_COMMIT, PAGE_READWRITE);
-    }
+
+    DynBuf hinfo;
+    NtQuerySysHandleInfo(hinfo);
+    LPVOID QuerySystemBuffer = hinfo.GetPtr();
+
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
     QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
     HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
@@ -908,10 +817,10 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
             {
                 if(DuplicateHandle(hProcess, (HANDLE)HandleInfo->hHandle, GetCurrentProcess(), &myHandle, NULL, false, DUPLICATE_SAME_ACCESS))
                 {
-                    RtlZeroMemory(HandleFullData, 0x1000);
+                    RtlZeroMemory(HandleFullData, sizeof(HandleFullData));
                     NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, 8, &RequiredSize);
                     NtQueryObject(myHandle, ObjectTypeInformation, HandleFullData, RequiredSize, &RequiredSize);
-                    RtlZeroMemory(HandleNameData, 0x1000);
+                    RtlZeroMemory(HandleNameData, sizeof(HandleNameData));
                     if(pObjectTypeInfo->TypeName.Length != NULL)
                     {
                         //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectTypeInfo->TypeName.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
@@ -920,10 +829,9 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
                         {
                             NtQueryObject(myHandle, ObjectNameInformation, ObjectNameInfo, 8, &RequiredSize);
                             NtQueryObject(myHandle, ObjectNameInformation, ObjectNameInfo, RequiredSize, &RequiredSize);
-                            RtlZeroMemory(HandleNameData, 0x1000);
+                            RtlZeroMemory(HandleNameData, sizeof(HandleNameData));
                             if(pObjectNameInfo->Name.Length != NULL)
                             {
-                                RtlZeroMemory(HandleNameData, 0x1000);
                                 //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectNameInfo->Name.Buffer, -1, (LPSTR)HandleNameData, 0x1000, NULL, NULL);
                                 lstrcpyW((wchar_t*)HandleNameData, (wchar_t*)pObjectNameInfo->Name.Buffer);
                                 if(lstrcmpiW((LPCWSTR)HandleNameData, RealMutexName) == NULL)
@@ -941,10 +849,6 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
         HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
         TotalHandleCount--;
     }
-    VirtualFree(HandleFullData, NULL, MEM_RELEASE);
-    VirtualFree(HandleNameData, NULL, MEM_RELEASE);
-    VirtualFree(ObjectNameInfo, NULL, MEM_RELEASE);
-    VirtualFree(QuerySystemBuffer, NULL, MEM_RELEASE);
     return(ReturnData);
 
 }
