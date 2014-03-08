@@ -965,3 +965,5 @@ typedef PEB64 PEB_CURRENT;
 #else
 typedef PEB32 PEB_CURRENT;
 #endif
+
+#pragma pack(pop)
