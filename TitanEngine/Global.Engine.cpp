@@ -180,7 +180,7 @@ bool EngineCreatePathForFile(char* szFileName)
                         {
                             RtlZeroMemory(szCreateFolder, 2 * MAX_PATH);
                             RtlCopyMemory(szCreateFolder, szFileName, i + 1);
-                            CreateDirectoryA(szCreateFolder, NULL);
+                            return !!CreateDirectoryA(szCreateFolder, NULL);
                         }
                     }
                 }
@@ -796,7 +796,7 @@ long EngineHashMemory(char* MemoryAddress, int MemorySize, DWORD InitialHashValu
     return(HashValue);
 }
 
-bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize)
+bool EngineIsValidReadPtrEx(LPVOID DataPointer, DWORD DataSize)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo = {0};
@@ -830,30 +830,22 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
     BYTE ReturnData = UE_FIELD_FIXABLE_CRITICAL;
 
     hResource = FindResourceA(hModule, (LPCSTR)lpszName, (LPCSTR)lpszType);
-    if(hResource != NULL)
+    if(hResource != NULL) //FindResourceA didn't fail
     {
         hResourceGlobal = LoadResource(hModule, hResource);
-        if(hResourceGlobal != NULL)
+        if(hResourceGlobal != NULL) //LoadResource didn't fail
         {
             ResourceSize = SizeofResource(hModule, hResource);
             ResourceData = LockResource(hResourceGlobal);
-            if(ResourceData != NULL)
+            if(ResourceData != NULL) //LockResource didn't fail
             {
-                if(!EngineIsBadReadPtrEx(ResourceData, ResourceSize))
+                if(EngineIsValidReadPtrEx(ResourceData, ResourceSize)) //ResourceData is a valid read pointer
                 {
-                    *((LONG*)lParam) = ReturnData;
-                    return false;
+                    return true;
                 }
             }
-            else
-            {
-                *((LONG*)lParam) = ReturnData;
-                return false;
-            }
         }
-        return true;
     }
-
     *((LONG*)lParam) = ReturnData;
     return false;
 }

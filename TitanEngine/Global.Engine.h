@@ -42,7 +42,7 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
 bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize);
 long EngineHashString(char* szStringToHash);
 long EngineHashMemory(char* MemoryAddress, int MemorySize, DWORD InitialHashValue);
-bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize);
+bool EngineIsValidReadPtrEx(LPVOID DataPointer, DWORD DataSize);
 bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, LONG_PTR lParam);
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile);
 long long EngineSimulateNtLoaderW(wchar_t* szFileName);

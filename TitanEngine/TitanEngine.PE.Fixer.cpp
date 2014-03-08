@@ -171,7 +171,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
                                     {
                                         PEExports = (PIMAGE_EXPORT_DIRECTORY)ConvertedAddress;
                                         if(PEExports->AddressOfFunctions > CorrectedImageSize || PEExports->AddressOfFunctions + 4 * PEExports->NumberOfFunctions > CorrectedImageSize)
@@ -269,7 +269,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
                                     {
                                         RtlMoveMemory(&ReadData, (LPVOID)ConvertedAddress, 4);
                                         RtlMoveMemory(&ReadSize, (LPVOID)(ConvertedAddress + 4), 4);
@@ -324,7 +324,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
                                     {
                                         PEExports = (PIMAGE_EXPORT_DIRECTORY)ConvertedAddress;
                                         if(PEExports->AddressOfFunctions > CorrectedImageSize || PEExports->AddressOfFunctions + 4 * PEExports->NumberOfFunctions > CorrectedImageSize)
@@ -467,7 +467,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                                             ImportNamePtr = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, (ULONG_PTR)((ULONG_PTR)ThunkData32->u1.AddressOfData + 2 + PEHeader32->OptionalHeader.ImageBase), false, true);
                                                             if(ImportNamePtr != NULL)
                                                             {
-                                                                if(!EngineIsBadReadPtrEx((LPVOID)ImportNamePtr, 8))
+                                                                if(!EngineIsValidReadPtrEx((LPVOID)ImportNamePtr, 8))
                                                                 {
                                                                     myFileStatusInfo.ImportTableData = UE_FIELD_BROKEN_NON_FIXABLE;
                                                                 }
@@ -910,7 +910,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
                                     {
                                         PEExports = (PIMAGE_EXPORT_DIRECTORY)ConvertedAddress;
                                         if(PEExports->AddressOfFunctions > CorrectedImageSize || PEExports->AddressOfFunctions + 4 * PEExports->NumberOfFunctions > CorrectedImageSize)
@@ -1008,7 +1008,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
                                     {
                                         RtlMoveMemory(&ReadData, (LPVOID)ConvertedAddress, 4);
                                         RtlMoveMemory(&ReadSize, (LPVOID)(ConvertedAddress + 4), 4);
@@ -1063,7 +1063,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
                                     {
                                         PEExports = (PIMAGE_EXPORT_DIRECTORY)ConvertedAddress;
                                         if(PEExports->AddressOfFunctions > CorrectedImageSize || PEExports->AddressOfFunctions + 4 * PEExports->NumberOfFunctions > CorrectedImageSize)
@@ -1206,7 +1206,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                                                             ImportNamePtr = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, (ULONG_PTR)(ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, (ULONG_PTR)((ULONG_PTR)ThunkData64->u1.AddressOfData + 2 + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase), false, true);
                                                             if(ImportNamePtr != NULL)
                                                             {
-                                                                if(!EngineIsBadReadPtrEx((LPVOID)ImportNamePtr, 8))
+                                                                if(!EngineIsValidReadPtrEx((LPVOID)ImportNamePtr, 8))
                                                                 {
                                                                     myFileStatusInfo.ImportTableData = UE_FIELD_BROKEN_NON_FIXABLE;
                                                                 }
@@ -1786,7 +1786,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                                     ImportNamePtr = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, (ULONG_PTR)((ULONG_PTR)ThunkData32->u1.AddressOfData + 2 + PEHeader32->OptionalHeader.ImageBase), false, true);
                                                     if(ImportNamePtr != NULL)
                                                     {
-                                                        if(EngineIsBadReadPtrEx((LPVOID)ImportNamePtr, 8))
+                                                        if(EngineIsValidReadPtrEx((LPVOID)ImportNamePtr, 8))
                                                         {
                                                             if(hLoadedModule != NULL)
                                                             {
@@ -1848,7 +1848,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                     ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                                     if(ConvertedAddress != NULL)
                                     {
-                                        if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
+                                        if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
                                         {
                                             PEExports = (PIMAGE_EXPORT_DIRECTORY)ConvertedAddress;
                                             if(PEExports->AddressOfFunctions > CorrectedImageSize || PEExports->AddressOfFunctions + 4 * PEExports->NumberOfFunctions > CorrectedImageSize)
@@ -1917,7 +1917,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + PEHeader32->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
                                     {
                                         RtlMoveMemory(&ReadData, (LPVOID)ConvertedAddress, 4);
                                         RtlMoveMemory(&ReadSize, (LPVOID)(ConvertedAddress + 4), 4);
@@ -2379,7 +2379,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                                     ImportNamePtr = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, (ULONG_PTR)((ULONG_PTR)ThunkData64->u1.AddressOfData + 2 + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase), false, true);
                                                     if(ImportNamePtr != NULL)
                                                     {
-                                                        if(EngineIsBadReadPtrEx((LPVOID)ImportNamePtr, 8))
+                                                        if(EngineIsValidReadPtrEx((LPVOID)ImportNamePtr, 8))
                                                         {
                                                             if(hLoadedModule != NULL)
                                                             {
@@ -2441,7 +2441,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                     ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                                     if(ConvertedAddress != NULL)
                                     {
-                                        if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
+                                        if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size))
                                         {
                                             PEExports = (PIMAGE_EXPORT_DIRECTORY)ConvertedAddress;
                                             if(PEExports->AddressOfFunctions > CorrectedImageSize || PEExports->AddressOfFunctions + 4 * PEExports->NumberOfFunctions > CorrectedImageSize)
@@ -2510,7 +2510,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                                 ConvertedAddress = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, NULL, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, false, true);
                                 if(ConvertedAddress != NULL)
                                 {
-                                    if(EngineIsBadReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
+                                    if(EngineIsValidReadPtrEx((LPVOID)ConvertedAddress, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size))
                                     {
                                         RtlMoveMemory(&ReadData, (LPVOID)ConvertedAddress, 4);
                                         RtlMoveMemory(&ReadSize, (LPVOID)(ConvertedAddress + 4), 4);
