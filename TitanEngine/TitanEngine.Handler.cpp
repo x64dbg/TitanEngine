@@ -130,7 +130,7 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
         TotalHandleCount--;
     }
 
-	if(!NameFound)
+    if(!NameFound)
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
         return(NULL);
@@ -200,7 +200,7 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
         TotalHandleCount--;
     }
 
-	if(!NameFound)
+    if(!NameFound)
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
         return(NULL);

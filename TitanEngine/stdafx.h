@@ -17,7 +17,7 @@
 #include "aplib.h"
 #include "LzmaDec.h"
 
-#include "Helper.h"
+#include "Global.Helper.h"
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L) // ntsubauth
 

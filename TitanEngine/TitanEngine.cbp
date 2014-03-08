@@ -80,6 +80,8 @@
 		<Unit filename="Global.Garbage.h" />
 		<Unit filename="Global.Handle.cpp" />
 		<Unit filename="Global.Handle.h" />
+		<Unit filename="Global.Helper.cpp" />
+		<Unit filename="Global.Helper.h" />
 		<Unit filename="Global.Injector.cpp" />
 		<Unit filename="Global.Injector.h" />
 		<Unit filename="Global.Librarian.cpp" />

@@ -292,7 +292,7 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
                 }
                 else if(CompareMemory->DataByte[0] == 0x0F && CompareMemory->DataByte[1] >= 0x81 && CompareMemory->DataByte[1] <= 0x8F && CurrentInstructionSize == 4)
                 {
-					ReadMemData = 0;
+                    ReadMemData = 0;
                     RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)ReadMemory + 2), 2);
                     TargetedAddress = ReadMemData + InstructionAddress + CurrentInstructionSize;
                 }
@@ -321,7 +321,7 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
                 }
                 else if(CompareMemory->DataByte[0] == 0xFF && CompareMemory->DataByte[1] != 0x64 && CompareMemory->DataByte[1] >= 0x60 && CompareMemory->DataByte[1] <= 0x67 && CurrentInstructionSize == 3)
                 {
-					ReadMemData = 0;
+                    ReadMemData = 0;
                     RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)ReadMemory + 2), 1);
                     TargetedAddress = ReadMemData;
                     if(CompareMemory->DataByte[1] == 0x60)
@@ -427,7 +427,7 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         }
         else if(CompareMemory->DataByte[0] == 0x0F && CompareMemory->DataByte[1] >= 0x81 && CompareMemory->DataByte[1] <= 0x8F && CurrentInstructionSize == 4)
         {
-			ReadMemData = 0;
+            ReadMemData = 0;
             RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)InstructionAddress + 2), 2);
             TargetedAddress = ReadMemData + InstructionAddress + CurrentInstructionSize;
         }
@@ -456,7 +456,7 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         }
         else if(CompareMemory->DataByte[0] == 0xFF && CompareMemory->DataByte[1] != 0x64 && CompareMemory->DataByte[1] >= 0x60 && CompareMemory->DataByte[1] <= 0x67 && CurrentInstructionSize == 3)
         {
-			ReadMemData = 0;
+            ReadMemData = 0;
             RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)InstructionAddress + 2), 1);
             TargetedAddress = ReadMemData;
             if(CompareMemory->DataByte[1] == 0x60)
