@@ -393,7 +393,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
     HANDLE hFile = 0;
     LPVOID ReadBase = MemoryStart;
     ULONG_PTR ProcReadBase = (ULONG_PTR)ReadBase;
-    LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ueCopyBuffer[0x2000] = {0};
     MEMORY_BASIC_INFORMATION MemInfo;
 
     if(EngineCreatePathForFileW(szDumpFileName))
@@ -406,7 +406,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
                 ReadBase = (LPVOID)ProcReadBase;
                 if(MemorySize >= 0x1000)
                 {
-                    RtlZeroMemory(ueCopyBuffer,0x2000);
+                    RtlZeroMemory(ueCopyBuffer, sizeof(ueCopyBuffer));
                     if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead))
                     {
                         VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -419,7 +419,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
                 }
                 else
                 {
-                    RtlZeroMemory(ueCopyBuffer,0x2000);
+                    RtlZeroMemory(ueCopyBuffer, sizeof(ueCopyBuffer));
                     if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead))
                     {
                         VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -433,12 +433,10 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
                 ProcReadBase = (ULONG_PTR)ReadBase + 0x1000;
             }
             EngineCloseHandle(hFile);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
             return true;
         }
         else
         {
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
             return false;
         }
     }

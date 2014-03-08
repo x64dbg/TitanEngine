@@ -5,7 +5,7 @@
 __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
 {
 
-    LPVOID TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    void* TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE); //pointer is returned
     char szDeviceName[3] = "A:";
     char szDeviceCOMName[5] = "COM0";
     int CurrentDeviceLen;
@@ -50,7 +50,7 @@ __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
 __declspec(dllexport) void* TITCALL TranslateNativeNameW(wchar_t* szNativeName)
 {
 
-    LPVOID TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    void* TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE); //pointer is returned
     wchar_t szDeviceName[3] = L"A:";
     wchar_t szDeviceCOMName[5] = L"COM0";
     int CurrentDeviceLen;

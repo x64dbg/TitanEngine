@@ -210,7 +210,7 @@ __declspec(dllexport) long long TITCALL GetFunctionParameter(HANDLE hProcess, DW
 __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
 {
 
-    LPVOID ReadMemory;
+    char ReadMemory[MAXIMUM_INSTRUCTION_SIZE] = {0};
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     PMEMORY_CMP_HANDLER CompareMemory;
@@ -224,9 +224,6 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         VirtualQueryEx(hProcess, (LPVOID)InstructionAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
         if(MemInfo.RegionSize > NULL)
         {
-            ReadMemory = VirtualAlloc(NULL, MAXIMUM_INSTRUCTION_SIZE, MEM_COMMIT, PAGE_READWRITE);
-            if(!ReadMemory)
-                return 0;
             if(ReadProcessMemory(hProcess, (LPVOID)InstructionAddress, ReadMemory, MAXIMUM_INSTRUCTION_SIZE, &ueNumberOfBytesRead))
             {
                 CompareMemory = (PMEMORY_CMP_HANDLER)ReadMemory;
@@ -358,7 +355,6 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
                     ReadProcessMemory(hProcess, (LPVOID)TargetedAddress, &TargetedAddress, 4, &ueNumberOfBytesRead);
                 }
             }
-            VirtualFree(ReadMemory, NULL, MEM_RELEASE);
             return((ULONG_PTR)TargetedAddress);
         }
         return(NULL);

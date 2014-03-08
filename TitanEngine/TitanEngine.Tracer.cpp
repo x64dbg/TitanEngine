@@ -1125,10 +1125,8 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
     PMEMORY_CMP_HANDLER cMem;
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
-    LPVOID TracerReadMemory = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char TracerReadMemory[0x1000] = {0};
     DWORD MaximumReadSize=0x1000;
-    if(!TracerReadMemory)
-        return (NULL);
     cMem = (PMEMORY_CMP_HANDLER)TracerReadMemory;
 
     VirtualQueryEx(hProcess, (LPVOID)AddressToTrace, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -1166,13 +1164,11 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     RtlMoveMemory(&ReadAddressX86, &cMem->DataByte[8], 4);
                     TestAddressX86 = TestAddressX86 + ReadAddressX86;
                 }
-                VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                 return((DWORD)TestAddressX86);
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1185,14 +1181,12 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                 RtlMoveMemory(&TestAddressX86, &cMem->DataByte[2], 4);
                 if(ReadProcessMemory(hProcess, (LPVOID)TestAddressX86, &TestAddressX86, 4, &ueNumberOfBytesRead))
                 {
-                    VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                     return((DWORD)TestAddressX86);
                 }
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1212,14 +1206,12 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                 }
                 if(ReadProcessMemory(hProcess, (LPVOID)TestAddressX86, &TestAddressX86, 4, &ueNumberOfBytesRead))
                 {
-                    VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                     return((DWORD)TestAddressX86);
                 }
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1268,7 +1260,6 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     }
                     if(ReadProcessMemory(hProcess, (LPVOID)TestAddressX86, &TestAddressX86, 4, &ueNumberOfBytesRead))
                     {
-                        VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                         return((DWORD)TestAddressX86);
                     }
                 }
@@ -1278,7 +1269,6 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     RtlMoveMemory(&TestAddressX86, &cMem->DataByte[2], 4);
                     if(ReadProcessMemory(hProcess, (LPVOID)TestAddressX86, &TestAddressX86, 4, &ueNumberOfBytesRead))
                     {
-                        VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                         return((DWORD)TestAddressX86);
                     }
                 }
@@ -1286,7 +1276,6 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1311,7 +1300,6 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     if(ReadProcessMemory(hProcess, (LPVOID)TestAddressX86, &TestAddressX86, 4, &ueNumberOfBytesRead))
                     {
                         TestAddressX86 = TestAddressX86 ^ ReadAddressX86;
-                        VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                         return((DWORD)TestAddressX86);
                     }
                 }
@@ -1319,7 +1307,6 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1330,13 +1317,11 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
             if(ReadProcessMemory(hProcess, (LPVOID)AddressToTrace, TracerReadMemory, MaximumReadSize, &ueNumberOfBytesRead))
             {
                 RtlMoveMemory(&TestAddressX86, &cMem->DataByte[1], 4);
-                VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                 return((DWORD)TestAddressX86);
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1357,20 +1342,17 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     {
                         TestAddressX86 = (DWORD)ImporterGetRemoteAPIAddress(hProcess, (ULONG_PTR)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetCommandLineW"));
                     }
-                    VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                     return((DWORD)TestAddressX86);
                 }
                 else if(cMem->DataByte[0] == 0xC8)
                 {
                     TestAddressX86 = (DWORD)ImporterGetRemoteAPIAddress(hProcess, (ULONG_PTR)GetProcAddress(GetModuleHandleA("kernel32.dll"), "ExitProcess"));
-                    VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                     return((DWORD)TestAddressX86);
                 }
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1382,13 +1364,11 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
             {
                 cMem = (PMEMORY_CMP_HANDLER)((ULONG_PTR)cMem + 0x34);
                 RtlMoveMemory(&TestAddressX86, &cMem->DataByte[0], 4);
-                VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                 return((DWORD)TestAddressX86);
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -1433,18 +1413,15 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     {
                         TestAddressX86 = (DWORD)ImporterGetRemoteAPIAddress(hProcess, (ULONG_PTR)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetModuleHandleA"));
                     }
-                    VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
                     return((DWORD)TestAddressX86);
                 }
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
-    VirtualFree(TracerReadMemory, NULL, MEM_RELEASE);
     return(NULL);
 }
 
@@ -1457,8 +1434,8 @@ __declspec(dllexport) long TITCALL TracerFixRedirectionViaImpRecPlugin(HANDLE hP
     ULONG_PTR fImpRecTrace = NULL;
     PMEMORY_CMP_HANDLER cmpModuleName;
     ULONG_PTR remInjectSize = (ULONG_PTR)((ULONG_PTR)&injectedRemoteLoadLibrary - (ULONG_PTR)&injectedImpRec);
-    LPVOID szModuleName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID szGarbageFile = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    char szModuleName[0x1100] = {0};
+    char szGarbageFile[0x1100] = {0};
     LPVOID cModuleName = szModuleName;
     ULONG_PTR NumberOfBytesWritten;
     InjectImpRecCodeData APIData;
@@ -1474,7 +1451,7 @@ __declspec(dllexport) long TITCALL TracerFixRedirectionViaImpRecPlugin(HANDLE hP
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
 
-    if(GetModuleFileNameA(engineHandle, (LPCH)szModuleName, 0x1000) > NULL)
+    if(GetModuleFileNameA(engineHandle, (LPCH)szModuleName, sizeof(szModuleName)-0x100) > NULL)
     {
         cModuleName = (LPVOID)((ULONG_PTR)cModuleName + lstrlenA((LPCSTR)szModuleName));
         cmpModuleName = (PMEMORY_CMP_HANDLER)(cModuleName);
@@ -1547,7 +1524,5 @@ __declspec(dllexport) long TITCALL TracerFixRedirectionViaImpRecPlugin(HANDLE hP
             }
         }
     }
-    VirtualFree(szModuleName, NULL, MEM_RELEASE);
-    VirtualFree(szGarbageFile, NULL, MEM_RELEASE);
     return(TracedAddress);
 }
