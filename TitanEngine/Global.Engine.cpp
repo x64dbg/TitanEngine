@@ -824,7 +824,6 @@ bool EngineIsBadReadPtrEx(LPVOID DataPointer, DWORD DataSize)
 
 bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, LONG_PTR lParam)
 {
-
     HRSRC hResource;
     HGLOBAL hResourceGlobal;
     DWORD ResourceSize;
@@ -862,11 +861,10 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
 
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile)
 {
-
     MODULEINFO ModuleInfo;
     DWORD MemorySize = NULL;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    IMAGE_NT_HEADERS32 RemotePEHeader32;
+    PIMAGE_NT_HEADERS PEHeader;
+    IMAGE_NT_HEADERS RemotePEHeader;
     MEMORY_BASIC_INFORMATION MemoryInfo= {0};
     ULONG_PTR NumberOfBytesRW = NULL;
 
@@ -874,8 +872,8 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     {
         if(hFileProc == NULL)
         {
-            VirtualQueryEx(GetCurrentProcess(), (LPVOID)FileMapVA, &MemoryInfo, sizeof MEMORY_BASIC_INFORMATION);
-            VirtualQueryEx(GetCurrentProcess(), MemoryInfo.AllocationBase, &MemoryInfo, sizeof MEMORY_BASIC_INFORMATION);
+            VirtualQueryEx(GetCurrentProcess(), (LPVOID)FileMapVA, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
+            VirtualQueryEx(GetCurrentProcess(), MemoryInfo.AllocationBase, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
             MemorySize = (DWORD)((ULONG_PTR)MemoryInfo.AllocationBase + (ULONG_PTR)MemoryInfo.RegionSize - (ULONG_PTR)FileMapVA);
         }
         else
@@ -886,75 +884,40 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
         {
             if(DOSHeader->e_magic == 0x5A4D)
             {
-                if(DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof(IMAGE_NT_HEADERS64) < MemorySize)
+                if(DOSHeader->e_lfanew + sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) < MemorySize)
                 {
-                    PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-                    if(PEHeader32->Signature != 0x4550)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
+                    PEHeader = (PIMAGE_NT_HEADERS)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+                    return (PEHeader->Signature == 0x4550);
                 }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            return false;
         }
     }
     else
     {
         RtlZeroMemory(&ModuleInfo, sizeof MODULEINFO);
-        GetModuleInformation(hFileProc, (HMODULE)ImageBase, &ModuleInfo, sizeof MODULEINFO);
+        GetModuleInformation(hFileProc, (HMODULE)ImageBase, &ModuleInfo, sizeof(MODULEINFO));
         __try
         {
             if(DOSHeader->e_magic == 0x5A4D)
             {
-                if(DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof(IMAGE_NT_HEADERS64) < ModuleInfo.SizeOfImage)
+                if(DOSHeader->e_lfanew + sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) < ModuleInfo.SizeOfImage)
                 {
-                    if(ReadProcessMemory(hFileProc, (LPVOID)((ULONG_PTR)ImageBase + DOSHeader->e_lfanew), &RemotePEHeader32, sizeof IMAGE_NT_HEADERS32, &NumberOfBytesRW))
+                    if(ReadProcessMemory(hFileProc, (LPVOID)((ULONG_PTR)ImageBase + DOSHeader->e_lfanew), &RemotePEHeader, sizeof(IMAGE_NT_HEADERS), &NumberOfBytesRW))
                     {
-                        PEHeader32 = (PIMAGE_NT_HEADERS32)(&RemotePEHeader32);
-                        if(PEHeader32->Signature != 0x4550)
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        return false;
+                        PEHeader = (PIMAGE_NT_HEADERS)(&RemotePEHeader);
+                        return (PEHeader->Signature == 0x4550);
                     }
                 }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            return false;
         }
     }
+    return false;
 }
 
 long long EngineSimulateNtLoaderW(wchar_t* szFileName)
