@@ -292,7 +292,7 @@ bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr)
         {
             TestChar = *((BYTE*)PossibleStringPtr);
 
-            if(TestChar < 32 || TestChar > 126)
+            if(TestChar < ' ' || TestChar > '~') //is inside the lower-ascii range
             {
                 if(TestChar != 0x00)
                 {
