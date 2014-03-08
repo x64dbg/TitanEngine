@@ -7,8 +7,8 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
 {
     if(!MemoryToCheck || !PatternToMatch)
         return false;
-    int i = NULL;
-    BYTE intWildCard = NULL;
+    int i = 0;
+    BYTE intWildCard = 0;
     LPVOID ueReadBuffer = NULL;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     MEMORY_BASIC_INFORMATION memoryInformation = {};

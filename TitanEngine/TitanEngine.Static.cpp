@@ -605,18 +605,18 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                                         WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
                                     }
                                     SizeToRead = Size;
-                                    Size = NULL;
+                                    Size = 0;
                                 }
                                 else
                                 {
                                     SizeToRead = Size;
-                                    Size = NULL;
+                                    Size = 0;
                                 }
                             }
                             else
                             {
                                 WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                Size = NULL;
+                                Size = 0;
                             }
                         }
                         EngineCloseHandle(hReadFile);

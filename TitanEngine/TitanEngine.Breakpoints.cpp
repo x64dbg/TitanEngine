@@ -152,7 +152,7 @@ __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
 __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bpxCallBack)
 {
     MutexLocker lock("BreakPointBuffer");
-    void* bpxDataPrt;
+    void* bpxDataPrt=NULL;
     PMEMORY_COMPARE_HANDLER bpxDataCmpPtr;
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
