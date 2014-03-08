@@ -218,7 +218,7 @@ bool EngineCreatePathForFileW(wchar_t* szFileName)
                         {
                             RtlZeroMemory(szCreateFolder, 2 * MAX_PATH);
                             RtlCopyMemory(szCreateFolder, szFileName, (i * 2) + 1);
-                            CreateDirectoryW(szCreateFolder, NULL);
+                            return !!CreateDirectoryW(szCreateFolder, NULL);
                         }
                     }
                 }
