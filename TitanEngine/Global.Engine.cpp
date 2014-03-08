@@ -517,16 +517,15 @@ bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName)
                 hFile = CreateFileW(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
                 if(hFile != INVALID_HANDLE_VALUE)
                 {
-                    WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL);
+                    if(WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL))
+                    {
+                        EngineCloseHandle(hFile);
+                        return true;
+                    }
                     EngineCloseHandle(hFile);
-                }
-                else
-                {
-                    return false;
                 }
             }
         }
-        return true;
     }
     return false;
 }
