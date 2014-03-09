@@ -7,10 +7,10 @@
 //TitanEngine.Dumper.functions:
 __declspec(dllexport) bool TITCALL DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
 {
-    wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {0};
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, -1, uniDumpFileName, _countof(uniDumpFileName));
         return DumpProcessW(hProcess, ImageBase, uniDumpFileName, EntryPoint);
     }
     return false;
@@ -39,7 +39,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     SIZE_T AlignedHeaderSize = NULL;
     LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
     LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
-    DWORD Protect;
 
     if(ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, 0x1000, &ueNumberOfBytesRead))
     {//ReadProcessMemory
@@ -156,24 +155,18 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                     if(SizeOfImageDump >= TITANENGINE_PAGESIZE)
                                     {
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-                                        if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead))
-                                        {
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
-                                            ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
-                                        }
+
+                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
+
                                         WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
                                     }
                                     else
                                     {
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-                                        if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead))
-                                        {
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
-                                            ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
-                                        }
+
+                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
+
                                         WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = NULL;
                                     }
@@ -245,24 +238,18 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                     if(SizeOfImageDump >= TITANENGINE_PAGESIZE)
                                     {
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-                                        if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead))
-                                        {
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
-                                            ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
-                                        }
+
+                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
+
                                         WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
                                     }
                                     else
                                     {
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-                                        if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead))
-                                        {
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
-                                            ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
-                                        }
+                                        
+                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
+                                        
                                         WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = NULL;
                                     }
@@ -298,12 +285,11 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
 
 __declspec(dllexport) bool TITCALL DumpProcessEx(DWORD ProcessId, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)
 {
-
-    wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {0};
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, -1, uniDumpFileName, _countof(uniDumpFileName));
         return(DumpProcessExW(ProcessId, ImageBase, uniDumpFileName, EntryPoint));
     }
     else
@@ -316,21 +302,14 @@ __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageB
 {
 
     HANDLE hProcess = 0;
-    BOOL ReturnValue = false;
+    bool ReturnValue = false;
 
     hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpProcessW(hProcess, ImageBase, szDumpFileName, EntryPoint);
         EngineCloseHandle(hProcess);
-        if(ReturnValue)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return ReturnValue;
     }
     else
     {
@@ -340,18 +319,57 @@ __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageB
 
 __declspec(dllexport) bool TITCALL DumpMemory(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
 {
-
-    wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {0};
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, -1, uniDumpFileName, _countof(uniDumpFileName));
         return(DumpMemoryW(hProcess, MemoryStart, MemorySize, uniDumpFileName));
     }
     else
     {
         return false;
     }
+}
+
+__declspec(dllexport) bool TITCALL ReadProcessMemoryEnforce(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead)
+{
+    SIZE_T ueNumberOfBytesRead = 0;
+    SIZE_T * pNumBytes = 0;
+    DWORD dwProtect = 0;
+    bool retValue = false;
+
+    if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
+    {
+        return false;
+    }
+
+    if (!lpNumberOfBytesRead)
+    {
+        pNumBytes = &ueNumberOfBytesRead;
+    }
+    else
+    {
+        pNumBytes = lpNumberOfBytesRead;
+    }
+
+    if(!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+    {
+        if (VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
+        {
+            if (ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+            {
+                retValue = false;
+            }
+            VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
+        }
+    }
+    else
+    {
+        retValue = true;
+    }
+
+    return retValue;
 }
 
 __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
@@ -363,7 +381,6 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
     LPVOID ReadBase = MemoryStart;
     ULONG_PTR ProcReadBase = (ULONG_PTR)ReadBase;
     LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
-    MEMORY_BASIC_INFORMATION MemInfo;
 
     if(EngineCreatePathForFileW(szDumpFileName))
     {
@@ -376,26 +393,18 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
                 if(MemorySize >= 0x1000)
                 {
                     RtlZeroMemory(ueCopyBuffer,0x2000);
-                    if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead))
-                    {
-                        VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                        VirtualProtectEx(hProcess, ReadBase, 0x1000, PAGE_EXECUTE_READWRITE, &MemInfo.Protect);
-                        ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
-                        VirtualProtectEx(hProcess, ReadBase, 0x1000, MemInfo.Protect, &MemInfo.Protect);
-                    }
+
+                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
+
                     WriteFile(hFile,ueCopyBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
                     MemorySize = MemorySize - 0x1000;
                 }
                 else
                 {
                     RtlZeroMemory(ueCopyBuffer,0x2000);
-                    if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead))
-                    {
-                        VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                        VirtualProtectEx(hProcess, ReadBase, 0x1000, PAGE_EXECUTE_READWRITE, &MemInfo.Protect);
-                        ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
-                        VirtualProtectEx(hProcess, ReadBase, 0x1000, MemInfo.Protect, &MemInfo.Protect);
-                    }
+
+                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead);
+
                     WriteFile(hFile, ueCopyBuffer, (DWORD)MemorySize, &uedNumberOfBytesRead, NULL);
                     MemorySize = NULL;
                 }
@@ -416,12 +425,11 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
 
 __declspec(dllexport) bool TITCALL DumpMemoryEx(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
 {
-
-    wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {0};
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, -1, uniDumpFileName, _countof(uniDumpFileName));
         return(DumpMemoryExW(ProcessId, MemoryStart, MemorySize, uniDumpFileName));
     }
     else
@@ -434,17 +442,14 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
 {
 
     HANDLE hProcess = 0;
-    BOOL ReturnValue = false;
+    bool ReturnValue = false;
 
     hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpMemoryW(hProcess, MemoryStart, MemorySize, szDumpFileName);
         EngineCloseHandle(hProcess);
-        if(ReturnValue)
-        {
-            return true;
-        }
+        return ReturnValue;
     }
 
     return false;
@@ -452,12 +457,11 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
 
 __declspec(dllexport) bool TITCALL DumpRegions(HANDLE hProcess, char* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
-
-    wchar_t uniDumpFolder[MAX_PATH] = {};
+    wchar_t uniDumpFolder[MAX_PATH] = {0};
 
     if(szDumpFolder != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFolder, lstrlenA(szDumpFolder)+1, uniDumpFolder, sizeof(uniDumpFolder)/(sizeof(uniDumpFolder[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFolder, -1, uniDumpFolder, _countof(uniDumpFolder));
         return(DumpRegionsW(hProcess, uniDumpFolder, DumpAboveImageBaseOnly));
     }
     else
@@ -470,7 +474,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
 {
 
     int i;
-    DWORD Dummy = NULL;
+    DWORD cbNeeded = NULL;
     wchar_t szDumpName[MAX_PATH];
     wchar_t szDumpFileName[MAX_PATH];
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -480,11 +484,15 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
 
     if(hProcess != NULL)
     {
-        EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &Dummy);
+        if (!EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
+        {
+            return false;
+        }
+
         while(VirtualQueryEx(hProcess, (LPVOID)DumpAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION) != NULL)
         {
             AddressIsModuleBase = false;
-            for(i = 0; i < _countof(EnumeratedModules); i++)
+            for(i = 0; i < (int)(cbNeeded / sizeof(HMODULE)); i++)
             {
                 if(EnumeratedModules[i] == (HMODULE)MemInfo.AllocationBase)
                 {
@@ -521,12 +529,11 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
 
 __declspec(dllexport) bool TITCALL DumpRegionsEx(DWORD ProcessId, char* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
-
-    wchar_t uniDumpFolder[MAX_PATH] = {};
+    wchar_t uniDumpFolder[MAX_PATH] = {0};
 
     if(szDumpFolder != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFolder, lstrlenA(szDumpFolder)+1, uniDumpFolder, sizeof(uniDumpFolder)/(sizeof(uniDumpFolder[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFolder, -1, uniDumpFolder, _countof(uniDumpFolder));
         return(DumpRegionsExW(ProcessId, uniDumpFolder, DumpAboveImageBaseOnly));
     }
     else
@@ -537,19 +544,15 @@ __declspec(dllexport) bool TITCALL DumpRegionsEx(DWORD ProcessId, char* szDumpFo
 
 __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
-
     HANDLE hProcess = 0;
-    BOOL ReturnValue = false;
+    bool ReturnValue = false;
 
     hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpRegionsW(hProcess, szDumpFolder, DumpAboveImageBaseOnly);
         EngineCloseHandle(hProcess);
-        if(ReturnValue)
-        {
-            return true;
-        }
+        return ReturnValue;
     }
 
     return false;
@@ -557,12 +560,11 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
 
 __declspec(dllexport) bool TITCALL DumpModule(HANDLE hProcess, LPVOID ModuleBase, char* szDumpFileName)
 {
-
-    wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {0};
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, -1, uniDumpFileName, _countof(uniDumpFileName));
         return(DumpModuleW(hProcess, ModuleBase, uniDumpFileName));
     }
     else
@@ -575,13 +577,13 @@ __declspec(dllexport) bool TITCALL DumpModuleW(HANDLE hProcess, LPVOID ModuleBas
 {
 
     int i;
-    DWORD Dummy = NULL;
+    DWORD cbNeeded = NULL;
     MODULEINFO RemoteModuleInfo;
-    HMODULE EnumeratedModules[1024];
+    HMODULE EnumeratedModules[1024] = {0};
 
-    if(EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &Dummy))
+    if(EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
     {
-        for(i = 0; i < _countof(EnumeratedModules); i++)
+        for(i = 0; i < (int)(cbNeeded / sizeof(HMODULE)); i++)
         {
             if(EnumeratedModules[i] == (HMODULE)ModuleBase)
             {
@@ -597,12 +599,11 @@ __declspec(dllexport) bool TITCALL DumpModuleW(HANDLE hProcess, LPVOID ModuleBas
 
 __declspec(dllexport) bool TITCALL DumpModuleEx(DWORD ProcessId, LPVOID ModuleBase, char* szDumpFileName)
 {
-
-    wchar_t uniDumpFileName[MAX_PATH] = {};
+    wchar_t uniDumpFileName[MAX_PATH] = {0};
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, -1, uniDumpFileName, _countof(uniDumpFileName));
         return(DumpModuleExW(ProcessId, ModuleBase, uniDumpFileName));
     }
     else
@@ -615,17 +616,14 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
 {
 
     HANDLE hProcess = 0;
-    BOOL ReturnValue = false;
+    bool ReturnValue = false;
 
     hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess) //If the function fails, the return value is NULL. To get extended error information, call GetLastError.
     {
         ReturnValue = DumpModuleW(hProcess, ModuleBase, szDumpFileName);
         EngineCloseHandle(hProcess);
-        if(ReturnValue)
-        {
-            return true;
-        }
+        return ReturnValue;
     }
 
     return false;

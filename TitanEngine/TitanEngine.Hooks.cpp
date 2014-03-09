@@ -1112,14 +1112,13 @@ __declspec(dllexport) void TITCALL HooksScanEntireProcessMemory(LPVOID CallBack)
 {
 
     unsigned int i;
-    DWORD ModulesLoaded;
-    HMODULE EnumeratedModules[1024];
+    DWORD cbNeeded = 0;
+    HMODULE EnumeratedModules[1024] = {0};
 
     hookEntry.clear();
-    if(EnumProcessModules(GetCurrentProcess(), &EnumeratedModules[0], sizeof EnumeratedModules, &ModulesLoaded))
+    if(EnumProcessModules(GetCurrentProcess(), EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
     {
-        ModulesLoaded = ModulesLoaded / sizeof HANDLE;
-        for(i = 1; i < ModulesLoaded; i++)
+        for(i = 1; i < (cbNeeded / sizeof(HMODULE)); i++)
         {
             HooksScanModuleMemory(EnumeratedModules[i], CallBack);
         }

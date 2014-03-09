@@ -543,8 +543,8 @@ __declspec(dllexport) long long TITCALL HashTracerLevel1(HANDLE hProcess, ULONG_
     unsigned int j = 0;
     DWORD Dummy = NULL;
     MODULEINFO RemoteModuleInfo;
-    ULONG_PTR EnumeratedModules[0x2000];
-    ULONG_PTR LoadedModules[1000][4];
+    ULONG_PTR EnumeratedModules[0x2000] = {0};
+    ULONG_PTR LoadedModules[1000][4] = {0};
     char RemoteDLLName[MAX_PATH];
     HANDLE hLoadedModule = NULL;
     HANDLE ModuleHandle = NULL;
@@ -576,8 +576,7 @@ __declspec(dllexport) long long TITCALL HashTracerLevel1(HANDLE hProcess, ULONG_
             return(NULL);
         }
     }
-    RtlZeroMemory(&EnumeratedModules, 0x2000 * sizeof ULONG_PTR);
-    RtlZeroMemory(&LoadedModules, 1000 * 4 * sizeof ULONG_PTR);
+
     if(hProcess == NULL)
     {
         if(dbgProcessInformation.hProcess == NULL)
@@ -589,7 +588,7 @@ __declspec(dllexport) long long TITCALL HashTracerLevel1(HANDLE hProcess, ULONG_
             hProcess = dbgProcessInformation.hProcess;
         }
     }
-    if(EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, 0x2000, &Dummy))
+    if(EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, sizeof(EnumeratedModules), &Dummy))
     {
         i++;
         while(FoundAPI == false && EnumeratedModules[i] != NULL)

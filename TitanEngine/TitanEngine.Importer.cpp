@@ -240,25 +240,22 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess
 }
 __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
 {
+    DWORD cbNeeded = NULL;
+    HMODULE EnumeratedModules[0x1024] = {0};
+    char RemoteDLLName[MAX_PATH] = {0};
 
-    int i = 1;
-    DWORD Dummy = NULL;
-    ULONG_PTR EnumeratedModules[0x2000];
-    char RemoteDLLName[MAX_PATH];
-
-    if(EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, 0x2000, &Dummy))
+    if(EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
     {
-        RtlZeroMemory(&RemoteDLLName, MAX_PATH);
-        while(EnumeratedModules[i] != NULL)
+        for(int i = 0; i < (int)(cbNeeded / sizeof(HMODULE)); i++)
         {
-            if(GetModuleBaseNameA(hProcess, (HMODULE)EnumeratedModules[i], (LPSTR)RemoteDLLName, MAX_PATH) > NULL)
+            RemoteDLLName[0] = 0;
+            if(GetModuleBaseNameA(hProcess, EnumeratedModules[i], (LPSTR)RemoteDLLName, _countof(RemoteDLLName)) > NULL)
             {
                 if(lstrcmpiA((LPCSTR)RemoteDLLName, (LPCSTR)szModuleName))
                 {
                     return((ULONG_PTR)EnumeratedModules[i]);
                 }
             }
-            i++;
         }
     }
     return(NULL);

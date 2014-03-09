@@ -73,11 +73,11 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
     int j;
     typedef void(TITCALL *fEnumFunction)(DWORD ProcessId, HMODULE ModuleBaseAddress);
     fEnumFunction myEnumFunction = (fEnumFunction)EnumFunction;
-    HMODULE EnumeratedModules[1024] = {};
-    DWORD bProcessId[1024] = {};
-    char szModuleName[1024] = {};
+    HMODULE EnumeratedModules[1024] = {0};
+    DWORD bProcessId[1024] = {0};
+    char szModuleName[1024] = {0};
     DWORD pProcessIdCount = NULL;
-    DWORD pModuleCount;
+    DWORD cbNeeded = 0;
     HANDLE hProcess;
 
     if(EnumFunction != NULL)
@@ -91,10 +91,10 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
                     hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
                     if(hProcess != NULL)
                     {
-                        RtlZeroMemory(&EnumeratedModules[0], sizeof EnumeratedModules);
-                        if(EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, sizeof EnumeratedModules, &pModuleCount))
+                        RtlZeroMemory(EnumeratedModules, sizeof(EnumeratedModules));
+                        if(EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
                         {
-                            for(j = 0; j < (int)pModuleCount; j++)
+                            for(j = 0; j < (int)(cbNeeded / sizeof(HMODULE)); j++)
                             {
                                 if(EnumeratedModules[j] != NULL)
                                 {

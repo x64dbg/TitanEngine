@@ -1316,8 +1316,8 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     unsigned int z = 0;
     DWORD Dummy = NULL;
     HANDLE hProcess = NULL;
-    ULONG_PTR EnumeratedModules[0x2000];
-    ULONG_PTR LoadedModules[1000][4];
+    ULONG_PTR EnumeratedModules[0x1000] = {0};
+    ULONG_PTR LoadedModules[1000][4] = {0};
     char RemoteDLLName[MAX_PATH]= {0};
     char FullRemoteDLLName[MAX_PATH]= {0};
     char szWindowsSideBySide[MAX_PATH]= {0};
@@ -1349,15 +1349,12 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     int Vista64UserForwarderFix = 0;
     unsigned int Windows7KernelBase = 0xFFFFFFFF;
 
-    RtlZeroMemory(&engineFoundDLLName, sizeof(szFwdDLLName));
-    RtlZeroMemory(&EnumeratedModules, 0x2000 * sizeof ULONG_PTR);
-    RtlZeroMemory(&LoadedModules, 1000 * 4 * sizeof ULONG_PTR);
     GetWindowsDirectoryA(szWindowsSideBySide, MAX_PATH);
     lstrcpyA(szWindowsKernelBase, szWindowsSideBySide);
     lstrcatA(szWindowsSideBySide, "\\WinSxS");
     if(EnumedModulesBases != NULL)
     {
-        RtlMoveMemory(&EnumeratedModules, (LPVOID)EnumedModulesBases, 0x1000);
+        RtlMoveMemory(EnumeratedModules, (LPVOID)EnumedModulesBases, 0x1000);
         i--;
     }
     if(handleProcess == NULL)
@@ -1375,7 +1372,7 @@ long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     {
         hProcess = handleProcess;
     }
-    if(EnumedModulesBases != NULL || EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, 0x2000, &Dummy))
+    if(EnumedModulesBases != NULL || EnumProcessModules(hProcess, (HMODULE*)EnumeratedModules, sizeof(EnumeratedModules), &Dummy))
     {
         i++;
         z = i;
