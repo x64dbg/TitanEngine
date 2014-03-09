@@ -41,7 +41,8 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
 
     if(ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, 0x1000, &ueNumberOfBytesRead))
-    {//ReadProcessMemory
+    {
+        //ReadProcessMemory
         DOSHeader = (PIMAGE_DOS_HEADER)ueReadBuffer;
         PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
 
@@ -84,7 +85,8 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             AlignedHeaderSize = 0x1000;
         }
         if(EngineValidateHeader((ULONG_PTR)ueReadBuffer, hProcess, ImageBase, DOSHeader, false))
-        {//EngineValidateHeader
+        {
+            //EngineValidateHeader
             PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             if(PEHeader32->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
@@ -102,7 +104,8 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                 return false;
             }
             if(!FileIs64)
-            {//PE32 Handler
+            {
+                //PE32 Handler
                 NumberOfSections = PEHeader32->FileHeader.NumberOfSections;
                 NumberOfSections++;
                 if(PEHeader32->OptionalHeader.SizeOfImage % PEHeader32->OptionalHeader.SectionAlignment == NULL)
@@ -114,78 +117,77 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                     SizeOfImageDump = ((PEHeader32->OptionalHeader.SizeOfImage / PEHeader32->OptionalHeader.SectionAlignment) + 1) * PEHeader32->OptionalHeader.SectionAlignment;
                 }
                 SizeOfImageDump = SizeOfImageDump - (DWORD)AlignedHeaderSize;
-                if(EngineCreatePathForFileW(szDumpFileName))
+                EngineCreatePathForFileW(szDumpFileName);
+                hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                if(hFile != INVALID_HANDLE_VALUE)
                 {
-                    hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                    if(hFile != INVALID_HANDLE_VALUE)
+                    if(ReadProcessMemory(hProcess, ImageBase, ueCopyBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
                     {
-                        if(ReadProcessMemory(hProcess, ImageBase, ueCopyBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
+                        __try
                         {
-                            __try
+                            DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
+                            PEFixHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
+                            PEFixSection = IMAGE_FIRST_SECTION(PEFixHeader32);
+                            if(PEFixHeader32->OptionalHeader.FileAlignment > 0x200)
                             {
-                                DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
-                                PEFixHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
-                                PEFixSection = IMAGE_FIRST_SECTION(PEFixHeader32);
-                                if(PEFixHeader32->OptionalHeader.FileAlignment > 0x200)
-                                {
-                                    PEFixHeader32->OptionalHeader.FileAlignment = PEHeader32->OptionalHeader.SectionAlignment;
-                                }
-                                PEFixHeader32->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
-                                PEFixHeader32->OptionalHeader.ImageBase = (DWORD)((ULONG_PTR)ImageBase);
-                                i = NumberOfSections;
-                                while(i >= 1)
-                                {
-                                    PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
-                                    RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader32->OptionalHeader.SectionAlignment) * PEHeader32->OptionalHeader.SectionAlignment;
-                                    if(RealignedVirtualSize < PEFixSection->Misc.VirtualSize)
-                                    {
-                                        RealignedVirtualSize = RealignedVirtualSize + PEHeader32->OptionalHeader.SectionAlignment;
-                                    }
-                                    PEFixSection->SizeOfRawData = RealignedVirtualSize;
-                                    PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
-                                    PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
-                                    i--;
-                                }
-                                WriteFile(hFile, ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
-                                ReadBase = (LPVOID)((ULONG_PTR)ReadBase + AlignedHeaderSize - TITANENGINE_PAGESIZE);
-                                while(SizeOfImageDump > NULL)
-                                {
-                                    ProcReadBase = (ULONG_PTR)ReadBase + TITANENGINE_PAGESIZE;
-                                    ReadBase = (LPVOID)ProcReadBase;
-                                    if(SizeOfImageDump >= TITANENGINE_PAGESIZE)
-                                    {
-                                        RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-
-                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-
-                                        WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
-                                        SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
-                                    }
-                                    else
-                                    {
-                                        RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-
-                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
-
-                                        WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
-                                        SizeOfImageDump = NULL;
-                                    }
-                                }
-                                EngineCloseHandle(hFile);
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return true;
+                                PEFixHeader32->OptionalHeader.FileAlignment = PEHeader32->OptionalHeader.SectionAlignment;
                             }
-                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            PEFixHeader32->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
+                            PEFixHeader32->OptionalHeader.ImageBase = (DWORD)((ULONG_PTR)ImageBase);
+                            i = NumberOfSections;
+                            while(i >= 1)
                             {
-
+                                PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
+                                RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader32->OptionalHeader.SectionAlignment) * PEHeader32->OptionalHeader.SectionAlignment;
+                                if(RealignedVirtualSize < PEFixSection->Misc.VirtualSize)
+                                {
+                                    RealignedVirtualSize = RealignedVirtualSize + PEHeader32->OptionalHeader.SectionAlignment;
+                                }
+                                PEFixSection->SizeOfRawData = RealignedVirtualSize;
+                                PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
+                                PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
+                                i--;
                             }
+                            WriteFile(hFile, ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
+                            ReadBase = (LPVOID)((ULONG_PTR)ReadBase + AlignedHeaderSize - TITANENGINE_PAGESIZE);
+                            while(SizeOfImageDump > NULL)
+                            {
+                                ProcReadBase = (ULONG_PTR)ReadBase + TITANENGINE_PAGESIZE;
+                                ReadBase = (LPVOID)ProcReadBase;
+                                if(SizeOfImageDump >= TITANENGINE_PAGESIZE)
+                                {
+                                    RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
+
+                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
+
+                                    WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
+                                    SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
+                                }
+                                else
+                                {
+                                    RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
+
+                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
+
+                                    WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
+                                    SizeOfImageDump = NULL;
+                                }
+                            }
+                            EngineCloseHandle(hFile);
+                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
+                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+                            return true;
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
+
                         }
                     }
                 }
             }//PE32 Handler
             else
-            {//PE64 Handler
+            {
+                //PE64 Handler
                 NumberOfSections = PEHeader64->FileHeader.NumberOfSections;
                 NumberOfSections++;
                 if(PEHeader64->OptionalHeader.SizeOfImage % PEHeader64->OptionalHeader.SectionAlignment == NULL)
@@ -197,72 +199,70 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                     SizeOfImageDump = ((PEHeader64->OptionalHeader.SizeOfImage / PEHeader64->OptionalHeader.SectionAlignment) + 1) * PEHeader64->OptionalHeader.SectionAlignment;
                 }
                 SizeOfImageDump = SizeOfImageDump - (DWORD)AlignedHeaderSize;
-                if(EngineCreatePathForFileW(szDumpFileName))
+                EngineCreatePathForFileW(szDumpFileName);
+                hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                if(hFile != INVALID_HANDLE_VALUE)
                 {
-                    hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                    if(hFile != INVALID_HANDLE_VALUE)
+                    if(ReadProcessMemory(hProcess, ImageBase, ueCopyBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
                     {
-                        if(ReadProcessMemory(hProcess, ImageBase, ueCopyBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
+                        __try
                         {
-                            __try
+                            DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
+                            PEFixHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
+                            PEFixSection = IMAGE_FIRST_SECTION(PEFixHeader64);
+                            if(PEFixHeader64->OptionalHeader.FileAlignment > 0x200)
                             {
-                                DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
-                                PEFixHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
-                                PEFixSection = IMAGE_FIRST_SECTION(PEFixHeader64);
-                                if(PEFixHeader64->OptionalHeader.FileAlignment > 0x200)
-                                {
-                                    PEFixHeader64->OptionalHeader.FileAlignment = PEHeader64->OptionalHeader.SectionAlignment;
-                                }
-                                PEFixHeader64->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
-                                PEFixHeader64->OptionalHeader.ImageBase = (DWORD64)((ULONG_PTR)ImageBase);
-                                i = NumberOfSections;
-                                while(i >= 1)
-                                {
-                                    PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
-                                    RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader64->OptionalHeader.SectionAlignment) * PEHeader64->OptionalHeader.SectionAlignment;
-                                    if(RealignedVirtualSize < PEFixSection->Misc.VirtualSize)
-                                    {
-                                        RealignedVirtualSize = RealignedVirtualSize + PEHeader64->OptionalHeader.SectionAlignment;
-                                    }
-                                    PEFixSection->SizeOfRawData = RealignedVirtualSize;
-                                    PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
-                                    PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
-                                    i--;
-                                }
-                                WriteFile(hFile,ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
-                                ReadBase = (LPVOID)((ULONG_PTR)ReadBase + (DWORD)AlignedHeaderSize - TITANENGINE_PAGESIZE);
-                                while(SizeOfImageDump > NULL)
-                                {
-                                    ProcReadBase = (ULONG_PTR)ReadBase + TITANENGINE_PAGESIZE;
-                                    ReadBase = (LPVOID)ProcReadBase;
-                                    if(SizeOfImageDump >= TITANENGINE_PAGESIZE)
-                                    {
-                                        RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-
-                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-
-                                        WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
-                                        SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
-                                    }
-                                    else
-                                    {
-                                        RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
-                                        
-                                        ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
-                                        
-                                        WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
-                                        SizeOfImageDump = NULL;
-                                    }
-                                }
-                                EngineCloseHandle(hFile);
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return true;
+                                PEFixHeader64->OptionalHeader.FileAlignment = PEHeader64->OptionalHeader.SectionAlignment;
                             }
-                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            PEFixHeader64->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
+                            PEFixHeader64->OptionalHeader.ImageBase = (DWORD64)((ULONG_PTR)ImageBase);
+                            i = NumberOfSections;
+                            while(i >= 1)
                             {
-
+                                PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
+                                RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader64->OptionalHeader.SectionAlignment) * PEHeader64->OptionalHeader.SectionAlignment;
+                                if(RealignedVirtualSize < PEFixSection->Misc.VirtualSize)
+                                {
+                                    RealignedVirtualSize = RealignedVirtualSize + PEHeader64->OptionalHeader.SectionAlignment;
+                                }
+                                PEFixSection->SizeOfRawData = RealignedVirtualSize;
+                                PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
+                                PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
+                                i--;
                             }
+                            WriteFile(hFile,ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
+                            ReadBase = (LPVOID)((ULONG_PTR)ReadBase + (DWORD)AlignedHeaderSize - TITANENGINE_PAGESIZE);
+                            while(SizeOfImageDump > NULL)
+                            {
+                                ProcReadBase = (ULONG_PTR)ReadBase + TITANENGINE_PAGESIZE;
+                                ReadBase = (LPVOID)ProcReadBase;
+                                if(SizeOfImageDump >= TITANENGINE_PAGESIZE)
+                                {
+                                    RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
+
+                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
+
+                                    WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
+                                    SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
+                                }
+                                else
+                                {
+                                    RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
+
+                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
+
+                                    WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
+                                    SizeOfImageDump = NULL;
+                                }
+                            }
+                            EngineCloseHandle(hFile);
+                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
+                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+                            return true;
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
+
                         }
                     }
                 }
@@ -382,45 +382,39 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
     ULONG_PTR ProcReadBase = (ULONG_PTR)ReadBase;
     LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
 
-    if(EngineCreatePathForFileW(szDumpFileName))
+    EngineCreatePathForFileW(szDumpFileName);
+    hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(hFile != INVALID_HANDLE_VALUE)
     {
-        hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-        if(hFile != INVALID_HANDLE_VALUE)
+        while(MemorySize > NULL)
         {
-            while(MemorySize > NULL)
+            ReadBase = (LPVOID)ProcReadBase;
+            if(MemorySize >= 0x1000)
             {
-                ReadBase = (LPVOID)ProcReadBase;
-                if(MemorySize >= 0x1000)
-                {
-                    RtlZeroMemory(ueCopyBuffer,0x2000);
+                RtlZeroMemory(ueCopyBuffer,0x2000);
 
-                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
+                ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
 
-                    WriteFile(hFile,ueCopyBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
-                    MemorySize = MemorySize - 0x1000;
-                }
-                else
-                {
-                    RtlZeroMemory(ueCopyBuffer,0x2000);
-
-                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead);
-
-                    WriteFile(hFile, ueCopyBuffer, (DWORD)MemorySize, &uedNumberOfBytesRead, NULL);
-                    MemorySize = NULL;
-                }
-                ProcReadBase = (ULONG_PTR)ReadBase + 0x1000;
+                WriteFile(hFile,ueCopyBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
+                MemorySize = MemorySize - 0x1000;
             }
-            EngineCloseHandle(hFile);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return true;
+            else
+            {
+                RtlZeroMemory(ueCopyBuffer,0x2000);
+
+                ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead);
+
+                WriteFile(hFile, ueCopyBuffer, (DWORD)MemorySize, &uedNumberOfBytesRead, NULL);
+                MemorySize = NULL;
+            }
+            ProcReadBase = (ULONG_PTR)ReadBase + 0x1000;
         }
-        else
-        {
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return false;
-        }
+        EngineCloseHandle(hFile);
+        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+        return true;
     }
-    return true;
+    VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL DumpMemoryEx(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, char* szDumpFileName)
