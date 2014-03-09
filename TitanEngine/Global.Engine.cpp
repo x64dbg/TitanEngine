@@ -51,6 +51,7 @@ void EngineInit()
         {
             lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
             lstrcatW(engineSzEngineGarbageFolder, L"garbage\\");
+            CreateDirectoryW(engineSzEngineGarbageFolder, 0);
         }
         EngineInitPlugins(engineSzEngineFolder);
     }
@@ -152,80 +153,53 @@ char* EngineExtractFileName(char* szFileName)
     return(engineExtractedFileName);
 }
 
-bool EngineCreatePathForFile(char* szFileName)
+void EngineCreatePathForFile(char* szFileName)
 {
-
-    int i,j;
-    char szFolderName[2 * MAX_PATH] = {};
-    char szCreateFolder[2 * MAX_PATH] = {};
-
-    if(engineCreatePathForFiles)
+    int len=lstrlenA(szFileName);
+    while(szFileName[len]!='\\' && len)
+        len--;
+    char szFolderName[MAX_PATH]="";
+    lstrcpyA(szFolderName, szFileName);
+    if(len)
+        szFolderName[len+1]='\0';
+    else //just a filename
+        return;
+    lstrcatA(szFolderName, "\\");
+    len=lstrlenA(szFolderName);
+    char szCreateFolder[MAX_PATH]="";
+    for(int i=3; i<len; i++)
     {
-        i = lstrlenA(szFileName);
-        while(szFileName[i] != '\\' && i > NULL)
+        if(szFolderName[i]=='\\')
         {
-            i--;
-        }
-        if(i != NULL)
-        {
-            RtlMoveMemory(szFolderName, szFileName, i + 1);
-            if(!CreateDirectoryA(szFolderName, NULL))
-            {
-                if(GetLastError() != ERROR_ALREADY_EXISTS)
-                {
-                    j = lstrlenA(szFolderName);
-                    for(i = 4; i < j; i++)
-                    {
-                        if(szFileName[i] == '\\')
-                        {
-                            RtlZeroMemory(szCreateFolder, 2 * MAX_PATH);
-                            RtlCopyMemory(szCreateFolder, szFileName, i + 1);
-                            return !!CreateDirectoryA(szCreateFolder, NULL);
-                        }
-                    }
-                }
-            }
+            lstrcpyA(szCreateFolder, szFolderName);
+            szCreateFolder[i]='\0';
+            CreateDirectoryA(szCreateFolder, 0);
         }
     }
-    return true;
 }
 
-bool EngineCreatePathForFileW(wchar_t* szFileName)
+void EngineCreatePathForFileW(wchar_t* szFileName)
 {
-
-    int i,j;
-    wchar_t szFolderName[MAX_PATH] = {};
-    wchar_t szCreateFolder[MAX_PATH] = {};
-
-    if(engineCreatePathForFiles)
+    int len=lstrlenW(szFileName);
+    while(szFileName[len]!=L'\\' && len)
+        len--;
+    wchar_t szFolderName[MAX_PATH]=L"";
+    lstrcpyW(szFolderName, szFileName);
+    if(len)
+        szFolderName[len+1]=L'\0';
+    else //just a filename
+        return;
+    len=lstrlenW(szFolderName);
+    wchar_t szCreateFolder[MAX_PATH]=L"";
+    for(int i=3; i<len; i++)
     {
-        i = lstrlenW(szFileName);
-        while(szFileName[i] != '\\' && i > 0)
+        if(szFolderName[i]=='\\')
         {
-            i--;
-        }
-        if(i != 0)
-        {
-            RtlCopyMemory(szFolderName, szFileName, (i * 2) + 2);
-            if(!CreateDirectoryW(szFolderName, NULL))
-            {
-                if(GetLastError() != ERROR_ALREADY_EXISTS)
-                {
-                    j = lstrlenW(szFolderName);
-                    for(i = 4; i < j; i++)
-                    {
-                        if(szFileName[i] == '\\')
-                        {
-                            RtlZeroMemory(szCreateFolder, 2 * MAX_PATH);
-                            RtlCopyMemory(szCreateFolder, szFileName, (i * 2) + 1);
-                            return !!CreateDirectoryW(szCreateFolder, NULL);
-                        }
-                    }
-                }
-            }
+            lstrcpyW(szCreateFolder, szFolderName);
+            szCreateFolder[i]='\0';
+            CreateDirectoryW(szCreateFolder, 0);
         }
     }
-    return true;
 }
 
 wchar_t* EngineExtractFileNameW(wchar_t* szFileName)
@@ -512,18 +486,16 @@ bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName)
         {
             ResourceSize = SizeofResource(engineHandle, hResource);
             ResourceData = LockResource(hResourceGlobal);
-            if(EngineCreatePathForFileW(szExtractedFileName))
+            EngineCreatePathForFileW(szExtractedFileName);
+            hFile = CreateFileW(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if(hFile != INVALID_HANDLE_VALUE)
             {
-                hFile = CreateFileW(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                if(hFile != INVALID_HANDLE_VALUE)
+                if(WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL))
                 {
-                    if(WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL))
-                    {
-                        EngineCloseHandle(hFile);
-                        return true;
-                    }
                     EngineCloseHandle(hFile);
+                    return true;
                 }
+                EngineCloseHandle(hFile);
             }
         }
     }

@@ -42,39 +42,8 @@ __declspec(dllexport) void TITCALL ForceClose()
         StopDebug();
     }
     RtlZeroMemory(&dbgProcessInformation, sizeof PROCESS_INFORMATION);
-    /*if(DebugDebuggingDLL)
-    {
-        RtlZeroMemory(&szTempName, sizeof szTempName);
-        RtlZeroMemory(&szTempFolder, sizeof szTempFolder);
-        if(GetTempPathW(MAX_PATH, szTempFolder) < MAX_PATH)
-        {
-            if(GetTempFileNameW(szTempFolder, L"DeleteTempFile", GetTickCount(), szTempName))
-            {
-                DeleteFileW(szTempName);
-                if(!MoveFileW(szDebuggerName, szTempName))
-                {
-                    DeleteFileW(szDebuggerName);
-                }
-                else
-                {
-                    DeleteFileW(szTempName);
-                }
-            }
-            RtlZeroMemory(&szTempName, sizeof szTempName);
-            if(GetTempFileNameW(szTempFolder, L"DeleteTempFile", GetTickCount() + 1, szTempName))
-            {
-                DeleteFileW(szTempName);
-                if(!MoveFileW(szReserveModuleName, szTempName))
-                {
-                    DeleteFileW(szReserveModuleName);
-                }
-                else
-                {
-                    DeleteFileW(szTempName);
-                }
-            }
-        }
-    }*/
+    if(DebugDebuggingDLL)
+        DeleteFileW(szDebuggerName);
     DebugDebuggingDLL = false;
     DebugExeFileEntryPointCallBack = NULL;
 }

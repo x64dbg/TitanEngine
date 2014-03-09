@@ -8,7 +8,6 @@
 #include <vector>
 
 static wchar_t szBackupDebuggedFileName[512];
-static wchar_t szDebuggerName[512];
 
 // TitanEngine.Debugger.functions:
 __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder)
@@ -150,17 +149,16 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
     }
     lstrcpyW(szDebuggerName, szFileName);
     i = lstrlenW(szDebuggerName);
-    while(szDebuggerName[i] != 0x5C && i >= NULL)
+    while(szDebuggerName[i] != '\\' && i)
     {
         i--;
     }
-    if(i > NULL)
+    if(i)
     {
-        szDebuggerName[i+1] = 0x00;
 #ifdef _WIN64
-        lstrcpyW(szDebuggerName, L"DLLLoader64.exe");
+        lstrcpyW(szDebuggerName+i+1, L"DLLLoader64.exe");
 #else
-        lstrcpyW(szDebuggerName, L"DLLLoader32.exe");
+        lstrcpyW(szDebuggerName+i+1, L"DLLLoader32.exe");
 #endif
     }
     else
@@ -171,21 +169,10 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         lstrcpyW(szDebuggerName, L"DLLLoader32.exe");
 #endif
     }
-    //RtlZeroMemory(&szReserveModuleName, sizeof szReserveModuleName);
-    //lstrcpyW(szReserveModuleName, szFileName);
-    //lstrcatW(szReserveModuleName, L".module");
 #if defined(_WIN64)
-    ReturnData = EngineExtractResource("LOADERx64", szDebuggerName);
-    /*if(ReserveModuleBase)
-    {
-        EngineExtractResource("MODULEx64", szReserveModuleName);
-    }*/
+    ReturnData = EngineExtractResource("LOADERX64", szDebuggerName);
 #else
-    ReturnData = EngineExtractResource("LOADERx86", szDebuggerName);
-    /*if(ReserveModuleBase)
-    {
-        EngineExtractResource("MODULEx86", szReserveModuleName);
-    }*/
+    ReturnData = EngineExtractResource("LOADERX86", szDebuggerName);
 #endif
     if(ReturnData)
     {
@@ -195,24 +182,14 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         {
             i--;
         }
-        /*j = lstrlenW(szReserveModuleName);
-        while(szReserveModuleName[j] != 0x5C && j >= NULL)
-        {
-            j--;
-        }*/
         DebugDebuggingDLLBase = NULL;
         DebugDebuggingMainModuleBase = NULL;
         DebugDebuggingDLLFullFileName = szFileName;
         DebugDebuggingDLLFileName = &szFileName[i+1];
-        //DebugDebuggingDLLReserveFileName = &szReserveModuleName[j+1];
         DebugModuleImageBase = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_IMAGEBASE);
         DebugReserveModuleBase = DebugModuleImageBase;
         DebugModuleEntryPoint = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_OEP);
         DebugModuleEntryPointCallBack = EntryCallBack;
-        /*if(ReserveModuleBase)
-        {
-            RelocaterChangeFileBaseW(szReserveModuleName, DebugModuleImageBase);
-        }*/
         return(InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder));
     }
     else
@@ -221,12 +198,14 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
     }
     return(NULL);
 }
+
 __declspec(dllexport) bool TITCALL StopDebug()
 {
     if(dbgProcessInformation.hProcess != NULL)
     {
         TerminateThread(dbgProcessInformation.hThread, NULL);
         TerminateProcess(dbgProcessInformation.hProcess, NULL);
+        Sleep(10); //allow thread switching
         return true;
     }
     else

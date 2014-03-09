@@ -182,56 +182,54 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
         hFile = CreateFileW(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if(hFile != INVALID_HANDLE_VALUE)
         {
-            if(EngineCreatePathForFileW(szExtactedFileName))
+            EngineCreatePathForFileW(szExtactedFileName);
+            hFileWrite = CreateFileW(szExtactedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if(hFileWrite != INVALID_HANDLE_VALUE)
             {
-                hFileWrite = CreateFileW(szExtactedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                if(hFileWrite != INVALID_HANDLE_VALUE)
+                SetFilePointer(hFile, OverlayStart, NULL, FILE_BEGIN);
+                while(OverlaySize > 0)
                 {
-                    SetFilePointer(hFile, OverlayStart, NULL, FILE_BEGIN);
-                    while(OverlaySize > 0)
+                    RtlZeroMemory(ueReadBuffer, 0x2000);
+
+                    if(OverlaySize > 0x1000)
                     {
-                        RtlZeroMemory(ueReadBuffer, 0x2000);
-
-                        if(OverlaySize > 0x1000)
+                        if(ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
                         {
-                            if(ReadFile(hFile, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
-                            {
-                                if(!WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
-                                    return false;
-                            }
-                            else
-                            {
+                            if(!WriteFile(hFileWrite, ueReadBuffer, 0x1000, &ueNumberOfBytesRead, NULL))
                                 return false;
-                            }
-
-                            OverlaySize = OverlaySize - 0x1000;
                         }
                         else
                         {
-                            if(ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
-                            {
-                                if(!WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
-                                    return false;
-                            }
-                            else
-                            {
-                                return false;
-                            }
-
-                            OverlaySize = 0;
+                            return false;
                         }
+
+                        OverlaySize = OverlaySize - 0x1000;
                     }
-                    VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                    EngineCloseHandle(hFile);
-                    EngineCloseHandle(hFileWrite);
-                    return true;
+                    else
+                    {
+                        if(ReadFile(hFile, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
+                        {
+                            if(!WriteFile(hFileWrite, ueReadBuffer, OverlaySize, &ueNumberOfBytesRead, NULL))
+                                return false;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+
+                        OverlaySize = 0;
+                    }
                 }
-                else
-                {
-                    VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                    EngineCloseHandle(hFile);
-                    return false;
-                }
+                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
+                EngineCloseHandle(hFile);
+                EngineCloseHandle(hFileWrite);
+                return true;
+            }
+            else
+            {
+                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
+                EngineCloseHandle(hFile);
+                return false;
             }
         }
     }

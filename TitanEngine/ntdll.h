@@ -11,7 +11,8 @@
 typedef LONG NTSTATUS;
 typedef LONG KPRIORITY;
 
-typedef struct _CLIENT_ID {
+typedef struct _CLIENT_ID
+{
     HANDLE UniqueProcess;
     HANDLE UniqueThread;
 } CLIENT_ID, *PCLIENT_ID;
@@ -53,7 +54,8 @@ typedef struct _PROCESS_BASIC_INFORMATION
 } PROCESS_BASIC_INFORMATION;
 typedef PROCESS_BASIC_INFORMATION *PPROCESS_BASIC_INFORMATION;
 
-typedef struct _THREAD_BASIC_INFORMATION {
+typedef struct _THREAD_BASIC_INFORMATION
+{
     NTSTATUS ExitStatus;
     PVOID TebBaseAddress;
     CLIENT_ID ClientId;

@@ -11,24 +11,17 @@ wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 // Global.Garbage.functions:
 bool CreateGarbageItem(void* outGargabeItem, int MaxGargabeStringSize)
 {
-
-    bool Created = false;
     wchar_t szGarbageItem[512];
     wchar_t szGargabeItemBuff[128];
 
-    while(!Created)
-    {
-        RtlZeroMemory(&szGarbageItem, sizeof szGarbageItem);
-        RtlZeroMemory(&szGargabeItemBuff, sizeof szGargabeItemBuff);
-        srand((unsigned int)time(NULL));
-        wsprintfW(szGargabeItemBuff, L"Junk-%08x\\", (rand() % 128 + 1) * (rand() % 128 + 1) + (rand() % 1024 + 1));
-        lstrcpyW(szGarbageItem, engineSzEngineGarbageFolder);
-        lstrcatW(szGarbageItem, szGargabeItemBuff);
-        if(EngineCreatePathForFileW(szGarbageItem))
-        {
-            Created = true;
-        }
-    }
+    RtlZeroMemory(&szGarbageItem, sizeof szGarbageItem);
+    RtlZeroMemory(&szGargabeItemBuff, sizeof szGargabeItemBuff);
+    srand((unsigned int)time(NULL));
+    wsprintfW(szGargabeItemBuff, L"Junk-%08x\\", (rand() % 128 + 1) * (rand() % 128 + 1) + (rand() % 1024 + 1));
+    lstrcpyW(szGarbageItem, engineSzEngineGarbageFolder);
+    lstrcatW(szGarbageItem, szGargabeItemBuff);
+    EngineCreatePathForFileW(szGarbageItem);
+
     if(lstrlenW(szGarbageItem) * 2 >= MaxGargabeStringSize)
     {
         RtlMoveMemory(outGargabeItem, &szGarbageItem, MaxGargabeStringSize);

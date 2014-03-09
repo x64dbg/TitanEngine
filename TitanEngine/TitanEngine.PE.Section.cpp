@@ -63,25 +63,23 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
                 if(SectionNumber <= PEHeader32->FileHeader.NumberOfSections)
                 {
                     PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + SectionNumber * IMAGE_SIZEOF_SECTION_HEADER);
-                    if(EngineCreatePathForFileW(szDumpFileName))
+                    EngineCreatePathForFileW(szDumpFileName);
+                    hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                    if(hFile != INVALID_HANDLE_VALUE)
                     {
-                        hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                        if(hFile != INVALID_HANDLE_VALUE)
+                        __try
                         {
-                            __try
-                            {
-                                WriteFile(hFile, (LPCVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData, &NumberOfBytesWritten, NULL);
-                                EngineCloseHandle(hFile);
-                                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                return true;
-                            }
-                            __except(EXCEPTION_EXECUTE_HANDLER)
-                            {
-                                EngineCloseHandle(hFile);
-                                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                DeleteFileW(szDumpFileName);
-                                return false;
-                            }
+                            WriteFile(hFile, (LPCVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData, &NumberOfBytesWritten, NULL);
+                            EngineCloseHandle(hFile);
+                            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                            return true;
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
+                            EngineCloseHandle(hFile);
+                            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                            DeleteFileW(szDumpFileName);
+                            return false;
                         }
                     }
                 }
@@ -94,25 +92,23 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
                 if(SectionNumber <= PEHeader64->FileHeader.NumberOfSections)
                 {
                     PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + SectionNumber * IMAGE_SIZEOF_SECTION_HEADER);
-                    if(EngineCreatePathForFileW(szDumpFileName))
+                    EngineCreatePathForFileW(szDumpFileName);
+                    hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                    if(hFile != INVALID_HANDLE_VALUE)
                     {
-                        hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                        if(hFile != INVALID_HANDLE_VALUE)
+                        __try
                         {
-                            __try
-                            {
-                                WriteFile(hFile, (LPCVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData, &NumberOfBytesWritten, NULL);
-                                EngineCloseHandle(hFile);
-                                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                return true;
-                            }
-                            __except(EXCEPTION_EXECUTE_HANDLER)
-                            {
-                                EngineCloseHandle(hFile);
-                                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-                                DeleteFileW(szDumpFileName);
-                                return false;
-                            }
+                            WriteFile(hFile, (LPCVOID)(FileMapVA + PESections->PointerToRawData), PESections->SizeOfRawData, &NumberOfBytesWritten, NULL);
+                            EngineCloseHandle(hFile);
+                            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                            return true;
+                        }
+                        __except(EXCEPTION_EXECUTE_HANDLER)
+                        {
+                            EngineCloseHandle(hFile);
+                            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                            DeleteFileW(szDumpFileName);
+                            return false;
                         }
                     }
                 }

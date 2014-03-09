@@ -45,18 +45,16 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileEx(ULONG_PTR 
         {
             ResourceSize = SizeofResource((HMODULE)FileMapVA, hResource);
             ResourceData = LockResource(hResourceGlobal);
-            if(EngineCreatePathForFile(szExtractedFileName))
+            EngineCreatePathForFile(szExtractedFileName);
+            hFile = CreateFileA(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if(hFile != INVALID_HANDLE_VALUE)
             {
-                hFile = CreateFileA(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                if(hFile != INVALID_HANDLE_VALUE)
-                {
-                    WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL);
-                    EngineCloseHandle(hFile);
-                }
-                else
-                {
-                    return false;
-                }
+                WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL);
+                EngineCloseHandle(hFile);
+            }
+            else
+            {
+                return false;
             }
         }
         return true;

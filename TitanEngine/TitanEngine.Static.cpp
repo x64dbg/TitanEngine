@@ -477,103 +477,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
                 ueCopyBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
                 if(ueCopyBuffer != NULL)
                 {
-                    if(EngineCreatePathForFileW(szDumpFileName))
-                    {
-                        hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                        if(hWriteFile != INVALID_HANDLE_VALUE)
-                        {
-                            if(Size < 0x1000)
-                            {
-                                SizeToRead = Size;
-                            }
-                            else
-                            {
-                                SizeToRead = 0x1000;
-                            }
-                            while((int)Size > NULL)
-                            {
-                                if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                                {
-                                    WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
-                                    if(Size > 0x1000)
-                                    {
-                                        Size = Size - 0x1000;
-                                    }
-                                    else if(SizeToRead != Size)
-                                    {
-                                        if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                                        {
-                                            WriteFile(hWriteFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL);
-                                        }
-                                        else
-                                        {
-                                            WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                        }
-                                        SizeToRead = Size;
-                                        Size = NULL;
-                                    }
-                                    else
-                                    {
-                                        SizeToRead = Size;
-                                        Size = NULL;
-                                    }
-                                }
-                                else
-                                {
-                                    WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                    Size = NULL;
-                                }
-                            }
-                            EngineCloseHandle(hReadFile);
-                            EngineCloseHandle(hWriteFile);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                            return true;
-                        }
-                        else
-                        {
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        }
-                    }
-                }
-            }
-            EngineCloseHandle(hReadFile);
-        }
-    }
-    return false;
-}
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
-{
-
-    wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szDumpFileName != NULL)
-    {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(StaticRawMemoryCopyExW(hFile, RawAddressToCopy, Size, uniFileName));
-    }
-    else
-    {
-        return false;
-    }
-}
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
-{
-
-    DWORD SizeToRead;
-    HANDLE hReadFile;
-    HANDLE hWriteFile;
-    LPVOID ueCopyBuffer;
-    DWORD rfNumberOfBytesRead;
-
-    if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(), &hReadFile, NULL, false, DUPLICATE_SAME_ACCESS))
-    {
-        if(SetFilePointer(hReadFile, (long)(RawAddressToCopy), NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
-        {
-            ueCopyBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-            if(ueCopyBuffer != NULL)
-            {
-                if(EngineCreatePathForFileW(szDumpFileName))
-                {
+                    EngineCreatePathForFileW(szDumpFileName);
                     hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
                     if(hWriteFile != INVALID_HANDLE_VALUE)
                     {
@@ -630,6 +534,98 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                     }
                 }
             }
+            EngineCloseHandle(hReadFile);
+        }
+    }
+    return false;
+}
+__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
+{
+
+    wchar_t uniFileName[MAX_PATH] = {};
+
+    if(szDumpFileName != NULL)
+    {
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        return(StaticRawMemoryCopyExW(hFile, RawAddressToCopy, Size, uniFileName));
+    }
+    else
+    {
+        return false;
+    }
+}
+__declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
+{
+
+    DWORD SizeToRead;
+    HANDLE hReadFile;
+    HANDLE hWriteFile;
+    LPVOID ueCopyBuffer;
+    DWORD rfNumberOfBytesRead;
+
+    if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(), &hReadFile, NULL, false, DUPLICATE_SAME_ACCESS))
+    {
+        if(SetFilePointer(hReadFile, (long)(RawAddressToCopy), NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
+        {
+            ueCopyBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+            if(ueCopyBuffer != NULL)
+            {
+                EngineCreatePathForFileW(szDumpFileName);
+                hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                if(hWriteFile != INVALID_HANDLE_VALUE)
+                {
+                    if(Size < 0x1000)
+                    {
+                        SizeToRead = Size;
+                    }
+                    else
+                    {
+                        SizeToRead = 0x1000;
+                    }
+                    while((int)Size > NULL)
+                    {
+                        if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                        {
+                            WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
+                            if(Size > 0x1000)
+                            {
+                                Size = Size - 0x1000;
+                            }
+                            else if(SizeToRead != Size)
+                            {
+                                if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                                {
+                                    WriteFile(hWriteFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL);
+                                }
+                                else
+                                {
+                                    WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                                }
+                                SizeToRead = Size;
+                                Size = NULL;
+                            }
+                            else
+                            {
+                                SizeToRead = Size;
+                                Size = NULL;
+                            }
+                        }
+                        else
+                        {
+                            WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                            Size = NULL;
+                        }
+                    }
+                    EngineCloseHandle(hReadFile);
+                    EngineCloseHandle(hWriteFile);
+                    VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+                    return true;
+                }
+                else
+                {
+                    VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+                }
+            }
         }
         EngineCloseHandle(hReadFile);
     }
@@ -670,62 +666,60 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
             ueCopyBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
             if(ueCopyBuffer != NULL)
             {
-                if(EngineCreatePathForFileW(szDumpFileName))
+                EngineCreatePathForFileW(szDumpFileName);
+                hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+                if(hWriteFile != INVALID_HANDLE_VALUE)
                 {
-                    hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                    if(hWriteFile != INVALID_HANDLE_VALUE)
+                    if(Size < 0x1000)
                     {
-                        if(Size < 0x1000)
-                        {
-                            SizeToRead = (DWORD)Size;
-                        }
-                        else
-                        {
-                            SizeToRead = 0x1000;
-                        }
-                        while(Size != NULL)
-                        {
-                            if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                            {
-                                WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
-                                if(Size > 0x1000)
-                                {
-                                    Size = Size - 0x1000;
-                                }
-                                else if((DWORD64)SizeToRead != Size)
-                                {
-                                    if(ReadFile(hFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                                    {
-                                        WriteFile(hWriteFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL);
-                                    }
-                                    else
-                                    {
-                                        WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                    }
-                                    SizeToRead = (DWORD)Size;
-                                    Size = NULL;
-                                }
-                                else
-                                {
-                                    SizeToRead = (DWORD)Size;
-                                    Size = NULL;
-                                }
-                            }
-                            else
-                            {
-                                WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                Size = NULL;
-                            }
-                        }
-                        EngineCloseHandle(hReadFile);
-                        EngineCloseHandle(hWriteFile);
-                        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return true;
+                        SizeToRead = (DWORD)Size;
                     }
                     else
                     {
-                        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+                        SizeToRead = 0x1000;
                     }
+                    while(Size != NULL)
+                    {
+                        if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                        {
+                            WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
+                            if(Size > 0x1000)
+                            {
+                                Size = Size - 0x1000;
+                            }
+                            else if((DWORD64)SizeToRead != Size)
+                            {
+                                if(ReadFile(hFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                                {
+                                    WriteFile(hWriteFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL);
+                                }
+                                else
+                                {
+                                    WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                                }
+                                SizeToRead = (DWORD)Size;
+                                Size = NULL;
+                            }
+                            else
+                            {
+                                SizeToRead = (DWORD)Size;
+                                Size = NULL;
+                            }
+                        }
+                        else
+                        {
+                            WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                            Size = NULL;
+                        }
+                    }
+                    EngineCloseHandle(hReadFile);
+                    EngineCloseHandle(hWriteFile);
+                    VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+                    return true;
+                }
+                else
+                {
+                    VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                 }
             }
         }

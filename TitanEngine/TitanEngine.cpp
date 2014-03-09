@@ -22,6 +22,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     case DLL_PROCESS_DETACH:
         if(lpvReserved)
             ExtensionManagerPluginReleaseCallBack();
+        RemoveDirectoryW(engineSzEngineGarbageFolder);
         break;
     }
     return TRUE;

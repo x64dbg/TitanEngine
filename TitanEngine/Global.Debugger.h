@@ -35,6 +35,7 @@ extern DWORD DBGCode;
 extern bool engineFileIsBeingDebugged;
 extern ULONG_PTR engineFakeDLLHandle;
 extern LPVOID engineAttachedProcessDebugInfo;
+extern wchar_t szDebuggerName[512];
 
 long DebugLoopInSecondThread(LPVOID InputParameter);
 void DebuggerReset();

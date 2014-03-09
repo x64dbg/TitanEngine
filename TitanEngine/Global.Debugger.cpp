@@ -35,6 +35,7 @@ DWORD DBGCode = DBG_CONTINUE;
 bool engineFileIsBeingDebugged = false;
 ULONG_PTR engineFakeDLLHandle = NULL;
 LPVOID engineAttachedProcessDebugInfo = NULL;
+wchar_t szDebuggerName[512];
 
 // Global.Debugger.functions:
 long DebugLoopInSecondThread(LPVOID InputParameter)

@@ -118,7 +118,7 @@ extern "C" {
 typedef enum {
     Decode16Bits = 0, Decode32Bits = 1, Decode64Bits = 2
 }
-                                 _DecodeType;
+_DecodeType;
 
 typedef OFFSET_INTEGER _OffsetType;
 
