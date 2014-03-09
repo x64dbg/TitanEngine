@@ -1083,13 +1083,13 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
                             {
                                 __try
                                 {
-                                    if((DOSHeader->e_lfanew + PEHeaderSize) % 0x1000 != 0)
+                                    if((DOSHeader->e_lfanew + PEHeaderSize) % 0x1000 != 0) //SectionAlignment, the default value is the page size for the system.
                                     {
                                         ExportDelta = (((DOSHeader->e_lfanew + PEHeaderSize) / 0x1000) + 1) * 0x1000;
                                     }
                                     else
                                     {
-                                        ExportDelta = ((DOSHeader->e_lfanew + PEHeaderSize) / 0x1000) * 0x1000;
+                                        ExportDelta = (DOSHeader->e_lfanew + PEHeaderSize); //multiple of 0x1000
                                     }
                                     ConvertedExport = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, PEHeader32->OptionalHeader.ImageBase, PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, true, true);
                                     if(ConvertedExport != NULL)
@@ -1134,13 +1134,13 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
                             {
                                 __try
                                 {
-                                    if((DOSHeader->e_lfanew + PEHeaderSize) % 0x1000 != 0)
+                                    if((DOSHeader->e_lfanew + PEHeaderSize) % 0x1000 != 0) //SectionAlignment, the default value is the page size for the system.
                                     {
-                                        ExportDelta = (((DOSHeader->e_lfanew + PEHeaderSize) % 0x1000) + 1) * 0x1000;
+                                        ExportDelta = (((DOSHeader->e_lfanew + PEHeaderSize) / 0x1000) + 1) * 0x1000;
                                     }
                                     else
                                     {
-                                        ExportDelta = ((DOSHeader->e_lfanew + PEHeaderSize) % 0x1000) * 0x1000;
+                                        ExportDelta = (DOSHeader->e_lfanew + PEHeaderSize); //multiple of 0x1000
                                     }
                                     ConvertedExport = (ULONG_PTR)ConvertVAtoFileOffsetEx(FileMapVA, FileSize, (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, true, true);
                                     if(ConvertedExport != NULL)

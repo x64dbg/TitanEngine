@@ -46,15 +46,15 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     {
         DOSHeader = (PIMAGE_DOS_HEADER)ueReadBuffer;
         CalculatedHeaderSize = DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof IMAGE_NT_HEADERS64;
-        if(CalculatedHeaderSize > 0x1000)
+        if(CalculatedHeaderSize > 0x1000) //SectionAlignment, the default value is the page size for the system.
         {
-            if(CalculatedHeaderSize % 0x1000 == NULL)
+            if(CalculatedHeaderSize % 0x1000 != NULL)
             {
-                AlignedHeaderSize = 0x1000;
+                AlignedHeaderSize = ((CalculatedHeaderSize / 0x1000) + 1) * 0x1000;
             }
             else
             {
-                AlignedHeaderSize = ((CalculatedHeaderSize / 0x1000) + 1) * 0x1000;
+                AlignedHeaderSize = CalculatedHeaderSize;
             }
             VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);

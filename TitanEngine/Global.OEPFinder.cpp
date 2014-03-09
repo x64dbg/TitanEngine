@@ -270,13 +270,9 @@ bool GenericOEPFileInitW(wchar_t* szFileName, LPVOID TraceInitCallBack, LPVOID C
             {
                 glbEntryTracerData.SectionData[i].SectionVirtualOffset = (DWORD)GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONVIRTUALOFFSET);
                 glbEntryTracerData.SectionData[i].SectionVirtualSize = (DWORD)GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONVIRTUALSIZE);
-                if(glbEntryTracerData.SectionData[i].SectionVirtualSize % 0x1000 != 0)
+                if(glbEntryTracerData.SectionData[i].SectionVirtualSize % 0x1000 != 0) //SectionAlignment, the default value is the page size for the system.
                 {
                     glbEntryTracerData.SectionData[i].SectionVirtualSize = ((glbEntryTracerData.SectionData[i].SectionVirtualSize / 0x1000) + 1) * 0x1000;
-                }
-                else
-                {
-                    glbEntryTracerData.SectionData[i].SectionVirtualSize = (glbEntryTracerData.SectionData[i].SectionVirtualSize / 0x1000) * 0x1000;
                 }
                 glbEntryTracerData.SectionData[i].SectionAttributes = (DWORD)GetPE32DataFromMappedFile(FileMapVA, i, UE_SECTIONFLAGS);
             }
