@@ -25,14 +25,13 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     PIMAGE_NT_HEADERS64 PEHeader64;
     PIMAGE_NT_HEADERS32 PEFixHeader32;
     PIMAGE_NT_HEADERS64 PEFixHeader64;
-    PIMAGE_SECTION_HEADER PESections;
     PIMAGE_SECTION_HEADER PEFixSection;
     ULONG_PTR ueNumberOfBytesRead = 0;
     DWORD uedNumberOfBytesRead = 0;
     DWORD SizeOfImageDump = 0;
     int NumberOfSections = 0;
     BOOL FileIs64 = false;
-    HANDLE hFile = 0;
+    HANDLE hFile = INVALID_HANDLE_VALUE;
     DWORD RealignedVirtualSize = 0;
     ULONG_PTR ProcReadBase = 0;
     LPVOID ReadBase = ImageBase;
@@ -40,12 +39,21 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     SIZE_T AlignedHeaderSize = NULL;
     LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
     LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
-    MEMORY_BASIC_INFORMATION MemInfo;
+    DWORD Protect;
 
     if(ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, 0x1000, &ueNumberOfBytesRead))
-    {
+    {//ReadProcessMemory
         DOSHeader = (PIMAGE_DOS_HEADER)ueReadBuffer;
-        CalculatedHeaderSize = DOSHeader->e_lfanew + sizeof IMAGE_DOS_HEADER + sizeof IMAGE_NT_HEADERS64;
+        PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+
+        if ((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
+        {
+            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
+            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
+            return false;
+        }
+
+        CalculatedHeaderSize = DOSHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS64) + (sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections);
         if(CalculatedHeaderSize > 0x1000) //SectionAlignment, the default value is the page size for the system.
         {
             if(CalculatedHeaderSize % 0x1000 != NULL)
@@ -77,7 +85,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             AlignedHeaderSize = 0x1000;
         }
         if(EngineValidateHeader((ULONG_PTR)ueReadBuffer, hProcess, ImageBase, DOSHeader, false))
-        {
+        {//EngineValidateHeader
             PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             if(PEHeader32->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
@@ -95,8 +103,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                 return false;
             }
             if(!FileIs64)
-            {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+            {//PE32 Handler
                 NumberOfSections = PEHeader32->FileHeader.NumberOfSections;
                 NumberOfSections++;
                 if(PEHeader32->OptionalHeader.SizeOfImage % PEHeader32->OptionalHeader.SectionAlignment == NULL)
@@ -119,7 +126,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             {
                                 DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
                                 PEFixHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
-                                PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                                PEFixSection = IMAGE_FIRST_SECTION(PEFixHeader32);
                                 if(PEFixHeader32->OptionalHeader.FileAlignment > 0x200)
                                 {
                                     PEFixHeader32->OptionalHeader.FileAlignment = PEHeader32->OptionalHeader.SectionAlignment;
@@ -151,10 +158,9 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
                                         if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead))
                                         {
-                                            VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
                                             ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, MemInfo.Protect, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
                                         }
                                         WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
@@ -164,10 +170,9 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
                                         if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead))
                                         {
-                                            VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
                                             ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, MemInfo.Protect, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
                                         }
                                         WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = NULL;
@@ -180,31 +185,14 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
-                                EngineCloseHandle(hFile);
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return false;
+
                             }
                         }
-                        else
-                        {
-                            EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return false;
                     }
                 }
-            }
+            }//PE32 Handler
             else
-            {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+            {//PE64 Handler
                 NumberOfSections = PEHeader64->FileHeader.NumberOfSections;
                 NumberOfSections++;
                 if(PEHeader64->OptionalHeader.SizeOfImage % PEHeader64->OptionalHeader.SectionAlignment == NULL)
@@ -227,7 +215,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             {
                                 DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
                                 PEFixHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
-                                PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                                PEFixSection = IMAGE_FIRST_SECTION(PEFixHeader64);
                                 if(PEFixHeader64->OptionalHeader.FileAlignment > 0x200)
                                 {
                                     PEFixHeader64->OptionalHeader.FileAlignment = PEHeader64->OptionalHeader.SectionAlignment;
@@ -259,10 +247,9 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
                                         if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead))
                                         {
-                                            VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
                                             ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, MemInfo.Protect, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
                                         }
                                         WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
@@ -272,10 +259,9 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                         RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
                                         if(!ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead))
                                         {
-                                            VirtualQueryEx(hProcess, ReadBase, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, PAGE_EXECUTE_READWRITE, &Protect);
                                             ReadProcessMemory(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
-                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, MemInfo.Protect, &MemInfo.Protect);
+                                            VirtualProtectEx(hProcess, ReadBase, TITANENGINE_PAGESIZE, Protect, &Protect);
                                         }
                                         WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
                                         SizeOfImageDump = NULL;
@@ -288,42 +274,25 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             }
                             __except(EXCEPTION_EXECUTE_HANDLER)
                             {
-                                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                                return false;
+
                             }
                         }
-                        else
-                        {
-                            EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        EngineCloseHandle(hFile);
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-                        return false;
                     }
                 }
-            }
-        }
-        else
-        {
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return false;
-        }
+            }//PE64 Handler
+        }//EngineValidateHeader
+    }//ReadProcessMemory
+
+    if (hFile != INVALID_HANDLE_VALUE)
+    {
+        EngineCloseHandle(hFile);
     }
-    else
+    if (ueReadBuffer != 0)
     {
         VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
         VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-        return false;
     }
+
     return false;
 }
 
