@@ -284,6 +284,9 @@
     <ClInclude Include="Global.Engine.Threading.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
+    <ClInclude Include="ntdll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TitanEngine.rc">

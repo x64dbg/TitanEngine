@@ -84,10 +84,7 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
     ULONG_PTR ueContext = NULL;
 
     ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-    if(!(ueContext & 0x100))
-    {
-        ueContext = ueContext ^ 0x100;
-    }
+    ueContext |= UE_TRAP_FLAG;
     SetContextData(UE_EFLAGS, ueContext);
     engineStepActive = true;
     engineStepCallBack = StepCallBack;
@@ -120,10 +117,7 @@ __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBa
     ULONG_PTR ueContext = NULL;
 
     ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-    if(!(ueContext & 0x100))
-    {
-        ueContext = ueContext ^ 0x100;
-    }
+    ueContext |= UE_TRAP_FLAG;
     SetContextData(UE_EFLAGS, ueContext);
     engineStepActive = true;
     engineStepCount = (int)StepCount;

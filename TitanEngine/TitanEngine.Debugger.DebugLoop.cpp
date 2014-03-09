@@ -741,7 +741,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                     else //handle hardware breakpoints
                     {
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
