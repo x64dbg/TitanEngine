@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Debugger.h"
+#include "Global.Breakpoints.h"
 #include <stdlib.h>
 
 __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
@@ -368,6 +369,7 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
     DWORD dwProtect = 0;
     bool retValue = false;
 
+    //read memory
     if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
     {
         return false;
@@ -397,6 +399,10 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
     {
         retValue = true;
     }
+
+    //filter breakpoints
+    if(retValue)
+        FilterBreakPoints((ULONG_PTR)lpBaseAddress, (unsigned char*)lpBuffer, nSize);
 
     return retValue;
 }

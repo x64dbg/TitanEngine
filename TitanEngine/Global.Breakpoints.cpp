@@ -110,3 +110,26 @@ void uintdr7(ULONG_PTR dr7, DR7* ret)
     if(BITGET(dr7,31))
         BITSET(ret->HWBP_SIZE[3],1);
 }
+
+void FilterBreakPoints(ULONG_PTR lpBaseAddress, unsigned char* lpBuffer, SIZE_T nSize)
+{
+    ULONG_PTR start=lpBaseAddress;
+    ULONG_PTR end=start+nSize;
+    int bpcount=BreakPointBuffer.size();
+    for(int i=0; i<bpcount; i++)
+    {
+        BreakPointDetail* curBp=&BreakPointBuffer.at(i);
+        //check if the breakpoint is one we should be concerned about
+        if(!curBp->BreakPointActive || (curBp->BreakPointType != UE_BREAKPOINT && curBp->BreakPointType != UE_SINGLESHOOT))
+            continue;
+        ULONG_PTR cur_addr=curBp->BreakPointAddress;
+        if(cur_addr>=start && cur_addr<end) //breakpoint is in range
+        {
+            ULONG_PTR index=cur_addr-start; //calculate where to write in the buffer
+            int n=curBp->BreakPointSize;
+            if((cur_addr+n)>end)
+                n=end-cur_addr; //do not overflow the buffer
+            memcpy(lpBuffer+index, curBp->OriginalByte, n);
+        }
+    }
+}
