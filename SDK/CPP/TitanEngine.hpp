@@ -388,6 +388,14 @@ protected:
     {
         return UE::ConvertFileOffsetToVAEx(FileMapVA, FileSize, ImageBase, AddressToConvert, ReturnType);
     }
+	static bool MemoryReadSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead)
+	{
+		return UE::MemoryReadSafe(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesRead);
+	}
+	static bool MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesWritten)
+	{
+		return UE::MemoryWriteSafe(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+	}
 };
 
 class DumperA
@@ -814,6 +822,14 @@ public:
 	static void* GetPEBLocation64(HANDLE hProcess)
     {
         return UE::GetPEBLocation64(hProcess);
+    }
+	static void* GetTEBLocation(HANDLE hProcess)
+    {
+        return UE::GetTEBLocation(hProcess);
+    }
+	static void* GetTEBLocation64(HANDLE hProcess)
+    {
+        return UE::GetTEBLocation64(hProcess);
     }
     static bool HideDebugger(HANDLE hProcess, eHideLevel PatchAPILevel)
     {

@@ -158,7 +158,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 {
                                     RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
 
-                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
+                                    MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
 
                                     WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
                                     SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
@@ -167,7 +167,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 {
                                     RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
 
-                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
+                                    MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
 
                                     WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
                                     SizeOfImageDump = NULL;
@@ -240,7 +240,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 {
                                     RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
 
-                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
+                                    MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, TITANENGINE_PAGESIZE, &ueNumberOfBytesRead);
 
                                     WriteFile(hFile, ueCopyBuffer, TITANENGINE_PAGESIZE, &uedNumberOfBytesRead, NULL);
                                     SizeOfImageDump = SizeOfImageDump - TITANENGINE_PAGESIZE;
@@ -249,7 +249,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 {
                                     RtlZeroMemory(ueCopyBuffer, AlignedHeaderSize);
 
-                                    ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
+                                    MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, SizeOfImageDump, &ueNumberOfBytesRead);
 
                                     WriteFile(hFile, ueCopyBuffer, SizeOfImageDump, &uedNumberOfBytesRead, NULL);
                                     SizeOfImageDump = NULL;
@@ -332,46 +332,6 @@ __declspec(dllexport) bool TITCALL DumpMemory(HANDLE hProcess, LPVOID MemoryStar
     }
 }
 
-__declspec(dllexport) bool TITCALL ReadProcessMemoryEnforce(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead)
-{
-    SIZE_T ueNumberOfBytesRead = 0;
-    SIZE_T * pNumBytes = 0;
-    DWORD dwProtect = 0;
-    bool retValue = false;
-
-    if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
-    {
-        return false;
-    }
-
-    if (!lpNumberOfBytesRead)
-    {
-        pNumBytes = &ueNumberOfBytesRead;
-    }
-    else
-    {
-        pNumBytes = lpNumberOfBytesRead;
-    }
-
-    if(!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
-    {
-        if (VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
-        {
-            if (ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
-            {
-                retValue = true;
-            }
-            VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
-        }
-    }
-    else
-    {
-        retValue = true;
-    }
-
-    return retValue;
-}
-
 __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
 {
 
@@ -393,7 +353,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
             {
                 RtlZeroMemory(ueCopyBuffer,0x2000);
 
-                ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
+                MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
 
                 WriteFile(hFile,ueCopyBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
                 MemorySize = MemorySize - 0x1000;
@@ -402,7 +362,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
             {
                 RtlZeroMemory(ueCopyBuffer,0x2000);
 
-                ReadProcessMemoryEnforce(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead);
+                MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead);
 
                 WriteFile(hFile, ueCopyBuffer, (DWORD)MemorySize, &uedNumberOfBytesRead, NULL);
                 MemorySize = NULL;

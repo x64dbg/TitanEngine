@@ -357,3 +357,54 @@ __declspec(dllexport) bool TITCALL Replace(LPVOID MemoryStart, DWORD MemorySize,
         return(ReplaceEx(GetCurrentProcess(), MemoryStart, MemorySize, SearchPattern, PatternSize, NumberOfRepetitions, ReplacePattern, ReplaceSize, WildCard));
     }
 }
+
+//what should this function do:
+//- do all possible effort to read memory
+//- filter out breakpoints
+__declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead)
+{
+    SIZE_T ueNumberOfBytesRead = 0;
+    SIZE_T * pNumBytes = 0;
+    DWORD dwProtect = 0;
+    bool retValue = false;
+
+    if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
+    {
+        return false;
+    }
+
+    if (!lpNumberOfBytesRead)
+    {
+        pNumBytes = &ueNumberOfBytesRead;
+    }
+    else
+    {
+        pNumBytes = lpNumberOfBytesRead;
+    }
+
+    if(!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+    {
+        if (VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
+        {
+            if (ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+            {
+                retValue = true;
+            }
+            VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
+        }
+    }
+    else
+    {
+        retValue = true;
+    }
+
+    return retValue;
+}
+
+//what should this function do:
+//- do all possible effort to write memory
+//- re-set breakpoints when overwritten
+__declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesWritten)
+{
+    return !!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+}
