@@ -359,7 +359,7 @@ __declspec(dllexport) bool TITCALL ReadProcessMemoryEnforce(HANDLE hProcess, LPV
         {
             if (ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
             {
-                retValue = false;
+                retValue = true;
             }
             VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
         }

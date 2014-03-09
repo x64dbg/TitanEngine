@@ -53,6 +53,7 @@ ConvertVAtoFileOffset
 ConvertVAtoFileOffsetEx
 ConvertFileOffsetToVA
 ConvertFileOffsetToVAEx
+ReadProcessMemoryEnforce
 GetPE32Data
 GetPE32DataW
 GetPE32DataFromMappedFile

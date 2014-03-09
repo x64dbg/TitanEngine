@@ -567,6 +567,7 @@ __declspec(dllexport) long long TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
 __declspec(dllexport) long long TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType);
 __declspec(dllexport) long long TITCALL ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType);
 __declspec(dllexport) long long TITCALL ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType);
+__declspec(dllexport) bool TITCALL ReadProcessMemoryEnforce(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead);
 // TitanEngine.Realigner.functions:
 __declspec(dllexport) bool TITCALL FixHeaderCheckSum(char* szFileName);
 __declspec(dllexport) bool TITCALL FixHeaderCheckSumW(wchar_t* szFileName);
@@ -584,6 +585,8 @@ __declspec(dllexport) bool TITCALL IsFileDLLW(wchar_t* szFileName, ULONG_PTR Fil
 // TitanEngine.Hider.functions:
 __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess);
 __declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess);
+__declspec(dllexport) void* TITCALL GetTEBLocation(HANDLE hThread);
+__declspec(dllexport) void* TITCALL GetTEBLocation64(HANDLE hThread);
 __declspec(dllexport) bool TITCALL HideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 __declspec(dllexport) bool TITCALL UnHideDebugger(HANDLE hProcess, DWORD PatchAPILevel);
 // TitanEngine.Relocater.functions:
