@@ -1233,7 +1233,7 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                 {
                     cMem = (PMEMORY_CMP_HANDLER)((ULONG_PTR)cMem + cMem->DataByte[1] + 2);
                 }
-                while(i > NULL && (cMem->DataByte[0] != 0xFF && (cMem->DataByte[1] != 0x20 || cMem->DataByte[1] != 0x30)))
+                while(i > NULL && (cMem->DataByte[0] == 0xFF && (cMem->DataByte[1] == 0x20 || cMem->DataByte[1] == 0x30)))
                 {
                     cMem = (PMEMORY_CMP_HANDLER)((ULONG_PTR)cMem + 1);
                     i--;
@@ -1243,7 +1243,7 @@ __declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProces
                     if(cMem->DataByte[2] != 0x90)
                     {
                         cMem = (PMEMORY_CMP_HANDLER)((ULONG_PTR)cMem + 1);
-                        while(i > NULL && (cMem->DataByte[0] != 0xFF && (cMem->DataByte[1] != 0x20 || cMem->DataByte[1] != 0x30)))
+                        while(i > NULL && (cMem->DataByte[0] == 0xFF && (cMem->DataByte[1] == 0x20 || cMem->DataByte[1] == 0x30)))
                         {
                             cMem = (PMEMORY_CMP_HANDLER)((ULONG_PTR)cMem + 1);
                             i--;
