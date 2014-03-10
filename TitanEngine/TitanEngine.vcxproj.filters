@@ -201,6 +201,9 @@
     <ClCompile Include="Global.Engine.Threading.cpp">
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Global.Engine.Importer.cpp">
+      <Filter>Source Files\TitanEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="ntdll.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.Engine.Importer.h">
+      <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

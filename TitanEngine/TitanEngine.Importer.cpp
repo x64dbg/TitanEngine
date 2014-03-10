@@ -3,6 +3,7 @@
 #include "Global.Mapping.h"
 #include "Global.Engine.h"
 #include "Global.Librarian.h"
+#include "Global.Engine.Importer.h"
 #include "scylla_wrapper.h"
 #include <psapi.h>
 
@@ -126,7 +127,7 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDL
     WCHAR uniDLLName[MAX_PATH] = {0};
     if (MultiByteToWideChar(CP_ACP, NULL, szDLLName, -1, uniDLLName, _countof(uniDLLName)))
     {
-        return EngineGetProcAddressRemote(uniDLLName, szAPIName);
+        return EngineGetProcAddressRemote(szDLLName, szAPIName);
     }
     else
     {

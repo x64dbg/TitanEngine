@@ -4,6 +4,7 @@
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
 #include "Global.Engine.Threading.h"
+#include "Global.Engine.Importer.h"
 
 static long engineDefaultBreakPointType = UE_BREAKPOINT_INT3;
 static BYTE UD2BreakPoint[2] = {0x0F, 0x0B};
@@ -302,322 +303,60 @@ __declspec(dllexport) bool TITCALL SafeDeleteBPX(ULONG_PTR bpxAddress)
 
 __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const char* szAPIName, DWORD bpxType, DWORD bpxPlace, LPVOID bpxCallBack)
 {
-    BYTE ReadByte = NULL;
-    HMODULE hModule = NULL;
-    DWORD ReadMemSize = NULL;
     ULONG_PTR APIAddress = NULL;
-    ULONG_PTR tryAPIAddress = NULL;
-    ULONG_PTR QueryAPIAddress = NULL;
-    int i = MAX_RET_SEARCH_INSTRUCTIONS;
-    ULONG_PTR ueNumberOfReadWrite = NULL;
-    int currentInstructionLen = NULL;
-    bool ModuleLoaded = false;
-    void* CmdBuffer = NULL;
-    bool RemovedBpx = false;
-
-    if(szDLLName != NULL && szAPIName != NULL)
+    if(szDLLName && szAPIName)
     {
-        hModule = GetModuleHandleA(szDLLName);
-        if(hModule == NULL)
+        APIAddress = EngineGetProcAddressRemote(szDLLName, szAPIName); //get remote proc address
+        if(APIAddress)
         {
-            if(engineAlowModuleLoading)
-            {
-                hModule = LoadLibraryA(szDLLName);
-                ModuleLoaded = true;
-            }
-            else
-            {
-                ReadMemSize = MAX_RET_SEARCH_INSTRUCTIONS * MAXIMUM_INSTRUCTION_SIZE;
-                APIAddress = (ULONG_PTR)EngineGlobalAPIHandler(dbgProcessInformation.hProcess, NULL, NULL, szAPIName, UE_OPTION_IMPORTER_RETURN_APIADDRESS);
-                if(APIAddress != NULL)
-                {
-                    CmdBuffer = VirtualAlloc(NULL, ReadMemSize, MEM_COMMIT, PAGE_READWRITE);
-                    while(ReadProcessMemory(dbgProcessInformation.hProcess, (void*)APIAddress, CmdBuffer, ReadMemSize, &ueNumberOfReadWrite) == false && ReadMemSize > NULL)
-                    {
-                        ReadMemSize = ReadMemSize - (MAXIMUM_INSTRUCTION_SIZE * 10);
-                    }
-                    if(ReadMemSize == NULL)
-                    {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                        APIAddress = NULL;
-                    }
-                    else
-                    {
-                        tryAPIAddress = (ULONG_PTR)CmdBuffer;
-                    }
-                }
-            }
-        }
-        if(hModule != NULL || APIAddress != NULL)
-        {
-            if(hModule != NULL)
-            {
-                APIAddress = (ULONG_PTR)GetProcAddress(hModule, szAPIName);
-            }
             if(bpxPlace == UE_APIEND)
             {
-                if(tryAPIAddress == NULL)
+                int i = 0;
+                unsigned char ReadByte;
+                do  //search for RET
                 {
-                    tryAPIAddress = APIAddress;
+                    unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
+                    memset(CmdBuffer, 0, sizeof(CmdBuffer));
+                    if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                        return false;
+                    i += StaticLengthDisassemble(CmdBuffer);
+                    ReadByte = *CmdBuffer;
                 }
-                QueryAPIAddress = APIAddress;
-                RtlMoveMemory(&ReadByte, (LPVOID)tryAPIAddress, 1);
-                while(i > 0 && ReadByte != 0xC3 && ReadByte != 0xC2)
-                {
-                    if(engineAlowModuleLoading == false && CmdBuffer != NULL)
-                    {
-                        if(IsBPXEnabled(QueryAPIAddress))
-                        {
-                            DisableBPX(QueryAPIAddress);
-                            ReadProcessMemory(dbgProcessInformation.hProcess, (void*)APIAddress, CmdBuffer, ReadMemSize, &ueNumberOfReadWrite);
-                            RemovedBpx = true;
-                        }
-                    }
-                    currentInstructionLen = StaticLengthDisassemble((LPVOID)tryAPIAddress);
-                    tryAPIAddress = tryAPIAddress + currentInstructionLen;
-                    RtlMoveMemory(&ReadByte, (LPVOID)tryAPIAddress, 1);
-                    QueryAPIAddress = QueryAPIAddress + currentInstructionLen;
-                    if(!engineAlowModuleLoading)
-                    {
-                        if(RemovedBpx)
-                        {
-                            EnableBPX(QueryAPIAddress - currentInstructionLen);
-                        }
-                    }
-                    RemovedBpx = false;
-                    i--;
-                }
-                if(i != NULL)
-                {
-                    if((engineAlowModuleLoading == true && ModuleLoaded == true) || (engineAlowModuleLoading == true && ModuleLoaded == false))
-                    {
-                        APIAddress = tryAPIAddress;
-                    }
-                    else if(!engineAlowModuleLoading)
-                    {
-                        if(CmdBuffer != NULL)
-                        {
-                            APIAddress = tryAPIAddress - (ULONG_PTR)CmdBuffer + APIAddress;
-                        }
-                        else
-                        {
-                            APIAddress = tryAPIAddress;
-                        }
-                    }
-                }
-                else
-                {
-                    if(ModuleLoaded)
-                    {
-                        FreeLibrary(hModule);
-                    }
-                    if(CmdBuffer != NULL)
-                    {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                    }
-                    return false;
-                }
-            }
-            if(engineAlowModuleLoading)
-            {
-                APIAddress = (ULONG_PTR)EngineGlobalAPIHandler(dbgProcessInformation.hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_REALIGN_APIADDRESS);
-                if(ModuleLoaded)
-                {
-                    FreeLibrary(hModule);
-                }
-            }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                }
+                while(ReadByte != 0xC3 && ReadByte != 0xC2);
+                APIAddress += i;
             }
             return SetBPX(APIAddress, bpxType, bpxCallBack);
         }
-        else
-        {
-            if(engineAlowModuleLoading)
-            {
-                if(ModuleLoaded)
-                {
-                    FreeLibrary(hModule);
-                }
-            }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                }
-            }
-            return false;
-        }
-    }
-    else
-    {
-        return false;
     }
     return false;
 }
 
 __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, const char* szAPIName, DWORD bpxPlace)
 {
-    BYTE ReadByte = NULL;
-    HMODULE hModule = NULL;
-    DWORD ReadMemSize = NULL;
     ULONG_PTR APIAddress = NULL;
-    ULONG_PTR tryAPIAddress = NULL;
-    ULONG_PTR QueryAPIAddress = NULL;
-    int i = MAX_RET_SEARCH_INSTRUCTIONS;
-    ULONG_PTR ueNumberOfReadWrite = NULL;
-    int currentInstructionLen = NULL;
-    bool ModuleLoaded = false;
-    void* CmdBuffer = NULL;
-    bool RemovedBpx = false;
-
-    if(szDLLName != NULL && szAPIName != NULL)
+    if(szDLLName && szAPIName)
     {
-        hModule = GetModuleHandleA(szDLLName);
-        if(hModule == NULL)
+        APIAddress = EngineGetProcAddressRemote(szDLLName, szAPIName); //get remote proc address
+        if(APIAddress)
         {
-            if(engineAlowModuleLoading)
-            {
-                hModule = LoadLibraryA(szDLLName);
-                ModuleLoaded = true;
-            }
-            else
-            {
-                ReadMemSize = MAX_RET_SEARCH_INSTRUCTIONS * MAXIMUM_INSTRUCTION_SIZE;
-                APIAddress = (ULONG_PTR)EngineGlobalAPIHandler(dbgProcessInformation.hProcess, NULL, NULL, szAPIName, UE_OPTION_IMPORTER_RETURN_APIADDRESS);
-                if(APIAddress != NULL)
-                {
-                    CmdBuffer = VirtualAlloc(NULL, ReadMemSize, MEM_COMMIT, PAGE_READWRITE);
-                    while(ReadProcessMemory(dbgProcessInformation.hProcess, (void*)APIAddress, CmdBuffer, ReadMemSize, &ueNumberOfReadWrite) == false && ReadMemSize > NULL)
-                    {
-                        ReadMemSize = ReadMemSize - (MAXIMUM_INSTRUCTION_SIZE * 10);
-                    }
-                    if(ReadMemSize == NULL)
-                    {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                        APIAddress = NULL;
-                    }
-                    else
-                    {
-                        tryAPIAddress = (ULONG_PTR)CmdBuffer;
-                    }
-                }
-            }
-        }
-        if(hModule != NULL || APIAddress != NULL)
-        {
-            if(hModule != NULL)
-            {
-                APIAddress = (ULONG_PTR)GetProcAddress(hModule, szAPIName);
-            }
             if(bpxPlace == UE_APIEND)
             {
-                if(tryAPIAddress == NULL)
+                int i = 0;
+                unsigned char ReadByte;
+                do  //search for RET
                 {
-                    tryAPIAddress = APIAddress;
+                    unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
+                    memset(CmdBuffer, 0, sizeof(CmdBuffer));
+                    if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                        return false;
+                    i += StaticLengthDisassemble(CmdBuffer);
+                    ReadByte = *CmdBuffer;
                 }
-                QueryAPIAddress = APIAddress;
-                RtlMoveMemory(&ReadByte, (LPVOID)tryAPIAddress, 1);
-                while(i > 0 && ReadByte != 0xC3 && ReadByte != 0xC2)
-                {
-                    if(engineAlowModuleLoading == false && CmdBuffer != NULL)
-                    {
-                        if(IsBPXEnabled(QueryAPIAddress))
-                        {
-                            DisableBPX(QueryAPIAddress);
-                            ReadProcessMemory(dbgProcessInformation.hProcess, (void*)APIAddress, CmdBuffer, ReadMemSize, &ueNumberOfReadWrite);
-                            RemovedBpx = true;
-                        }
-                    }
-                    currentInstructionLen = StaticLengthDisassemble((LPVOID)tryAPIAddress);
-                    tryAPIAddress = tryAPIAddress + currentInstructionLen;
-                    RtlMoveMemory(&ReadByte, (LPVOID)tryAPIAddress, 1);
-                    QueryAPIAddress = QueryAPIAddress + currentInstructionLen;
-                    if(!engineAlowModuleLoading)
-                    {
-                        if(RemovedBpx)
-                        {
-                            EnableBPX(QueryAPIAddress - currentInstructionLen);
-                        }
-                    }
-                    RemovedBpx = false;
-                    i--;
-                }
-                if(i != NULL)
-                {
-                    if((engineAlowModuleLoading == true && ModuleLoaded == true) || (engineAlowModuleLoading == true && ModuleLoaded == false))
-                    {
-                        APIAddress = tryAPIAddress;
-                    }
-                    else if(!engineAlowModuleLoading)
-                    {
-                        if(CmdBuffer != NULL)
-                        {
-                            APIAddress = tryAPIAddress - (ULONG_PTR)CmdBuffer + APIAddress;
-                        }
-                        else
-                        {
-                            APIAddress = tryAPIAddress;
-                        }
-                    }
-                }
-                else
-                {
-                    if(ModuleLoaded)
-                    {
-                        FreeLibrary(hModule);
-                    }
-                    if(CmdBuffer != NULL)
-                    {
-                        VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                    }
-                    return false;
-                }
+                while(ReadByte != 0xC3 && ReadByte != 0xC2);
+                APIAddress += i;
             }
-            if(engineAlowModuleLoading)
-            {
-                APIAddress = (ULONG_PTR)EngineGlobalAPIHandler(dbgProcessInformation.hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_REALIGN_APIADDRESS);
-                if(ModuleLoaded)
-                {
-                    FreeLibrary(hModule);
-                }
-            }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                }
-            }
-            return(DeleteBPX(APIAddress));
+            return DeleteBPX(APIAddress);
         }
-        else
-        {
-            if(engineAlowModuleLoading)
-            {
-                if(ModuleLoaded)
-                {
-                    FreeLibrary(hModule);
-                }
-            }
-            else
-            {
-                if(CmdBuffer != NULL)
-                {
-                    VirtualFree(CmdBuffer, NULL, MEM_RELEASE);
-                }
-            }
-            return false;
-        }
-    }
-    else
-    {
-        return false;
     }
     return false;
 }

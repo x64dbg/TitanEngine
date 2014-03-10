@@ -155,3 +155,4 @@ $RECYCLE.BIN/
 *.depend
 *.layout
 *.orig
+*.cbTemp

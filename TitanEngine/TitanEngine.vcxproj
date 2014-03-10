@@ -217,6 +217,7 @@
     <ClCompile Include="Global.Engine.Hash.cpp" />
     <ClCompile Include="Global.Engine.Hider.cpp" />
     <ClCompile Include="Global.Engine.Hook.cpp" />
+    <ClCompile Include="Global.Engine.Importer.cpp" />
     <ClCompile Include="Global.Engine.Simplification.cpp" />
     <ClCompile Include="Global.Engine.Threading.cpp" />
     <ClCompile Include="Global.Garbage.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Engine.Hider.h" />
     <ClInclude Include="Global.Engine.Hook.h" />
+    <ClInclude Include="Global.Engine.Importer.h" />
     <ClInclude Include="Global.Engine.Simplification.h" />
     <ClInclude Include="Global.Engine.Threading.h" />
     <ClInclude Include="Global.Garbage.h" />

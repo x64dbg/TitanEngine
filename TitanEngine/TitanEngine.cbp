@@ -70,6 +70,8 @@
 		<Unit filename="Global.Engine.Hider.h" />
 		<Unit filename="Global.Engine.Hook.cpp" />
 		<Unit filename="Global.Engine.Hook.h" />
+		<Unit filename="Global.Engine.Importer.cpp" />
+		<Unit filename="Global.Engine.Importer.h" />
 		<Unit filename="Global.Engine.Simplification.cpp" />
 		<Unit filename="Global.Engine.Simplification.h" />
 		<Unit filename="Global.Engine.Threading.cpp" />
