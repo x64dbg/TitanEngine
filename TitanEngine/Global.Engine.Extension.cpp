@@ -128,7 +128,7 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
                                     NameHasBeenRegistered = true;
                                 }
                             }
-                            if(!NameHasBeenRegistered)
+                            if(NameHasBeenRegistered)
                             {
                                 Plugin.push_back(myPluginInfo);
                             }

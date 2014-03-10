@@ -42,13 +42,11 @@ void EngineInit()
     {
         lstrcpyW(engineSzEngineFolder, engineSzEngineFile);
         i = lstrlenW(engineSzEngineFolder);
-        while(i > NULL && engineSzEngineFolder[i] != 0x5C)
-        {
-            engineSzEngineFolder[i] = 0x00;
+        while(engineSzEngineFolder[i] != L'\\' && i)
             i--;
-        }
-        if(i > NULL)
+        if(i)
         {
+            engineSzEngineFolder[i]=L'\0';
             lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
             lstrcatW(engineSzEngineGarbageFolder, L"garbage\\");
             CreateDirectoryW(engineSzEngineGarbageFolder, 0);
