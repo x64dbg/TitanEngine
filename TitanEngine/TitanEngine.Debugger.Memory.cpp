@@ -402,7 +402,7 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
 
     //filter breakpoints
     if(retValue)
-        FilterBreakPoints((ULONG_PTR)lpBaseAddress, (unsigned char*)lpBuffer, nSize);
+        BreakPointPostReadFilter((ULONG_PTR)lpBaseAddress, (unsigned char*)lpBuffer, nSize);
 
     return retValue;
 }
@@ -412,5 +412,48 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
 //- re-set breakpoints when overwritten
 __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesWritten)
 {
-    return !!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+    SIZE_T ueNumberOfBytesWritten = 0;
+    SIZE_T * pNumBytes = 0;
+    DWORD dwProtect = 0;
+    bool retValue = false;
+
+    //read memory
+    if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
+    {
+        return false;
+    }
+
+    MutexLocker lock("BreakPointBuffer"); //thread-safe
+    //disable breakpoints that interfere with the memory to write
+    BreakPointPreWriteFilter((ULONG_PTR)lpBaseAddress, nSize, &lock);
+
+    if (!lpNumberOfBytesWritten)
+    {
+        pNumBytes = &ueNumberOfBytesWritten;
+    }
+    else
+    {
+        pNumBytes = lpNumberOfBytesWritten;
+    }
+
+    if(!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+    {
+        if (VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
+        {
+            if (WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+            {
+                retValue = true;
+            }
+            VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
+        }
+    }
+    else
+    {
+        retValue = true;
+    }
+
+    //re-enable breakpoints that interfere with the memory to write
+    BreakPointPostWriteFilter((ULONG_PTR)lpBaseAddress, nSize, &lock);
+
+    return retValue;
 }

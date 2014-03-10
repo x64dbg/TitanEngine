@@ -67,32 +67,41 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
             if(BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE && (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT))
             {
-                if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_INT3)
+                //re-read original byte(s)
+                if(ReadProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).OriginalByte, BreakPointBuffer.at(i).BreakPointSize, 0))
                 {
-                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3BreakPoint, 1, &NumberOfBytesReadWritten))
+                    if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_INT3)
                     {
-                        testWrite = true;
+                        if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3BreakPoint, 1, &NumberOfBytesReadWritten))
+                        {
+                            testWrite = true;
+                        }
                     }
-                }
-                else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_LONG_INT3)
-                {
-                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3LongBreakPoint, 2, &NumberOfBytesReadWritten))
+                    else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_LONG_INT3)
                     {
-                        testWrite = true;
+                        if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3LongBreakPoint, 2, &NumberOfBytesReadWritten))
+                        {
+                            testWrite = true;
+                        }
                     }
-                }
-                else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_UD2)
-                {
-                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &UD2BreakPoint, 2, &NumberOfBytesReadWritten))
+                    else if(BreakPointBuffer.at(i).AdvancedBreakPointType == UE_BREAKPOINT_UD2)
                     {
-                        testWrite = true;
+                        if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &UD2BreakPoint, 2, &NumberOfBytesReadWritten))
+                        {
+                            testWrite = true;
+                        }
                     }
-                }
-                if(testWrite)
-                {
-                    BreakPointBuffer.at(i).BreakPointActive = UE_BPXACTIVE;
-                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
-                    return true;
+                    if(testWrite)
+                    {
+                        BreakPointBuffer.at(i).BreakPointActive = UE_BPXACTIVE;
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                        return true;
+                    }
+                    else
+                    {
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
+                        return false;
+                    }
                 }
                 else
                 {
