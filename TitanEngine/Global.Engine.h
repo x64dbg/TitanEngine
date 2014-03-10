@@ -51,5 +51,6 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName);
 long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName);
 bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, LPDWORD ptrOrdinalCount);
 long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);
+LONG_PTR EngineGetProcAddressRemote(const WCHAR * szDLLName, const char* szAPIName);
 
 #endif //_GLOBAL_ENGINE_H
