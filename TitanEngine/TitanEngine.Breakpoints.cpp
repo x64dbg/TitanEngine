@@ -312,17 +312,45 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
             if(bpxPlace == UE_APIEND)
             {
                 int i = 0;
-                unsigned char ReadByte;
+                int len = 0;
+                unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
+                if(!_strnicmp(szDLLName, "kernel32", 8))
+                {
+                    ULONG_PTR APIAddress_ = EngineGetProcAddressRemote("kernelbase.dll", szAPIName);
+                    if(APIAddress_)
+                    {
+                        bool KernelBase = true;
+                        do //search for forwarding indicators
+                        {
+                            i += len;
+                            if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                                return false;
+                            if(CmdBuffer[0] == 0xCC || CmdBuffer[0] == 0x90) //padding
+                            {
+                                KernelBase = false; //failed to find forward indicator
+                                break;
+                            }
+                            len = StaticLengthDisassemble(CmdBuffer);
+                        }
+#ifdef _WIN64
+                        while(!(CmdBuffer[0] == 0x48 && CmdBuffer[1] == 0xFF && CmdBuffer[2] == 0x25));
+#else
+                        while(!(CmdBuffer[0] == 0xFF && CmdBuffer[1] == 0x25));
+#endif //_WIN64
+                        if(KernelBase)
+                            APIAddress = APIAddress_;
+                        i = 0;
+                        len = 0;
+                    }
+                }
                 do  //search for RET
                 {
-                    unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
-                    memset(CmdBuffer, 0, sizeof(CmdBuffer));
+                    i += len;
                     if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
                         return false;
-                    i += StaticLengthDisassemble(CmdBuffer);
-                    ReadByte = *CmdBuffer;
+                    len = StaticLengthDisassemble(CmdBuffer);
                 }
-                while(ReadByte != 0xC3 && ReadByte != 0xC2);
+                while(CmdBuffer[0] != 0xC3 && CmdBuffer[0] != 0xC2);
                 APIAddress += i;
             }
             return SetBPX(APIAddress, bpxType, bpxCallBack);
@@ -342,17 +370,45 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
             if(bpxPlace == UE_APIEND)
             {
                 int i = 0;
-                unsigned char ReadByte;
+                int len = 0;
+                unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
+                if(!_strnicmp(szDLLName, "kernel32", 8))
+                {
+                    ULONG_PTR APIAddress_ = EngineGetProcAddressRemote("kernelbase.dll", szAPIName);
+                    if(APIAddress_)
+                    {
+                        bool KernelBase = true;
+                        do //search for forwarding indicators
+                        {
+                            i += len;
+                            if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                                return false;
+                            if(CmdBuffer[0] == 0xCC || CmdBuffer[0] == 0x90) //padding
+                            {
+                                KernelBase = false; //failed to find forward indicator
+                                break;
+                            }
+                            len = StaticLengthDisassemble(CmdBuffer);
+                        }
+#ifdef _WIN64
+                        while(!(CmdBuffer[0] == 0x48 && CmdBuffer[1] == 0xFF && CmdBuffer[2] == 0x25));
+#else
+                        while(!(CmdBuffer[0] == 0xFF && CmdBuffer[1] == 0x25));
+#endif //_WIN64
+                        if(KernelBase)
+                            APIAddress = APIAddress_;
+                        i = 0;
+                        len = 0;
+                    }
+                }
                 do  //search for RET
                 {
-                    unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
-                    memset(CmdBuffer, 0, sizeof(CmdBuffer));
+                    i += len;
                     if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
                         return false;
-                    i += StaticLengthDisassemble(CmdBuffer);
-                    ReadByte = *CmdBuffer;
+                    len = StaticLengthDisassemble(CmdBuffer);
                 }
-                while(ReadByte != 0xC3 && ReadByte != 0xC2);
+                while(CmdBuffer[0] != 0xC3 && CmdBuffer[0] != 0xC2);
                 APIAddress += i;
             }
             return DeleteBPX(APIAddress);
