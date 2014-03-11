@@ -4,6 +4,7 @@
 #include "Global.Engine.h"
 #include "Global.Librarian.h"
 #include "Global.Engine.Importer.h"
+#include "Global.Debugger.h"
 #include "scylla_wrapper.h"
 #include <psapi.h>
 
@@ -16,6 +17,7 @@ __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR 
 
     scylla_addModule(uniDLLName, FirstThunk);
 }
+
 __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR ThunkValue)
 {
     wchar_t uniAPIName[MAX_PATH] = {};
@@ -24,88 +26,106 @@ __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR 
 
     scylla_addImport(uniAPIName, ThunkValue);
 }
+
 __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue)
 {
-
-    if(OrdinalNumber & IMAGE_ORDINAL_FLAG)
-    {
-        OrdinalNumber = OrdinalNumber ^ IMAGE_ORDINAL_FLAG;
-        ImporterAddNewAPI((char*)OrdinalNumber, ThunkValue);
-    }
-    else
-    {
-        ImporterAddNewAPI((char*)OrdinalNumber, ThunkValue);
-    }
+    ImporterAddNewAPI((char*)(OrdinalNumber&~IMAGE_ORDINAL_FLAG), ThunkValue);
 }
+
 __declspec(dllexport) long TITCALL ImporterGetAddedDllCount()
 {
     return scylla_getModuleCount();
 }
+
 __declspec(dllexport) long TITCALL ImporterGetAddedAPICount()
 {
     return scylla_getImportCount();
 }
+
 __declspec(dllexport) bool TITCALL ImporterExportIAT(ULONG_PTR StorePlace, ULONG_PTR FileMapVA, HANDLE hFileMap)
 {
-    if(scylla_fixMappedDump(StorePlace, FileMapVA, hFileMap) != SCY_ERROR_SUCCESS)
-    {
-        return false;
-    }
-
-    return true;
+    return (scylla_fixMappedDump(StorePlace, FileMapVA, hFileMap) == SCY_ERROR_SUCCESS);
 }
+
 __declspec(dllexport) long TITCALL ImporterEstimatedSize()
 {
     return scylla_estimatedIATSize();
 }
+
 __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, char* szExportFileName, char* szSectionName)
 {
-
     wchar_t uniExportFileName[MAX_PATH] = {};
     wchar_t uniDumpFileName[MAX_PATH] = {};
     wchar_t uniSectionName[MAX_PATH] = {};
-
     if(szExportFileName != NULL && szDumpFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName)+1, uniExportFileName, sizeof(uniExportFileName)/(sizeof(uniExportFileName[0])));
         MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
         MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName)+1, uniSectionName, sizeof(uniSectionName)/(sizeof(uniSectionName[0])));
-        return(ImporterExportIATExW(uniDumpFileName, uniExportFileName, uniSectionName));
+        return ImporterExportIATExW(uniDumpFileName, uniExportFileName, uniSectionName);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName, wchar_t* szExportFileName, wchar_t* szSectionName)
 {
-    if(scylla_fixDump(szDumpFileName, szExportFileName, szSectionName) != SCY_ERROR_SUCCESS)
-    {
-        return false;
-    }
-
-    return true;
+    return (scylla_fixDump(szDumpFileName, szExportFileName, szSectionName) == SCY_ERROR_SUCCESS);
 }
+
 __declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPIName)
 {
-    return(scylla_findImportWriteLocation(szAPIName));
+    return scylla_findImportWriteLocation(szAPIName);
 }
+
 __declspec(dllexport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
 {
-    return(scylla_findOrdinalImportWriteLocation(OrdinalNumber));
+    return scylla_findOrdinalImportWriteLocation(OrdinalNumber);
 }
+
 __declspec(dllexport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
 {
-    return(scylla_findImportNameByWriteLocation(APIWriteLocation));
+    return scylla_findImportNameByWriteLocation(APIWriteLocation);
 }
+
 __declspec(dllexport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
 {
     return scylla_findModuleNameByWriteLocation(APIWriteLocation);
 }
+
 __declspec(dllexport) void* TITCALL ImporterGetDLLName(ULONG_PTR APIAddress)
 {
-    return((LPVOID)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLNAME));
+    HANDLE hProcess;
+    if(!dbgProcessInformation.hProcess)
+        hProcess = GetCurrentProcess();
+    else
+        hProcess = dbgProcessInformation.hProcess;
+    ULONG_PTR moduleBase=EngineGetModuleBaseRemote(hProcess, APIAddress);
+    if(moduleBase)
+    {
+        static char szModuleName[MAX_PATH]="";
+        if(GetModuleFileNameExA(hProcess, (HMODULE)moduleBase, szModuleName, _countof(szModuleName)))
+            return szModuleName;
+    }
+    return 0;
 }
+
+__declspec(dllexport) void* TITCALL ImporterGetDLLNameW(ULONG_PTR APIAddress)
+{
+    HANDLE hProcess;
+    if(!dbgProcessInformation.hProcess)
+        hProcess = GetCurrentProcess();
+    else
+        hProcess = dbgProcessInformation.hProcess;
+    ULONG_PTR moduleBase=EngineGetModuleBaseRemote(hProcess, APIAddress);
+    if(moduleBase)
+    {
+        static wchar_t szModuleName[MAX_PATH]=L"";
+        if(GetModuleFileNameExW(hProcess, (HMODULE)moduleBase, szModuleName, _countof(szModuleName)))
+            return szModuleName;
+    }
+    return 0;
+}
+
 __declspec(dllexport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress)
 {
     return((LPVOID)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));

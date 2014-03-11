@@ -742,6 +742,7 @@ __declspec(dllimport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULON
 __declspec(dllimport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation);
 __declspec(dllimport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation);
 __declspec(dllimport) void* TITCALL ImporterGetDLLName(ULONG_PTR APIAddress);
+__declspec(dllexport) void* TITCALL ImporterGetDLLNameW(ULONG_PTR APIAddress);
 __declspec(dllimport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress);
 __declspec(dllimport) long long TITCALL ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress);
 __declspec(dllimport) void* TITCALL ImporterGetAPINameEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList);

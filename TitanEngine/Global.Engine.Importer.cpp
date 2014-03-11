@@ -8,62 +8,47 @@ ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const WCHAR * szDLLName, c
 {
     if(!hProcess) //no process specified
     {
-        if(dbgProcessInformation.hProcess == 0)
-        {
+        if(!dbgProcessInformation.hProcess)
             hProcess = GetCurrentProcess();
-        }
         else
-        {
             hProcess = dbgProcessInformation.hProcess;
-        }
     }
-    DWORD cbNeeded = 0;
-    HMODULE EnumeratedModules[1024] = {0};
-    WCHAR RemoteDLLPath[MAX_PATH] = {0};
-    HMODULE hModuleLocal = GetModuleHandleW(szDLLName);
-    WCHAR * dllName;
-
-    if(EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
+    DWORD cbNeeded=0;
+    if(EnumProcessModules(hProcess, 0, 0, &cbNeeded))
     {
-        for(int i = 0; i < (int)(cbNeeded / sizeof(HMODULE)); i++)
+        HMODULE* hMods=(HMODULE*)malloc(cbNeeded*sizeof(HMODULE));
+        if(EnumProcessModules(hProcess, hMods, cbNeeded, &cbNeeded))
         {
-            RemoteDLLPath[0] = 0;
-            if(GetModuleFileNameExW(hProcess, EnumeratedModules[i], RemoteDLLPath, _countof(RemoteDLLPath)) > 0)
+            for(unsigned int i=0; i<cbNeeded/sizeof(HMODULE); i++)
             {
-                dllName = wcsrchr(RemoteDLLPath, L'\\');
-                if (dllName)
+                wchar_t szModuleName[MAX_PATH]=L"";
+                if(GetModuleFileNameExW(hProcess, hMods[i], szModuleName, _countof(szModuleName)))
                 {
-                    dllName++;
-                    if(_wcsicmp(dllName, szDLLName) == 0)
+                    wchar_t* dllName=wcsrchr(szModuleName, L'\\');
+                    if(dllName)
                     {
-                        LONG_PTR funcAddress = 0;
-
-                        if (hModuleLocal)
+                        dllName++;
+                        if(!_wcsicmp(dllName, szDLLName))
                         {
-                            funcAddress = (LONG_PTR)GetProcAddress(hModuleLocal, szAPIName);
-                            if (funcAddress)
+                            HMODULE hModule = LoadLibraryExW(szModuleName, 0, DONT_RESOLVE_DLL_REFERENCES|LOAD_LIBRARY_AS_DATAFILE);
+                            if (hModule)
                             {
-                                return (LONG_PTR)funcAddress - (LONG_PTR)hModuleLocal + (LONG_PTR)EnumeratedModules[i];
+                                ULONG_PTR funcAddress=(ULONG_PTR)GetProcAddress(hModule, szAPIName);
+                                if(funcAddress)
+                                {
+                                    funcAddress-=(ULONG_PTR)hModule; //rva
+                                    FreeLibrary(hModule);
+                                    return funcAddress+(ULONG_PTR)hMods[i]; //va
+                                }
                             }
+                            break;
                         }
-                        else
-                        {
-                            hModuleLocal = LoadLibraryExW(RemoteDLLPath, 0, DONT_RESOLVE_DLL_REFERENCES);
-                            if (hModuleLocal)
-                            {
-                                funcAddress = (LONG_PTR)GetProcAddress(hModuleLocal, szAPIName);
-                                funcAddress = (LONG_PTR)funcAddress - (LONG_PTR)hModuleLocal + (LONG_PTR)EnumeratedModules[i];
-                                FreeLibrary(hModuleLocal);
-                                return funcAddress;
-                            }
-                        }
-                        break;
                     }
                 }
             }
         }
+        free(hMods);
     }
-
     return 0;
 }
 
@@ -88,4 +73,37 @@ ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const char * szDLLName, co
 ULONG_PTR EngineGetProcAddressRemote(const char * szDLLName, const char* szAPIName)
 {
     return EngineGetProcAddressRemote(0, szDLLName, szAPIName);
+}
+
+ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, ULONG_PTR APIAddress)
+{
+    if(!hProcess) //no process specified
+    {
+        if(!dbgProcessInformation.hProcess)
+            hProcess = GetCurrentProcess();
+        else
+            hProcess = dbgProcessInformation.hProcess;
+    }
+    DWORD cbNeeded=0;
+    if(EnumProcessModules(hProcess, 0, 0, &cbNeeded))
+    {
+        HMODULE* hMods=(HMODULE*)malloc(cbNeeded*sizeof(HMODULE));
+        if(EnumProcessModules(hProcess, hMods, cbNeeded, &cbNeeded))
+        {
+            for(unsigned int i=0; i<cbNeeded/sizeof(HMODULE); i++)
+            {
+                MODULEINFO modinfo;
+                memset(&modinfo, 0, sizeof(MODULEINFO));
+                if(GetModuleInformation(hProcess, hMods[i], &modinfo, sizeof(MODULEINFO)))
+                {
+                    ULONG_PTR start=(ULONG_PTR)hMods[i];
+                    ULONG_PTR end=modinfo.SizeOfImage;
+                    if(APIAddress>=start && APIAddress<end)
+                        return start;
+                }
+            }
+        }
+        free(hMods);
+    }
+    return 0;
 }

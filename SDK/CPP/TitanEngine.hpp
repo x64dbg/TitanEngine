@@ -1689,6 +1689,10 @@ protected:
     {
         return (const char*)UE::ImporterGetDLLName(APIAddress);
     }
+    static const wchar_t* GetDLLNameW(ULONG_PTR APIAddress)
+    {
+        return (const wchar_t*)UE::ImporterGetDLLNameW(APIAddress);
+    }
     static const char* GetAPIName(ULONG_PTR APIAddress)
     {
         return (const char*)UE::ImporterGetAPIName(APIAddress);
@@ -1737,14 +1741,14 @@ protected:
     {
         return UE::ImporterGetRemoteDLLBase(hProcess, LocalModuleBase);
     }
-	static long long GetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
-	{
-	    return UE::ImporterGetRemoteDLLBaseEx(hProcess, szModuleName);
-	}
-	static void* GetRemoteDLLBaseExW(HANDLE hProcess, WCHAR* szModuleName)
-	{
-	    return UE::ImporterGetRemoteDLLBaseExW(hProcess, szModuleName);
-	}
+    static long long GetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+    {
+        return UE::ImporterGetRemoteDLLBaseEx(hProcess, szModuleName);
+    }
+    static void* GetRemoteDLLBaseExW(HANDLE hProcess, WCHAR* szModuleName)
+    {
+        return UE::ImporterGetRemoteDLLBaseExW(hProcess, szModuleName);
+    }
     static bool IsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterIsForwardedAPI(hProcess, APIAddress);
@@ -1876,6 +1880,7 @@ public:
     using ImporterX::FindAPIByWriteLocation;
     using ImporterX::FindDLLByWriteLocation;
     using ImporterX::GetDLLName;
+    using ImporterX::GetDLLNameW;
     using ImporterX::GetAPIName;
     using ImporterX::GetAPIOrdinalNumber;
     using ImporterX::GetAPINameEx;
