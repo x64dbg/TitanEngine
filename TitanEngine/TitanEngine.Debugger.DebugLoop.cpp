@@ -427,6 +427,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
         case OUTPUT_DEBUG_STRING_EVENT:
         {
+            //http://maximumcrack.wordpress.com/2009/06/22/outputdebugstring-awesomeness/ (the final advice is incorrect, but still helpful)
+            DBGCode = DBG_EXCEPTION_NOT_HANDLED; //pass exception to debuggee
+            if(engineExecutePluginCallBack)
+            {
+                 ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
+            }
             //debug string callback
             if(DBGCustomHandler->chOutputDebugString != NULL)
             {
@@ -440,8 +446,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DBGCustomHandler->chOutputDebugString = NULL;
                 }
             }
-            //http://maximumcrack.wordpress.com/2009/06/22/outputdebugstring-awesomeness/ (the final advice is incorrect, but still helpful)
-            DBGCode = DBG_EXCEPTION_NOT_HANDLED; //pass exception to debuggee
         }
         break;
 
@@ -1289,6 +1293,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
             //general unhandled exception callback
             if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
             {
+                if(engineExecutePluginCallBack)
+                {
+                     ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
+                }
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chUnhandledException);
@@ -1322,7 +1330,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
         case RIP_EVENT:
         {
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //fix an anti-debug trick
-            //system breakpoint callback
+            if(engineExecutePluginCallBack)
+            {
+                ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
+            }
+            //rip event callback
             if(DBGCustomHandler->chRipEvent != NULL)
             {
                 myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chRipEvent);

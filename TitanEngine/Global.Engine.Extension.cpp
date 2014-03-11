@@ -96,7 +96,7 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
             myPluginInfo.TitanReleasePlugin = (fPluginReleaseExec)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanReleasePlugin");
             myPluginInfo.TitanRegisterPlugin = (fPluginRegister)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanRegisterPlugin");
             myPluginInfo.TitanDebuggingCallBack = (fPluginDebugExec)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanDebuggingCallBack");
-            myPluginRegister = (fPluginRegister)myPluginInfo.TitanRegisterPlugin;
+            myPluginRegister = myPluginInfo.TitanRegisterPlugin;
             if(myPluginRegister != NULL)
             {
                 __try
@@ -113,7 +113,7 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
                                     NameHasBeenRegistered = true;
                                 }
                             }
-                            if(NameHasBeenRegistered)
+                            if(!NameHasBeenRegistered)
                             {
                                 Plugin.push_back(myPluginInfo);
                             }
