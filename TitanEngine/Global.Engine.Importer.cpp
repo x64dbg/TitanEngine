@@ -148,9 +148,9 @@ ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, const char* szDLLName)
     }
 }
 
-ULONG_PTR EngineGetAPIAddressRemote(HANDLE hProcess, ULONG_PTR APIAddress)
+ULONG_PTR EngineGetAddressRemote(HANDLE hProcess, ULONG_PTR Address)
 {
-    HMODULE localModuleBase=(HMODULE)EngineGetModuleBaseRemote(GetCurrentProcess(), APIAddress);
+    HMODULE localModuleBase=(HMODULE)EngineGetModuleBaseRemote(GetCurrentProcess(), Address);
     if(localModuleBase)
     {
         wchar_t szModuleName[MAX_PATH]=L"";
@@ -163,8 +163,8 @@ ULONG_PTR EngineGetAPIAddressRemote(HANDLE hProcess, ULONG_PTR APIAddress)
                 ULONG_PTR remoteModuleBase=EngineGetModuleBaseRemote(hProcess, dllName);
                 if(remoteModuleBase)
                 {
-                    APIAddress-=(ULONG_PTR)localModuleBase; //rva
-                    return APIAddress+remoteModuleBase;
+                    Address-=(ULONG_PTR)localModuleBase; //rva
+                    return Address+remoteModuleBase;
                 }
             }
         }
@@ -172,9 +172,9 @@ ULONG_PTR EngineGetAPIAddressRemote(HANDLE hProcess, ULONG_PTR APIAddress)
     return 0;
 }
 
-ULONG_PTR EngineGetAPIAddressLocal(HANDLE hProcess, ULONG_PTR APIAddress)
+ULONG_PTR EngineGetAddressLocal(HANDLE hProcess, ULONG_PTR Address)
 {
-    HMODULE remoteModuleBase=(HMODULE)EngineGetModuleBaseRemote(hProcess, APIAddress);
+    HMODULE remoteModuleBase=(HMODULE)EngineGetModuleBaseRemote(hProcess, Address);
     if(remoteModuleBase)
     {
         wchar_t szModuleName[MAX_PATH]=L"";
@@ -187,8 +187,8 @@ ULONG_PTR EngineGetAPIAddressLocal(HANDLE hProcess, ULONG_PTR APIAddress)
                 ULONG_PTR localModuleBase=EngineGetModuleBaseRemote(GetCurrentProcess(), dllName);
                 if(localModuleBase)
                 {
-                    APIAddress-=(ULONG_PTR)remoteModuleBase; //rva
-                    return APIAddress+localModuleBase;
+                    Address-=(ULONG_PTR)remoteModuleBase; //rva
+                    return Address+localModuleBase;
                 }
             }
         }

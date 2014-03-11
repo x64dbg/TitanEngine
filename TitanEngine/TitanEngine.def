@@ -173,6 +173,7 @@ ImporterFindOrdinalAPIWriteLocation
 ImporterFindAPIByWriteLocation
 ImporterFindDLLByWriteLocation
 ImporterGetDLLName
+ImporterGetDLLNameW
 ImporterGetAPIName
 ImporterGetAPINameEx
 ImporterGetAPIOrdinalNumber
@@ -180,6 +181,7 @@ ImporterGetRemoteAPIAddress
 ImporterGetRemoteAPIAddressEx
 ImporterGetLocalAPIAddress
 ImporterGetDLLNameFromDebugee
+ImporterGetDLLNameFromDebugeeW
 ImporterGetAPINameFromDebugee
 ImporterGetAPIOrdinalNumberFromDebugee
 ImporterGetDLLIndexEx

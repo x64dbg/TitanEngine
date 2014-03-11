@@ -104,7 +104,7 @@ __declspec(dllexport) void* TITCALL ImporterGetDLLNameW(ULONG_PTR APIAddress)
 
 __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    return EngineGetAPIAddressRemote(hProcess, APIAddress);
+    return EngineGetAddressRemote(hProcess, APIAddress);
 }
 
 __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDLLName, char* szAPIName)
@@ -114,7 +114,7 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDL
 
 __declspec(dllexport) long long TITCALL ImporterGetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    return EngineGetAPIAddressLocal(hProcess, APIAddress);
+    return EngineGetAddressLocal(hProcess, APIAddress);
 }
 
 __declspec(dllexport) void* TITCALL ImporterGetDLLNameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
@@ -153,7 +153,7 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProce
 
 __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
 {
-    return EngineGetAPIAddressRemote(hProcess, (ULONG_PTR)LocalModuleBase);
+    return EngineGetAddressRemote(hProcess, (ULONG_PTR)LocalModuleBase);
 }
 
 __declspec(dllexport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress)
