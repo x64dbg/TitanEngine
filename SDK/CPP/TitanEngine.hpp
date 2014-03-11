@@ -1721,6 +1721,10 @@ protected:
     {
         return (const char*)UE::ImporterGetDLLNameFromDebugee(hProcess, APIAddress);
     }
+    static const wchar_t* GetDLLNameFromDebugeeW(HANDLE hProcess, ULONG_PTR APIAddress)
+    {
+        return (const wchar_t*)UE::ImporterGetDLLNameFromDebugeeW(hProcess, APIAddress);
+    }
     static const char* GetAPINameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return (const char*)UE::ImporterGetAPINameFromDebugee(hProcess, APIAddress);
@@ -1888,6 +1892,7 @@ public:
     using ImporterX::GetRemoteAPIAddressEx;
     using ImporterX::GetLocalAPIAddress;
     using ImporterX::GetDLLNameFromDebugee;
+    using ImporterX::GetDLLNameFromDebugeeW;
     using ImporterX::GetAPINameFromDebugee;
     using ImporterX::GetAPIOrdinalNumberFromDebugee;
     using ImporterX::GetDLLIndexEx;

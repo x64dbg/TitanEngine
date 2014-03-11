@@ -306,7 +306,7 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
     ULONG_PTR APIAddress = NULL;
     if(szDLLName && szAPIName)
     {
-        APIAddress = EngineGetProcAddressRemote(szDLLName, szAPIName); //get remote proc address
+        APIAddress = EngineGetProcAddressRemote(0, szDLLName, szAPIName); //get remote proc address
         if(APIAddress)
         {
             if(bpxPlace == UE_APIEND)
@@ -314,9 +314,9 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                 int i = 0;
                 int len = 0;
                 unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
-                if(!_strnicmp(szDLLName, "kernel32", 8))
+                if(!_stricmp(szDLLName, "kernel32.dll"))
                 {
-                    ULONG_PTR APIAddress_ = EngineGetProcAddressRemote("kernelbase.dll", szAPIName);
+                    ULONG_PTR APIAddress_ = EngineGetProcAddressRemote(0, "kernelbase.dll", szAPIName);
                     if(APIAddress_)
                     {
                         bool KernelBase = true;
@@ -364,7 +364,7 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
     ULONG_PTR APIAddress = NULL;
     if(szDLLName && szAPIName)
     {
-        APIAddress = EngineGetProcAddressRemote(szDLLName, szAPIName); //get remote proc address
+        APIAddress = EngineGetProcAddressRemote(0, szDLLName, szAPIName); //get remote proc address
         if(APIAddress)
         {
             if(bpxPlace == UE_APIEND)
@@ -372,9 +372,9 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                 int i = 0;
                 int len = 0;
                 unsigned char CmdBuffer[MAXIMUM_INSTRUCTION_SIZE];
-                if(!_strnicmp(szDLLName, "kernel32", 8))
+                if(!_stricmp(szDLLName, "kernel32.dll"))
                 {
-                    ULONG_PTR APIAddress_ = EngineGetProcAddressRemote("kernelbase.dll", szAPIName);
+                    ULONG_PTR APIAddress_ = EngineGetProcAddressRemote(0, "kernelbase.dll", szAPIName);
                     if(APIAddress_)
                     {
                         bool KernelBase = true;

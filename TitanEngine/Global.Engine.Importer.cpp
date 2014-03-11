@@ -4,7 +4,7 @@
 #include "Global.Debugger.h"
 #include <psapi.h>
 
-ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const WCHAR * szDLLName, const char* szAPIName)
+ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const wchar_t* szDLLName, const char* szAPIName)
 {
     if(!hProcess) //no process specified
     {
@@ -52,12 +52,7 @@ ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const WCHAR * szDLLName, c
     return 0;
 }
 
-ULONG_PTR EngineGetProcAddressRemote(const WCHAR * szDLLName, const char* szAPIName)
-{
-    return EngineGetProcAddressRemote(0, szDLLName, szAPIName);
-}
-
-ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const char * szDLLName, const char* szAPIName)
+ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const char* szDLLName, const char* szAPIName)
 {
     WCHAR uniDLLName[MAX_PATH] = {0};
     if (MultiByteToWideChar(CP_ACP, NULL, szDLLName, -1, uniDLLName, _countof(uniDLLName)))
@@ -68,11 +63,6 @@ ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const char * szDLLName, co
     {
         return 0;
     }
-}
-
-ULONG_PTR EngineGetProcAddressRemote(const char * szDLLName, const char* szAPIName)
-{
-    return EngineGetProcAddressRemote(0, szDLLName, szAPIName);
 }
 
 ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, ULONG_PTR APIAddress)
@@ -104,6 +94,104 @@ ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, ULONG_PTR APIAddress)
             }
         }
         free(hMods);
+    }
+    return 0;
+}
+
+ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, const wchar_t* szDLLName)
+{
+    if(!hProcess) //no process specified
+    {
+        if(!dbgProcessInformation.hProcess)
+            hProcess = GetCurrentProcess();
+        else
+            hProcess = dbgProcessInformation.hProcess;
+    }
+    DWORD cbNeeded=0;
+    if(EnumProcessModules(hProcess, 0, 0, &cbNeeded))
+    {
+        HMODULE* hMods=(HMODULE*)malloc(cbNeeded*sizeof(HMODULE));
+        if(EnumProcessModules(hProcess, hMods, cbNeeded, &cbNeeded))
+        {
+            for(unsigned int i=0; i<cbNeeded/sizeof(HMODULE); i++)
+            {
+                wchar_t szModuleName[MAX_PATH]=L"";
+                if(GetModuleFileNameExW(hProcess, hMods[i], szModuleName, _countof(szModuleName)))
+                {
+                    wchar_t* dllName=wcsrchr(szModuleName, L'\\');
+                    if(dllName)
+                    {
+                        dllName++;
+                        if(!_wcsicmp(dllName, szDLLName))
+                        {
+                            return (ULONG_PTR)hMods[i];
+                        }
+                    }
+                }
+            }
+        }
+        free(hMods);
+    }
+    return 0;
+}
+
+ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, const char* szDLLName)
+{
+    WCHAR uniDLLName[MAX_PATH] = {0};
+    if (MultiByteToWideChar(CP_ACP, NULL, szDLLName, -1, uniDLLName, _countof(uniDLLName)))
+    {
+        return EngineGetModuleBaseRemote(hProcess, szDLLName);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+ULONG_PTR EngineGetAPIAddressRemote(HANDLE hProcess, ULONG_PTR APIAddress)
+{
+    HMODULE localModuleBase=(HMODULE)EngineGetModuleBaseRemote(GetCurrentProcess(), APIAddress);
+    if(localModuleBase)
+    {
+        wchar_t szModuleName[MAX_PATH]=L"";
+        if(GetModuleFileNameExW(hProcess, localModuleBase, szModuleName, _countof(szModuleName)))
+        {
+            wchar_t* dllName=wcsrchr(szModuleName, L'\\');
+            if(dllName)
+            {
+                dllName++;
+                ULONG_PTR remoteModuleBase=EngineGetModuleBaseRemote(hProcess, dllName);
+                if(remoteModuleBase)
+                {
+                    APIAddress-=(ULONG_PTR)localModuleBase; //rva
+                    return APIAddress+remoteModuleBase;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+ULONG_PTR EngineGetAPIAddressLocal(HANDLE hProcess, ULONG_PTR APIAddress)
+{
+    HMODULE remoteModuleBase=(HMODULE)EngineGetModuleBaseRemote(hProcess, APIAddress);
+    if(remoteModuleBase)
+    {
+        wchar_t szModuleName[MAX_PATH]=L"";
+        if(GetModuleFileNameExW(hProcess, remoteModuleBase, szModuleName, _countof(szModuleName)))
+        {
+            wchar_t* dllName=wcsrchr(szModuleName, L'\\');
+            if(dllName)
+            {
+                dllName++;
+                ULONG_PTR localModuleBase=EngineGetModuleBaseRemote(GetCurrentProcess(), dllName);
+                if(localModuleBase)
+                {
+                    APIAddress-=(ULONG_PTR)remoteModuleBase; //rva
+                    return APIAddress+localModuleBase;
+                }
+            }
+        }
     }
     return 0;
 }
