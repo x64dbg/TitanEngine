@@ -19,13 +19,11 @@ bool enginePassAllExceptions = true;
 bool engineExecutePluginCallBack = true;
 bool engineAutoHideFromDebugger = false; // hardcoded
 
-char engineExtractedFolderName[512];
-char engineFoundDLLName[512];
-char engineFoundAPIName[512];
-char engineExtractedFileName[512];
-wchar_t engineExtractedFileNameW[512];
-wchar_t engineSzEngineFile[MAX_PATH];
-wchar_t engineSzEngineFolder[MAX_PATH];
+char engineFoundDLLName[512] = {0};
+char engineFoundAPIName[512] = {0};
+wchar_t engineExtractedFileNameW[512] = {0};
+wchar_t engineSzEngineFile[MAX_PATH] = {0};
+wchar_t engineSzEngineFolder[MAX_PATH] = {0};
 HMODULE engineHandle;
 LPVOID engineExitThreadOneShootCallBack = NULL;
 LPVOID engineDependencyFiles;
@@ -36,9 +34,7 @@ void* EngineStartUnpackingCallBack;
 void EngineInit()
 {
     int i;
-    RtlZeroMemory(&engineSzEngineFile, sizeof engineSzEngineFile);
-    RtlZeroMemory(&engineSzEngineFolder, sizeof engineSzEngineFolder);
-    if(GetModuleFileNameW(engineHandle, engineSzEngineFile, MAX_PATH) > NULL)
+    if(GetModuleFileNameW(engineHandle, engineSzEngineFile, _countof(engineSzEngineFile)) > NULL)
     {
         lstrcpyW(engineSzEngineFolder, engineSzEngineFile);
         i = lstrlenW(engineSzEngineFolder);
@@ -106,49 +102,6 @@ bool EngineFileExists(char* szFileName)
     {
         return false;
     }
-}
-
-char* EngineExtractPath(char* szFileName)
-{
-    int i;
-
-    RtlZeroMemory(&engineExtractedFolderName, sizeof(engineExtractedFolderName));
-    lstrcpyA(engineExtractedFolderName, szFileName);
-    i = lstrlenA(engineExtractedFolderName);
-    while(i > 0 && engineExtractedFolderName[i] != 0x5C)
-    {
-        engineExtractedFolderName[i] = 0x00;
-        i--;
-    }
-    return(engineExtractedFolderName);
-}
-
-char* EngineExtractFileName(char* szFileName)
-{
-
-    int i;
-    int j;
-    int x = 0;
-
-    i = lstrlenA(szFileName);
-    RtlZeroMemory(&engineExtractedFileName, sizeof(engineExtractedFileName));
-    while(i > 0 && szFileName[i] != 0x5C)
-    {
-        i--;
-    }
-    if(szFileName[i] == 0x5C)
-    {
-        for(j = i + 1; j <= lstrlenA(szFileName); j++)
-        {
-            engineExtractedFileName[x] = szFileName[j];
-            x++;
-        }
-    }
-    else
-    {
-        return(szFileName);
-    }
-    return(engineExtractedFileName);
 }
 
 void EngineCreatePathForFile(char* szFileName)
@@ -979,12 +932,11 @@ long long EngineSimulateNtLoaderW(wchar_t* szFileName)
 
 long long EngineSimulateNtLoader(char* szFileName)
 {
-
-    wchar_t uniFileName[MAX_PATH] = {};
+    wchar_t uniFileName[MAX_PATH] = {0};
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, -1, uniFileName, _countof(uniFileName));
         return(EngineSimulateNtLoaderW(uniFileName));
     }
     else
@@ -1168,10 +1120,11 @@ long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName)
     PEXPORTED_DATA ExportedFunctions;
     PEXPORTED_DATA ExportedFunctionNames;
     PEXPORTED_DATA_WORD ExportedFunctionOrdinals;
-    char szModuleName[MAX_PATH] = {};
     bool FileIs64 = false;
 
-    if(GetModuleFileNameA((HMODULE)ModuleBase, szModuleName, MAX_PATH) == NULL)
+    APIFoundAddress = (ULONG_PTR)GetProcAddress((HMODULE)ModuleBase, szAPIName);
+
+    if(APIFoundAddress == 0)
     {
         __try
         {
@@ -1224,7 +1177,7 @@ long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName)
     }
     else
     {
-        return((ULONG_PTR)GetProcAddress((HMODULE)ModuleBase, szAPIName));
+        return APIFoundAddress;
     }
 }
 

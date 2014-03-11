@@ -25,8 +25,6 @@ extern bool engineAutoHideFromDebugger;
 void EngineInit();
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister);
 bool EngineFileExists(char* szFileName);
-char* EngineExtractPath(char* szFileName);
-char* EngineExtractFileName(char* szFileName);
 void EngineCreatePathForFile(char* szFileName);
 void EngineCreatePathForFileW(wchar_t* szFileName);
 wchar_t* EngineExtractFileNameW(wchar_t* szFileName);
