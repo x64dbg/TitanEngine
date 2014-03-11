@@ -186,6 +186,7 @@ ImporterGetDLLIndexEx
 ImporterGetDLLIndex
 ImporterGetRemoteDLLBase
 ImporterGetRemoteDLLBaseEx
+ImporterGetRemoteDLLBaseExW
 ImporterIsForwardedAPI
 ImporterAutoSearchIAT
 ImporterAutoSearchIATW

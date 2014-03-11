@@ -127,7 +127,7 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDL
     WCHAR uniDLLName[MAX_PATH] = {0};
     if (MultiByteToWideChar(CP_ACP, NULL, szDLLName, -1, uniDLLName, _countof(uniDLLName)))
     {
-        return EngineGetProcAddressRemote(szDLLName, szAPIName);
+        return EngineGetProcAddressRemote(uniDLLName, szAPIName);
     }
     else
     {
@@ -162,27 +162,39 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess
 {
     return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, (ULONG_PTR)LocalModuleBase, NULL, UE_OPTION_IMPORTER_RETURN_DLLBASE));
 }
-__declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+__declspec(dllexport) void* TITCALL ImporterGetRemoteDLLBaseExW(HANDLE hProcess, WCHAR * szModuleName)
 {
     DWORD cbNeeded = NULL;
-    HMODULE EnumeratedModules[0x1024] = {0};
-    char RemoteDLLName[MAX_PATH] = {0};
+    HMODULE EnumeratedModules[1024] = {0};
+    WCHAR RemoteDLLName[MAX_PATH] = {0};
 
     if(EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
     {
         for(int i = 0; i < (int)(cbNeeded / sizeof(HMODULE)); i++)
         {
             RemoteDLLName[0] = 0;
-            if(GetModuleBaseNameA(hProcess, EnumeratedModules[i], (LPSTR)RemoteDLLName, _countof(RemoteDLLName)) > NULL)
+            if(GetModuleBaseNameW(hProcess, EnumeratedModules[i], RemoteDLLName, _countof(RemoteDLLName)) > NULL)
             {
-                if(lstrcmpiA((LPCSTR)RemoteDLLName, (LPCSTR)szModuleName))
+                if(_wcsicmp(RemoteDLLName, szModuleName) == 0)
                 {
-                    return((ULONG_PTR)EnumeratedModules[i]);
+                    return (void*)EnumeratedModules[i];
                 }
             }
         }
     }
-    return(NULL);
+    return 0;
+}
+__declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+{
+    WCHAR uniModuleName[MAX_PATH] = {0};
+    if (MultiByteToWideChar(CP_ACP, NULL, szModuleName, -1, uniModuleName, _countof(uniModuleName)))
+    {
+        return (long long)ImporterGetRemoteDLLBaseExW(hProcess, uniModuleName);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)

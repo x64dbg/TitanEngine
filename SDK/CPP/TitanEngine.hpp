@@ -1737,6 +1737,14 @@ protected:
     {
         return UE::ImporterGetRemoteDLLBase(hProcess, LocalModuleBase);
     }
+	static long long GetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+	{
+	    return UE::ImporterGetRemoteDLLBaseEx(hProcess, szModuleName);
+	}
+	static void* GetRemoteDLLBaseExW(HANDLE hProcess, WCHAR* szModuleName)
+	{
+	    return UE::ImporterGetRemoteDLLBaseExW(hProcess, szModuleName);
+	}
     static bool IsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterIsForwardedAPI(hProcess, APIAddress);
