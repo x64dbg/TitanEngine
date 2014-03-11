@@ -58,7 +58,7 @@ long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(uMsg == WM_INITDIALOG)
     {
         SendMessageA(hwndDlg, WM_SETTEXT, NULL, (LPARAM)&szWindowUnpackerTitle);
-        SendMessageA(hwndDlg, WM_SETICON, NULL, (LPARAM)LoadIconA((HINSTANCE)engineHandle, MAKEINTRESOURCEA(IDI_ICON2)));
+        SendMessageA(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM)LoadIconA((HINSTANCE)engineHandle, MAKEINTRESOURCEA(IDI_ICON2)));
         SetDlgItemTextA(hwndDlg, IDD_UNPACKERTITLE, szWindowUnpackerLongTitle);
         SetDlgItemTextA(hwndDlg, IDC_FILENAME, "filename.exe");
         CheckDlgButton(hwndDlg, IDC_REALING, 1);

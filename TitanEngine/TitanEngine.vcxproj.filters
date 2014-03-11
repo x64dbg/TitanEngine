@@ -306,22 +306,12 @@
     <None Include="..\TitanEngineLoaders\LibraryLoader\Release\LibraryLoader.exe">
       <Filter>Resource Files\Binary</Filter>
     </None>
-    <None Include="..\TitanEngineLoaders\ReserveLibrary\Release\ReserveLibrary.dll">
-      <Filter>Resource Files\Binary</Filter>
-    </None>
-    <None Include="..\TitanEngineLoaders\ReserveLibrary\x64\Release\ReserveLibrary.dll">
-      <Filter>Resource Files\Binary</Filter>
-    </None>
-    <None Include="HEADER.BMP">
-      <Filter>Resource Files\Images</Filter>
-    </None>
     <None Include="LOGO.bmp">
       <Filter>Resource Files\Images</Filter>
     </None>
     <None Include="MAINICON.ico">
       <Filter>Resource Files\Images</Filter>
     </None>
-    <None Include="ReadMe.txt" />
     <None Include="Global.Engine.Hash.h">
       <Filter>Header Files\TitanEngine</Filter>
     </None>

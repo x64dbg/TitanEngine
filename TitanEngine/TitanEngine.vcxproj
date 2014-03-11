@@ -311,13 +311,9 @@
   <ItemGroup>
     <None Include="..\TitanEngineLoaders\LibraryLoader\x64\Release\LibraryLoader.exe" />
     <None Include="..\TitanEngineLoaders\LibraryLoader\Release\LibraryLoader.exe" />
-    <None Include="..\TitanEngineLoaders\ReserveLibrary\Release\ReserveLibrary.dll" />
-    <None Include="..\TitanEngineLoaders\ReserveLibrary\x64\Release\ReserveLibrary.dll" />
     <None Include="Global.Engine.Hash.h" />
-    <None Include="HEADER.BMP" />
     <None Include="LOGO.bmp" />
     <None Include="MAINICON.ico" />
-    <None Include="ReadMe.txt" />
     <ClCompile Include="TitanEngine.PE.Data.cpp" />
     <ClCompile Include="TitanEngine.PE.Section.cpp">
       <FileType>Document</FileType>

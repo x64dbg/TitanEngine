@@ -2,27 +2,22 @@
 //
 #include "resource.h"
 
-#include "WinResrc.h"
-#define IDC_STATIC (-1)
-
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-//#include "afxres.h" //MFC
+#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -63,27 +58,26 @@ LOADERX64               BINARY                  "..\\TitanEngineLoaders\\Library
 // Dialog
 //
 
-IDD_MAINWINDOW DIALOGEX 0, 0, 255, 206
+IDD_MAINWINDOW DIALOGEX 0, 0, 255, 168
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_NOFAILCREATE | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
 CAPTION "[ TitanEngine2 ]"
 FONT 8, "Verdana", 0, 0, 0x1
 BEGIN
-    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,0,0,321,38
     CONTROL         "Realign PE32 file [Recommended, but it can produce invalid files]",IDC_REALING,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,156,241,14
-    EDITTEXT        IDC_FILENAME,42,55,163,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    CTEXT           "- TitanEngine2 unpacker -",IDD_UNPACKERTITLE,2,39,250,10,SS_SUNKEN | NOT WS_GROUP,WS_EX_STATICEDGE
-    LTEXT           "[Filename]",112,3,55,36,10
-    GROUPBOX        "Unpack execution messages",113,2,72,250,112
-    LISTBOX         IDC_LISTBOX,5,81,243,75,LBS_NOINTEGRALHEIGHT | NOT WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_STATICEDGE
-    PUSHBUTTON      "UnPack",IDC_UNPACK,71,188,60,14,BS_CENTER | BS_VCENTER
-    PUSHBUTTON      "Browse",IDC_BROWSE,210,53,40,14,BS_CENTER | BS_VCENTER
-    PUSHBUTTON      "About",IDC_ABOUT,131,188,60,14
-    PUSHBUTTON      "Exit",IDC_EXIT,191,188,60,14
-    CONTROL         131,IDC_STATIC,"Static",SS_BITMAP,5,191,46,9
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,119,241,14
+    EDITTEXT        IDC_FILENAME,43,18,163,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    CTEXT           "- TitanEngine2 unpacker -",IDD_UNPACKERTITLE,3,2,250,10,SS_SUNKEN | NOT WS_GROUP,WS_EX_STATICEDGE
+    LTEXT           "[Filename]",112,3,18,36,10
+    GROUPBOX        "Unpack execution messages",113,3,35,250,112
+    LISTBOX         IDC_LISTBOX,6,44,243,75,LBS_NOINTEGRALHEIGHT | NOT WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_STATICEDGE
+    PUSHBUTTON      "UnPack",IDC_UNPACK,71,151,60,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "Browse",IDC_BROWSE,211,16,40,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "About",IDC_ABOUT,131,151,60,14
+    PUSHBUTTON      "Exit",IDC_EXIT,191,151,60,14
+    CONTROL         131,IDC_STATIC,"Static",SS_BITMAP,6,154,46,9
     CONTROL         "Copy file overlay [Recommended for all SFX files]",IDC_COPYOVERLAY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,168,241,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,131,241,14
 END
 
 
@@ -92,7 +86,6 @@ END
 // Bitmap
 //
 
-IDB_BITMAP1             BITMAP                  "HEADER.BMP"
 IDB_BITMAP2             BITMAP                  "LOGO.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -142,7 +135,22 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON2               ICON                    "MAINICON.ico"
-#endif    // English (U.S.) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_MAINWINDOW, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
