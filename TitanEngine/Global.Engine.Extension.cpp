@@ -8,17 +8,13 @@ static std::vector<PluginInformation> Plugin;
 // Global.Engine.Extension.Functions:
 void ExtensionManagerPluginReleaseCallBack()
 {
-    typedef void(TITCALL *fPluginReleaseExec)();
-    fPluginReleaseExec myPluginReleaseExec;
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         __try
         {
             if(Plugin.at(i).TitanReleasePlugin != NULL)
             {
-                myPluginReleaseExec = (fPluginReleaseExec)Plugin.at(i).TitanReleasePlugin;
-                myPluginReleaseExec();
+                Plugin.at(i).TitanReleasePlugin();
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
@@ -30,18 +26,13 @@ void ExtensionManagerPluginReleaseCallBack()
 
 void ExtensionManagerPluginResetCallBack()
 {
-
-    typedef void(TITCALL *fPluginResetExec)();
-    fPluginResetExec myPluginResetExec;
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         __try
         {
             if(Plugin.at(i).TitanResetPlugin != NULL)
             {
-                myPluginResetExec = (fPluginResetExec)Plugin.at(i).TitanResetPlugin;
-                myPluginResetExec();
+                Plugin.at(i).TitanResetPlugin();
             }
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
@@ -53,9 +44,6 @@ void ExtensionManagerPluginResetCallBack()
 
 void ExtensionManagerPluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReason)
 {
-    typedef void(TITCALL *fPluginDebugExec)(LPDEBUG_EVENT debugEvent, int CallReason);
-    fPluginDebugExec myPluginDebugExec;
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         __try
@@ -64,8 +52,7 @@ void ExtensionManagerPluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReaso
             {
                 if(Plugin.at(i).TitanDebuggingCallBack != NULL)
                 {
-                    myPluginDebugExec = (fPluginDebugExec)Plugin.at(i).TitanDebuggingCallBack;
-                    myPluginDebugExec(debugEvent, CallReason);
+                    Plugin.at(i).TitanDebuggingCallBack(debugEvent, CallReason);
                 }
             }
         }
@@ -78,7 +65,6 @@ void ExtensionManagerPluginDebugCallBack(LPDEBUG_EVENT debugEvent, int CallReaso
 
 void EngineInitPlugins(wchar_t* szEngineFolder)
 {
-
     bool MoreFiles = true;
     bool NameHasBeenRegistered = false;
     PluginInformation myPluginInfo = {};
@@ -87,7 +73,6 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
 #else
     wchar_t* szPluginFolder = L"\\plugins\\x86\\";
 #endif
-    typedef bool(TITCALL *fPluginRegister)(char* szPluginName, LPDWORD titanPluginMajorVersion, LPDWORD titanPluginMinorVersion);
     wchar_t szPluginSearchString[MAX_PATH] = {};
     wchar_t szPluginFullPath[MAX_PATH] = {};
     fPluginRegister myPluginRegister;
@@ -107,10 +92,10 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
         myPluginInfo.PluginBaseAddress = LoadLibraryW(szPluginFullPath);
         if(myPluginInfo.PluginBaseAddress != NULL)
         {
-            myPluginInfo.TitanResetPlugin = (void*)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanResetPlugin");
-            myPluginInfo.TitanReleasePlugin = (void*)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanReleasePlugin");
-            myPluginInfo.TitanRegisterPlugin = (void*)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanRegisterPlugin");
-            myPluginInfo.TitanDebuggingCallBack = (void*)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanDebuggingCallBack");
+            myPluginInfo.TitanResetPlugin = (fPluginResetExec)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanResetPlugin");
+            myPluginInfo.TitanReleasePlugin = (fPluginReleaseExec)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanReleasePlugin");
+            myPluginInfo.TitanRegisterPlugin = (fPluginRegister)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanRegisterPlugin");
+            myPluginInfo.TitanDebuggingCallBack = (fPluginDebugExec)GetProcAddress(myPluginInfo.PluginBaseAddress, "TitanDebuggingCallBack");
             myPluginRegister = (fPluginRegister)myPluginInfo.TitanRegisterPlugin;
             if(myPluginRegister != NULL)
             {
@@ -176,7 +161,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginLoaded(char* szPlugin
 
 __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPluginName)
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
@@ -196,7 +180,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPlugi
 
 __declspec(dllexport) bool TITCALL ExtensionManagerDisableAllPlugins()
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         Plugin.at(i).PluginDisabled = true;
@@ -206,7 +189,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerDisableAllPlugins()
 
 __declspec(dllexport) bool TITCALL ExtensionManagerDisablePlugin(char* szPluginName)
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
@@ -220,7 +202,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerDisablePlugin(char* szPluginN
 
 __declspec(dllexport) bool TITCALL ExtensionManagerEnableAllPlugins()
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         Plugin.at(i).PluginDisabled = false;
@@ -230,7 +211,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerEnableAllPlugins()
 
 __declspec(dllexport) bool TITCALL ExtensionManagerEnablePlugin(char* szPluginName)
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         if(lstrcmpiA(Plugin.at(i).PluginName, szPluginName) == NULL)
@@ -244,7 +224,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerEnablePlugin(char* szPluginNa
 
 __declspec(dllexport) bool TITCALL ExtensionManagerUnloadAllPlugins()
 {
-
     for(unsigned int i = 0; i < Plugin.size(); i++)
     {
         if(FreeLibrary(Plugin.at(i).PluginBaseAddress))
@@ -257,8 +236,6 @@ __declspec(dllexport) bool TITCALL ExtensionManagerUnloadAllPlugins()
 
 __declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(char* szPluginName)
 {
-
-    typedef void(TITCALL *fPluginReleaseExec)();
     fPluginReleaseExec myPluginReleaseExec;
 
     for(unsigned int i = 0; i < Plugin.size(); i++)

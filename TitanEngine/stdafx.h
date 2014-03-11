@@ -51,19 +51,6 @@
 
 typedef struct
 {
-    char PluginName[64];
-    DWORD PluginMajorVersion;
-    DWORD PluginMinorVersion;
-    HMODULE PluginBaseAddress;
-    void* TitanDebuggingCallBack;
-    void* TitanRegisterPlugin;
-    void* TitanReleasePlugin;
-    void* TitanResetPlugin;
-    bool PluginDisabled;
-} PluginInformation, *PPluginInformation;
-
-typedef struct
-{
     ULONG_PTR BreakPointAddress;
     ULONG_PTR Parameter1;
     ULONG_PTR Parameter2;
