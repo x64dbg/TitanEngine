@@ -83,9 +83,9 @@ void EngineInitPlugins(wchar_t* szEngineFolder)
     bool NameHasBeenRegistered = false;
     PluginInformation myPluginInfo = {};
 #if defined (_WIN64)
-    wchar_t* szPluginFolder = L"plugins\\x64\\";
+    wchar_t* szPluginFolder = L"\\plugins\\x64\\";
 #else
-    wchar_t* szPluginFolder = L"plugins\\x86\\";
+    wchar_t* szPluginFolder = L"\\plugins\\x86\\";
 #endif
     typedef bool(TITCALL *fPluginRegister)(char* szPluginName, LPDWORD titanPluginMajorVersion, LPDWORD titanPluginMinorVersion);
     wchar_t szPluginSearchString[MAX_PATH] = {};
