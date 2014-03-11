@@ -28,6 +28,9 @@
     <Filter Include="Source Files\TitanEngine">
       <UniqueIdentifier>{11622163-c50b-481a-9db8-1993dc220a72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ThirdParty">
+      <UniqueIdentifier>{db6d0b8a-e5c1-4a1e-9157-5818612589f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -218,21 +221,6 @@
     <ClInclude Include="definitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scylla_wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LzmaTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LzmaDec.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="distorm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="aplib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Global.Mapping.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>
@@ -292,6 +280,21 @@
     </ClInclude>
     <ClInclude Include="Global.Engine.Importer.h">
       <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="aplib.h">
+      <Filter>Header Files\ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="distorm.h">
+      <Filter>Header Files\ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="LzmaDec.h">
+      <Filter>Header Files\ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="LzmaTypes.h">
+      <Filter>Header Files\ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="scylla_wrapper.h">
+      <Filter>Header Files\ThirdParty</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
