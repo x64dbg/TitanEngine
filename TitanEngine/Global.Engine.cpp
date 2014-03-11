@@ -608,51 +608,68 @@ bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFil
 
 bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize)
 {
+    wchar_t uniFileName[MAX_PATH] = {0};
+    wchar_t uniDependencyForFile[MAX_PATH] = {0};
+    wchar_t * uniLocationOfTheFile = (WCHAR *)malloc(sizeof(WCHAR) * MaxStringSize);
+
+    MultiByteToWideChar(CP_ACP, NULL, szFileName, -1, uniFileName, _countof(uniFileName));
+    MultiByteToWideChar(CP_ACP, NULL, szDependencyForFile, -1, uniDependencyForFile, _countof(uniDependencyForFile));
+    if (EngineGetDependencyLocationW(uniFileName, uniDependencyForFile, uniLocationOfTheFile, MaxStringSize))
+    {
+        bool retVal = (WideCharToMultiByte(CP_ACP, NULL, uniLocationOfTheFile, -1, (char *)szLocationOfTheFile, MaxStringSize, NULL, NULL) != 0);
+        free(uniLocationOfTheFile);
+        return retVal;
+    }
+
+    return false;
+}
+
+bool EngineGetDependencyLocationW(wchar_t* szFileName, wchar_t* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize)
+{
 
     int i,j;
     HANDLE hFile;
-    char szTryFileName[512] = {0};
+    wchar_t szTryFileName[512] = {0};
 
     if(szFileName != NULL)
     {
-        hFile = CreateFileA(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        RtlZeroMemory(szLocationOfTheFile, MaxStringSize * sizeof(WCHAR));
+
+        hFile = CreateFileW(szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if(hFile != INVALID_HANDLE_VALUE)
         {
-            RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
-            if(lstrlenA(szFileName) <= MaxStringSize)
+            if((int)wcslen(szFileName) <= MaxStringSize)
             {
-                RtlCopyMemory(szLocationOfTheFile, szFileName, lstrlenA(szFileName));
+                RtlCopyMemory(szLocationOfTheFile, szFileName, wcslen(szFileName) * sizeof(WCHAR));
             }
             EngineCloseHandle(hFile);
             return true;
         }
-        if(GetSystemDirectoryA(szTryFileName, 512) > NULL)
+        if(GetSystemDirectoryW(szTryFileName, _countof(szTryFileName)) > NULL)
         {
-            lstrcatA(szTryFileName, "\\");
-            lstrcatA(szTryFileName, szFileName);
-            hFile = CreateFileA(szTryFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            wcscat(szTryFileName, L"\\");
+            wcscat(szTryFileName, szFileName);
+            hFile = CreateFileW(szTryFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if(hFile != INVALID_HANDLE_VALUE)
             {
-                RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
-                if(lstrlenA(szTryFileName) <= MaxStringSize)
+                if((int)wcslen(szTryFileName) <= MaxStringSize)
                 {
-                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
+                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, wcslen(szTryFileName) * sizeof(WCHAR));
                 }
                 EngineCloseHandle(hFile);
                 return true;
             }
         }
-        if(GetWindowsDirectoryA(szTryFileName, 512) > NULL)
+        if(GetWindowsDirectoryW(szTryFileName, _countof(szTryFileName)) > NULL)
         {
-            lstrcatA(szTryFileName, "\\");
-            lstrcatA(szTryFileName, szFileName);
-            hFile = CreateFileA(szTryFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            wcscat(szTryFileName, L"\\");
+            wcscat(szTryFileName, szFileName);
+            hFile = CreateFileW(szTryFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if(hFile != INVALID_HANDLE_VALUE)
             {
-                RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
-                if(lstrlenA(szTryFileName) <= MaxStringSize)
+                if((int)wcslen(szTryFileName) <= MaxStringSize)
                 {
-                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
+                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, wcslen(szTryFileName) * sizeof(WCHAR));
                 }
                 EngineCloseHandle(hFile);
                 return true;
@@ -660,9 +677,9 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
         }
         if(szDependencyForFile != NULL)
         {
-            RtlZeroMemory(&szTryFileName, 512);
-            i = lstrlenA(szDependencyForFile);
-            while(i > 0 && szDependencyForFile[i] != 0x5C)
+            RtlZeroMemory(szTryFileName, sizeof(szTryFileName));
+            i = wcslen(szDependencyForFile);
+            while(i > 0 && szDependencyForFile[i] != L'\\')
             {
                 i--;
             }
@@ -670,14 +687,13 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
             {
                 szTryFileName[j] = szDependencyForFile[j];
             }
-            lstrcatA(szTryFileName, szFileName);
-            hFile = CreateFileA(szTryFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            wcscat(szTryFileName, szFileName);
+            hFile = CreateFileW(szTryFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if(hFile != INVALID_HANDLE_VALUE)
             {
-                RtlZeroMemory(szLocationOfTheFile, MaxStringSize);
-                if(lstrlenA(szTryFileName) <= MaxStringSize)
+                if((int)wcslen(szTryFileName) <= MaxStringSize)
                 {
-                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, lstrlenA(szTryFileName));
+                    RtlCopyMemory(szLocationOfTheFile, &szTryFileName, wcslen(szTryFileName) * sizeof(WCHAR));
                 }
                 EngineCloseHandle(hFile);
                 return true;
@@ -947,7 +963,19 @@ long long EngineSimulateNtLoader(char* szFileName)
 
 long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
 {
+    WCHAR uniFileName[MAX_PATH] = {0};
 
+    if (hProcess && szFileName)
+    {
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, -1, uniFileName, _countof(uniFileName));
+        return EngineSimulateDllLoaderW(hProcess, uniFileName);
+    }
+
+    return 0;
+}
+
+long long EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName)
+{
     int n;
     BOOL FileIs64;
     DWORD FileSize;
@@ -963,18 +991,19 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
     PIMAGE_EXPORT_DIRECTORY PEExports;
     PEXPORTED_DATA ExportedFunctionNames;
     ULONG_PTR ConvertedExport = NULL;
-    char szFileRemoteProc[1024]= {0};
-    char szDLLFileLocation[512]= {0};
-    char* szTranslatedProcName=0;
+    WCHAR szFileRemoteProc[1024]= {0};
+    WCHAR szDLLFileLocation[512]= {0};
+    WCHAR* szTranslatedProcName=0;
 
-    GetProcessImageFileNameA(hProcess, szFileRemoteProc, sizeof(szFileRemoteProc));
-    szTranslatedProcName = (char*)TranslateNativeName(szFileRemoteProc);
-    if(EngineIsDependencyPresent(szFileName, NULL, NULL))
+    GetProcessImageFileNameW(hProcess, szFileRemoteProc, _countof(szFileRemoteProc));
+
+    szTranslatedProcName = (WCHAR*)TranslateNativeNameW(szFileRemoteProc);
+    if(EngineIsDependencyPresentW(szFileName, NULL, NULL))
     {
-        if(EngineGetDependencyLocation(szFileName, szTranslatedProcName, &szDLLFileLocation, sizeof(szDLLFileLocation)))
+        if(EngineGetDependencyLocationW(szFileName, szTranslatedProcName, &szDLLFileLocation, _countof(szDLLFileLocation)))
         {
             VirtualFree((void*)szTranslatedProcName, NULL, MEM_RELEASE);
-            if(MapFileEx(szDLLFileLocation, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
+            if(MapFileExW(szDLLFileLocation, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
             {
                 DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
                 if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))

@@ -38,6 +38,7 @@ bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName);
 bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char* szPresentInFolder);
 bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFile, wchar_t* szPresentInFolder);
 bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize);
+bool EngineGetDependencyLocationW(wchar_t* szFileName, wchar_t* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize);
 long EngineHashString(char* szStringToHash);
 long EngineHashMemory(char* MemoryAddress, int MemorySize, DWORD InitialHashValue);
 bool EngineIsValidReadPtrEx(LPVOID DataPointer, DWORD DataSize);
@@ -46,6 +47,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
 long long EngineSimulateNtLoaderW(wchar_t* szFileName);
 long long EngineSimulateNtLoader(char* szFileName);
 long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName);
+long long EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName);
 long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName);
 bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, LPDWORD ptrOrdinalCount);
 long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);

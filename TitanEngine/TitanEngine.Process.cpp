@@ -7,12 +7,11 @@
 // TitanEngine.Process.functions:
 __declspec(dllexport) long TITCALL GetActiveProcessId(char* szImageName)
 {
-
-    wchar_t uniImageName[MAX_PATH] = {};
+    wchar_t uniImageName[MAX_PATH] = {0};
 
     if(szImageName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szImageName, lstrlenA(szImageName)+1, uniImageName, sizeof(uniImageName)/(sizeof(uniImageName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szImageName, -1, uniImageName, _countof(uniImageName));
         return(GetActiveProcessIdW(uniImageName));
     }
     else
@@ -28,31 +27,41 @@ __declspec(dllexport) long TITCALL GetActiveProcessIdW(wchar_t* szImageName)
     wchar_t* szTranslatedProcName;
     DWORD bProcessId[1024] = {};
     wchar_t szProcessPath[1024] = {};
-    DWORD pProcessIdCount = NULL;
+    DWORD cbNeeded = NULL;
     HANDLE hProcess;
+    wchar_t * nameOnly = 0;
 
-    if(EnumProcesses(bProcessId, sizeof bProcessId, &pProcessIdCount))
+    if(EnumProcesses(bProcessId, sizeof(bProcessId), &cbNeeded))
     {
-        for(i = 0; i < (int)pProcessIdCount; i++)
+        for(i = 0; i < (int)(cbNeeded / sizeof(DWORD)); i++)
         {
             if(bProcessId[i] != NULL)
             {
                 hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
                 if(hProcess != NULL)
                 {
-                    if(GetProcessImageFileNameW(hProcess, szProcessPath, 1024) > NULL)
+                    if(GetProcessImageFileNameW(hProcess, szProcessPath, _countof(szProcessPath)) > NULL)
                     {
                         szTranslatedProcName = (wchar_t*)TranslateNativeNameW(szProcessPath);
                         lstrcpyW(szProcessPath, szTranslatedProcName);
                         VirtualFree((void*)szTranslatedProcName, NULL, MEM_RELEASE);
                         EngineCloseHandle(hProcess);
-                        if(lstrcmpiW(szProcessPath, szImageName) == NULL)
+                        
+                        if(_wcsicmp(szProcessPath, szImageName) == 0)
                         {
                             return(bProcessId[i]);
                         }
-                        else if(lstrcmpiW(EngineExtractFileNameW(szProcessPath), szImageName) == NULL)
+                        else 
                         {
-                            return(bProcessId[i]);
+                            nameOnly = wcsrchr(szProcessPath, L'\\');
+                            if (nameOnly)
+                            {
+                                nameOnly++;
+                                if(_wcsicmp(nameOnly, szImageName) == 0)
+                                {
+                                    return(bProcessId[i]);
+                                }
+                            }
                         }
                     }
                     else
@@ -82,13 +91,13 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
 
     if(EnumFunction != NULL)
     {
-        if(EnumProcesses(bProcessId, sizeof bProcessId, &pProcessIdCount))
+        if(EnumProcesses(bProcessId, sizeof(bProcessId), &pProcessIdCount))
         {
-            for(i = 0; i < (int)pProcessIdCount; i++)
+            for(i = 0; i < (int)(pProcessIdCount / sizeof(DWORD)); i++)
             {
                 if(bProcessId[i] != NULL)
                 {
-                    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
+                    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, 0, bProcessId[i]);
                     if(hProcess != NULL)
                     {
                         RtlZeroMemory(EnumeratedModules, sizeof(EnumeratedModules));
@@ -98,7 +107,7 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
                             {
                                 if(EnumeratedModules[j] != NULL)
                                 {
-                                    if(GetModuleBaseNameA(hProcess, EnumeratedModules[j], szModuleName, 1024) > NULL)
+                                    if(GetModuleBaseNameA(hProcess, EnumeratedModules[j], szModuleName, _countof(szModuleName)) > NULL)
                                     {
                                         if(lstrcmpiA(szModuleName, szLibraryName) == NULL)
                                         {

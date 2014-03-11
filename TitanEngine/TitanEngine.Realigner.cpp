@@ -8,23 +8,17 @@
 // TitanEngine.Realigner.functions:
 __declspec(dllexport) bool TITCALL FixHeaderCheckSum(char* szFileName)
 {
-    HANDLE FileHandle;
-    DWORD FileSize;
-    HANDLE FileMap;
-    ULONG_PTR FileMapVA;
-    if(MapFileEx(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, 0))
+    wchar_t uniFileName[MAX_PATH] = {0};
+
+    if(szFileName != NULL)
     {
-        DWORD HeaderSum;
-        DWORD CheckSum;
-        if(CheckSumMappedFile((PVOID)FileMapVA, FileSize, &HeaderSum, &CheckSum) != NULL)
-        {
-            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return false;
-        }
-        UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-        return SetPE32Data(szFileName, NULL, UE_CHECKSUM, (ULONG_PTR)CheckSum);
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, -1, uniFileName, _countof(uniFileName));
+        return FixHeaderCheckSumW(uniFileName);
     }
-    return false;
+    else
+    {
+        return 0;
+    }
 }
 
 __declspec(dllexport) bool TITCALL FixHeaderCheckSumW(wchar_t* szFileName)
@@ -33,19 +27,19 @@ __declspec(dllexport) bool TITCALL FixHeaderCheckSumW(wchar_t* szFileName)
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
+    bool retVal = false;
+
     if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, 0))
     {
         DWORD HeaderSum;
         DWORD CheckSum;
-        if(CheckSumMappedFile((PVOID)FileMapVA, FileSize, &HeaderSum, &CheckSum) != NULL)
+        if(CheckSumMappedFile((PVOID)FileMapVA, FileSize, &HeaderSum, &CheckSum))
         {
-            UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-            return false;
+            retVal = SetPE32DataW(szFileName, NULL, UE_CHECKSUM, (ULONG_PTR)CheckSum);
         }
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
-        return SetPE32DataW(szFileName, NULL, UE_CHECKSUM, (ULONG_PTR)CheckSum);
     }
-    return false;
+    return retVal;
 }
 
 __declspec(dllexport) long TITCALL RealignPE(ULONG_PTR FileMapVA, DWORD FileSize, DWORD RealingMode)
