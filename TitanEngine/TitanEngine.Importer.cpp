@@ -151,6 +151,10 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProce
     return EngineGetModuleBaseRemote(hProcess, szModuleName);
 }
 
+__declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
+{
+    return EngineGetAPIAddressRemote(hProcess, (ULONG_PTR)LocalModuleBase);
+}
 
 __declspec(dllexport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress)
 {
@@ -179,10 +183,6 @@ __declspec(dllexport) long TITCALL ImporterGetDLLIndexEx(ULONG_PTR APIAddress, U
 __declspec(dllexport) long TITCALL ImporterGetDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
     return((DWORD)EngineGlobalAPIHandler(hProcess, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLINDEX));
-}
-__declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
-{
-    return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, (ULONG_PTR)LocalModuleBase, NULL, UE_OPTION_IMPORTER_RETURN_DLLBASE));
 }
 
 __declspec(dllexport) bool TITCALL ImporterIsForwardedAPI(HANDLE hProcess, ULONG_PTR APIAddress)
