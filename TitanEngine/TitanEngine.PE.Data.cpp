@@ -21,11 +21,11 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
         {
             PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            if(PEHeader32->OptionalHeader.Magic == 0x10B)
+            if(PEHeader32->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
             {
                 FileIs64 = false;
             }
-            else if(PEHeader32->OptionalHeader.Magic == 0x20B)
+            else if(PEHeader32->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
             {
                 FileIs64 = true;
             }
