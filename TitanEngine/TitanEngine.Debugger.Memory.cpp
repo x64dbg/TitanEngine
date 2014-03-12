@@ -5,13 +5,13 @@
 
 __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
-    if(!MemoryToCheck || !PatternToMatch)
+    if(!MemoryToCheck || !PatternToMatch || !SizeOfPatternToMatch || !SizeOfMemoryToCheck)
         return false;
-    int i = 0;
+
     BYTE intWildCard = 0;
     LPVOID ueReadBuffer = NULL;
     DynBuf ueReadBuf;
-    ULONG_PTR ueNumberOfBytesRead = NULL;
+    SIZE_T ueNumberOfBytesRead = 0;
     MEMORY_BASIC_INFORMATION memoryInformation = {};
     PMEMORY_COMPARE_HANDLER memCmp = (PMEMORY_COMPARE_HANDLER)MemoryToCheck;
     PMEMORY_COMPARE_HANDLER memPattern = (PMEMORY_COMPARE_HANDLER)PatternToMatch;
@@ -20,6 +20,7 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
     {
         WildCard = &intWildCard;
     }
+
     if(SizeOfMemoryToCheck >= SizeOfPatternToMatch)
     {
         if(hProcess != GetCurrentProcess())
@@ -27,57 +28,39 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
             ueReadBuffer = ueReadBuf.Allocate(SizeOfMemoryToCheck);
             if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
             {
-                if(ueNumberOfBytesRead == NULL)
+                if(ueNumberOfBytesRead == 0)
                 {
                     if(VirtualQueryEx(hProcess, MemoryToCheck, &memoryInformation, sizeof memoryInformation) != NULL)
                     {
                         SizeOfMemoryToCheck = (int)((ULONG_PTR)memoryInformation.BaseAddress + memoryInformation.RegionSize - (ULONG_PTR)MemoryToCheck);
                         if(!ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
                         {
-                            return(NULL);
-                        }
-                        else
-                        {
-                            memCmp = (PMEMORY_COMPARE_HANDLER)ueReadBuffer;
+                            return false;
                         }
                     }
                     else
                     {
-                        return(NULL);
+                        return false;
                     }
                 }
-                else
-                {
-                    memCmp = (PMEMORY_COMPARE_HANDLER)ueReadBuffer;
-                }
             }
-            else
-            {
-                memCmp = (PMEMORY_COMPARE_HANDLER)ueReadBuffer;
-            }
-        }
-        __try
-        {
-            while(SizeOfPatternToMatch > NULL)
-            {
-                if(memCmp->Array.bArrayEntry[i] != memPattern->Array.bArrayEntry[i] && memPattern->Array.bArrayEntry[i] != *WildCard)
-                {
-                    return false;
-                }
-                SizeOfPatternToMatch--;
-                i++;
-            }
-            return true;
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-            return false;
+
+            memCmp = (PMEMORY_COMPARE_HANDLER)ueReadBuffer;
         }
     }
-    else
+
+    if(memCmp)
     {
-        return false;
+        for(int i=0; i<SizeOfMemoryToCheck && i<SizeOfPatternToMatch; i++)
+        {
+            if(memCmp->Array.bArrayEntry[i] != memPattern->Array.bArrayEntry[i] && memPattern->Array.bArrayEntry[i] != *WildCard)
+            {
+                return false;
+            }
+        }
     }
+
+    return true;
 }
 __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
@@ -93,9 +76,9 @@ __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfM
 }
 __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
+    if(!hProcess || !MemoryStart ||!MemorySize || !SearchPattern || !PatternSize)
+        return 0;
 
-    int i = NULL;
-    int j = NULL;
     ULONG_PTR Return = NULL;
     LPVOID ueReadBuffer = NULL;
     DynBuf ueReadBuf;
@@ -111,74 +94,50 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
     {
         WildCard = &nWildCard;
     }
-    if(hProcess != NULL && MemoryStart != NULL && MemorySize != NULL)
+
+    if(hProcess != GetCurrentProcess())
     {
-        if(hProcess != GetCurrentProcess())
+        ueReadBuffer = ueReadBuf.Allocate(MemorySize);
+        if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
         {
-            ueReadBuffer = ueReadBuf.Allocate(MemorySize);
-            if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
+            if(ueNumberOfBytesRead == NULL)
             {
-                if(ueNumberOfBytesRead == NULL)
+                if(VirtualQueryEx(hProcess, MemoryStart, &memoryInformation, sizeof memoryInformation) != NULL)
                 {
-                    if(VirtualQueryEx(hProcess, MemoryStart, &memoryInformation, sizeof memoryInformation) != NULL)
+                    MemorySize = (DWORD)((ULONG_PTR)memoryInformation.BaseAddress + memoryInformation.RegionSize - (ULONG_PTR)MemoryStart);
+                    if(!ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
                     {
-                        MemorySize = (DWORD)((ULONG_PTR)memoryInformation.BaseAddress + memoryInformation.RegionSize - (ULONG_PTR)MemoryStart);
-                        if(!ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
-                        {
-                            return(NULL);
-                        }
-                        else
-                        {
-                            SearchBuffer = (PUCHAR)ueReadBuffer;
-                        }
-                    }
-                    else
-                    {
-                        return(NULL);
+                        return 0;
                     }
                 }
                 else
                 {
-                    SearchBuffer = (PUCHAR)ueReadBuffer;
+                    return 0;
                 }
             }
-            else
-            {
-                SearchBuffer = (PUCHAR)ueReadBuffer;
-            }
-        }
-        else
-        {
-            SearchBuffer = (PUCHAR)MemoryStart;
-        }
-        __try
-        {
-            CompareBuffer = (PUCHAR)SearchPattern;
-            for(i = 0; i < (int)MemorySize && Return == NULL; i++)
-            {
-                for(j = 0; j < (int)PatternSize; j++)
-                {
-                    if(CompareBuffer[j] != *(PUCHAR)WildCard && SearchBuffer[i + j] != CompareBuffer[j])
-                    {
-                        break;
-                    }
-                }
-                if(j == (int)PatternSize)
-                {
-                    Return = (ULONG_PTR)MemoryStart + i;
-                }
-            }
-            return(Return);
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-            return(NULL);
         }
     }
-    else
+
+    SearchBuffer = (PUCHAR)MemoryStart;
+    CompareBuffer = (PUCHAR)SearchPattern;
+
+    DWORD i,j;
+    for(i=0; i < MemorySize && Return == NULL; i++)
     {
-        return(NULL);
+        for(j=0; j < PatternSize; j++)
+        {
+            if(CompareBuffer[j] != *(PUCHAR)WildCard && SearchBuffer[i + j] != CompareBuffer[j])
+            {
+                break;
+            }
+        }
+        if(j == PatternSize)
+        {
+            Return = (ULONG_PTR)MemoryStart + i;
+        }
     }
+
+    return Return;
 }
 
 extern "C" __declspec(dllexport) long long TITCALL Find(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)

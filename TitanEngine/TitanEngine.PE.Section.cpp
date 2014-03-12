@@ -200,7 +200,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
             if(!FileIs64)
             {
                 sortedFileName = sortedFileNameBuf.Allocate(FileSize);
-                __try
+                if(sortedFileName)
                 {
                     RtlMoveMemory(sortedFileName, (LPVOID)FileMapVA, FileSize);
                     SectionNumber = PEHeader32->FileHeader.NumberOfSections;
@@ -257,7 +257,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                         return true;
                     }
                 }
-                __except(EXCEPTION_EXECUTE_HANDLER)
+                else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);
@@ -267,7 +267,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
             else
             {
                 sortedFileName = sortedFileNameBuf.Allocate(FileSize);
-                __try
+                if(sortedFileName)
                 {
                     RtlMoveMemory(sortedFileName, (LPVOID)FileMapVA, FileSize);
                     SectionNumber = PEHeader64->FileHeader.NumberOfSections;
@@ -324,7 +324,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                         return true;
                     }
                 }
-                __except(EXCEPTION_EXECUTE_HANDLER)
+                else
                 {
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     RemoveGarbageItem(szBackupItem, true);

@@ -17,7 +17,6 @@ __declspec(dllexport) bool TITCALL DumpProcess(HANDLE hProcess, LPVOID ImageBase
 
 __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint)
 {
-    int i = 0;
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_DOS_HEADER DOSFixHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
@@ -46,7 +45,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         DOSHeader = (PIMAGE_DOS_HEADER)ueReadBuffer;
         PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
 
-        if ((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
+        if((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
         {
             if(CalculatedHeaderSize % 0x1000 == NULL)
             {
@@ -109,7 +108,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                 {
                     if(ReadProcessMemory(hProcess, ImageBase, ueCopyBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
                     {
-                        __try
+                        if(ueCopyBuffer)
                         {
                             DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
                             PEFixHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
@@ -120,8 +119,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             }
                             PEFixHeader32->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
                             PEFixHeader32->OptionalHeader.ImageBase = (DWORD)((ULONG_PTR)ImageBase);
-                            i = NumberOfSections;
-                            while(i >= 1)
+                            for(int i=NumberOfSections; i>=1; i--)
                             {
                                 PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
                                 RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader32->OptionalHeader.SectionAlignment) * PEHeader32->OptionalHeader.SectionAlignment;
@@ -132,7 +130,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 PEFixSection->SizeOfRawData = RealignedVirtualSize;
                                 PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
                                 PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
-                                i--;
                             }
                             WriteFile(hFile, ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
                             ReadBase = (LPVOID)((ULONG_PTR)ReadBase + AlignedHeaderSize - TITANENGINE_PAGESIZE);
@@ -162,10 +159,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             EngineCloseHandle(hFile);
                             return true;
                         }
-                        __except(EXCEPTION_EXECUTE_HANDLER)
-                        {
-
-                        }
                     }
                 }
             }//PE32 Handler
@@ -189,7 +182,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                 {
                     if(ReadProcessMemory(hProcess, ImageBase, ueCopyBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
                     {
-                        __try
+                        if(ueCopyBuffer)
                         {
                             DOSFixHeader = (PIMAGE_DOS_HEADER)ueCopyBuffer;
                             PEFixHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSFixHeader + DOSFixHeader->e_lfanew);
@@ -200,8 +193,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             }
                             PEFixHeader64->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
                             PEFixHeader64->OptionalHeader.ImageBase = (DWORD64)((ULONG_PTR)ImageBase);
-                            i = NumberOfSections;
-                            while(i >= 1)
+                            for(int i=NumberOfSections; i>=1; i--)
                             {
                                 PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
                                 RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader64->OptionalHeader.SectionAlignment) * PEHeader64->OptionalHeader.SectionAlignment;
@@ -212,7 +204,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 PEFixSection->SizeOfRawData = RealignedVirtualSize;
                                 PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
                                 PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
-                                i--;
                             }
                             WriteFile(hFile,ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
                             ReadBase = (LPVOID)((ULONG_PTR)ReadBase + (DWORD)AlignedHeaderSize - TITANENGINE_PAGESIZE);
@@ -242,9 +233,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             EngineCloseHandle(hFile);
                             return true;
                         }
-                        __except(EXCEPTION_EXECUTE_HANDLER)
-                        {
-                        }
                     }
                 }
             }//PE64 Handler
@@ -254,9 +242,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     if (hFile != INVALID_HANDLE_VALUE)
     {
         EngineCloseHandle(hFile);
-    }
-    if (ueReadBuffer != 0)
-    {
     }
 
     return false;

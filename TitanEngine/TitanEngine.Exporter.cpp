@@ -205,15 +205,8 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
         RtlMoveMemory(expBuildExportDataCWP, &expOrdinals, 2 * expExportNumber);
         expBuildExportDataCWP = (LPVOID)((ULONG_PTR)expBuildExportDataCWP + 2 * expExportNumber);
         RtlMoveMemory(expBuildExportData, &expExportData, sizeof IMAGE_EXPORT_DIRECTORY);
-        __try
-        {
-            RtlMoveMemory((LPVOID)StorePlace, expBuildExportData, (DWORD)((ULONG_PTR)expBuildExportDataCWP - (ULONG_PTR)expBuildExportData));
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-            ExporterCleanup();
-            return false;
-        }
+
+        RtlMoveMemory((LPVOID)StorePlace, expBuildExportData, (DWORD)((ULONG_PTR)expBuildExportDataCWP - (ULONG_PTR)expBuildExportData));
 
         if(FileMapVA != NULL)
         {
