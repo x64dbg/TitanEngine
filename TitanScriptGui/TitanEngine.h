@@ -1,7 +1,7 @@
 #ifndef TITANENGINE
 #define TITANENGINE
 
-#define TITCALL
+#define TITCALL __cdecl
 
 #if _MSC_VER > 1000
 #pragma once
