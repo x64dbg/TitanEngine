@@ -157,30 +157,42 @@ __declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess
 
 __declspec(dllexport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress)
 {
-    return((LPVOID)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));
+    return ImporterGetAPINameFromDebugee(GetCurrentProcess(), APIAddress);
 }
+
 __declspec(dllexport) long long TITCALL ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress)
 {
-    return((long)EngineGlobalAPIHandler(NULL, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER));
+    return ImporterGetAPIOrdinalNumberFromDebugee(GetCurrentProcess(), APIAddress);
 }
+
 __declspec(dllexport) void* TITCALL ImporterGetAPINameEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
-    return((LPVOID)EngineGlobalAPIHandler(NULL, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));
+    //TODO: remove?
+    return ImporterGetAPIName(APIAddress);
 }
+
 __declspec(dllexport) void* TITCALL ImporterGetAPINameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    return((LPVOID)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_APINAME));
+    static char APIName[5000]="";
+    if(EngineGetAPINameRemote(hProcess, APIAddress, APIName, _countof(APIName), 0))
+        return APIName;
+    return 0;
 }
+
 __declspec(dllexport) long long TITCALL ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    return((long)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER));
+    return EngineGetAPIOrdinalRemote(hProcess, APIAddress);
 }
+
 __declspec(dllexport) long TITCALL ImporterGetDLLIndexEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
+    //TODO: remove?
     return((DWORD)EngineGlobalAPIHandler(NULL, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLINDEX));
 }
+
 __declspec(dllexport) long TITCALL ImporterGetDLLIndex(HANDLE hProcess, ULONG_PTR APIAddress, ULONG_PTR DLLBasesList)
 {
+    //TODO: remove?
     return((DWORD)EngineGlobalAPIHandler(hProcess, DLLBasesList, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_DLLINDEX));
 }
 

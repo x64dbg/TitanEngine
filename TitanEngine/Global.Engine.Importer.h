@@ -10,5 +10,6 @@ ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, const char* szDLLName);
 ULONG_PTR EngineGetAddressRemote(HANDLE hProcess, ULONG_PTR APIAddress);
 ULONG_PTR EngineGetAddressLocal(HANDLE hProcess, ULONG_PTR APIAddress);
 bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName, DWORD APINameSize, DWORD* APINameSizeNeeded);
+DWORD EngineGetAPIOrdinalRemote(HANDLE hProcess, ULONG_PTR APIAddress);
 
 #endif //_GLOBAL_ENGINE_IMPORTER_H

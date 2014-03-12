@@ -88,7 +88,7 @@ ULONG_PTR EngineGetModuleBaseRemote(HANDLE hProcess, ULONG_PTR APIAddress)
                 if(GetModuleInformation(hProcess, hMods[i], &modinfo, sizeof(MODULEINFO)))
                 {
                     ULONG_PTR start=(ULONG_PTR)hMods[i];
-                    ULONG_PTR end=modinfo.SizeOfImage;
+                    ULONG_PTR end=start+modinfo.SizeOfImage;
                     if(APIAddress>=start && APIAddress<end)
                         return start;
                 }
@@ -199,11 +199,20 @@ ULONG_PTR EngineGetAddressLocal(HANDLE hProcess, ULONG_PTR Address)
 
 bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName, DWORD APINameSize, DWORD* APINameSizeNeeded)
 {
+    if(!hProcess) //no process specified
+    {
+        if(!dbgProcessInformation.hProcess)
+            hProcess = GetCurrentProcess();
+        else
+            hProcess = dbgProcessInformation.hProcess;
+    }
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
     ULONG_PTR ModuleBase=EngineGetModuleBaseRemote(hProcess, APIAddress);
+    if(!ModuleBase)
+        return false;
     wchar_t szModulePath[MAX_PATH]=L"";
     if(!GetModuleFileNameExW(hProcess, (HMODULE)ModuleBase, szModulePath, _countof(szModulePath)))
         return false;
@@ -220,14 +229,14 @@ bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName
             if(PEHeader32->OptionalHeader.Magic==IMAGE_NT_OPTIONAL_HDR32_MAGIC)
             {
                 ImageBase=PEHeader32->OptionalHeader.ImageBase;
-                ExportDirectoryVA=(ULONG_PTR)(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-                ExportDirectorySize=(ULONG_PTR)(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size);
+                ExportDirectoryVA=(ULONG_PTR)PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+                ExportDirectorySize=(ULONG_PTR)PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
             }
             else //x64
             {
-                ImageBase=PEHeader64->OptionalHeader.ImageBase;
-                ExportDirectoryVA=(ULONG_PTR)(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-                ExportDirectorySize=(ULONG_PTR)(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size);
+                ImageBase=(ULONG_PTR)PEHeader64->OptionalHeader.ImageBase;
+                ExportDirectoryVA=(ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+                ExportDirectorySize=(ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
             }
             PIMAGE_EXPORT_DIRECTORY ExportDirectory=(PIMAGE_EXPORT_DIRECTORY)ConvertVAtoFileOffset(FileMapVA, ExportDirectoryVA+ImageBase, true);
             DWORD* AddrOfFunctions=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfFunctions+ImageBase, true);
@@ -242,7 +251,7 @@ bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName
                 {
                     if(curRva+ModuleBase==APIAddress)
                     {
-                        if(APIName && APINameSize<strlen(curName))
+                        if(APIName && APINameSize>strlen(curName))
                         {
                             strcpy(APIName, curName);
                             return true;
@@ -259,4 +268,66 @@ bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
     }
     return false;
+}
+
+DWORD EngineGetAPIOrdinalRemote(HANDLE hProcess, ULONG_PTR APIAddress)
+{
+    if(!hProcess) //no process specified
+    {
+        if(!dbgProcessInformation.hProcess)
+            hProcess = GetCurrentProcess();
+        else
+            hProcess = dbgProcessInformation.hProcess;
+    }
+    HANDLE FileHandle;
+    DWORD FileSize;
+    HANDLE FileMap;
+    ULONG_PTR FileMapVA;
+    ULONG_PTR ModuleBase=EngineGetModuleBaseRemote(hProcess, APIAddress);
+    if(!ModuleBase)
+        return 0;
+    wchar_t szModulePath[MAX_PATH]=L"";
+    if(!GetModuleFileNameExW(hProcess, (HMODULE)ModuleBase, szModulePath, _countof(szModulePath)))
+        return 0;
+    if(MapFileExW(szModulePath, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, 0))
+    {
+        PIMAGE_DOS_HEADER DOSHeader=(PIMAGE_DOS_HEADER)FileMapVA;
+        if(EngineValidateHeader(FileMapVA, NULL, NULL, DOSHeader, true))
+        {
+            PIMAGE_NT_HEADERS32 PEHeader32=(PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS64 PEHeader64=(PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            ULONG_PTR ExportDirectoryVA;
+            DWORD ExportDirectorySize;
+            ULONG_PTR ImageBase;
+            if(PEHeader32->OptionalHeader.Magic==IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+            {
+                ImageBase=PEHeader32->OptionalHeader.ImageBase;
+                ExportDirectoryVA=(ULONG_PTR)PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+                ExportDirectorySize=(ULONG_PTR)PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+            }
+            else //x64
+            {
+                ImageBase=(ULONG_PTR)PEHeader64->OptionalHeader.ImageBase;
+                ExportDirectoryVA=(ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+                ExportDirectorySize=(ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+            }
+            PIMAGE_EXPORT_DIRECTORY ExportDirectory=(PIMAGE_EXPORT_DIRECTORY)ConvertVAtoFileOffset(FileMapVA, ExportDirectoryVA+ImageBase, true);
+            DWORD* AddrOfFunctions=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfFunctions+ImageBase, true);
+            unsigned int NumberOfFunctions=ExportDirectory->NumberOfFunctions;
+            for(unsigned int i=0,j=0; i<NumberOfFunctions; i++)
+            {
+                unsigned int curRva=AddrOfFunctions[i];
+                if(!curRva)
+                    continue;
+                j++; //ordinal
+                if(curRva<ExportDirectoryVA || curRva>=ExportDirectoryVA+ExportDirectorySize) //non-forwarded exports
+                {
+                    if(curRva+ModuleBase==APIAddress)
+                        return j;
+                }
+            }
+        }
+        UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+    }
+    return 0;
 }
