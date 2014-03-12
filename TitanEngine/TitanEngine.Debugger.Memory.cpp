@@ -26,7 +26,7 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
         if(hProcess != GetCurrentProcess())
         {
             ueReadBuffer = ueReadBuf.Allocate(SizeOfMemoryToCheck);
-            if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
+            if(ueReadBuffer && ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
             {
                 if(ueNumberOfBytesRead == 0)
                 {
@@ -116,9 +116,14 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
                 }
             }
         }
+
+        SearchBuffer = (PUCHAR)ueReadBuffer;
+    }
+    else
+    {
+        SearchBuffer = (PUCHAR)MemoryStart;
     }
 
-    SearchBuffer = (PUCHAR)MemoryStart;
     CompareBuffer = (PUCHAR)SearchPattern;
 
     DWORD i,j;
