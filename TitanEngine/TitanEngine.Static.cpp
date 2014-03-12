@@ -230,7 +230,7 @@ __declspec(dllexport) void TITCALL StaticMemoryDecrypt(LPVOID MemoryStart, DWORD
     BYTE DataByte = NULL;
     WORD DataWord = NULL;
     DWORD DataDword = NULL;
-    ULONG_PTR DataQword = NULL;
+    ULONG64 DataQword = NULL;
 
     //ignore too big stuff
     if(DecryptionKeySize>sizeof(ULONG_PTR))
