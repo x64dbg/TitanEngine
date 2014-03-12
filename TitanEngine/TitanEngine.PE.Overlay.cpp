@@ -189,7 +189,7 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                 SetFilePointer(hFile, OverlayStart, NULL, FILE_BEGIN);
                 while(OverlaySize > 0)
                 {
-                        RtlZeroMemory(ueReadBuffer, sizeof(ueReadBuffer));
+                    RtlZeroMemory(ueReadBuffer, sizeof(ueReadBuffer));
 
                     if(OverlaySize > 0x1000)
                     {

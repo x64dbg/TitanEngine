@@ -479,22 +479,22 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
                     hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
                     if(hWriteFile != INVALID_HANDLE_VALUE)
                     {
-                            if(Size < sizeof(ueCopyBuffer))
+                        if(Size < sizeof(ueCopyBuffer))
                         {
                             SizeToRead = Size;
                         }
                         else
                         {
-                                SizeToRead = sizeof(ueCopyBuffer);
+                            SizeToRead = sizeof(ueCopyBuffer);
                         }
                         while((int)Size > NULL)
                         {
                             if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                             {
                                 WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
-                                    if(Size > sizeof(ueCopyBuffer))
+                                if(Size > sizeof(ueCopyBuffer))
                                 {
-                                        Size = Size - sizeof(ueCopyBuffer);
+                                    Size = Size - sizeof(ueCopyBuffer);
                                 }
                                 else if(SizeToRead != Size)
                                 {
@@ -565,22 +565,22 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                 hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
                 if(hWriteFile != INVALID_HANDLE_VALUE)
                 {
-                        if(Size < sizeof(ueCopyBuffer))
+                    if(Size < sizeof(ueCopyBuffer))
                     {
                         SizeToRead = Size;
                     }
                     else
                     {
-                            SizeToRead = sizeof(ueCopyBuffer);
+                        SizeToRead = sizeof(ueCopyBuffer);
                     }
-                        while((int)Size > 0)
+                    while((int)Size > 0)
                     {
                         if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                         {
                             WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
-                                if(Size > sizeof(ueCopyBuffer))
+                            if(Size > sizeof(ueCopyBuffer))
                             {
-                                    Size = Size - sizeof(ueCopyBuffer);
+                                Size = Size - sizeof(ueCopyBuffer);
                             }
                             else if(SizeToRead != Size)
                             {
@@ -593,18 +593,18 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                                     WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
                                 }
                                 SizeToRead = Size;
-                                    Size = 0;
+                                Size = 0;
                             }
                             else
                             {
                                 SizeToRead = Size;
-                                    Size = 0;
+                                Size = 0;
                             }
                         }
                         else
                         {
                             WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                Size = 0;
+                            Size = 0;
                         }
                     }
                     EngineCloseHandle(hReadFile);
@@ -700,10 +700,10 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
                     EngineCloseHandle(hWriteFile);
                     return true;
                 }
-                }
             }
         }
-        EngineCloseHandle(hReadFile);
+    }
+    EngineCloseHandle(hReadFile);
     return false;
 }
 __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD SizeOfMemory, void* HashDigest, bool OutputString, int Algorithm)

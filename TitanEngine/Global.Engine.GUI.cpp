@@ -3,7 +3,6 @@
 #include "Global.Engine.GUI.h"
 #include "Global.Engine.h"
 
-
 #define TE_VER_MAJOR 2
 #define TE_VER_MIDDLE 1
 #define TE_VER_MINOR 0

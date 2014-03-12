@@ -430,7 +430,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //pass exception to debuggee
             if(engineExecutePluginCallBack)
             {
-                 ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
+                ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
             }
             //debug string callback
             if(DBGCustomHandler->chOutputDebugString != NULL)
@@ -1294,7 +1294,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 if(engineExecutePluginCallBack)
                 {
-                     ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
+                    ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
                 }
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {
