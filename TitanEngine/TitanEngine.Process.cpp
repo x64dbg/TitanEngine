@@ -2,7 +2,6 @@
 #include "definitions.h"
 #include "Global.Handle.h"
 #include "Global.Engine.h"
-#include <psapi.h>
 
 // TitanEngine.Process.functions:
 __declspec(dllexport) long TITCALL GetActiveProcessId(char* szImageName)

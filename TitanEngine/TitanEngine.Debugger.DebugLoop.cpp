@@ -8,7 +8,6 @@
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
 #include "Global.TLS.h"
-#include <psapi.h>
 
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;

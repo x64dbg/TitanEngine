@@ -3,8 +3,7 @@
 #include "Global.Garbage.h"
 #include "Global.Handle.h"
 #include "Global.Engine.h"
-#include <stdlib.h>
-#include <time.h>
+
 
 wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 

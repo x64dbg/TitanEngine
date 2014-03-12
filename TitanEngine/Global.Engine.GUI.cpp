@@ -2,8 +2,7 @@
 #include "definitions.h"
 #include "Global.Engine.GUI.h"
 #include "Global.Engine.h"
-#include <commdlg.h>
-#include <shellapi.h>
+
 
 #define TE_VER_MAJOR 2
 #define TE_VER_MIDDLE 1

@@ -5,8 +5,6 @@
 #include "Global.Engine.h"
 #include "Global.Handle.h"
 #include "Global.Mapping.h"
-#include <vector>
-#include <psapi.h>
 
 // Global.Engine.Hooks:
 static std::vector<HOOK_ENTRY> hookEntry;

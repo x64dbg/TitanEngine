@@ -6,7 +6,6 @@
 #include "Global.Engine.Importer.h"
 #include "Global.Debugger.h"
 #include "scylla_wrapper.h"
-#include <psapi.h>
 
 // TitanEngine.Importer.functions:
 __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR FirstThunk)

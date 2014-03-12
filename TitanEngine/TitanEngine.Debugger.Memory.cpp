@@ -2,7 +2,6 @@
 #include "definitions.h"
 #include "Global.Debugger.h"
 #include "Global.Breakpoints.h"
-#include <stdlib.h>
 
 __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {

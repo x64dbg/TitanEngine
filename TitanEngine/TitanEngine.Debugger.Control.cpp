@@ -4,7 +4,6 @@
 #include "Global.Handle.h"
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
-#include <vector>
 
 __declspec(dllexport) void TITCALL ForceClose()
 {

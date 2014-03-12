@@ -5,7 +5,6 @@
 #include "Global.Handle.h"
 #include "Global.Breakpoints.h"
 #include "Global.Threader.h"
-#include <vector>
 
 static wchar_t szBackupDebuggedFileName[512];
 

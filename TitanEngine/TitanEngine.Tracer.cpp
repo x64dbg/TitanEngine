@@ -5,7 +5,7 @@
 #include "Global.Mapping.h"
 #include "Global.Engine.Hash.h"
 #include "Global.Injector.h"
-#include <psapi.h>
+
 
 // Global.Engine.Tracer.functions:
 static long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressToTrace, bool HashInstructions, DWORD InputNumberOfInstructions)

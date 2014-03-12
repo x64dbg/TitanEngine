@@ -6,7 +6,6 @@
 #include "Global.Debugger.h"
 #include "Global.Mapping.h"
 #include "Global.Handle.h"
-#include <psapi.h>
 
 GenericOEPTracerData glbEntryTracerData = {};
 

@@ -4,7 +4,6 @@
 #include "Global.Engine.h"
 #include "Global.Threader.h"
 #include "Global.Debugger.h"
-#include <tlhelp32.h>
 
 // TitanEngine.Threader.functions:
 __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD ProcessId)

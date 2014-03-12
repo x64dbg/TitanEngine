@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Engine.Extension.h"
-#include <vector>
+
 
 static std::vector<PluginInformation> Plugin;
 

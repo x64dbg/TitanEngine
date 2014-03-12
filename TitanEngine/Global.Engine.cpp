@@ -6,7 +6,6 @@
 #include "Global.Engine.Extension.h"
 #include "Global.Engine.Hash.h"
 #include "Global.Debugger.h"
-#include <psapi.h>
 
 bool engineCheckForwarders = true;
 bool engineAlowModuleLoading = false;

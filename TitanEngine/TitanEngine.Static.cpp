@@ -4,7 +4,6 @@
 #include "Global.Handle.h"
 #include "Global.Engine.h"
 #include "Global.Engine.Hash.h"
-#include <wincrypt.h>
 
 // TitanEngine.StaticUnpacker.functions:
 __declspec(dllexport) bool TITCALL StaticFileLoad(char* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)

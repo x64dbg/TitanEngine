@@ -2,7 +2,6 @@
 #include "definitions.h"
 #include "Global.Engine.h"
 #include "Global.Handle.h"
-#include <psapi.h>
 
 //TitanEngine.Dumper.functions:
 __declspec(dllexport) bool TITCALL DumpProcess(HANDLE hProcess, LPVOID ImageBase, char* szDumpFileName, ULONG_PTR EntryPoint)

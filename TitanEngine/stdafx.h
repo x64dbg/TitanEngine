@@ -11,8 +11,23 @@
 //#define TITANENGINE_BUILD_ASM_LIB
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+
 // Windows Header Files:
 #include <windows.h>
+
+#include <imagehlp.h>
+#include <wincrypt.h>
+#include <psapi.h>
+#include <commdlg.h>
+#include <shellapi.h>
+#include <tlhelp32.h>
+
+
+//stl/crt
+#include <vector>
+#include <stdlib.h>
+#include <time.h>
+
 //#include <winternl.h>
 #include "ntdll.h"
 #include "aplib.h"

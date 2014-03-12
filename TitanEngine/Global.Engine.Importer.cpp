@@ -2,7 +2,6 @@
 #include "definitions.h"
 #include "Global.Engine.Importer.h"
 #include "Global.Debugger.h"
-#include <psapi.h>
 
 ULONG_PTR EngineGetProcAddressRemote(HANDLE hProcess, const wchar_t* szDLLName, const char* szAPIName)
 {
