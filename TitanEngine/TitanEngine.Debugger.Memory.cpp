@@ -7,9 +7,10 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
 {
     if(!MemoryToCheck || !PatternToMatch)
         return false;
-    int i = NULL;
-    BYTE intWildCard = NULL;
+    int i = 0;
+    BYTE intWildCard = 0;
     LPVOID ueReadBuffer = NULL;
+    DynBuf ueReadBuf;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     MEMORY_BASIC_INFORMATION memoryInformation = {};
     PMEMORY_COMPARE_HANDLER memCmp = (PMEMORY_COMPARE_HANDLER)MemoryToCheck;
@@ -23,8 +24,8 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
     {
         if(hProcess != GetCurrentProcess())
         {
-            ueReadBuffer = VirtualAlloc(NULL, SizeOfMemoryToCheck, MEM_COMMIT, PAGE_READWRITE);
-            if(!ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
+            ueReadBuffer = ueReadBuf.Allocate(SizeOfMemoryToCheck);
+            if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
             {
                 if(ueNumberOfBytesRead == NULL)
                 {
@@ -33,7 +34,6 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
                         SizeOfMemoryToCheck = (int)((ULONG_PTR)memoryInformation.BaseAddress + memoryInformation.RegionSize - (ULONG_PTR)MemoryToCheck);
                         if(!ReadProcessMemory(hProcess, MemoryToCheck, ueReadBuffer, SizeOfMemoryToCheck, &ueNumberOfBytesRead))
                         {
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             return(NULL);
                         }
                         else
@@ -43,7 +43,6 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
                     }
                     else
                     {
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         return(NULL);
                     }
                 }
@@ -68,12 +67,10 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
                 SizeOfPatternToMatch--;
                 i++;
             }
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             return true;
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             return false;
         }
     }
@@ -101,6 +98,7 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
     int j = NULL;
     ULONG_PTR Return = NULL;
     LPVOID ueReadBuffer = NULL;
+    DynBuf ueReadBuf;
     PUCHAR SearchBuffer = NULL;
     PUCHAR CompareBuffer = NULL;
     MEMORY_BASIC_INFORMATION memoryInformation = {};
@@ -117,8 +115,8 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
     {
         if(hProcess != GetCurrentProcess())
         {
-            ueReadBuffer = VirtualAlloc(NULL, MemorySize, MEM_COMMIT, PAGE_READWRITE);
-            if(!ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
+            ueReadBuffer = ueReadBuf.Allocate(MemorySize);
+            if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
             {
                 if(ueNumberOfBytesRead == NULL)
                 {
@@ -127,7 +125,6 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
                         MemorySize = (DWORD)((ULONG_PTR)memoryInformation.BaseAddress + memoryInformation.RegionSize - (ULONG_PTR)MemoryStart);
                         if(!ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
                         {
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                             return(NULL);
                         }
                         else
@@ -137,7 +134,6 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
                     }
                     else
                     {
-                        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                         return(NULL);
                     }
                 }
@@ -172,12 +168,10 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
                     Return = (ULONG_PTR)MemoryStart + i;
                 }
             }
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             return(Return);
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
             return(NULL);
         }
     }
@@ -313,7 +307,8 @@ __declspec(dllexport) bool TITCALL ReplaceEx(HANDLE hProcess, LPVOID MemoryStart
     ULONG_PTR CurrentFoundPattern;
     LPVOID cMemoryStart = MemoryStart;
     DWORD cMemorySize = MemorySize;
-    LPVOID lpReadMemory = VirtualAlloc(NULL, PatternSize, MEM_COMMIT, PAGE_READWRITE);
+    DynBuf lpReadMem;
+    LPVOID lpReadMemory = lpReadMem.Allocate(PatternSize);
 
     CurrentFoundPattern = (ULONG_PTR)FindEx(hProcess, cMemoryStart, cMemorySize, SearchPattern, PatternSize, WildCard);
     NumberOfRepetitions--;
@@ -335,7 +330,6 @@ __declspec(dllexport) bool TITCALL ReplaceEx(HANDLE hProcess, LPVOID MemoryStart
         CurrentFoundPattern = (ULONG_PTR)FindEx(hProcess, cMemoryStart, cMemorySize, SearchPattern, PatternSize, WildCard);
         NumberOfRepetitions--;
     }
-    VirtualFree(lpReadMemory, NULL, MEM_RELEASE);
     if(NumberOfRepetitions != NULL)
     {
         return false;

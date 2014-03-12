@@ -7,10 +7,7 @@ __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
 {
     ULONG RequiredLen = 0;
     void * PebAddress = 0;
-    PPROCESS_BASIC_INFORMATION myProcessBasicInformation = (PPROCESS_BASIC_INFORMATION)VirtualAlloc(NULL, sizeof(PROCESS_BASIC_INFORMATION) * 4, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
-
-    if(!myProcessBasicInformation)
-        return 0;
+    PROCESS_BASIC_INFORMATION myProcessBasicInformation[5] = {0};
 
     if(NtQueryInformationProcess(hProcess, ProcessBasicInformation, myProcessBasicInformation, sizeof(PROCESS_BASIC_INFORMATION), &RequiredLen) == STATUS_SUCCESS)
     {
@@ -24,8 +21,6 @@ __declspec(dllexport) void* TITCALL GetPEBLocation(HANDLE hProcess)
         }
     }
 
-
-    VirtualFree(myProcessBasicInformation, 0, MEM_RELEASE);
     return PebAddress;
 }
 
@@ -33,10 +28,7 @@ __declspec(dllexport) void* TITCALL GetTEBLocation(HANDLE hThread)
 {
     ULONG RequiredLen = 0;
     void * TebAddress = 0;
-    PTHREAD_BASIC_INFORMATION myThreadBasicInformation = (PTHREAD_BASIC_INFORMATION)VirtualAlloc(NULL, sizeof(THREAD_BASIC_INFORMATION) * 4, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
-
-    if(!myThreadBasicInformation)
-        return 0;
+    THREAD_BASIC_INFORMATION myThreadBasicInformation[5] = {0};
 
     if(NtQueryInformationThread(hThread, ThreadBasicInformation, myThreadBasicInformation, sizeof(THREAD_BASIC_INFORMATION), &RequiredLen) == STATUS_SUCCESS)
     {
@@ -50,8 +42,6 @@ __declspec(dllexport) void* TITCALL GetTEBLocation(HANDLE hThread)
         }
     }
 
-
-    VirtualFree(myThreadBasicInformation, 0, MEM_RELEASE);
     return TebAddress;
 }
 

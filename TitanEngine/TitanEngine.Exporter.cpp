@@ -152,6 +152,7 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
     PIMAGE_NT_HEADERS32 PEHeader32;
     PIMAGE_NT_HEADERS64 PEHeader64;
     LPVOID expBuildExportData;
+    DynBuf expBuildExportDyn;
     LPVOID expBuildExportDataCWP;
     DWORD StorePlaceRVA = (DWORD)ConvertFileOffsetToVA(FileMapVA, StorePlace, false);
     ULONG_PTR TempULONG;
@@ -160,7 +161,7 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
 
     if(expTableDataCWP != NULL)
     {
-        expBuildExportData = VirtualAlloc(NULL, ExporterEstimatedSize(), MEM_COMMIT, PAGE_READWRITE);
+        expBuildExportData = expBuildExportDyn.Allocate(ExporterEstimatedSize());
         expBuildExportDataCWP = (LPVOID)((ULONG_PTR)expBuildExportData + sizeof IMAGE_EXPORT_DIRECTORY);
 
         expExportData.NumberOfNames = expExportNumber;
@@ -210,7 +211,6 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
         }
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
-            VirtualFree(expBuildExportData, NULL, MEM_RELEASE);
             ExporterCleanup();
             return false;
         }
@@ -246,7 +246,6 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTable(ULONG_PTR StorePlace
                 }
             }
         }
-        VirtualFree(expBuildExportData, NULL, MEM_RELEASE);
         ExporterCleanup();
         return true;
     }

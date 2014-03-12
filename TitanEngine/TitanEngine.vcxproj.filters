@@ -278,6 +278,12 @@
     <ClInclude Include="ntdll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Global.Helper.h">
+      <Filter>Header Files\TitanEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="ntdll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Global.Engine.Importer.h">
       <Filter>Header Files\TitanEngine</Filter>
     </ClInclude>

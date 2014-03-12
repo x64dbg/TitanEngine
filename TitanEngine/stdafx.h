@@ -33,6 +33,8 @@
 #include "aplib.h"
 #include "LzmaDec.h"
 
+#include "Global.Helper.h"
+
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L) // ntsubauth
 
 // Engine.Internal:

@@ -36,8 +36,9 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     LPVOID ReadBase = ImageBase;
     SIZE_T CalculatedHeaderSize = NULL;
     SIZE_T AlignedHeaderSize = NULL;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    DynBuf ueReadBuf, ueCopyBuf;
+    LPVOID ueReadBuffer = ueReadBuf.Allocate(0x2000);
+    LPVOID ueCopyBuffer = ueCopyBuf.Allocate(0x2000);
 
     if(ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, 0x1000, &ueNumberOfBytesRead))
     {
@@ -47,30 +48,18 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
 
         if ((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
         {
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            return false;
-        }
-
-        CalculatedHeaderSize = DOSHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS64) + (sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections);
-        if(CalculatedHeaderSize > 0x1000) //SectionAlignment, the default value is the page size for the system.
-        {
-            if(CalculatedHeaderSize % 0x1000 != NULL)
+            if(CalculatedHeaderSize % 0x1000 == NULL)
             {
-                AlignedHeaderSize = ((CalculatedHeaderSize / 0x1000) + 1) * 0x1000;
+                AlignedHeaderSize = 0x1000;
             }
             else
             {
                 AlignedHeaderSize = CalculatedHeaderSize;
             }
-            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
-            ueReadBuffer = VirtualAlloc(NULL, AlignedHeaderSize, MEM_COMMIT, PAGE_READWRITE);
-            ueCopyBuffer = VirtualAlloc(NULL, AlignedHeaderSize, MEM_COMMIT, PAGE_READWRITE);
+            ueReadBuffer = ueReadBuf.Allocate(AlignedHeaderSize);
+            ueCopyBuffer = ueCopyBuf.Allocate(AlignedHeaderSize);
             if(!ReadProcessMemory(hProcess, ImageBase, ueReadBuffer, AlignedHeaderSize, &ueNumberOfBytesRead))
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                 return false;
             }
             else
@@ -98,8 +87,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
             }
             else
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                 return false;
             }
             if(!FileIs64)
@@ -173,8 +160,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 }
                             }
                             EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                             return true;
                         }
                         __except(EXCEPTION_EXECUTE_HANDLER)
@@ -255,13 +240,10 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 }
                             }
                             EngineCloseHandle(hFile);
-                            VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-                            VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
                             return true;
                         }
                         __except(EXCEPTION_EXECUTE_HANDLER)
                         {
-
                         }
                     }
                 }
@@ -275,8 +257,6 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
     }
     if (ueReadBuffer != 0)
     {
-        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
-        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
     }
 
     return false;
@@ -339,7 +319,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
     HANDLE hFile = 0;
     LPVOID ReadBase = MemoryStart;
     ULONG_PTR ProcReadBase = (ULONG_PTR)ReadBase;
-    LPVOID ueCopyBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ueCopyBuffer[0x2000] = {0};
 
     EngineCreatePathForFileW(szDumpFileName);
     hFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -369,10 +349,8 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
             ProcReadBase = (ULONG_PTR)ReadBase + 0x1000;
         }
         EngineCloseHandle(hFile);
-        VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
         return true;
     }
-    VirtualFree(ueCopyBuffer, NULL, MEM_RELEASE);
     return false;
 }
 

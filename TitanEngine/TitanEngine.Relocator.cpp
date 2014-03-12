@@ -258,6 +258,7 @@ __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTableEx(HANDLE hProces
     DWORD RelocationBase = NULL;
     DWORD RelocationSize = NULL;
     DWORD OldProtect;
+    DynBuf mem;
 
     if(RelocationData != NULL)
     {
@@ -269,7 +270,7 @@ __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTableEx(HANDLE hProces
             MemorySize = MemInfo.RegionSize;
         }
         VirtualProtectEx(hProcess, (LPVOID)MemoryStart, MemorySize, PAGE_EXECUTE_READWRITE, &OldProtect);
-        ReadMemoryStorage = VirtualAlloc(NULL, MemorySize, MEM_COMMIT, PAGE_READWRITE);
+        ReadMemoryStorage = mem.Allocate(MemorySize);
         mReadMemoryStorage = ReadMemoryStorage;
         if(ReadProcessMemory(hProcess, (LPVOID)MemoryStart, ReadMemoryStorage, MemorySize, &ueNumberOfBytesRead))
         {
@@ -281,12 +282,10 @@ __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTableEx(HANDLE hProces
                 RtlMoveMemory(&RelocationBase, ReadMemoryStorage, 4);
                 RtlMoveMemory(&RelocationSize, (LPVOID)((ULONG_PTR)ReadMemoryStorage + 4), 4);
             }
-            VirtualFree(mReadMemoryStorage, NULL, MEM_RELEASE);
             return(RelocaterGrabRelocationTable(hProcess, MemoryStart, (DWORD)((ULONG_PTR)ReadMemoryStorage - (ULONG_PTR)mReadMemoryStorage)));
         }
         else
         {
-            VirtualFree(ReadMemoryStorage, NULL, MEM_RELEASE);
             return false;
         }
     }

@@ -224,6 +224,7 @@
     <ClCompile Include="Global.Engine.Threading.cpp" />
     <ClCompile Include="Global.Garbage.cpp" />
     <ClCompile Include="Global.Handle.cpp" />
+    <ClCompile Include="Global.Helper.cpp" />
     <ClCompile Include="Global.Injector.cpp" />
     <ClCompile Include="Global.Librarian.cpp" />
     <ClCompile Include="Global.Mapping.cpp" />
@@ -289,6 +290,7 @@
     <ClInclude Include="Global.Engine.Threading.h" />
     <ClInclude Include="Global.Garbage.h" />
     <ClInclude Include="Global.Handle.h" />
+    <ClInclude Include="Global.Helper.h" />
     <ClInclude Include="Global.Injector.h" />
     <ClInclude Include="Global.Librarian.h" />
     <ClInclude Include="Global.Mapping.h" />

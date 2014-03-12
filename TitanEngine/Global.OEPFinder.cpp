@@ -54,7 +54,8 @@ void GenericOEPTraceHited()
 {
 
     int i;
-    void* lpHashBuffer;
+    //void* lpHashBuffer;
+    char lpHashBuffer[0x1000] = {0};
     bool FakeEPDetected = false;
     ULONG_PTR NumberOfBytesRW;
     LPDEBUG_EVENT myDbgEvent = (LPDEBUG_EVENT)GetDebugData();
@@ -84,12 +85,11 @@ void GenericOEPTraceHited()
                         {
                             glbEntryTracerData.SectionData[i].AccessedAlready = true;
                         }
-                        lpHashBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-                        memBpxAddress = (glbEntryTracerData.MemoryAccessed / 0x1000) * 0x1000;
+                        memBpxAddress = (glbEntryTracerData.MemoryAccessed / sizeof(lpHashBuffer)) * sizeof(lpHashBuffer);
                         memBpxSize = glbEntryTracerData.SectionData[i].SectionVirtualOffset + glbEntryTracerData.SectionData[i].SectionVirtualSize + glbEntryTracerData.LoadedImageBase - memBpxAddress;
-                        if(memBpxSize > 0x1000)
+                        if(memBpxSize > sizeof(lpHashBuffer))
                         {
-                            memBpxSize = 0x1000;
+                            memBpxSize = sizeof(lpHashBuffer);
                         }
                         if(ReadProcessMemory(dbgProcessInformation.hProcess, (void*)(memBpxAddress), lpHashBuffer, memBpxSize, &NumberOfBytesRW))
                         {
@@ -107,7 +107,6 @@ void GenericOEPTraceHited()
                                     FakeEPDetected = true;
                                 }
                             }
-                            VirtualFree(lpHashBuffer, NULL, MEM_RELEASE);
                             if(currentHash != originalHash && glbEntryTracerData.SectionData[i].AccessedAlready == true && i != glbEntryTracerData.OriginalEntryPointNum && FakeEPDetected == false)
                             {
                                 __try

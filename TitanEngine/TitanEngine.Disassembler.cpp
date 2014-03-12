@@ -65,7 +65,8 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
     _DecodeType DecodingType = Decode64Bits;
 #endif
     ULONG_PTR ueNumberOfBytesRead = 0;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    DynBuf ueReadBuf;
+    LPVOID ueReadBuffer = ueReadBuf.Allocate(0x1000);
     MEMORY_BASIC_INFORMATION MemInfo;
     DWORD MaxDisassmSize;
 
@@ -101,7 +102,6 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
             if(rpm)
             {
                 DecodingResult = distorm_decode((ULONG_PTR)DisassmAddress, (const unsigned char*)ueReadBuffer, MaxDisassmSize, DecodingType, engineDecodedInstructions, MAX_DECODE_INSTRUCTIONS, &DecodedInstructionsCount);
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 RtlZeroMemory(&engineDisassembledInstruction, 128);
                 lstrcpyA(engineDisassembledInstruction, (LPCSTR)engineDecodedInstructions[0].mnemonic.p);
                 if(!ReturnInstructionType)
@@ -116,7 +116,6 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
             }
             else
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 return(NULL);
             }
         }
@@ -127,7 +126,6 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
     }
     else
     {
-        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
         return(NULL);
     }
 }
@@ -185,7 +183,8 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
     _DecodeType DecodingType = Decode64Bits;
 #endif
     ULONG_PTR ueNumberOfBytesRead = 0;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+    DynBuf ueReadBuf;
+    LPVOID ueReadBuffer = ueReadBuf.Allocate(0x1000);
     MEMORY_BASIC_INFORMATION MemInfo;
     DWORD MaxDisassmSize;
 
@@ -210,12 +209,10 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
             if(ReadProcessMemory(hProcess, (LPVOID)DisassmAddress, ueReadBuffer, MaxDisassmSize, &ueNumberOfBytesRead))
             {
                 DecodingResult = distorm_decode(NULL, (const unsigned char*)ueReadBuffer, MaxDisassmSize, DecodingType, DecodedInstructions, MAX_DECODE_INSTRUCTIONS, &DecodedInstructionsCount);
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 return(DecodedInstructions[0].size);
             }
             else
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 return(-1);
             }
         }
@@ -226,7 +223,6 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
     }
     else
     {
-        VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
         return(-1);
     }
 }

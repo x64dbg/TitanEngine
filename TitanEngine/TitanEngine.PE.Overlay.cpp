@@ -174,7 +174,7 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
     DWORD OverlayStart = 0;
     DWORD OverlaySize = 0;
     DWORD ueNumberOfBytesRead = 0;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ueReadBuffer[0x2000] = {0};
 
     Return = FindOverlayW(szFileName, &OverlayStart, &OverlaySize);
     if(Return)
@@ -189,7 +189,7 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                 SetFilePointer(hFile, OverlayStart, NULL, FILE_BEGIN);
                 while(OverlaySize > 0)
                 {
-                    RtlZeroMemory(ueReadBuffer, 0x2000);
+                        RtlZeroMemory(ueReadBuffer, sizeof(ueReadBuffer));
 
                     if(OverlaySize > 0x1000)
                     {
@@ -220,20 +220,17 @@ __declspec(dllexport) bool TITCALL ExtractOverlayW(wchar_t* szFileName, wchar_t*
                         OverlaySize = 0;
                     }
                 }
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 EngineCloseHandle(hFile);
                 EngineCloseHandle(hFileWrite);
                 return true;
             }
             else
             {
-                VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
                 EngineCloseHandle(hFile);
                 return false;
             }
         }
     }
-    VirtualFree(ueReadBuffer, NULL, MEM_RELEASE);
     return false;
 }
 __declspec(dllexport) bool TITCALL AddOverlay(char* szFileName, char* szOverlayFileName)
@@ -262,7 +259,7 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
     DWORD OverlaySize = 0;
     ULONG_PTR ueNumberOfBytesRead = 0;
     DWORD uedNumberOfBytesRead = 0;
-    LPVOID ueReadBuffer = VirtualAlloc(NULL, 0x2000, MEM_COMMIT, PAGE_READWRITE);
+    char ueReadBuffer[0x2000] = {0};
 
     hFile = CreateFileW(szFileName, GENERIC_READ+GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(hFile != INVALID_HANDLE_VALUE)
@@ -275,7 +272,7 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
             SetFilePointer(hFile, FileSize, NULL, FILE_BEGIN);
             while(OverlaySize > 0)
             {
-                RtlZeroMemory(ueReadBuffer, 0x2000);
+                RtlZeroMemory(ueReadBuffer, sizeof(ueReadBuffer));
 
                 if(OverlaySize > 0x1000)
                 {
