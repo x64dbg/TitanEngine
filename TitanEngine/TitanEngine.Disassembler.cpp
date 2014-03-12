@@ -43,6 +43,10 @@ long IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
                             return res; //this is bad
                         }
                     }
+                    else
+                    {
+                        return res; //this is bad
+                    }
 
                     section += (ULONG_PTR)MemInfo.RegionSize;
 
@@ -56,8 +60,6 @@ long IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
 
     return 0;
 }
-
-
 
 __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress)
 {
