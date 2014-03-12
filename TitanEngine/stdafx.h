@@ -67,6 +67,9 @@
 #define UE_OPTION_IMPORTER_RETURN_NEAREST_APINAME 12
 #define UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER 13
 
+#pragma pack(push)
+#pragma pack(1)
+
 typedef struct
 {
     ULONG_PTR BreakPointAddress;
@@ -848,8 +851,6 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
 //Evolution of Process Environment Block (PEB) http://blog.rewolf.pl/blog/?p=573
 //March 2, 2013 / ReWolf posted in programming, reverse engineering, source code, x64 /
 
-#pragma pack(push)
-#pragma pack(1)
 template <class T>
 struct LIST_ENTRY_T
 {
