@@ -710,7 +710,8 @@ long EngineHashString(char* szStringToHash)
 
     if(szStringToHash != NULL)
     {
-        for(i = 0; i < lstrlenA(szStringToHash); i++)
+		const int strl = lstrlenA(szStringToHash);
+        for(i = 0; i < strl; i++)
         {
             HashValue = (((HashValue << 7) | (HashValue >> (32 - 7))) ^ szStringToHash[i]);
         }
