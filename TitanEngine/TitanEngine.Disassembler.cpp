@@ -135,98 +135,42 @@ __declspec(dllexport) void* TITCALL Disassemble(LPVOID DisassmAddress)
 }
 __declspec(dllexport) long TITCALL StaticLengthDisassemble(LPVOID DisassmAddress)
 {
-
-    _DecodeResult DecodingResult;
-    _DecodedInst DecodedInstructions[MAX_DECODE_INSTRUCTIONS];
-    unsigned int DecodedInstructionsCount = 0;
-#if !defined(_WIN64)
-    _DecodeType DecodingType = Decode32Bits;
-#else
-    _DecodeType DecodingType = Decode64Bits;
-#endif
-    MEMORY_BASIC_INFORMATION MemInfo;
-    DWORD MaxDisassmSize;
-
-    VirtualQueryEx(GetCurrentProcess(), DisassmAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-    if(MemInfo.State == MEM_COMMIT)
-    {
-        if((ULONG_PTR)MemInfo.BaseAddress + (ULONG_PTR)MemInfo.RegionSize - (ULONG_PTR)DisassmAddress <= MAXIMUM_INSTRUCTION_SIZE)
-        {
-            MaxDisassmSize = (DWORD)((ULONG_PTR)MemInfo.BaseAddress + (ULONG_PTR)MemInfo.RegionSize - (ULONG_PTR)DisassmAddress - 1);
-            VirtualQueryEx(GetCurrentProcess(), (LPVOID)((ULONG_PTR)DisassmAddress + (ULONG_PTR)MemInfo.RegionSize), &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-            if(MemInfo.State == MEM_COMMIT)
-            {
-                MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE;
-            }
-        }
-        else
-        {
-            MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE;
-        }
-        DecodingResult = distorm_decode(NULL, (const unsigned char*)DisassmAddress, MaxDisassmSize, DecodingType, DecodedInstructions, MAX_DECODE_INSTRUCTIONS, &DecodedInstructionsCount);
-        return(DecodedInstructions[0].size);
-    }
-    else
-    {
-        return(NULL);
-    }
+    return LengthDisassembleEx(GetCurrentProcess(), DisassmAddress);
 }
 __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
 {
-
-    _DecodeResult DecodingResult;
-    _DecodedInst DecodedInstructions[MAX_DECODE_INSTRUCTIONS];
     unsigned int DecodedInstructionsCount = 0;
 #if !defined(_WIN64)
     _DecodeType DecodingType = Decode32Bits;
 #else
     _DecodeType DecodingType = Decode64Bits;
 #endif
-    ULONG_PTR ueNumberOfBytesRead = 0;
-    DynBuf ueReadBuf;
-    LPVOID ueReadBuffer = ueReadBuf.Allocate(0x1000);
-    MEMORY_BASIC_INFORMATION MemInfo;
-    DWORD MaxDisassmSize;
+    _CodeInfo decomposerCi = {0};
+    _DInst decomposerResult[2] = {0};
+    BYTE readBuffer[20] = {0}; //The maximum length of an Intel 64 and IA-32 instruction remains 15 bytes, but we are generous
 
     if(hProcess != NULL)
     {
-        VirtualQueryEx(GetCurrentProcess(), DisassmAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-        if(MemInfo.State == MEM_COMMIT)
+        if (MemoryReadSafe(hProcess, (LPVOID)DisassmAddress, readBuffer, sizeof(readBuffer), 0))
         {
-            if((ULONG_PTR)MemInfo.BaseAddress + (ULONG_PTR)MemInfo.RegionSize - (ULONG_PTR)DisassmAddress <= MAXIMUM_INSTRUCTION_SIZE)
+            decomposerCi.code = readBuffer;
+            decomposerCi.codeLen = sizeof(readBuffer);
+            decomposerCi.dt = DecodingType;
+            decomposerCi.codeOffset = (LONG_PTR)DisassmAddress;
+
+            if (distorm_decompose(&decomposerCi, decomposerResult, _countof(decomposerResult), &DecodedInstructionsCount) != DECRES_INPUTERR)
             {
-                MaxDisassmSize = (DWORD)((ULONG_PTR)MemInfo.BaseAddress + (ULONG_PTR)MemInfo.RegionSize - (ULONG_PTR)DisassmAddress - 1);
-                VirtualQueryEx(GetCurrentProcess(), (LPVOID)((ULONG_PTR)DisassmAddress + (ULONG_PTR)MemInfo.RegionSize), &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                if(MemInfo.State == MEM_COMMIT)
+                if (decomposerResult[0].flags != FLAG_NOT_DECODABLE)
                 {
-                    MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE;
+                    return decomposerResult[0].size;
                 }
             }
-            else
-            {
-                MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE;
-            }
-            if(ReadProcessMemory(hProcess, (LPVOID)DisassmAddress, ueReadBuffer, MaxDisassmSize, &ueNumberOfBytesRead))
-            {
-                DecodingResult = distorm_decode(NULL, (const unsigned char*)ueReadBuffer, MaxDisassmSize, DecodingType, DecodedInstructions, MAX_DECODE_INSTRUCTIONS, &DecodedInstructionsCount);
-                return(DecodedInstructions[0].size);
-            }
-            else
-            {
-                return(-1);
-            }
-        }
-        else
-        {
-            return(NULL);
         }
     }
-    else
-    {
-        return(-1);
-    }
+
+    return -1;
 }
 __declspec(dllexport) long TITCALL LengthDisassemble(LPVOID DisassmAddress)
 {
-    return(LengthDisassembleEx(dbgProcessInformation.hProcess, DisassmAddress));
+    return LengthDisassembleEx(dbgProcessInformation.hProcess, DisassmAddress);
 }
