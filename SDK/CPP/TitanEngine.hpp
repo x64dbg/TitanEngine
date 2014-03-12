@@ -1384,9 +1384,9 @@ protected:
     {
         UE::StepOver((void*)traceCallBack);
     }
-    static void StepOut(fBreakPointCallback StepOutCallBack)
+    static void StepOut(fBreakPointCallback StepOutCallBack, bool FinalStep)
     {
-        UE::StepOut((void*)StepOutCallBack);
+        UE::StepOut((void*)StepOutCallBack, FinalStep);
     }
     static void SingleStep(DWORD StepCount, fBreakPointCallback StepCallBack)
     {
