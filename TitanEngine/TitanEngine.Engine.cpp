@@ -119,7 +119,7 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                     MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
                     if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
                     {
-                        RtlZeroMemory(&BuildExportName, 512);
+                        RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
                         lstrcatW(BuildExportName, szOutputFolder);
                         if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
                         {
@@ -173,7 +173,7 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                     MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
                     if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
                     {
-                        RtlZeroMemory(&BuildExportName, 512);
+                        RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
                         lstrcatW(BuildExportName, szOutputFolder);
                         if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
                         {

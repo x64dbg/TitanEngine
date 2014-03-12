@@ -26,14 +26,14 @@ bool EngineGetFileDialog(char* GlobalBuffer)
 
     RtlZeroMemory(&sOpenFileName, sizeof(OPENFILENAMEA));
     sOpenFileName.lStructSize = sizeof(OPENFILENAMEA);
-    sOpenFileName.lpstrFilter = &szFilterString[0];
-    sOpenFileName.lpstrFile = &GlobalBuffer[0];
+    sOpenFileName.lpstrFilter = szFilterString;
+    sOpenFileName.lpstrFile = GlobalBuffer;
     sOpenFileName.nMaxFile = 1024;
     sOpenFileName.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_LONGNAMES | OFN_EXPLORER | OFN_HIDEREADONLY;
-    sOpenFileName.lpstrTitle = &szDialogTitle[0];
+    sOpenFileName.lpstrTitle = szDialogTitle;
     if(!GetOpenFileNameA(&sOpenFileName))
     {
-        RtlZeroMemory(&GlobalBuffer[0], 1024);
+        RtlZeroMemory(GlobalBuffer, 1024);
         return false;
     }
     else
@@ -44,7 +44,6 @@ bool EngineGetFileDialog(char* GlobalBuffer)
 
 long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
     char szAboutTitle[] = "[ About ]";
     char szAboutText[] = "%s \r\n\r\n ReversingLabs - http://www.reversinglabs.com \r\n\r\n  Minimum engine version needed:\r\n- TitanEngine %i.%i.%i by RevLabs\r\n\r\nUnpacker coded by %s";
     typedef void(TITCALL *fStartUnpacking)(char* szInputFile, bool RealignFile, bool CopyOverlay);
@@ -65,7 +64,7 @@ long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
     else if(uMsg == WM_DROPFILES)
     {
-        DragQueryFileA((HDROP)wParam, NULL, GlobalBuffer, 1024);
+        DragQueryFileA((HDROP)wParam, NULL, GlobalBuffer, sizeof(GlobalBuffer));
         SetDlgItemTextA(hwndDlg, IDC_FILENAME, GlobalBuffer);
     }
     else if(uMsg == WM_CLOSE)
@@ -76,7 +75,7 @@ long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         if(wParam == IDC_UNPACK)
         {
-            GetDlgItemTextA(hwndDlg, IDC_FILENAME, GlobalBuffer, 1024);
+            GetDlgItemTextA(hwndDlg, IDC_FILENAME, GlobalBuffer, sizeof(GlobalBuffer));
             if(!IsFileBeingDebugged() && EngineFileExists(GlobalBuffer))
             {
                 EngineBoxHandle = GetDlgItem(hwndDlg, IDC_LISTBOX);
@@ -109,5 +108,5 @@ long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
             EndDialog(hwndDlg, NULL);
         }
     }
-    return(NULL);
+    return 0;
 }
