@@ -567,8 +567,8 @@ __declspec(dllimport) long long TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
 __declspec(dllimport) long long TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType);
 __declspec(dllimport) long long TITCALL ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType);
 __declspec(dllimport) long long TITCALL ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType);
-__declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead);
-__declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesWritten);
+__declspec(dllimport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead);
+__declspec(dllimport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesWritten);
 // TitanEngine.Realigner.functions:
 __declspec(dllimport) bool TITCALL FixHeaderCheckSum(char* szFileName);
 __declspec(dllimport) bool TITCALL FixHeaderCheckSumW(wchar_t* szFileName);
@@ -705,7 +705,7 @@ __declspec(dllimport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
 __declspec(dllimport) void TITCALL ForceClose();
 __declspec(dllimport) void TITCALL StepInto(LPVOID traceCallBack);
 __declspec(dllimport) void TITCALL StepOver(LPVOID traceCallBack);
-__declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal);
+__declspec(dllimport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal);
 __declspec(dllimport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack);
 __declspec(dllimport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex);
 __declspec(dllimport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister);
@@ -744,7 +744,7 @@ __declspec(dllimport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULON
 __declspec(dllimport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation);
 __declspec(dllimport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation);
 __declspec(dllimport) void* TITCALL ImporterGetDLLName(ULONG_PTR APIAddress);
-__declspec(dllexport) void* TITCALL ImporterGetDLLNameW(ULONG_PTR APIAddress);
+__declspec(dllimport) void* TITCALL ImporterGetDLLNameW(ULONG_PTR APIAddress);
 __declspec(dllimport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress);
 __declspec(dllimport) long long TITCALL ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress);
 __declspec(dllimport) void* TITCALL ImporterGetAPINameEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList);
@@ -752,7 +752,7 @@ __declspec(dllimport) long long TITCALL ImporterGetRemoteAPIAddress(HANDLE hProc
 __declspec(dllimport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDLLName, char* szAPIName);
 __declspec(dllimport) long long TITCALL ImporterGetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllimport) void* TITCALL ImporterGetDLLNameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress);
-__declspec(dllexport) void* TITCALL ImporterGetDLLNameFromDebugeeW(HANDLE hProcess, ULONG_PTR APIAddress);
+__declspec(dllimport) void* TITCALL ImporterGetDLLNameFromDebugeeW(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllimport) void* TITCALL ImporterGetAPINameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllimport) long long TITCALL ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress);
 __declspec(dllimport) long TITCALL ImporterGetDLLIndexEx(ULONG_PTR APIAddress, ULONG_PTR DLLBasesList);
@@ -899,10 +899,10 @@ __declspec(dllimport) void TITCALL StaticSectionDecrypt(ULONG_PTR FileMapVA, DWO
 __declspec(dllimport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD SourceSize, void* Destination, DWORD DestinationSize, int Algorithm);
 __declspec(dllimport) bool TITCALL StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, char* szDumpFileName);
 __declspec(dllimport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, wchar_t* szDumpFileName);
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName);
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName);
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName);
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, wchar_t* szDumpFileName);
+__declspec(dllimport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName);
+__declspec(dllimport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName);
+__declspec(dllimport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName);
+__declspec(dllimport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, wchar_t* szDumpFileName);
 __declspec(dllimport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD SizeOfMemory, void* HashDigest, bool OutputString, int Algorithm);
 __declspec(dllimport) bool TITCALL StaticHashFile(char* szFileName, char* HashDigest, bool OutputString, int Algorithm);
 __declspec(dllimport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* HashDigest, bool OutputString, int Algorithm);
