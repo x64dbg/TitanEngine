@@ -36,8 +36,8 @@ extern bool engineFileIsBeingDebugged;
 extern ULONG_PTR engineFakeDLLHandle;
 extern LPVOID engineAttachedProcessDebugInfo;
 extern wchar_t szDebuggerName[512];
-extern bool DebugStepFinal = false;
-extern LPVOID StepOutCallBack = 0;
+extern bool DebugStepFinal;
+extern LPVOID StepOutCallBack;
 
 long DebugLoopInSecondThread(LPVOID InputParameter);
 void DebuggerReset();
