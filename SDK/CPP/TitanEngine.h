@@ -705,6 +705,7 @@ __declspec(dllimport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
 __declspec(dllimport) void TITCALL ForceClose();
 __declspec(dllimport) void TITCALL StepInto(LPVOID traceCallBack);
 __declspec(dllimport) void TITCALL StepOver(LPVOID traceCallBack);
+__declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal);
 __declspec(dllimport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack);
 __declspec(dllimport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex);
 __declspec(dllimport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister);

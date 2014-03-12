@@ -79,6 +79,13 @@ __declspec(dllexport) void TITCALL StepOver(LPVOID StepCallBack)
         StepInto(StepCallBack);
 }
 
+__declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal)
+{
+    DebugStepFinal = StepFinal;
+    StepOutCallBack = StepOut;
+    StepOver(StepOutStepCallBack);
+}
+
 __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack)
 {
 

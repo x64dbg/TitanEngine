@@ -1384,6 +1384,10 @@ protected:
     {
         UE::StepOver((void*)traceCallBack);
     }
+    static void StepOut(fBreakPointCallback StepOutCallBack)
+    {
+        UE::StepOut((void*)StepOutCallBack);
+    }
     static void SingleStep(DWORD StepCount, fBreakPointCallback StepCallBack)
     {
         UE::SingleStep(StepCount, (void*)StepCallBack);
@@ -1565,6 +1569,7 @@ public:
     using DebuggerX::ForceClose;
     using DebuggerX::StepInto;
     using DebuggerX::StepOver;
+    using DebuggerX::StepOut;
     using DebuggerX::SingleStep;
     using DebuggerX::GetUnusedHardwareBreakPointRegister;
     using DebuggerX::SetHardwareBreakPointEx;

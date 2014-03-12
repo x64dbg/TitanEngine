@@ -36,6 +36,8 @@ bool engineFileIsBeingDebugged = false;
 ULONG_PTR engineFakeDLLHandle = NULL;
 LPVOID engineAttachedProcessDebugInfo = NULL;
 wchar_t szDebuggerName[512];
+bool DebugStepFinal = false;
+LPVOID StepOutCallBack = NULL;
 
 // Global.Debugger.functions:
 long DebugLoopInSecondThread(LPVOID InputParameter)
@@ -70,4 +72,28 @@ void DebuggerReset()
 void ClearProcessList()
 {
     std::vector<PROCESS_ITEM_DATA>().swap(hListProcess);
+}
+
+void StepOutStepCallBack()
+{
+    BYTE cipch = 0x90;
+    MemoryReadSafe(dbgProcessInformation.hProcess, (void*)GetContextData(UE_CIP), &cipch, sizeof(cipch), 0);
+    if(cipch == 0xC3 || cipch == 0xC2) //ret
+    {
+        if(DebugStepFinal)
+            StepOver(StepOutCallBack);
+        else
+        {
+            typedef void(TITCALL *fCustomBreakPoint)();
+            __try
+            {
+                ((fCustomBreakPoint)StepOutCallBack)();
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+            }            
+        }
+    }
+    else
+        StepOver(StepOutStepCallBack);
 }
