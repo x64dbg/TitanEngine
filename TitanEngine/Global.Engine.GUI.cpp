@@ -55,7 +55,10 @@ long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(uMsg == WM_INITDIALOG)
     {
         SendMessageA(hwndDlg, WM_SETTEXT, NULL, (LPARAM)&szWindowUnpackerTitle);
-        SendMessageA(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM)LoadIconA((HINSTANCE)engineHandle, MAKEINTRESOURCEA(IDI_ICON2)));
+        HICON hIconLarge = (HICON)LoadImage(engineHandle, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
+        SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
+        HICON hIconSmall = (HICON)LoadImage(engineHandle, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
+        SendMessage(hwndDlg, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
         SetDlgItemTextA(hwndDlg, IDD_UNPACKERTITLE, szWindowUnpackerLongTitle);
         SetDlgItemTextA(hwndDlg, IDC_FILENAME, "filename.exe");
         CheckDlgButton(hwndDlg, IDC_REALING, 1);

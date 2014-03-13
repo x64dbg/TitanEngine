@@ -9,6 +9,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Header Files\SDK">
+      <UniqueIdentifier>{dcabac3b-acfe-4e79-a827-01d97b369669}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -25,17 +28,14 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TitanEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TitanEngine.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TitanScript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TitanScript.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\SDK\CPP\TitanEngine.h">
+      <Filter>Header Files\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SDK\CPP\TitanEngine.hpp">
+      <Filter>Header Files\SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "TitanScriptGui.h"
-#include "TitanEngine.h"
+#include "..\SDK\CPP\TitanEngine.h"
 #include "TitanScript.h"
 
 HINSTANCE hInst;
@@ -21,6 +21,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    hInst = hInstance;
+
     DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAINWINDOW), NULL, &WndProc);
     ExitProcess(NULL);
 }
@@ -30,16 +32,29 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     switch (message)
     {
-    case WM_INITDIALOG: {
+    case WM_INITDIALOG:
+    {
+        HICON hIconLarge = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
+        SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
+        HICON hIconSmall = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
+        SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
+
         hLogBox = GetDlgItem(hWnd, IDC_LOG);
 
         //make sure TitanScript is available
-        if ( !ExtensionManagerIsPluginLoaded( "TitanScript" ) || !ExtensionManagerIsPluginEnabled( "TitanScript" ) ) {
+        if ( !ExtensionManagerIsPluginLoaded( "TitanScript" ) || !ExtensionManagerIsPluginEnabled( "TitanScript" ) )
+        {
             AddLogMessage("TitanScript failed to load", TS_LOG_ERROR);
+#ifdef _WIN64
+            AddLogMessage("Ensure plugins\\x64\\TitanScript.dll exists !", TS_LOG_ERROR);
+#else
             AddLogMessage("Ensure plugins\\x86\\TitanScript.dll exists !", TS_LOG_ERROR);
+#endif //_WIN64
 
             EnableWindow(GetDlgItem(hWnd, IDC_RUN ), FALSE);
-        } else {
+        }
+        else
+        {
             load_file = GetTSFunctionPointer( LoadFileA );
             exec = GetTSFunctionPointer( ExecuteWithTitanMistA );
             set_log_callback = GetTSFunctionPointer( SetLogCallback );
@@ -52,31 +67,36 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
-        case IDC_BROWSETARGET: {
+        case IDC_BROWSETARGET:
+        {
             if(GetFileDialog(FileNameTarget))
             {
                 SetDlgItemText(hWnd, IDC_TARGETPATH, FileNameTarget);
             }
             break;
         }
-        case IDC_BROWSESCRIPT: {
+        case IDC_BROWSESCRIPT:
+        {
             if(GetFileDialog(FileNameScript))
             {
                 SetDlgItemText(hWnd, IDC_SCRIPTPATH, FileNameScript);
             }
             break;
         }
-        case IDC_RUN: {
+        case IDC_RUN:
+        {
             char buf[MAX_PATH] = {0};
 
             wcstombs(buf, FileNameScript, sizeof(buf));
-            if(!load_file(buf)) {
+            if(!load_file(buf))
+            {
                 AddLogMessage("Script failed to load", TS_LOG_ERROR);
                 break;
             }
 
             wcstombs(buf, FileNameTarget, sizeof(buf));
-            if(!exec(buf, "dump.exe")) {
+            if(!exec(buf, "dump.exe"))
+            {
                 AddLogMessage("Failed to execute", TS_LOG_ERROR);
                 break;
             }
