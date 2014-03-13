@@ -192,20 +192,20 @@ static void SettingGet(const TCHAR* name, TCHAR* value, int value_size)
 
 static bool FileExists(LPCTSTR szPath)
 {
-	DWORD dwAttrib = GetFileAttributes(szPath);
-	return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+    DWORD dwAttrib = GetFileAttributes(szPath);
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 static void CreateDummyUnicodeFile(const TCHAR* szFileName)
 {
-	//http://www.codeproject.com/Articles/9071/Using-Unicode-in-INI-files
-	if (!FileExists(szFileName))
-	{
-		// UTF16-LE BOM(FFFE)
-		WORD wBOM = 0xFEFF;
-		DWORD NumberOfBytesWritten;
-		HANDLE hFile = CreateFile(szFileName, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-		WriteFile(hFile, &wBOM, sizeof(WORD), &NumberOfBytesWritten, NULL);
-		CloseHandle(hFile);
-	}
+    //http://www.codeproject.com/Articles/9071/Using-Unicode-in-INI-files
+    if (!FileExists(szFileName))
+    {
+        // UTF16-LE BOM(FFFE)
+        WORD wBOM = 0xFEFF;
+        DWORD NumberOfBytesWritten;
+        HANDLE hFile = CreateFile(szFileName, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+        WriteFile(hFile, &wBOM, sizeof(WORD), &NumberOfBytesWritten, NULL);
+        CloseHandle(hFile);
+    }
 }
