@@ -134,29 +134,42 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         case IDC_COPY: {
             //get lines
-            LRESULT cnt = SendMessage(hLogBox, LB_GETCOUNT, 0, 0);
+            LRESULT cnt = SendMessageW(hLogBox, LB_GETCOUNT, 0, 0);
 
             if (cnt != 0 && cnt != LB_ERR)
             {
-                TCHAR buf[MAX_LOG_LINE_LENGTH] = {0};
-                TCHAR copy[MAX_LOG_LINE_COUNT*MAX_LOG_LINE_LENGTH*3] = {0};
+                WCHAR * copy = 0;
+                int copyLength = 0;
 
                 for(LRESULT i=0; i<cnt; i++) {
-                    if (SendMessage(hLogBox, LB_GETTEXT, i, (LPARAM)buf) != LB_ERR)
+                    LRESULT stringLength = SendMessageW(hLogBox, LB_GETTEXTLEN, i, 0);
+                    copyLength += stringLength + 1 + 2;
+
+                    copy = (WCHAR *)realloc(copy, copyLength * sizeof(WCHAR));
+                    if (copy)
                     {
-                        _tcscat(copy, buf);
-                        _tcscat(copy, L"\r\n");
+                        copy[copyLength - stringLength - 1 - 2] = 0;
+                    }
+
+                    WCHAR * buf = (WCHAR *)calloc(stringLength + 1, sizeof(WCHAR));
+
+                    if (buf && (SendMessageW(hLogBox, LB_GETTEXT, i, (LPARAM)buf) != LB_ERR))
+                    {
+                        wcscat(copy, buf);
+                        wcscat(copy, L"\r\n");
+
+                        free(buf);
                     }
                 }
 
                 //copy to clipboard
                 HGLOBAL clipbuffer;
-                TCHAR* buffer;
-                clipbuffer = GlobalAlloc(GMEM_MOVEABLE, (_tcslen(copy) + 1) * sizeof(TCHAR));
+                WCHAR* buffer;
+                clipbuffer = GlobalAlloc(GMEM_MOVEABLE, (wcslen(copy) + 1) * sizeof(WCHAR));
                 if (clipbuffer)
                 {
                     buffer = (TCHAR*)GlobalLock(clipbuffer);
-                    _tcscpy(buffer, copy);
+                    wcscpy(buffer, copy);
                     GlobalUnlock(clipbuffer);
                     OpenClipboard(NULL);
                     EmptyClipboard();
