@@ -43,7 +43,7 @@ void EngineInit()
         {
             engineSzEngineFolder[i]=L'\0';
             lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
-            lstrcatW(engineSzEngineGarbageFolder, L"garbage\\");
+            lstrcatW(engineSzEngineGarbageFolder, L"\\garbage\\");
             CreateDirectoryW(engineSzEngineGarbageFolder, 0);
         }
         EngineInitPlugins(engineSzEngineFolder);
