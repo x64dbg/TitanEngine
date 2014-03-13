@@ -26,8 +26,8 @@ static void CreateDummyUnicodeFile(const TCHAR* szFileName);
 static DWORD WINAPI TitanScriptExecThread(LPVOID lpParam);
 
 //TitanScript functions
-static tScripterLoadFileA load_file = NULL;
-static tScripterExecuteWithTitanMistA exec = NULL;
+static tScripterLoadFileW load_file = NULL;
+static tScripterExecuteWithTitanMistW exec = NULL;
 static tScripterSetLogCallback set_log_callback = NULL;
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
@@ -91,8 +91,8 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         else
         {
-            load_file = GetTSFunctionPointer( LoadFileA );
-            exec = GetTSFunctionPointer( ExecuteWithTitanMistA );
+            load_file = GetTSFunctionPointer( LoadFileW );
+            exec = GetTSFunctionPointer( ExecuteWithTitanMistW );
             set_log_callback = GetTSFunctionPointer( SetLogCallback );
             set_log_callback(&AddLogMessage);
         }
@@ -214,7 +214,7 @@ static bool GetFileDialog(TCHAR Buffer[MAX_PATH])
 static void AddLogMessage(const char* szLogMessage, eLogType Type)
 {
     TCHAR buf[MAX_LOG_LINE_LENGTH] = {0};
-    mbstowcs(buf, szLogMessage, sizeof(buf));
+    mbstowcs(buf, szLogMessage, _countof(buf));
     LRESULT cSelect = SendMessage(hLogBox, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)buf);
     SendMessage(hLogBox, LB_SETCURSEL, cSelect, NULL);
 }
@@ -251,17 +251,14 @@ static void CreateDummyUnicodeFile(const TCHAR* szFileName)
 
 static DWORD WINAPI TitanScriptExecThread(LPVOID lpParam)
 {
-    char buf[MAX_PATH] = {0};
-    wcstombs(buf, FileNameScript, sizeof(buf));
-    if(!load_file(buf))
+    if(!load_file(FileNameScript))
     {
         AddLogMessage("Script failed to load", TS_LOG_ERROR);
         return 0;
     }
     SetWindowText(hRunBtn, _T("Stop"));
     bRunning = true;
-    wcstombs(buf, FileNameTarget, sizeof(buf));
-    if(!exec(buf, "")) //TitanScript will generate the output filename
+    if(!exec(FileNameTarget, L"")) //TitanScript will generate the output filename
     {
         AddLogMessage("Failed to execute", TS_LOG_ERROR);
     }

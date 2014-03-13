@@ -19,6 +19,7 @@ typedef bool (*tScripterAutoDebugA)(const char*);
 typedef bool (*tScripterAutoDebugW)(const wchar_t*);
 typedef void (*tScripterSetLogCallback)(fLogCallback Callback);
 typedef bool (*tScripterExecuteWithTitanMistA)(const char*, const char*);
+typedef bool (*tScripterExecuteWithTitanMistW)(const wchar_t*, const wchar_t*);
 
 // use like this: tScripterResume foo = GetTSFunctionPointer(Resume);
 #define GetTSFunctionPointer(x) ((tScripter ## x)GetProcAddress(GetModuleHandleA("TitanScript"), "Scripter" #x))
