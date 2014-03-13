@@ -19,6 +19,7 @@ static TCHAR FileNameIni[MAX_PATH] = {};
 static INT_PTR CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 static bool GetFileDialog(TCHAR[MAX_PATH]);
 static void AddLogMessage(const char* szLogMessage, eLogType Type);
+static void AddLogMessageW(const wchar_t* szLogMessage, eLogType Type);
 static void SettingSet(const TCHAR* name, const TCHAR* value);
 static void SettingGet(const TCHAR* name, TCHAR* value, int value_size);
 static bool FileExists(LPCTSTR szPath);
@@ -81,11 +82,11 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //make sure TitanScript is available
         if ( !ExtensionManagerIsPluginLoaded( "TitanScript" ) || !ExtensionManagerIsPluginEnabled( "TitanScript" ) )
         {
-            AddLogMessage("TitanScript failed to load", TS_LOG_ERROR);
+            AddLogMessageW(L"TitanScript failed to load", TS_LOG_ERROR);
 #ifdef _WIN64
-            AddLogMessage("Ensure plugins\\x64\\TitanScript.dll exists !", TS_LOG_ERROR);
+            AddLogMessageW(L"Ensure plugins\\x64\\TitanScript.dll exists !", TS_LOG_ERROR);
 #else
-            AddLogMessage("Ensure plugins\\x86\\TitanScript.dll exists !", TS_LOG_ERROR);
+            AddLogMessageW(L"Ensure plugins\\x86\\TitanScript.dll exists !", TS_LOG_ERROR);
 #endif //_WIN64
             EnableWindow(GetDlgItem(hWnd, IDC_RUN ), FALSE);
         }
@@ -211,12 +212,32 @@ static bool GetFileDialog(TCHAR Buffer[MAX_PATH])
     return (TRUE == GetOpenFileName(&sOpenFileName));
 }
 
+static void AddLogMessageW(const wchar_t* szLogMessage, eLogType Type)
+{
+    LRESULT cSelect = SendMessage(hLogBox, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)szLogMessage);
+    if (cSelect == LB_ERR)
+    {
+        MessageBoxW(0, L"ERROR LOG MESSAGE - LB_INSERTSTRING", L"ERROR", MB_ICONWARNING);
+    } else if (cSelect == LB_ERRSPACE)
+    {
+        MessageBoxW(0, L"ERROR LOG MESSAGE - LB_ERRSPACE - Not enough space!", L"ERROR", MB_ICONWARNING);
+    }
+    else
+    {
+        SendMessage(hLogBox, LB_SETCURSEL, cSelect, NULL);
+    }
+}
+
 static void AddLogMessage(const char* szLogMessage, eLogType Type)
 {
-    TCHAR buf[MAX_LOG_LINE_LENGTH] = {0};
-    mbstowcs(buf, szLogMessage, _countof(buf));
-    LRESULT cSelect = SendMessage(hLogBox, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)buf);
-    SendMessage(hLogBox, LB_SETCURSEL, cSelect, NULL);
+    TCHAR * buf = (TCHAR *)calloc(strlen(szLogMessage) + 1, sizeof(TCHAR));
+    if (buf)
+    {
+        mbstowcs(buf, szLogMessage, strlen(szLogMessage) + 1);
+        AddLogMessageW(buf, Type);
+        free(buf);
+    }
+
 }
 
 static void SettingSet(const TCHAR* name, const TCHAR* value)
@@ -253,17 +274,17 @@ static DWORD WINAPI TitanScriptExecThread(LPVOID lpParam)
 {
     if(!load_file(FileNameScript))
     {
-        AddLogMessage("Script failed to load", TS_LOG_ERROR);
+        AddLogMessageW(L"Script failed to load", TS_LOG_ERROR);
         return 0;
     }
     SetWindowText(hRunBtn, _T("Stop"));
     bRunning = true;
     if(!exec(FileNameTarget, L"")) //TitanScript will generate the output filename
     {
-        AddLogMessage("Failed to execute", TS_LOG_ERROR);
+        AddLogMessageW(L"Failed to execute", TS_LOG_ERROR);
     }
     else
-        AddLogMessage("Debugging stopped", TS_LOG_NORMAL);
+        AddLogMessageW(L"Debugging stopped", TS_LOG_NORMAL);
     bRunning = false;
     SetWindowText(hRunBtn, _T("Run"));
     return 0;
