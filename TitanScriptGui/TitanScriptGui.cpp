@@ -6,6 +6,8 @@
 //variables
 static HINSTANCE hInst;
 static HWND hLogBox;
+static HWND hRunBtn;
+static bool bRunning;
 static TCHAR FileNameTarget[MAX_PATH] = {};
 static TCHAR FileNameScript[MAX_PATH] = {};
 static TCHAR FileNameIni[MAX_PATH] = {};
@@ -18,6 +20,7 @@ static void SettingSet(const TCHAR* name, const TCHAR* value);
 static void SettingGet(const TCHAR* name, TCHAR* value, int value_size);
 static bool FileExists(LPCTSTR szPath);
 static void CreateDummyUnicodeFile(const TCHAR* szFileName);
+static DWORD WINAPI TitanScriptExecThread(LPVOID lpParam);
 
 //TitanScript functions
 static tScripterLoadFileA load_file = NULL;
@@ -49,6 +52,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         //initialize variables
         hLogBox = GetDlgItem(hWnd, IDC_LOG);
+        hRunBtn = GetDlgItem(hWnd, IDC_RUN);
         int i = GetModuleFileName(hInst, FileNameIni, _countof(FileNameIni));
         while(FileNameIni[i] != TCHAR('\\') && i)
             i--;
@@ -117,23 +121,10 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         case IDC_RUN:
         {
-            char buf[MAX_PATH] = {0};
-
-            wcstombs(buf, FileNameScript, sizeof(buf));
-            if(!load_file(buf))
-            {
-                AddLogMessage("Script failed to load", TS_LOG_ERROR);
-                break;
-            }
-
-            wcstombs(buf, FileNameTarget, sizeof(buf));
-            if(!exec(buf, "")) //TitanScript will generate the output filename
-            {
-                AddLogMessage("Failed to execute", TS_LOG_ERROR);
-                break;
-            }
-
-            break;
+            if(!bRunning)
+                CreateThread(0, 0, TitanScriptExecThread, 0, 0, 0);
+            else
+                StopDebug();
         }
 
         }
@@ -208,4 +199,27 @@ static void CreateDummyUnicodeFile(const TCHAR* szFileName)
         WriteFile(hFile, &wBOM, sizeof(WORD), &NumberOfBytesWritten, NULL);
         CloseHandle(hFile);
     }
+}
+
+static DWORD WINAPI TitanScriptExecThread(LPVOID lpParam)
+{
+    char buf[MAX_PATH] = {0};
+    wcstombs(buf, FileNameScript, sizeof(buf));
+    if(!load_file(buf))
+    {
+        AddLogMessage("Script failed to load", TS_LOG_ERROR);
+        return 0;
+    }
+    SetWindowText(hRunBtn, _T("Stop"));
+    bRunning = true;
+    wcstombs(buf, FileNameTarget, sizeof(buf));
+    if(!exec(buf, "")) //TitanScript will generate the output filename
+    {
+        AddLogMessage("Failed to execute", TS_LOG_ERROR);
+    }
+    else
+        AddLogMessage("Debugging stopped", TS_LOG_NORMAL);
+    bRunning = false;
+    SetWindowText(hRunBtn, _T("Run"));
+    return 0;
 }
