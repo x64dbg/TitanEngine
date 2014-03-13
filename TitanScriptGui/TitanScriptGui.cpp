@@ -3,6 +3,9 @@
 #include "..\SDK\CPP\TitanEngine.h"
 #include "TitanScript.h"
 
+#define MAX_LOG_LINE_LENGTH 100
+#define MAX_LOG_LINE_COUNT 100
+
 //variables
 static HINSTANCE hInst;
 static HWND hLogBox;
@@ -125,9 +128,38 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 CreateThread(0, 0, TitanScriptExecThread, 0, 0, 0);
             else
                 StopDebug();
+
+            break;
+        }
+        case IDC_COPY: {
+            //get lines
+            int cnt = SendMessage(hLogBox, LB_GETCOUNT, 0, 0);
+            TCHAR buf[MAX_LOG_LINE_LENGTH] = {0};
+            TCHAR copy[MAX_LOG_LINE_COUNT] = {0};
+
+            for(int i=0; i<cnt; i++) {
+                SendMessage(hLogBox, LB_GETTEXT, i, (LPARAM)buf);
+                lstrcat(copy, buf);
+                lstrcat(copy, L"\n");
+            }
+
+            //copy to clipboard
+            HGLOBAL clipbuffer;
+            TCHAR* buffer;
+            clipbuffer = GlobalAlloc(GMEM_DDESHARE, sizeof(copy));
+            buffer = (TCHAR*)GlobalLock(clipbuffer);
+            //wcstombs(buffer, copy, sizeof(buffer));
+            wcscpy(buffer, copy);
+            GlobalUnlock(clipbuffer);
+            OpenClipboard(NULL);
+            EmptyClipboard();
+            SetClipboardData(CF_UNICODETEXT,clipbuffer);
+            CloseClipboard();
+
+            break;
+        }
         }
 
-        }
     }
     break;
 
@@ -165,7 +197,7 @@ static bool GetFileDialog(TCHAR Buffer[MAX_PATH])
 
 static void AddLogMessage(const char* szLogMessage, eLogType Type)
 {
-    TCHAR buf[100] = {0};
+    TCHAR buf[MAX_LOG_LINE_LENGTH] = {0};
     mbstowcs(buf, szLogMessage, sizeof(buf));
     LRESULT cSelect = SendMessage(hLogBox, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)buf);
     SendMessage(hLogBox, LB_SETCURSEL, cSelect, NULL);
