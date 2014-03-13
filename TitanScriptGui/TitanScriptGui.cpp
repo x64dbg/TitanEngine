@@ -135,9 +135,9 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             //get lines
             int cnt = SendMessage(hLogBox, LB_GETCOUNT, 0, 0);
             TCHAR buf[MAX_LOG_LINE_LENGTH] = {0};
-            TCHAR copy[MAX_LOG_LINE_COUNT] = {0};
+            TCHAR copy[MAX_LOG_LINE_COUNT*MAX_LOG_LINE_LENGTH] = {0};
 
-            for(int i=0; i<cnt; i++) {
+            for(int i=0; i<MAX_LOG_LINE_COUNT; i++) {
                 SendMessage(hLogBox, LB_GETTEXT, i, (LPARAM)buf);
                 lstrcat(copy, buf);
                 lstrcat(copy, L"\n");
@@ -148,7 +148,6 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             TCHAR* buffer;
             clipbuffer = GlobalAlloc(GMEM_DDESHARE, sizeof(copy));
             buffer = (TCHAR*)GlobalLock(clipbuffer);
-            //wcstombs(buffer, copy, sizeof(buffer));
             wcscpy(buffer, copy);
             GlobalUnlock(clipbuffer);
             OpenClipboard(NULL);
