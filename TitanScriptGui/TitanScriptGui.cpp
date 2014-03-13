@@ -47,162 +47,168 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_INITDIALOG:
-    {
-        //set icon
-        HICON hIconLarge = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
-        SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
-        HICON hIconSmall = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
-        SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
-
-        //initialize variables
-        hLogBox = GetDlgItem(hWnd, IDC_LOG);
-        hRunBtn = GetDlgItem(hWnd, IDC_RUN);
-        int i = GetModuleFileName(hInst, FileNameIni, _countof(FileNameIni));
-        while(FileNameIni[i] != TCHAR('\\') && i)
-            i--;
-        if(i)
         {
-            int len = lstrlen(FileNameIni);
-            while(FileNameIni[i] != TCHAR('.') && i < len)
-                i++;
-            if(i+1 < len)
-                FileNameIni[i] = TCHAR('\0');
-        }
-        lstrcat(FileNameIni, _T(".ini"));
-        CreateDummyUnicodeFile(FileNameIni);
+            //set icon
+            HICON hIconLarge = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
+            SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
+            HICON hIconSmall = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
+            SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
 
-        //restore last files
-        SettingGet(_T("Target"), FileNameTarget, _countof(FileNameTarget));
-        if(lstrlen(FileNameTarget))
-            SetDlgItemText(hWnd, IDC_TARGETPATH, FileNameTarget);
-        SettingGet(_T("Script"), FileNameScript, _countof(FileNameScript));
-        if(lstrlen(FileNameScript))
-            SetDlgItemText(hWnd, IDC_SCRIPTPATH, FileNameScript);
+            //initialize variables
+            hLogBox = GetDlgItem(hWnd, IDC_LOG);
+            hRunBtn = GetDlgItem(hWnd, IDC_RUN);
+            int i = GetModuleFileName(hInst, FileNameIni, _countof(FileNameIni));
+            while(FileNameIni[i] != TCHAR('\\') && i)
+                i--;
+            if(i)
+            {
+                int len = lstrlen(FileNameIni);
+                while(FileNameIni[i] != TCHAR('.') && i < len)
+                    i++;
+                if(i+1 < len)
+                    FileNameIni[i] = TCHAR('\0');
+            }
+            lstrcat(FileNameIni, _T(".ini"));
+            CreateDummyUnicodeFile(FileNameIni);
 
-        //make sure TitanScript is available
-        if ( !ExtensionManagerIsPluginLoaded( "TitanScript" ) || !ExtensionManagerIsPluginEnabled( "TitanScript" ) )
-        {
-            AddLogMessageW(L"TitanScript failed to load", TS_LOG_ERROR);
+            //restore last files
+            SettingGet(_T("Target"), FileNameTarget, _countof(FileNameTarget));
+            if(lstrlen(FileNameTarget))
+                SetDlgItemText(hWnd, IDC_TARGETPATH, FileNameTarget);
+            SettingGet(_T("Script"), FileNameScript, _countof(FileNameScript));
+            if(lstrlen(FileNameScript))
+                SetDlgItemText(hWnd, IDC_SCRIPTPATH, FileNameScript);
+
+            //make sure TitanScript is available
+            if ( !ExtensionManagerIsPluginLoaded( "TitanScript" ) || !ExtensionManagerIsPluginEnabled( "TitanScript" ) )
+            {
+                AddLogMessageW(L"TitanScript failed to load", TS_LOG_ERROR);
 #ifdef _WIN64
-            AddLogMessageW(L"Ensure plugins\\x64\\TitanScript.dll exists !", TS_LOG_ERROR);
+                AddLogMessageW(L"Ensure plugins\\x64\\TitanScript.dll exists !", TS_LOG_ERROR);
 #else
-            AddLogMessageW(L"Ensure plugins\\x86\\TitanScript.dll exists !", TS_LOG_ERROR);
+                AddLogMessageW(L"Ensure plugins\\x86\\TitanScript.dll exists !", TS_LOG_ERROR);
 #endif //_WIN64
-            EnableWindow(GetDlgItem(hWnd, IDC_RUN ), FALSE);
-        }
-        else
-        {
-            load_file = GetTSFunctionPointer( LoadFileW );
-            exec = GetTSFunctionPointer( ExecuteWithTitanMistW );
-            set_log_callback = GetTSFunctionPointer( SetLogCallback );
-            set_log_callback(&AddLogMessage);
-        }
+                EnableWindow(GetDlgItem(hWnd, IDC_RUN ), FALSE);
+            }
+            else
+            {
+                load_file = GetTSFunctionPointer( LoadFileW );
+                exec = GetTSFunctionPointer( ExecuteWithTitanMistW );
+                set_log_callback = GetTSFunctionPointer( SetLogCallback );
+                set_log_callback(&AddLogMessage);
+            }
 
-        break;
-    }
+            break;
+        }
 
     case WM_COMMAND:
-    {
-        switch (LOWORD(wParam))
         {
-        case IDC_BROWSETARGET:
-        {
-            if(GetFileDialog(FileNameTarget))
+            switch (LOWORD(wParam))
             {
-                SetDlgItemText(hWnd, IDC_TARGETPATH, FileNameTarget);
-                SettingSet(_T("Target"), FileNameTarget);
-            }
-            break;
-        }
-        case IDC_BROWSESCRIPT:
-        {
-            if(GetFileDialog(FileNameScript))
-            {
-                SetDlgItemText(hWnd, IDC_SCRIPTPATH, FileNameScript);
-                SettingSet(_T("Script"), FileNameScript);
-            }
-            break;
-        }
-        case IDC_RUN:
-        {
-            if(!bRunning)
-                CreateThread(0, 0, TitanScriptExecThread, 0, 0, 0);
-            else
-                StopDebug();
-
-            break;
-        }
-        case IDC_COPY: {
-            //get lines
-            LRESULT cnt = SendMessageW(hLogBox, LB_GETCOUNT, 0, 0);
-
-            if (cnt != 0 && cnt != LB_ERR)
-            {
-                WCHAR * copy = 0;
-                int copyLength = 0;
-
-                for(LRESULT i=0; i<cnt; i++) {
-                    LRESULT stringLength = SendMessageW(hLogBox, LB_GETTEXTLEN, i, 0);
-                    copyLength += stringLength + 1 + 2;
-
-                    copy = (WCHAR *)realloc(copy, copyLength * sizeof(WCHAR));
-                    if (copy)
-                    {
-                        copy[copyLength - stringLength - 1 - 2] = 0;
-                    }
-
-                    WCHAR * buf = (WCHAR *)calloc(stringLength + 1, sizeof(WCHAR));
-
-                    if (buf && (SendMessageW(hLogBox, LB_GETTEXT, i, (LPARAM)buf) != LB_ERR))
-                    {
-                        wcscat(copy, buf);
-                        wcscat(copy, L"\r\n");
-
-                        free(buf);
-                    }
-                }
-
-                //copy to clipboard
-                HGLOBAL clipbuffer;
-                WCHAR* buffer;
-                clipbuffer = GlobalAlloc(GMEM_MOVEABLE, (wcslen(copy) + 1) * sizeof(WCHAR));
-                if (clipbuffer)
+            case IDC_BROWSETARGET:
                 {
-                    buffer = (TCHAR*)GlobalLock(clipbuffer);
-                    wcscpy(buffer, copy);
-                    GlobalUnlock(clipbuffer);
-                    OpenClipboard(NULL);
-                    EmptyClipboard();
-                    UINT format;
+                    if(GetFileDialog(FileNameTarget))
+                    {
+                        SetDlgItemText(hWnd, IDC_TARGETPATH, FileNameTarget);
+                        SettingSet(_T("Target"), FileNameTarget);
+                    }
+                    break;
+                }
+            case IDC_BROWSESCRIPT:
+                {
+                    if(GetFileDialog(FileNameScript))
+                    {
+                        SetDlgItemText(hWnd, IDC_SCRIPTPATH, FileNameScript);
+                        SettingSet(_T("Script"), FileNameScript);
+                    }
+                    break;
+                }
+            case IDC_RUN:
+                {
+                    if(!bRunning)
+                        CreateThread(0, 0, TitanScriptExecThread, 0, 0, 0);
+                    else
+                        StopDebug();
+
+                    break;
+                }
+            case IDC_COPY: {
+                //get lines
+                LRESULT cnt = SendMessageW(hLogBox, LB_GETCOUNT, 0, 0);
+
+                if (cnt != 0 && cnt != LB_ERR)
+                {
+                    WCHAR * copy = (WCHAR *)calloc(1, sizeof(WCHAR));
+                    int copyLength = 1;
+
+                    for(LRESULT i=0; i<cnt; i++) {
+                        LRESULT stringLength = SendMessageW(hLogBox, LB_GETTEXTLEN, i, 0);
+                        copyLength += stringLength + 2;
+
+                        copy = (WCHAR *)realloc(copy, copyLength * sizeof(WCHAR));
+                        if (copy)
+                        {
+                            copy[copyLength - stringLength - 2] = 0;
+                        }
+                        else
+                        {
+                            return FALSE;
+                        }
+
+                        WCHAR * buf = (WCHAR *)calloc(stringLength + 1, sizeof(WCHAR));
+
+                        if (buf && (SendMessageW(hLogBox, LB_GETTEXT, i, (LPARAM)buf) != LB_ERR))
+                        {
+                            wcscat(copy, buf);
+                            wcscat(copy, L"\r\n");
+
+                            free(buf);
+                        }
+                    }
+
+                    //copy to clipboard
+                    HGLOBAL clipbuffer;
+                    WCHAR* buffer;
+                    clipbuffer = GlobalAlloc(GMEM_MOVEABLE, (wcslen(copy) + 1) * sizeof(WCHAR));
+                    if (clipbuffer)
+                    {
+                        buffer = (TCHAR*)GlobalLock(clipbuffer);
+                        wcscpy(buffer, copy);
+                        GlobalUnlock(clipbuffer);
+                        OpenClipboard(NULL);
+                        EmptyClipboard();
+                        UINT format;
 #ifdef UNICODE
-                    format = CF_UNICODETEXT;
+                        format = CF_UNICODETEXT;
 #else
-                    format = CF_OEMTEXT;
+                        format = CF_OEMTEXT;
 #endif
-                    SetClipboardData(format, clipbuffer);
+                        SetClipboardData(format, clipbuffer);
+                    }
+
+                    CloseClipboard();
+
+                    free(copy);
                 }
 
-                CloseClipboard();
+
+                break;
+                           }
             }
 
-
-            break;
-                       }
         }
-
-    }
-    break;
+        break;
 
     case WM_CLOSE:
-    {
-        EndDialog(hWnd, NULL);
-    }
-    break;
+        {
+            EndDialog(hWnd, NULL);
+        }
+        break;
 
     default:
-    {
-        return false;
-    }
+        {
+            return FALSE;
+        }
     }
     return 0;
 }
