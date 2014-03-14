@@ -6,6 +6,12 @@
 #define MAX_LOG_LINE_LENGTH 100
 #define MAX_LOG_LINE_COUNT 100
 
+#ifdef _WIN64
+const WCHAR WindowTitle[] = L"TitanScriptGUI x64";
+#else
+const WCHAR WindowTitle[] = L"TitanScriptGUI x86";
+#endif
+
 //variables
 static HINSTANCE hInst;
 static HWND hLogBox;
@@ -48,6 +54,8 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_INITDIALOG:
         {
+            SetWindowTextW(hWnd, WindowTitle);
+
             //set icon
             HICON hIconLarge = (HICON)LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
             SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
@@ -249,14 +257,23 @@ static void AddLogMessageW(const wchar_t* szLogMessage, eLogType Type)
 
 static void AddLogMessage(const char* szLogMessage, eLogType Type)
 {
-    TCHAR * buf = (TCHAR *)calloc(strlen(szLogMessage) + 1, sizeof(TCHAR));
-    if (buf)
+    if (strlen(szLogMessage) > 0)
     {
-        mbstowcs(buf, szLogMessage, strlen(szLogMessage) + 1);
-        AddLogMessageW(buf, Type);
-        free(buf);
+        if (isalnum(szLogMessage[0]))
+        {
+            TCHAR * buf = (TCHAR *)calloc(strlen(szLogMessage) + 1, sizeof(TCHAR));
+            if (buf)
+            {
+                mbstowcs(buf, szLogMessage, strlen(szLogMessage) + 1);
+                AddLogMessageW(buf, Type);
+                free(buf);
+            }
+        }
+        else
+        {
+            AddLogMessageW(L"ERROR INVALID LOG MESSAGE", Type);
+        }
     }
-
 }
 
 static void SettingSet(const TCHAR* name, const TCHAR* value)
