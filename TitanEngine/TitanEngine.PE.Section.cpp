@@ -24,7 +24,6 @@ __declspec(dllexport) bool TITCALL ExtractSection(char* szFileName, char* szDump
 
 __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t* szDumpFileName, DWORD SectionNumber)
 {
-
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
     PIMAGE_NT_HEADERS64 PEHeader64;
@@ -127,7 +126,6 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
 
 __declspec(dllexport) bool TITCALL ResortFileSections(char* szFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -143,7 +141,6 @@ __declspec(dllexport) bool TITCALL ResortFileSections(char* szFileName)
 
 __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
 {
-
     int i = 0;
     int j = 0;
     PIMAGE_DOS_HEADER DOSHeader;
@@ -345,7 +342,6 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
 
 __declspec(dllexport) bool TITCALL MakeAllSectionsRWE(char* szFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -361,7 +357,6 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWE(char* szFileName)
 
 __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
 {
-
     wchar_t szBackupFile[MAX_PATH] = {};
     wchar_t szBackupItem[MAX_PATH] = {};
     PIMAGE_DOS_HEADER DOSHeader;
@@ -501,7 +496,6 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
 
 __declspec(dllexport) long TITCALL AddNewSectionEx(char* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -511,13 +505,12 @@ __declspec(dllexport) long TITCALL AddNewSectionEx(char* szFileName, char* szSec
     }
     else
     {
-        return(NULL);
+        return NULL;
     }
 }
 
 __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* szSectionName, DWORD SectionSize, DWORD SectionAttributes, LPVOID SectionContent, DWORD ContentSize)
 {
-
     bool OverlayHasBeenRemoved = false;
     wchar_t szBackupOverlayFile[MAX_PATH] = {};
     wchar_t szBackupFile[MAX_PATH] = {};
@@ -876,17 +869,16 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
 
 __declspec(dllexport) long TITCALL AddNewSection(char* szFileName, char* szSectionName, DWORD SectionSize)
 {
-    return(AddNewSectionEx(szFileName, szSectionName, SectionSize, NULL, NULL, NULL));
+    return AddNewSectionEx(szFileName, szSectionName, SectionSize, NULL, NULL, NULL);
 }
 
 __declspec(dllexport) long TITCALL AddNewSectionW(wchar_t* szFileName, char* szSectionName, DWORD SectionSize)
 {
-    return(AddNewSectionExW(szFileName, szSectionName, SectionSize, NULL, NULL, NULL));
+    return AddNewSectionExW(szFileName, szSectionName, SectionSize, NULL, NULL, NULL);
 }
 
 __declspec(dllexport) bool TITCALL ResizeLastSection(char* szFileName, DWORD NumberOfExpandBytes, bool AlignResizeData)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -902,7 +894,6 @@ __declspec(dllexport) bool TITCALL ResizeLastSection(char* szFileName, DWORD Num
 
 __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD NumberOfExpandBytes, bool AlignResizeData)
 {
-
     wchar_t szBackupFile[MAX_PATH] = {};
     wchar_t szBackupItem[MAX_PATH] = {};
     PIMAGE_DOS_HEADER DOSHeader;
@@ -1106,7 +1097,6 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
 
 __declspec(dllexport) bool TITCALL DeleteLastSection(char* szFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -1122,7 +1112,6 @@ __declspec(dllexport) bool TITCALL DeleteLastSection(char* szFileName)
 
 __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
 {
-
     wchar_t szBackupFile[MAX_PATH] = {};
     wchar_t szBackupItem[MAX_PATH] = {};
     PIMAGE_DOS_HEADER DOSHeader;
@@ -1276,7 +1265,6 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
 
 __declspec(dllexport) bool TITCALL DeleteLastSectionEx(char* szFileName, DWORD NumberOfSections)
 {
-
     while(NumberOfSections > 0)
     {
         DeleteLastSection(szFileName);
@@ -1287,7 +1275,6 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionEx(char* szFileName, DWORD N
 
 __declspec(dllexport) bool TITCALL DeleteLastSectionExW(wchar_t* szFileName, DWORD NumberOfSections)
 {
-
     while(NumberOfSections > 0)
     {
         DeleteLastSectionW(szFileName);
@@ -1298,7 +1285,6 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionExW(wchar_t* szFileName, DWO
 
 __declspec(dllexport) bool TITCALL WipeSection(char* szFileName, int WipeSectionNumber, bool RemovePhysically)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -1311,9 +1297,9 @@ __declspec(dllexport) bool TITCALL WipeSection(char* szFileName, int WipeSection
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSectionNumber, bool RemovePhysically)
 {
-
     wchar_t szBackupFile[MAX_PATH] = {};
     wchar_t szBackupItem[MAX_PATH] = {};
     PIMAGE_DOS_HEADER DOSHeader;

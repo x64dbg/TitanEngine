@@ -85,10 +85,12 @@ __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, 
 
     return 0;
 }
+
 __declspec(dllexport) void* TITCALL StaticDisassemble(LPVOID DisassmAddress)
 {
-    return(StaticDisassembleEx((ULONG_PTR)DisassmAddress, DisassmAddress));
+    return StaticDisassembleEx((ULONG_PTR)DisassmAddress, DisassmAddress);
 }
+
 __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType)
 {
     _DecodedInst engineDecodedInstructions[1];
@@ -136,14 +138,17 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
 
     return 0;
 }
+
 __declspec(dllexport) void* TITCALL Disassemble(LPVOID DisassmAddress)
 {
     return(DisassembleEx(dbgProcessInformation.hProcess, DisassmAddress, false));
 }
+
 __declspec(dllexport) long TITCALL StaticLengthDisassemble(LPVOID DisassmAddress)
 {
     return LengthDisassembleEx(GetCurrentProcess(), DisassmAddress);
 }
+
 __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
 {
     unsigned int DecodedInstructionsCount = 0;
@@ -174,6 +179,7 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
 
     return -1;
 }
+
 __declspec(dllexport) long TITCALL LengthDisassemble(LPVOID DisassmAddress)
 {
     return LengthDisassembleEx(dbgProcessInformation.hProcess, DisassmAddress);
