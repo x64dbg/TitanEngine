@@ -151,12 +151,12 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                     for(LRESULT i=0; i<cnt; i++) {
                         LRESULT stringLength = SendMessageW(hLogBox, LB_GETTEXTLEN, i, 0);
-                        copyLength += stringLength + 2;
+                        copyLength += (int)stringLength + 2;
 
                         copy = (WCHAR *)realloc(copy, copyLength * sizeof(WCHAR));
                         if (copy)
                         {
-                            copy[copyLength - stringLength - 2] = 0;
+                            copy[copyLength - (int)stringLength - 2] = 0;
                         }
                         else
                         {
