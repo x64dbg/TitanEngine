@@ -61,7 +61,7 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoW(wchar_t* szLibraryN
     static LIBRARY_ITEM_DATAW LibraryInfo;
     memset(&LibraryInfo, 0, sizeof(LIBRARY_ITEM_DATAW));
     
-    for(int i = 0; i < hListLibrary.size(); i++)
+    for(unsigned int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && !lstrcmpiW(hListLibrary.at(i).szLibraryName, szLibraryName))
         {
@@ -98,7 +98,7 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoExW(void* BaseOfDll)
     static LIBRARY_ITEM_DATAW LibraryData;
     memset(&LibraryData, 0, sizeof(LIBRARY_ITEM_DATAW));
 
-    for(int i = 0; i < hListLibrary.size(); i++)
+    for(unsigned int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && hListLibrary.at(i).BaseOfDll == BaseOfDll)
         {
@@ -118,9 +118,8 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfo(void* EnumCallBack)
 
     typedef void(TITCALL *fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
-    int libcount = hListLibrary.size();
 
-    for(int i = 0; i < libcount; i++)
+    for(unsigned int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE)
         {
@@ -151,9 +150,8 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfoW(void* EnumCallBack)
 
     typedef void(TITCALL *fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
-    int libcount = hListLibrary.size();
 
-    for(int i = 0; i < libcount; i++)
+    for(unsigned int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE)
         {
