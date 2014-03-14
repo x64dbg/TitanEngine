@@ -24,7 +24,6 @@ static TCHAR FileNameIni[MAX_PATH] = {};
 //functions
 static INT_PTR CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 static bool GetFileDialog(TCHAR[MAX_PATH]);
-static void AddLogMessage(const char* szLogMessage, eLogType Type);
 static void AddLogMessageW(const wchar_t* szLogMessage, eLogType Type);
 static void SettingSet(const TCHAR* name, const TCHAR* value);
 static void SettingGet(const TCHAR* name, TCHAR* value, int value_size);
@@ -35,7 +34,7 @@ static DWORD WINAPI TitanScriptExecThread(LPVOID lpParam);
 //TitanScript functions
 static tScripterLoadFileW load_file = NULL;
 static tScripterExecuteWithTitanMistW exec = NULL;
-static tScripterSetLogCallback set_log_callback = NULL;
+static tScripterSetLogCallbackW set_log_callback = NULL;
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
@@ -102,8 +101,8 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 load_file = GetTSFunctionPointer( LoadFileW );
                 exec = GetTSFunctionPointer( ExecuteWithTitanMistW );
-                set_log_callback = GetTSFunctionPointer( SetLogCallback );
-                set_log_callback(&AddLogMessage);
+                set_log_callback = GetTSFunctionPointer( SetLogCallbackW );
+                set_log_callback(&AddLogMessageW);
             }
 
             break;
@@ -241,17 +240,20 @@ static bool GetFileDialog(TCHAR Buffer[MAX_PATH])
 
 static void AddLogMessageW(const wchar_t* szLogMessage, eLogType Type)
 {
-    LRESULT cSelect = SendMessage(hLogBox, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)szLogMessage);
-    if (cSelect == LB_ERR)
+    if (wcslen(szLogMessage) > 0)
     {
-        MessageBoxW(0, L"ERROR LOG MESSAGE - LB_INSERTSTRING", L"ERROR", MB_ICONWARNING);
-    } else if (cSelect == LB_ERRSPACE)
-    {
-        MessageBoxW(0, L"ERROR LOG MESSAGE - LB_ERRSPACE - Not enough space!", L"ERROR", MB_ICONWARNING);
-    }
-    else
-    {
-        SendMessage(hLogBox, LB_SETCURSEL, cSelect, NULL);
+        LRESULT cSelect = SendMessage(hLogBox, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)szLogMessage);
+        if (cSelect == LB_ERR)
+        {
+            MessageBoxW(0, L"ERROR LOG MESSAGE - LB_INSERTSTRING", L"ERROR", MB_ICONWARNING);
+        } else if (cSelect == LB_ERRSPACE)
+        {
+            MessageBoxW(0, L"ERROR LOG MESSAGE - LB_ERRSPACE - Not enough space!", L"ERROR", MB_ICONWARNING);
+        }
+        else
+        {
+            SendMessage(hLogBox, LB_SETCURSEL, cSelect, NULL);
+        }
     }
 }
 
@@ -268,27 +270,6 @@ static bool IsValidChar(char s)
     else
     {
         return false;
-    }
-}
-
-static void AddLogMessage(const char* szLogMessage, eLogType Type)
-{
-    if (strlen(szLogMessage) > 0)
-    {
-        if (IsValidChar(szLogMessage[0]))
-        {
-            TCHAR * buf = (TCHAR *)calloc(strlen(szLogMessage) + 1, sizeof(TCHAR));
-            if (buf)
-            {
-                mbstowcs(buf, szLogMessage, strlen(szLogMessage) + 1);
-                AddLogMessageW(buf, Type);
-                free(buf);
-            }
-        }
-        else
-        {
-            AddLogMessageW(L"ERROR INVALID LOG MESSAGE", Type);
-        }
     }
 }
 

@@ -9,6 +9,7 @@
 
 enum eLogType {TS_LOG_NORMAL, TS_LOG_ERROR, TS_LOG_COMMAND, TS_LOG_DEBUG};
 typedef void(*fLogCallback)(const char* szString, eLogType Type);
+typedef void(*fLogCallbackW)(const wchar_t* szString, eLogType Type);
 
 typedef bool (*tScripterLoadFileA)(const char*);
 typedef bool (*tScripterLoadFileW)(const wchar_t*);
@@ -18,6 +19,7 @@ typedef bool (*tScripterPause)();
 typedef bool (*tScripterAutoDebugA)(const char*);
 typedef bool (*tScripterAutoDebugW)(const wchar_t*);
 typedef void (*tScripterSetLogCallback)(fLogCallback Callback);
+typedef void (*tScripterSetLogCallbackW)(fLogCallbackW Callback);
 typedef bool (*tScripterExecuteWithTitanMistA)(const char*, const char*);
 typedef bool (*tScripterExecuteWithTitanMistW)(const wchar_t*, const wchar_t*);
 
