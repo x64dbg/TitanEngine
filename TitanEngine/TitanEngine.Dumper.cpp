@@ -264,7 +264,6 @@ __declspec(dllexport) bool TITCALL DumpProcessEx(DWORD ProcessId, LPVOID ImageBa
 
 __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageBase, wchar_t* szDumpFileName, ULONG_PTR EntryPoint)
 {
-
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
@@ -298,7 +297,6 @@ __declspec(dllexport) bool TITCALL DumpMemory(HANDLE hProcess, LPVOID MemoryStar
 
 __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
 {
-
     ULONG_PTR ueNumberOfBytesRead = 0;
     DWORD uedNumberOfBytesRead = 0;
     HANDLE hFile = 0;
@@ -356,7 +354,6 @@ __declspec(dllexport) bool TITCALL DumpMemoryEx(DWORD ProcessId, LPVOID MemorySt
 
 __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryStart, ULONG_PTR MemorySize, wchar_t* szDumpFileName)
 {
-
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
@@ -388,7 +385,6 @@ __declspec(dllexport) bool TITCALL DumpRegions(HANDLE hProcess, char* szDumpFold
 
 __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDumpFolder, bool DumpAboveImageBaseOnly)
 {
-
     int i;
     DWORD cbNeeded = NULL;
     wchar_t szDumpName[MAX_PATH];

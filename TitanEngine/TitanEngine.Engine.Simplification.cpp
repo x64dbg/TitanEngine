@@ -6,7 +6,6 @@
 // TitanEngine.Engine.Simplification.functions:
 __declspec(dllexport) void TITCALL EngineUnpackerInitialize(char* szFileName, char* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
     wchar_t uniUnpackedFileName[MAX_PATH] = {};
 
@@ -15,7 +14,7 @@ __declspec(dllexport) void TITCALL EngineUnpackerInitialize(char* szFileName, ch
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
         if(szUnpackedFileName == NULL)
         {
-            return(EngineUnpackerInitializeW(uniFileName, NULL, DoLogData, DoRealignFile, DoMoveOverlay, EntryCallBack));
+            return EngineUnpackerInitializeW(uniFileName, NULL, DoLogData, DoRealignFile, DoMoveOverlay, EntryCallBack);
         }
         else
         {
@@ -24,9 +23,9 @@ __declspec(dllexport) void TITCALL EngineUnpackerInitialize(char* szFileName, ch
         }
     }
 }
+
 __declspec(dllexport) void TITCALL EngineUnpackerInitializeW(wchar_t* szFileName, wchar_t* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
 {
-
     int i,j;
     wchar_t TempBackBuffer[MAX_PATH] = {};
 
@@ -80,9 +79,9 @@ __declspec(dllexport) void TITCALL EngineUnpackerInitializeW(wchar_t* szFileName
         }
     }
 }
+
 __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchStart, DWORD SearchSize, void* SearchPattern, DWORD PatternSize, DWORD PatternDelta, ULONG_PTR BreakType, bool SingleBreak, DWORD Parameter1, DWORD Parameter2)
 {
-
     ULONG_PTR fPatternLocation;
     DWORD fBreakPointType = UE_BREAKPOINT;
     UnpackerInformation fUnpackerInformation = {};
@@ -98,10 +97,12 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             SearchStart = (void*)((ULONG_PTR)GetPE32DataW(szEngineUnpackerInputFile, NULL, UE_OEP) + (ULONG_PTR)GetDebuggedFileBaseAddress());
         }
     }
+
     if(SearchSize == NULL)
     {
         SearchSize = 0x1000;
     }
+
     fPatternLocation = (ULONG_PTR)FindEx(pEngineUnpackerProcessHandle->hProcess, SearchStart, SearchSize, SearchPattern, PatternSize, NULL);
     if(fPatternLocation != NULL)
     {
@@ -109,11 +110,13 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
         {
             fBreakPointType = UE_SINGLESHOOT;
         }
+
         fPatternLocation = fPatternLocation + (int)PatternDelta;
         fUnpackerInformation.Parameter1 = Parameter1;
         fUnpackerInformation.Parameter2 = Parameter2;
         fUnpackerInformation.SingleBreak = SingleBreak;
         fUnpackerInformation.BreakPointAddress = fPatternLocation;
+
         if(BreakType == UE_UNPACKER_CONDITION_LOADLIBRARY)
         {
             if(SetBPX(fPatternLocation, UE_BREAKPOINT, &EngineSimplifyLoadLibraryCallBack))
@@ -165,15 +168,17 @@ __declspec(dllexport) bool TITCALL EngineUnpackerSetBreakCondition(void* SearchS
             }
         }
     }
+
     return false;
 }
+
 __declspec(dllexport) void TITCALL EngineUnpackerSetEntryPointAddress(ULONG_PTR UnpackedEntryPointAddress)
 {
     EngineUnpackerOptionUnpackedOEP = UnpackedEntryPointAddress;
 }
+
 __declspec(dllexport) void TITCALL EngineUnpackerFinalizeUnpacking()
 {
-
     EngineSimplifyEntryPointCallBack();
     EmptyGarbage();
 }

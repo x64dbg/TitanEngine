@@ -8,7 +8,6 @@
 // TitanEngine.StaticUnpacker.functions:
 __declspec(dllexport) bool TITCALL StaticFileLoad(char* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
 {
-
     if(!SimulateLoad)
     {
         if(MapFileEx(szFileName, DesiredAccess, FileHandle, LoadedSize, FileMap, FileMapVA, NULL))
@@ -24,14 +23,16 @@ __declspec(dllexport) bool TITCALL StaticFileLoad(char* szFileName, DWORD Desire
             *LoadedSize = (DWORD)GetPE32DataFromMappedFile(*FileMapVA, NULL, UE_SIZEOFIMAGE);
             *FileHandle = NULL;
             *FileMap = NULL;
+
             return true;
         }
     }
+
     return false;
 }
+
 __declspec(dllexport) bool TITCALL StaticFileLoadW(wchar_t* szFileName, DWORD DesiredAccess, bool SimulateLoad, LPHANDLE FileHandle, LPDWORD LoadedSize, LPHANDLE FileMap, PULONG_PTR FileMapVA)
 {
-
     if(!SimulateLoad)
     {
         if(MapFileExW(szFileName, DesiredAccess, FileHandle, LoadedSize, FileMap, FileMapVA, NULL))
@@ -47,14 +48,16 @@ __declspec(dllexport) bool TITCALL StaticFileLoadW(wchar_t* szFileName, DWORD De
             *LoadedSize = (DWORD)GetPE32DataFromMappedFile(*FileMapVA, NULL, UE_SIZEOFIMAGE);
             *FileHandle = NULL;
             *FileMap = NULL;
+
             return true;
         }
     }
+
     return false;
 }
+
 __declspec(dllexport) bool TITCALL StaticFileUnload(char* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
@@ -67,9 +70,9 @@ __declspec(dllexport) bool TITCALL StaticFileUnload(char* szFileName, bool Commi
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool CommitChanges, HANDLE FileHandle, DWORD LoadedSize, HANDLE FileMap, ULONG_PTR FileMapVA)
 {
-
     DWORD PeHeaderSize;
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
@@ -87,13 +90,14 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
     if(FileHandle != NULL && FileMap != NULL)
     {
         UnMapFileEx(FileHandle, LoadedSize, FileMap, FileMapVA);
+
         return true;
     }
     else
     {
         if(!CommitChanges)
         {
-            return(ResourcerFreeLoadedFile((LPVOID)FileMapVA));
+            return ResourcerFreeLoadedFile((LPVOID)FileMapVA);
         }
         else
         {
@@ -104,6 +108,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                 {
                     PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
                     PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+
                     if(PEHeader32->OptionalHeader.Magic == 0x10B)
                     {
                         FileIs64 = false;
@@ -116,22 +121,27 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                     {
                         ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                         UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
+
                         return false;
                     }
+
                     if(!FileIs64)
                     {
                         PeHeaderSize = PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections;
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
                         SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                         RtlMoveMemory((LPVOID)myFileMapVA, (LPVOID)FileMapVA, PeHeaderSize);
+
                         while(SectionNumber > 0)
                         {
                             RtlMoveMemory((LPVOID)((ULONG_PTR)myFileMapVA + PESections->PointerToRawData), (LPVOID)(FileMapVA + PESections->VirtualAddress), PESections->SizeOfRawData);
                             PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
                             SectionNumber--;
                         }
+
                         ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                         UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
+
                         return true;
                     }
                     else
@@ -140,6 +150,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
                         SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                         RtlMoveMemory((LPVOID)myFileMapVA, (LPVOID)FileMapVA, PeHeaderSize);
+
                         while(SectionNumber > 0)
                         {
                             RtlMoveMemory((LPVOID)((ULONG_PTR)myFileMapVA + PESections->PointerToRawData), (LPVOID)(FileMapVA + PESections->VirtualAddress), PESections->SizeOfRawData);
@@ -148,6 +159,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                         }
                         ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                         UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
+
                         return true;
                     }
                 }
@@ -155,37 +167,41 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                 {
                     ResourcerFreeLoadedFile((LPVOID)FileMapVA);
                     UnMapFileEx(myFileHandle, myFileSize, myFileMap, myFileMapVA);
+
                     return false;
                 }
             }
         }
     }
+
     return false;
 }
+
 __declspec(dllexport) bool TITCALL StaticFileOpen(char* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(StaticFileOpenW(uniFileName, DesiredAccess, FileHandle, FileSizeLow, FileSizeHigh));
+
+        return StaticFileOpenW(uniFileName, DesiredAccess, FileHandle, FileSizeLow, FileSizeHigh);
     }
     else
     {
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL StaticFileOpenW(wchar_t* szFileName, DWORD DesiredAccess, LPHANDLE FileHandle, LPDWORD FileSizeLow, LPDWORD FileSizeHigh)
 {
-
     __try
     {
         *FileHandle = CreateFileW(szFileName, DesiredAccess, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if(FileHandle != INVALID_HANDLE_VALUE)
         {
             *FileSizeLow = GetFileSize(*FileHandle, FileSizeHigh);
+
             return true;
         }
         else
@@ -198,9 +214,9 @@ __declspec(dllexport) bool TITCALL StaticFileOpenW(wchar_t* szFileName, DWORD De
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL StaticFileGetContent(HANDLE FileHandle, DWORD FilePositionLow, LPDWORD FilePositionHigh, void* Buffer, DWORD Size)
 {
-
     DWORD rfNumberOfBytesRead;
 
     if(SetFilePointer(FileHandle, FilePositionLow, (PLONG)FilePositionHigh, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
@@ -217,12 +233,15 @@ __declspec(dllexport) bool TITCALL StaticFileGetContent(HANDLE FileHandle, DWORD
             }
         }
     }
+
     return false;
 }
+
 __declspec(dllexport) void TITCALL StaticFileClose(HANDLE FileHandle)
 {
     EngineCloseHandle(FileHandle);
 }
+
 __declspec(dllexport) void TITCALL StaticMemoryDecrypt(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionType, DWORD DecryptionKeySize, ULONG_PTR DecryptionKey)
 {
     DWORD LoopCount = NULL;
@@ -326,9 +345,9 @@ __declspec(dllexport) void TITCALL StaticMemoryDecrypt(LPVOID MemoryStart, DWORD
         }
     }
 }
+
 __declspec(dllexport) void TITCALL StaticMemoryDecryptEx(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, void* DecryptionCallBack)
 {
-
     DWORD LoopCount = NULL;
     typedef bool(TITCALL *fStaticCallBack)(void* sMemoryStart, int sKeySize);
     fStaticCallBack myStaticCallBack = (fStaticCallBack)DecryptionCallBack;
@@ -354,9 +373,9 @@ __declspec(dllexport) void TITCALL StaticMemoryDecryptEx(LPVOID MemoryStart, DWO
         }
     }
 }
+
 __declspec(dllexport) void TITCALL StaticMemoryDecryptSpecial(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, DWORD SpecDecryptionType, void* DecryptionCallBack)
 {
-
     DWORD LoopCount = NULL;
     typedef bool(TITCALL *fStaticCallBack)(void* sMemoryStart, int sKeySize);
     fStaticCallBack myStaticCallBack = (fStaticCallBack)DecryptionCallBack;
@@ -381,6 +400,7 @@ __declspec(dllexport) void TITCALL StaticMemoryDecryptSpecial(LPVOID MemoryStart
             {
                 break;
             }
+
             if(SpecDecryptionType == UE_STATIC_DECRYPTOR_BACKWARD)
             {
                 MemoryStart = (LPVOID)((ULONG_PTR)MemoryStart - DecryptionKeySize);
@@ -389,13 +409,14 @@ __declspec(dllexport) void TITCALL StaticMemoryDecryptSpecial(LPVOID MemoryStart
             {
                 MemoryStart = (LPVOID)((ULONG_PTR)MemoryStart + DecryptionKeySize);
             }
+
             LoopCount--;
         }
     }
 }
+
 __declspec(dllexport) void TITCALL StaticSectionDecrypt(ULONG_PTR FileMapVA, DWORD SectionNumber, bool SimulateLoad, DWORD DecryptionType, DWORD DecryptionKeySize, ULONG_PTR DecryptionKey)
 {
-
     if(!SimulateLoad)
     {
         StaticMemoryDecrypt((LPVOID)((ULONG_PTR)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWOFFSET) + FileMapVA), (DWORD)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWSIZE), DecryptionType, DecryptionKeySize, DecryptionKey);
@@ -405,6 +426,7 @@ __declspec(dllexport) void TITCALL StaticSectionDecrypt(ULONG_PTR FileMapVA, DWO
         StaticMemoryDecrypt((LPVOID)((ULONG_PTR)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONVIRTUALOFFSET) + FileMapVA), (DWORD)GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWSIZE), DecryptionType, DecryptionKeySize, DecryptionKey);
     }
 }
+
 __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD SourceSize, void* Destination, DWORD DestinationSize, int Algorithm)
 {
     if(!Source || !Destination)
@@ -431,11 +453,12 @@ __declspec(dllexport) bool TITCALL StaticMemoryDecompress(void* Source, DWORD So
             return true;
         }
     }
+
     return false;
 }
+
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, char* szDumpFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szDumpFileName != NULL)
@@ -448,9 +471,9 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR F
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR VitualAddressToCopy, DWORD Size, bool AddressIsRVA, wchar_t* szDumpFileName)
 {
-
     DWORD SizeToRead;
     HANDLE hReadFile;
     HANDLE hWriteFile;
@@ -472,94 +495,8 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyW(HANDLE hFile, ULONG_PTR 
             {
                 AddressToCopy = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, VitualAddressToCopy, false);
             }
+
             if(SetFilePointer(hReadFile, (long)AddressToCopy, NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
-            {
-                {
-                    EngineCreatePathForFileW(szDumpFileName);
-                    hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                    if(hWriteFile != INVALID_HANDLE_VALUE)
-                    {
-                        if(Size < sizeof(ueCopyBuffer))
-                        {
-                            SizeToRead = Size;
-                        }
-                        else
-                        {
-                            SizeToRead = sizeof(ueCopyBuffer);
-                        }
-                        while((int)Size > NULL)
-                        {
-                            if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                            {
-                                WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
-                                if(Size > sizeof(ueCopyBuffer))
-                                {
-                                    Size = Size - sizeof(ueCopyBuffer);
-                                }
-                                else if(SizeToRead != Size)
-                                {
-                                    if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                                    {
-                                        WriteFile(hWriteFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL);
-                                    }
-                                    else
-                                    {
-                                        WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                    }
-                                    SizeToRead = Size;
-                                    Size = NULL;
-                                }
-                                else
-                                {
-                                    SizeToRead = Size;
-                                    Size = NULL;
-                                }
-                            }
-                            else
-                            {
-                                WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                Size = NULL;
-                            }
-                        }
-                        EngineCloseHandle(hReadFile);
-                        EngineCloseHandle(hWriteFile);
-                        return true;
-                    }
-                }
-            }
-            EngineCloseHandle(hReadFile);
-        }
-    }
-    return false;
-}
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
-{
-
-    wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szDumpFileName != NULL)
-    {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(StaticRawMemoryCopyExW(hFile, RawAddressToCopy, Size, uniFileName));
-    }
-    else
-    {
-        return false;
-    }
-}
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
-{
-
-    DWORD SizeToRead;
-    HANDLE hReadFile;
-    HANDLE hWriteFile;
-    char ueCopyBuffer[0x1000] = {0};
-    DWORD rfNumberOfBytesRead;
-
-    if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(), &hReadFile, NULL, false, DUPLICATE_SAME_ACCESS))
-    {
-        if(SetFilePointer(hReadFile, (long)(RawAddressToCopy), NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
-        {
             {
                 EngineCreatePathForFileW(szDumpFileName);
                 hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -573,7 +510,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                     {
                         SizeToRead = sizeof(ueCopyBuffer);
                     }
-                    while((int)Size > 0)
+                    while((int)Size > NULL)
                     {
                         if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                         {
@@ -593,48 +530,139 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD Ra
                                     WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
                                 }
                                 SizeToRead = Size;
-                                Size = 0;
+                                Size = NULL;
                             }
                             else
                             {
                                 SizeToRead = Size;
-                                Size = 0;
+                                Size = NULL;
                             }
                         }
                         else
                         {
                             WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                            Size = 0;
+                            Size = NULL;
                         }
                     }
+
                     EngineCloseHandle(hReadFile);
                     EngineCloseHandle(hWriteFile);
+
                     return true;
                 }
             }
+            EngineCloseHandle(hReadFile);
         }
-        EngineCloseHandle(hReadFile);
     }
+
     return false;
 }
-__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName)
-{
 
+__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, char* szDumpFileName)
+{
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szDumpFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(StaticRawMemoryCopyEx64W(hFile, RawAddressToCopy, Size, uniFileName));
+        return(StaticRawMemoryCopyExW(hFile, RawAddressToCopy, Size, uniFileName));
     }
     else
     {
         return false;
     }
 }
+
+__declspec(dllexport) bool TITCALL StaticRawMemoryCopyExW(HANDLE hFile, DWORD RawAddressToCopy, DWORD Size, wchar_t* szDumpFileName)
+{
+    DWORD SizeToRead;
+    HANDLE hReadFile;
+    HANDLE hWriteFile;
+    char ueCopyBuffer[0x1000] = {0};
+    DWORD rfNumberOfBytesRead;
+
+    if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(), &hReadFile, NULL, false, DUPLICATE_SAME_ACCESS))
+    {
+        if(SetFilePointer(hReadFile, (long)(RawAddressToCopy), NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
+        {
+            EngineCreatePathForFileW(szDumpFileName);
+            hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if(hWriteFile != INVALID_HANDLE_VALUE)
+            {
+                if(Size < sizeof(ueCopyBuffer))
+                {
+                    SizeToRead = Size;
+                }
+                else
+                {
+                    SizeToRead = sizeof(ueCopyBuffer);
+                }
+                while((int)Size > 0)
+                {
+                    if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                    {
+                        WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
+                        if(Size > sizeof(ueCopyBuffer))
+                        {
+                            Size = Size - sizeof(ueCopyBuffer);
+                        }
+                        else if(SizeToRead != Size)
+                        {
+                            if(ReadFile(hFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                            {
+                                WriteFile(hWriteFile, ueCopyBuffer, Size, &rfNumberOfBytesRead, NULL);
+                            }
+                            else
+                            {
+                                WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                            }
+                            SizeToRead = Size;
+                            Size = 0;
+                        }
+                        else
+                        {
+                            SizeToRead = Size;
+                            Size = 0;
+                        }
+                    }
+                    else
+                    {
+                        WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                        Size = 0;
+                    }
+                }
+
+                EngineCloseHandle(hReadFile);
+                EngineCloseHandle(hWriteFile);
+
+                return true;
+            }
+        }
+
+        EngineCloseHandle(hReadFile);
+    }
+
+    return false;
+}
+
+__declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, char* szDumpFileName)
+{
+    wchar_t uniFileName[MAX_PATH] = {};
+
+    if(szDumpFileName != NULL)
+    {
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+
+        return StaticRawMemoryCopyEx64W(hFile, RawAddressToCopy, Size, uniFileName);
+    }
+    else
+    {
+        return false;
+    }
+}
+
 __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD64 RawAddressToCopy, DWORD64 Size, wchar_t* szDumpFileName)
 {
-
     DWORD SizeToRead;
     HANDLE hReadFile;
     HANDLE hWriteFile;
@@ -649,66 +677,69 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64W(HANDLE hFile, DWORD6
         RtlMoveMemory(&FilePosHigh, (void*)((ULONG_PTR)(&RawAddressToCopy) + 4), 4);
         if(SetFilePointer(hReadFile, FilePosLow, &FilePosHigh, FILE_BEGIN) != INVALID_SET_FILE_POINTER)
         {
+            EngineCreatePathForFileW(szDumpFileName);
+            hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if(hWriteFile != INVALID_HANDLE_VALUE)
             {
-                EngineCreatePathForFileW(szDumpFileName);
-                hWriteFile = CreateFileW(szDumpFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-                if(hWriteFile != INVALID_HANDLE_VALUE)
+                if(Size < 0x1000)
                 {
-                    if(Size < 0x1000)
+                    SizeToRead = (DWORD)Size;
+                }
+                else
+                {
+                    SizeToRead = 0x1000;
+                }
+                while(Size != NULL)
+                {
+                    if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                     {
-                        SizeToRead = (DWORD)Size;
-                    }
-                    else
-                    {
-                        SizeToRead = 0x1000;
-                    }
-                    while(Size != NULL)
-                    {
-                        if(ReadFile(hFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
+                        WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
+                        if(Size > 0x1000)
                         {
-                            WriteFile(hWriteFile, ueCopyBuffer, SizeToRead, &rfNumberOfBytesRead, NULL);
-                            if(Size > 0x1000)
+                            Size = Size - 0x1000;
+                        }
+                        else if((DWORD64)SizeToRead != Size)
+                        {
+                            if(ReadFile(hFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
                             {
-                                Size = Size - 0x1000;
-                            }
-                            else if((DWORD64)SizeToRead != Size)
-                            {
-                                if(ReadFile(hFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL) && rfNumberOfBytesRead == SizeToRead)
-                                {
-                                    WriteFile(hWriteFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL);
-                                }
-                                else
-                                {
-                                    WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
-                                }
-                                SizeToRead = (DWORD)Size;
-                                Size = NULL;
+                                WriteFile(hWriteFile, ueCopyBuffer, (DWORD)Size, &rfNumberOfBytesRead, NULL);
                             }
                             else
                             {
-                                SizeToRead = (DWORD)Size;
-                                Size = NULL;
+                                WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
                             }
+
+                            SizeToRead = (DWORD)Size;
+                            Size = NULL;
                         }
                         else
                         {
-                            WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                            SizeToRead = (DWORD)Size;
                             Size = NULL;
                         }
                     }
-                    EngineCloseHandle(hReadFile);
-                    EngineCloseHandle(hWriteFile);
-                    return true;
+                    else
+                    {
+                        WriteFile(hWriteFile, ueCopyBuffer, rfNumberOfBytesRead, &rfNumberOfBytesRead, NULL);
+                        Size = NULL;
+                    }
                 }
+
+                EngineCloseHandle(hReadFile);
+                EngineCloseHandle(hWriteFile);
+
+                return true;
             }
         }
     }
+
     EngineCloseHandle(hReadFile);
+
     return false;
 }
+
 __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD SizeOfMemory, void* HashDigest, bool OutputString, int Algorithm)
 {
-
 #define MD5LEN 16
 #define SHA1LEN 20
 #define HASH_MAX_LENGTH 20
@@ -741,6 +772,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
         if(!CryptCreateHash(hProv, hashAlgo, NULL, NULL, &hHash))
         {
             CryptReleaseContext(hProv, NULL);
+
             return false;
         }
         else
@@ -749,6 +781,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
             {
                 CryptReleaseContext(hProv, NULL);
                 CryptDestroyHash(hHash);
+
                 return false;
             }
         }
@@ -759,6 +792,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
             {
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
+
                 return false;
             }
             else
@@ -767,6 +801,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
                 rgbHash[1] = _byteswap_ulong(rgbHash[1]);
                 rgbHash[2] = _byteswap_ulong(rgbHash[2]);
                 rgbHash[3] = _byteswap_ulong(rgbHash[3]);
+
                 __try
                 {
                     if(OutputString)
@@ -782,10 +817,13 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
                 {
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
+
                     return false;
                 }
+
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
+
                 return true;
             }
         }
@@ -796,6 +834,7 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
             {
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
+
                 return false;
             }
             else
@@ -820,10 +859,13 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
                 {
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
+
                     return false;
                 }
+
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
+
                 return true;
             }
         }
@@ -840,28 +882,31 @@ __declspec(dllexport) bool TITCALL StaticHashMemory(void* MemoryToHash, DWORD Si
         {
             RtlMoveMemory(HashDigest, &crc32, sizeof crc32);
         }
+
         return true;
     }
+
     return false;
 }
+
 __declspec(dllexport) bool TITCALL StaticHashFile(char* szFileName, char* HashDigest, bool OutputString, int Algorithm)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
 
     if(szFileName != NULL)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(StaticHashFileW(uniFileName, HashDigest, OutputString, Algorithm));
+
+        return StaticHashFileW(uniFileName, HashDigest, OutputString, Algorithm);
     }
     else
     {
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* HashDigest, bool OutputString, int Algorithm)
 {
-
 #define MD5LEN 16
 #define SHA1LEN 20
 #define HASH_MAX_LENGTH 20
@@ -889,6 +934,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
             if(!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
             {
                 CloseHandle(hFile);
+
                 return false;
             }
         }
@@ -904,6 +950,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
         {
             CloseHandle(hFile);
             CryptReleaseContext(hProv, NULL);
+
             return false;
         }
         while(bResult)
@@ -921,6 +968,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 CryptReleaseContext(hProv, NULL);
                 CryptDestroyHash(hHash);
                 CloseHandle(hFile);
+
                 return false;
             }
         }
@@ -929,6 +977,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
             CryptReleaseContext(hProv, NULL);
             CryptDestroyHash(hHash);
             CloseHandle(hFile);
+
             return false;
         }
         if(Algorithm == UE_STATIC_HASH_MD5)
@@ -939,6 +988,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
+
                 return false;
             }
             else
@@ -947,6 +997,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 rgbHash[1] = _byteswap_ulong(rgbHash[1]);
                 rgbHash[2] = _byteswap_ulong(rgbHash[2]);
                 rgbHash[3] = _byteswap_ulong(rgbHash[3]);
+
                 __try
                 {
                     if(OutputString)
@@ -963,11 +1014,13 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
                     CloseHandle(hFile);
+
                     return false;
                 }
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
+
                 return true;
             }
         }
@@ -979,6 +1032,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
+
                 return false;
             }
             else
@@ -988,6 +1042,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                 rgbHash[2] = _byteswap_ulong(rgbHash[2]);
                 rgbHash[3] = _byteswap_ulong(rgbHash[3]);
                 rgbHash[4] = _byteswap_ulong(rgbHash[4]);
+
                 __try
                 {
                     if(OutputString)
@@ -1004,11 +1059,13 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
                     CryptDestroyHash(hHash);
                     CryptReleaseContext(hProv, NULL);
                     CloseHandle(hFile);
+
                     return false;
                 }
                 CryptDestroyHash(hHash);
                 CryptReleaseContext(hProv, NULL);
                 CloseHandle(hFile);
+
                 return true;
             }
         }
@@ -1025,6 +1082,7 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
             {
                 break;
             }
+
             EngineCrc32PartialCRC(&crc32, (unsigned char*)&rgbFile[0], cbRead);
         }
         crc32 = crc32 ^ 0xFFFFFFFF;
@@ -1036,9 +1094,13 @@ __declspec(dllexport) bool TITCALL StaticHashFileW(wchar_t* szFileName, char* Ha
         {
             RtlMoveMemory(HashDigest, &crc32, sizeof crc32);
         }
+
         CloseHandle(hFile);
+
         return true;
     }
+
     CloseHandle(hFile);
+
     return false;
 }
