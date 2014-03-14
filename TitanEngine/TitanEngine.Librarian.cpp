@@ -20,7 +20,7 @@ __declspec(dllexport) bool TITCALL LibrarianSetBreakPoint(char* szLibraryName, D
 
 __declspec(dllexport) bool TITCALL LibrarianRemoveBreakPoint(char* szLibraryName, DWORD bpxType)
 {
-    for(int i = LibrarianData.size() - 1; i >- 1; i--)
+    for(int i = LibrarianData.size() - 1; i >= 0; i--)
     {
         if(!lstrcmpiA(szLibraryName, LibrarianData.at(i).szLibraryName) && (LibrarianData.at(i).bpxType == bpxType || bpxType == UE_ON_LIB_ALL))
         {
@@ -60,9 +60,8 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoW(wchar_t* szLibraryN
 {
     static LIBRARY_ITEM_DATAW LibraryInfo;
     memset(&LibraryInfo, 0, sizeof(LIBRARY_ITEM_DATAW));
-    int libcount = hListLibrary.size();
     
-    for(int i = 0; i < libcount; i++)
+    for(int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && !lstrcmpiW(hListLibrary.at(i).szLibraryName, szLibraryName))
         {
@@ -98,9 +97,8 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoExW(void* BaseOfDll)
 {
     static LIBRARY_ITEM_DATAW LibraryData;
     memset(&LibraryData, 0, sizeof(LIBRARY_ITEM_DATAW));
-    int libcount = hListLibrary.size();
 
-    for(int i = 0; i < libcount; i++)
+    for(int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && hListLibrary.at(i).BaseOfDll == BaseOfDll)
         {
