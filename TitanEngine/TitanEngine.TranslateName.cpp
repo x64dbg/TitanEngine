@@ -4,7 +4,6 @@
 // TitanEngine.TranslateName.functions:
 __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
 {
-
     void* TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE); //pointer is returned
     char szDeviceName[3] = "A:";
     char szDeviceCOMName[5] = "COM0";
@@ -47,9 +46,9 @@ __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
     VirtualFree(TranslatedName, NULL, MEM_RELEASE);
     return(NULL);
 }
+
 __declspec(dllexport) void* TITCALL TranslateNativeNameW(wchar_t* szNativeName)
 {
-
     void* TranslatedName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE); //pointer is returned
     wchar_t szDeviceName[3] = L"A:";
     wchar_t szDeviceCOMName[5] = L"COM0";

@@ -15,7 +15,6 @@ static void* buffPatchedEntry;
 // Internal.Engine.Hook.functions:
 static bool ProcessHookScanAddNewHook(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATAW ModuleInformation, DWORD SizeOfImage)
 {
-
     HOOK_ENTRY MyhookEntry = {};
 
     RtlMoveMemory(&MyhookEntry, HookDetails, sizeof HOOK_ENTRY);
@@ -79,17 +78,17 @@ __declspec(dllexport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL HooksSafeTransition(LPVOID HookAddress, bool TransitionStart)
 {
-
     void* aHookAddress[1];
     aHookAddress[0] = HookAddress;
 
     return(HooksSafeTransitionEx(&aHookAddress[0], sizeof aHookAddress, TransitionStart));
 }
+
 __declspec(dllexport) bool TITCALL HooksIsAddressRedirected(LPVOID HookAddress)
 {
-
     for(unsigned int i = 0; i < hookEntry.size(); i++)
     {
         if(hookEntry[i].HookAddress == HookAddress && hookEntry[i].IATHook == false && hookEntry[i].HookIsEnabled == true)
@@ -99,9 +98,9 @@ __declspec(dllexport) bool TITCALL HooksIsAddressRedirected(LPVOID HookAddress)
     }
     return false;
 }
+
 __declspec(dllexport) void* TITCALL HooksGetTrampolineAddress(LPVOID HookAddress)
 {
-
     for(unsigned int i = 0; i < hookEntry.size(); i++)
     {
         if(hookEntry[i].HookAddress == HookAddress)
@@ -111,9 +110,9 @@ __declspec(dllexport) void* TITCALL HooksGetTrampolineAddress(LPVOID HookAddress
     }
     return(NULL);
 }
+
 __declspec(dllexport) void* TITCALL HooksGetHookEntryDetails(LPVOID HookAddress)
 {
-
     for(unsigned int i = 0; i < hookEntry.size(); i++)
     {
         if(hookEntry[i].HookAddress == HookAddress)
@@ -123,9 +122,9 @@ __declspec(dllexport) void* TITCALL HooksGetHookEntryDetails(LPVOID HookAddress)
     }
     return(NULL);
 }
+
 __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress, LPVOID RedirectTo, int HookType)
 {
-
 #if !defined(_WIN64)
     int j;
     unsigned int i;
@@ -411,6 +410,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewRedirection(LPVOID HookAddress,
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR FileMapVA, ULONG_PTR LoadedModuleBase, char* szHookFunction, LPVOID RedirectTo)
 {
 
@@ -561,9 +561,9 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR File
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirection(char* szModuleName, char* szHookFunction, LPVOID RedirectTo)
 {
-
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
@@ -590,9 +590,9 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirection(char* szModuleNa
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL HooksRemoveRedirection(LPVOID HookAddress, bool RemoveAll)
 {
-
     DWORD OldProtect = PAGE_READONLY;
 
     if(!RemoveAll)
@@ -626,9 +626,9 @@ __declspec(dllexport) bool TITCALL HooksRemoveRedirection(LPVOID HookAddress, bo
         return true;
     }
 }
+
 __declspec(dllexport) bool TITCALL HooksRemoveRedirectionsForModule(HMODULE ModuleBase)
 {
-
     int j = NULL;
     unsigned int i = (unsigned int)hookEntry.size();
     DWORD OldProtect = PAGE_READONLY;
@@ -661,9 +661,9 @@ __declspec(dllexport) bool TITCALL HooksRemoveRedirectionsForModule(HMODULE Modu
     }
     return true;
 }
+
 __declspec(dllexport) bool TITCALL HooksRemoveIATRedirection(char* szModuleName, char* szHookFunction, bool RemoveAll)
 {
-
     unsigned int i = (unsigned int)hookEntry.size() - 1;
     DWORD OldProtect = PAGE_READONLY;
     HMODULE ModuleBase = GetModuleHandleA(szModuleName);
@@ -687,9 +687,9 @@ __declspec(dllexport) bool TITCALL HooksRemoveIATRedirection(char* szModuleName,
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL HooksDisableRedirection(LPVOID HookAddress, bool DisableAll)
 {
-
     DWORD OldProtect = PAGE_READONLY;
 
     if(!DisableAll)
@@ -723,9 +723,9 @@ __declspec(dllexport) bool TITCALL HooksDisableRedirection(LPVOID HookAddress, b
         return true;
     }
 }
+
 __declspec(dllexport) bool TITCALL HooksDisableRedirectionsForModule(HMODULE ModuleBase)
 {
-
     int j = NULL;
     unsigned int i = (unsigned int)hookEntry.size();
     DWORD OldProtect = PAGE_READONLY;
@@ -758,9 +758,9 @@ __declspec(dllexport) bool TITCALL HooksDisableRedirectionsForModule(HMODULE Mod
     }
     return true;
 }
+
 __declspec(dllexport) bool TITCALL HooksDisableIATRedirection(char* szModuleName, char* szHookFunction, bool DisableAll)
 {
-
     unsigned int i = (unsigned int)hookEntry.size() - 1;
     DWORD OldProtect = PAGE_READONLY;
     HMODULE ModuleBase = GetModuleHandleA(szModuleName);
@@ -787,9 +787,9 @@ __declspec(dllexport) bool TITCALL HooksDisableIATRedirection(char* szModuleName
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL HooksEnableRedirection(LPVOID HookAddress, bool EnableAll)
 {
-
     DWORD OldProtect = PAGE_READONLY;
 
     if(!EnableAll)
@@ -823,9 +823,9 @@ __declspec(dllexport) bool TITCALL HooksEnableRedirection(LPVOID HookAddress, bo
         return true;
     }
 }
+
 __declspec(dllexport) bool TITCALL HooksEnableRedirectionsForModule(HMODULE ModuleBase)
 {
-
     int j = NULL;
     unsigned int i = (unsigned int)hookEntry.size();
     DWORD OldProtect = PAGE_READONLY;
@@ -858,9 +858,9 @@ __declspec(dllexport) bool TITCALL HooksEnableRedirectionsForModule(HMODULE Modu
     }
     return true;
 }
+
 __declspec(dllexport) bool TITCALL HooksEnableIATRedirection(char* szModuleName, char* szHookFunction, bool EnableAll)
 {
-
     unsigned int i = (unsigned int)hookEntry.size() - 1;
     DWORD OldProtect = PAGE_READONLY;
     HMODULE ModuleBase = GetModuleHandleA(szModuleName);
@@ -887,9 +887,9 @@ __declspec(dllexport) bool TITCALL HooksEnableIATRedirection(char* szModuleName,
     }
     return false;
 }
+
 __declspec(dllexport) void TITCALL HooksScanModuleMemory(HMODULE ModuleBase, LPVOID CallBack)
 {
-
     unsigned int i;
     bool FileIs64 = false;
     bool FileError = false;
@@ -1106,9 +1106,9 @@ __declspec(dllexport) void TITCALL HooksScanModuleMemory(HMODULE ModuleBase, LPV
         }
     }
 }
+
 __declspec(dllexport) void TITCALL HooksScanEntireProcessMemory(LPVOID CallBack)
 {
-
     unsigned int i;
     DWORD cbNeeded = 0;
     HMODULE EnumeratedModules[1024] = {0};
@@ -1122,6 +1122,7 @@ __declspec(dllexport) void TITCALL HooksScanEntireProcessMemory(LPVOID CallBack)
         }
     }
 }
+
 __declspec(dllexport) void TITCALL HooksScanEntireProcessMemoryEx()
 {
     HooksScanEntireProcessMemory(&ProcessHookScanAddNewHook);
