@@ -255,11 +255,27 @@ static void AddLogMessageW(const wchar_t* szLogMessage, eLogType Type)
     }
 }
 
+static bool IsValidChar(char s)
+{
+    if (isalnum(s))
+    {
+        return true;
+    }
+    else if (s == '$' || s == '-' || s == '>')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 static void AddLogMessage(const char* szLogMessage, eLogType Type)
 {
     if (strlen(szLogMessage) > 0)
     {
-        if (isalnum(szLogMessage[0]))
+        if (IsValidChar(szLogMessage[0]))
         {
             TCHAR * buf = (TCHAR *)calloc(strlen(szLogMessage) + 1, sizeof(TCHAR));
             if (buf)
