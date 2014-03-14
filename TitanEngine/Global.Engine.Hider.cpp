@@ -89,33 +89,33 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
     if(Hide)
     {
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "CheckRemoteDebuggerPresent");
-        if (VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), &patchCheckRemoteDebuggerPresent, patchCheckRemoteDebuggerPresentSize, &ueNumberOfBytesRead);
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, OldProtect, &OldProtect);
+            VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, OldProtect, &OldProtect);
         }
 
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "GetTickCount");
-        if (VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), &patchGetTickCount, patchGetTickCountSize, &ueNumberOfBytesRead);
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
+            VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
         }
     }
     else
     {
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "CheckRemoteDebuggerPresent");
-        if (VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), (void*)GetProcAddress(GetModuleHandleA("kernel32.dll"), "CheckRemoteDebuggerPresent"), patchCheckRemoteDebuggerPresentSize, &ueNumberOfBytesRead);
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, OldProtect, &OldProtect);
+            VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, OldProtect, &OldProtect);
         }
 
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "GetTickCount");
-        if (VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), (void*)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetTickCount"), patchGetTickCountSize, &ueNumberOfBytesRead);
-            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
+            VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
         }
     }
 }
