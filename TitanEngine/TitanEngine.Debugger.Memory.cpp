@@ -62,6 +62,7 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
 
     return true;
 }
+
 __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfMemoryToCheck, void* PatternToMatch, int SizeOfPatternToMatch, PBYTE WildCard)
 {
 
@@ -74,6 +75,7 @@ __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfM
         return(MatchPatternEx(GetCurrentProcess(), MemoryToCheck, SizeOfMemoryToCheck, PatternToMatch, SizeOfPatternToMatch, WildCard));
     }
 }
+
 __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
     if(!hProcess || !MemoryStart ||!MemorySize || !SearchPattern || !PatternSize)
@@ -98,14 +100,14 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
     if(hProcess != GetCurrentProcess())
     {
         ueReadBuffer = ueReadBuf.Allocate(MemorySize);
-        if(ueReadBuffer && !ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
+        if(ueReadBuffer && !MemoryReadSafe(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
         {
             if(ueNumberOfBytesRead == NULL)
             {
                 if(VirtualQueryEx(hProcess, MemoryStart, &memoryInformation, sizeof memoryInformation) != NULL)
                 {
                     MemorySize = (DWORD)((ULONG_PTR)memoryInformation.BaseAddress + memoryInformation.RegionSize - (ULONG_PTR)MemoryStart);
-                    if(!ReadProcessMemory(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
+                    if(!MemoryReadSafe(hProcess, MemoryStart, ueReadBuffer, MemorySize, &ueNumberOfBytesRead))
                     {
                         return 0;
                     }
@@ -186,6 +188,7 @@ __declspec(dllexport) bool TITCALL FillEx(HANDLE hProcess, LPVOID MemoryStart, D
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL Fill(LPVOID MemoryStart, DWORD MemorySize, PBYTE FillByte)
 {
 
@@ -198,6 +201,7 @@ __declspec(dllexport) bool TITCALL Fill(LPVOID MemoryStart, DWORD MemorySize, PB
         return(FillEx(GetCurrentProcess(), MemoryStart, MemorySize, FillByte));
     }
 }
+
 __declspec(dllexport) bool TITCALL PatchEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
 {
 
@@ -251,6 +255,7 @@ __declspec(dllexport) bool TITCALL PatchEx(HANDLE hProcess, LPVOID MemoryStart, 
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL Patch(LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
 {
 
@@ -263,6 +268,7 @@ __declspec(dllexport) bool TITCALL Patch(LPVOID MemoryStart, DWORD MemorySize, L
         return(PatchEx(GetCurrentProcess(), MemoryStart, MemorySize, ReplacePattern, ReplaceSize, AppendNOP, PrependNOP));
     }
 }
+
 __declspec(dllexport) bool TITCALL ReplaceEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)
 {
 
@@ -303,6 +309,7 @@ __declspec(dllexport) bool TITCALL ReplaceEx(HANDLE hProcess, LPVOID MemoryStart
         return true;
     }
 }
+
 __declspec(dllexport) bool TITCALL Replace(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, DWORD NumberOfRepetitions, LPVOID ReplacePattern, DWORD ReplaceSize, PBYTE WildCard)
 {
 
