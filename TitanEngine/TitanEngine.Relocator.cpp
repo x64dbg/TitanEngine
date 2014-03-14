@@ -25,6 +25,7 @@ __declspec(dllexport) void TITCALL RelocaterCleanup()
         RelocationNewImageBase = NULL;
     }
 }
+
 __declspec(dllexport) void TITCALL RelocaterInit(DWORD MemorySize, ULONG_PTR OldImageBase, ULONG_PTR NewImageBase)
 {
 
@@ -39,6 +40,7 @@ __declspec(dllexport) void TITCALL RelocaterInit(DWORD MemorySize, ULONG_PTR Old
     RelocationOldImageBase = OldImageBase;
     RelocationNewImageBase = NewImageBase;
 }
+
 __declspec(dllexport) void TITCALL RelocaterAddNewRelocation(HANDLE hProcess, ULONG_PTR RelocateAddress, DWORD RelocateState)
 {
 
@@ -91,10 +93,12 @@ __declspec(dllexport) void TITCALL RelocaterAddNewRelocation(HANDLE hProcess, UL
     RtlMoveMemory(RelocationWritePosition, &CopyDummy, 2);
     RelocationWritePosition = (LPVOID)((ULONG_PTR)RelocationWritePosition + 2);
 }
+
 __declspec(dllexport) long TITCALL RelocaterEstimatedSize()
 {
     return((DWORD)((ULONG_PTR)RelocationWritePosition - (ULONG_PTR)RelocationData + 8));
 }
+
 __declspec(dllexport) bool TITCALL RelocaterExportRelocation(ULONG_PTR StorePlace, DWORD StorePlaceRVA, ULONG_PTR FileMapVA)
 {
 
@@ -173,6 +177,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocation(ULONG_PTR StorePlac
     RelocationData = NULL;
     return false;
 }
+
 __declspec(dllexport) bool TITCALL RelocaterExportRelocationEx(char* szFileName, char* szSectionName)
 {
 
@@ -188,6 +193,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocationEx(char* szFileName,
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL RelocaterExportRelocationExW(wchar_t* szFileName, char* szSectionName)
 {
 
@@ -226,6 +232,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocationExW(wchar_t* szFileN
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTable(HANDLE hProcess, ULONG_PTR MemoryStart, DWORD MemorySize)
 {
 
@@ -247,6 +254,7 @@ __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTable(HANDLE hProcess,
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL RelocaterGrabRelocationTableEx(HANDLE hProcess, ULONG_PTR MemoryStart, ULONG_PTR MemorySize, DWORD NtSizeOfImage)
 {
 
@@ -296,10 +304,12 @@ __declspec(dllexport) bool TITCALL RelocaterMakeSnapshot(HANDLE hProcess, char* 
 {
     return(DumpMemory(hProcess, MemoryStart, MemorySize, szSaveFileName));
 }
+
 __declspec(dllexport) bool TITCALL RelocaterMakeSnapshotW(HANDLE hProcess, wchar_t* szSaveFileName, LPVOID MemoryStart, ULONG_PTR MemorySize)
 {
     return(DumpMemoryW(hProcess, MemoryStart, MemorySize, szSaveFileName));
 }
+
 __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshots(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, char* szDumpFile1, char* szDumpFile2, ULONG_PTR MemStart)
 {
 
@@ -317,6 +327,7 @@ __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshots(HANDLE hProcess,
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshotsW(HANDLE hProcess, ULONG_PTR LoadedImageBase, ULONG_PTR NtSizeOfImage, wchar_t* szDumpFile1, wchar_t* szDumpFile2, ULONG_PTR MemStart)
 {
 
@@ -430,6 +441,7 @@ __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshotsW(HANDLE hProcess
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL RelocaterChangeFileBase(char* szFileName, ULONG_PTR NewImageBase)
 {
 
@@ -445,6 +457,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBase(char* szFileName, ULO
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName, ULONG_PTR NewImageBase)
 {
 
@@ -604,6 +617,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBaseW(wchar_t* szFileName,
     RemoveGarbageItem(szBackupItem, true);
     return false;
 }
+
 __declspec(dllexport) bool TITCALL RelocaterRelocateMemoryBlock(ULONG_PTR FileMapVA, ULONG_PTR MemoryLocation, void* RelocateMemory, DWORD RelocateMemorySize, ULONG_PTR CurrentLoadedBase, ULONG_PTR RelocateBase)
 {
 
@@ -710,6 +724,7 @@ __declspec(dllexport) bool TITCALL RelocaterRelocateMemoryBlock(ULONG_PTR FileMa
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTable(char* szFileName)
 {
 
@@ -725,6 +740,7 @@ __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTable(char* szFileName
         return false;
     }
 }
+
 __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTableW(wchar_t* szFileName)
 {
 

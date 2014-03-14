@@ -14,17 +14,20 @@ __declspec(dllexport) bool TITCALL LibrarianSetBreakPoint(char* szLibraryName, D
     NewLibrarianData.bpxSingleShoot = SingleShoot;
     NewLibrarianData.bpxType = bpxType;
     LibrarianData.push_back(NewLibrarianData);
+
     return true;
 }
 
 __declspec(dllexport) bool TITCALL LibrarianRemoveBreakPoint(char* szLibraryName, DWORD bpxType)
 {
-    int libbpcount=LibrarianData.size();
-    for(int i=libbpcount=1; i>-1; i--)
+    for(int i = LibrarianData.size() - 1; i >- 1; i--)
+    {
         if(!lstrcmpiA(szLibraryName, LibrarianData.at(i).szLibraryName) && (LibrarianData.at(i).bpxType == bpxType || bpxType == UE_ON_LIB_ALL))
         {
-            LibrarianData.erase(LibrarianData.begin()+i);
+            LibrarianData.erase(LibrarianData.begin() + i);
         }
+    }
+
     return true;
 }
 
@@ -32,6 +35,7 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfo(char* szLibraryName)
 {
     if(!szLibraryName)
         return NULL;
+
     wchar_t uniLibraryName[MAX_PATH] = {};
     PLIBRARY_ITEM_DATAW LibInfo;
     MultiByteToWideChar(CP_ACP, NULL, szLibraryName, lstrlenA(szLibraryName)+1, uniLibraryName, sizeof(uniLibraryName)/(sizeof(uniLibraryName[0])));
@@ -45,22 +49,28 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfo(char* szLibraryName)
         LibraryInfoData.hFileMappingView = LibInfo->hFileMappingView;
         WideCharToMultiByte(CP_ACP, NULL, LibInfo->szLibraryName, -1, &LibraryInfoData.szLibraryName[0], sizeof LibraryInfoData.szLibraryName, NULL, NULL);
         WideCharToMultiByte(CP_ACP, NULL, LibInfo->szLibraryPath, -1, &LibraryInfoData.szLibraryPath[0], sizeof LibraryInfoData.szLibraryPath, NULL, NULL);
+
         return((void*)&LibraryInfoData);
     }
-    return(NULL);
+
+    return NULL;
 }
 
 __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoW(wchar_t* szLibraryName)
 {
     static LIBRARY_ITEM_DATAW LibraryInfo;
     memset(&LibraryInfo, 0, sizeof(LIBRARY_ITEM_DATAW));
-    int libcount=hListLibrary.size();
-    for(int i=0; i<libcount; i++)
+    int libcount = hListLibrary.size();
+    
+    for(int i = 0; i < libcount; i++)
+    {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && !lstrcmpiW(hListLibrary.at(i).szLibraryName, szLibraryName))
         {
             memcpy(&LibraryInfo, &hListLibrary.at(i), sizeof(LIBRARY_ITEM_DATAW));
             return &LibraryInfo;
         }
+    }
+
     return NULL;
 }
 
@@ -77,22 +87,29 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoEx(void* BaseOfDll)
         LibraryInfoData.hFileMappingView = LibInfo->hFileMappingView;
         WideCharToMultiByte(CP_ACP, NULL, LibInfo->szLibraryName, -1, &LibraryInfoData.szLibraryName[0], sizeof LibraryInfoData.szLibraryName, NULL, NULL);
         WideCharToMultiByte(CP_ACP, NULL, LibInfo->szLibraryPath, -1, &LibraryInfoData.szLibraryPath[0], sizeof LibraryInfoData.szLibraryPath, NULL, NULL);
-        return((void*)&LibraryInfoData);
+
+        return (void*)&LibraryInfoData;
     }
-    return(NULL);
+
+    return NULL;
 }
 
 __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoExW(void* BaseOfDll)
 {
     static LIBRARY_ITEM_DATAW LibraryData;
     memset(&LibraryData, 0, sizeof(LIBRARY_ITEM_DATAW));
-    int libcount=hListLibrary.size();
-    for(int i=0; i<libcount; i++)
+    int libcount = hListLibrary.size();
+
+    for(int i = 0; i < libcount; i++)
+    {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && hListLibrary.at(i).BaseOfDll == BaseOfDll)
         {
             memcpy(&LibraryData, &hListLibrary.at(i), sizeof(LIBRARY_ITEM_DATAW));
+
             return &LibraryData;
         }
+    }
+
     return NULL;
 }
 
@@ -100,10 +117,13 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfo(void* EnumCallBack)
 {
     if(!EnumCallBack)
         return;
+
     typedef void(TITCALL *fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
-    int libcount=hListLibrary.size();
-    for(int i=0; i<libcount; i++)
+    int libcount = hListLibrary.size();
+
+    for(int i = 0; i < libcount; i++)
+    {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE)
         {
             __try
@@ -123,16 +143,20 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfo(void* EnumCallBack)
                 break;
             }
         }
+    }
 }
 
 __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfoW(void* EnumCallBack)
 {
     if(!EnumCallBack)
         return;
+
     typedef void(TITCALL *fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
-    int libcount=hListLibrary.size();
-    for(int i=0; i<libcount; i++)
+    int libcount = hListLibrary.size();
+
+    for(int i = 0; i < libcount; i++)
+    {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE)
         {
             __try
@@ -144,4 +168,5 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfoW(void* EnumCallBack)
                 break;
             }
         }
+    }
 }
