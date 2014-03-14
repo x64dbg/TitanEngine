@@ -208,7 +208,7 @@
       <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
     <ClCompile Include="Global.Helper.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\TitanEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

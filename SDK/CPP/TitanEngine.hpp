@@ -23,6 +23,23 @@ namespace UE
 
 // ----
 
+enum eStructType : DWORD
+{
+    UE_STRUCT_PE32STRUCT = UE::UE_STRUCT_PE32STRUCT,
+    UE_STRUCT_PE64STRUCT = UE::UE_STRUCT_PE64STRUCT,
+    UE_STRUCT_PESTRUCT = UE::UE_STRUCT_PESTRUCT,
+    UE_STRUCT_IMPORTENUMDATA = UE::UE_STRUCT_IMPORTENUMDATA,
+    UE_STRUCT_THREAD_ITEM_DATA = UE::UE_STRUCT_THREAD_ITEM_DATA,
+    UE_STRUCT_LIBRARY_ITEM_DATA = UE::UE_STRUCT_LIBRARY_ITEM_DATA,
+    UE_STRUCT_LIBRARY_ITEM_DATAW = UE::UE_STRUCT_LIBRARY_ITEM_DATAW,
+    UE_STRUCT_PROCESS_ITEM_DATA = UE::UE_STRUCT_PROCESS_ITEM_DATA,
+    UE_STRUCT_HANDLERARRAY = UE::UE_STRUCT_HANDLERARRAY,
+    UE_STRUCT_PLUGININFORMATION = UE::UE_STRUCT_PLUGININFORMATION,
+    UE_STRUCT_HOOK_ENTRY = UE::UE_STRUCT_HOOK_ENTRY,
+    UE_STRUCT_FILE_STATUS_INFO = UE::UE_STRUCT_FILE_STATUS_INFO,
+    UE_STRUCT_FILE_FIX_INFO = UE::UE_STRUCT_FILE_FIX_INFO
+};
+
 enum eHideLevel : DWORD
 {
     UE_HIDE_PEBONLY = UE::UE_HIDE_PEBONLY,
@@ -2740,6 +2757,10 @@ protected:
     {
         return UE::EngineAddUnpackerWindowLogMessage(szLogMessage);
     }
+    static bool EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize)
+    {
+        return UE::EngineCheckStructAlignment(StructureType, StructureSize);
+    }
 };
 
 class EngineA
@@ -2773,6 +2794,7 @@ public:
     using EngineX::DeleteCreatedDependencies;
     using EngineX::CreateUnpackerWindow;
     using EngineX::AddUnpackerWindowLogMessage;
+    using EngineX::EngineCheckStructAlignment;
 };
 
 class ExtensionManager

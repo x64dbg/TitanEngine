@@ -13,6 +13,20 @@
 
 // Global.Constant.Structure.Declaration:
 // Engine.External:
+#define UE_STRUCT_PE32STRUCT 1
+#define UE_STRUCT_PE64STRUCT 2
+#define UE_STRUCT_PESTRUCT 3
+#define UE_STRUCT_IMPORTENUMDATA 4
+#define UE_STRUCT_THREAD_ITEM_DATA 5
+#define UE_STRUCT_LIBRARY_ITEM_DATA 6
+#define UE_STRUCT_LIBRARY_ITEM_DATAW 7
+#define UE_STRUCT_PROCESS_ITEM_DATA 8
+#define UE_STRUCT_HANDLERARRAY 9
+#define UE_STRUCT_PLUGININFORMATION 10
+#define UE_STRUCT_HOOK_ENTRY 11
+#define UE_STRUCT_FILE_STATUS_INFO 12
+#define UE_STRUCT_FILE_FIX_INFO 13
+
 #define UE_ACCESS_READ 0
 #define UE_ACCESS_WRITE 1
 #define UE_ACCESS_ALL 2
@@ -920,6 +934,7 @@ __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess
 __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies();
 __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack);
 __declspec(dllexport) void TITCALL EngineAddUnpackerWindowLogMessage(char* szLogMessage);
+__declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize);
 // Global.Engine.Extension.Functions:
 __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginLoaded(char* szPluginName);
 __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPluginName);

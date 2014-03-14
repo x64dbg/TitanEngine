@@ -70,6 +70,21 @@
 #pragma pack(push)
 #pragma pack(1)
 
+//EngineCheckStructAlignment
+#define UE_STRUCT_PE32STRUCT 1
+#define UE_STRUCT_PE64STRUCT 2
+#define UE_STRUCT_PESTRUCT 3
+#define UE_STRUCT_IMPORTENUMDATA 4
+#define UE_STRUCT_THREAD_ITEM_DATA 5
+#define UE_STRUCT_LIBRARY_ITEM_DATA 6
+#define UE_STRUCT_LIBRARY_ITEM_DATAW 7
+#define UE_STRUCT_PROCESS_ITEM_DATA 8
+#define UE_STRUCT_HANDLERARRAY 9
+#define UE_STRUCT_PLUGININFORMATION 10
+#define UE_STRUCT_HOOK_ENTRY 11
+#define UE_STRUCT_FILE_STATUS_INFO 12
+#define UE_STRUCT_FILE_FIX_INFO 13
+
 typedef struct
 {
     ULONG_PTR BreakPointAddress;
@@ -587,6 +602,12 @@ typedef struct
     WORD Characteristics;
     DWORD NumberOfRvaAndSizes;
 } PE64Struct, *PPE64Struct;
+
+#ifdef _WIN64
+typedef PE64Struct PEStruct;
+#else
+typedef PE32Struct PEStruct;
+#endif
 
 typedef struct
 {
