@@ -243,7 +243,7 @@ __declspec(dllexport) long long TITCALL ThreaderGetOpenHandleForThread(DWORD Thr
 
 __declspec(dllexport) bool TITCALL ThreaderIsExceptionInMainThread()
 {
-    LPDEBUG_EVENT myDBGEvent;
-    myDBGEvent = (LPDEBUG_EVENT)GetDebugData();
+    LPDEBUG_EVENT myDBGEvent = (LPDEBUG_EVENT)GetDebugData();
+
     return (myDBGEvent->dwThreadId == dbgProcessInformation.dwThreadId);
 }

@@ -247,13 +247,14 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
 
             //maintain thread list
-            int threadcount=hListThread.size();
-            for(int i=0; i<threadcount; i++)
+            for(unsigned int i = 0; i < hListThread.size(); i++)
             {
                 if(hListThread.at(i).dwThreadId == DBGEvent.dwThreadId) //found the thread to remove
                 {
                     //TODO: close handle?
-                    hListThread.erase(hListThread.begin()+i);
+                    EngineCloseHandle(hListThread.at(i).hThread);
+
+                    hListThread.erase(hListThread.begin() + i);
                     break;
                 }
             }
@@ -313,8 +314,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         WideCharToMultiByte(CP_ACP, NULL, NewLibraryData.szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
 
                         //library breakpoint
-                        int libbpcount=LibrarianData.size();
-                        for(int i=libbpcount-1; i>-1; i--)
+                        for(int i = LibrarianData.size() - 1; i >= 0; i--)
                         {
                             ptrLibrarianData=&LibrarianData.at(i);
                             if(!lstrcmpiA(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
@@ -378,10 +378,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 RtlZeroMemory(szAnsiLibraryName, sizeof(szAnsiLibraryName));
                 WideCharToMultiByte(CP_ACP, NULL, hLoadedLibData->szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
-                int libbpcount=LibrarianData.size();
-                for(int i=libbpcount-1; i>-1; i--)
+
+                for(int i= LibrarianData.size() - 1; i >= 0; i--)
                 {
-                    ptrLibrarianData=&LibrarianData.at(i);
+                    ptrLibrarianData = &LibrarianData.at(i);
                     if(!lstrcmpiA(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
                     {
                         if(ptrLibrarianData->bpxType == UE_ON_LIB_UNLOAD || ptrLibrarianData->bpxType == UE_ON_LIB_ALL)
@@ -405,8 +405,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
 
             //maintain library list
-            int libcount=hListLibrary.size();
-            for(int i=0; i<libcount; i++)
+            for(unsigned int i = 0; i < hListLibrary.size(); i++)
             {
                 if(hListLibrary.at(i).BaseOfDll == DBGEvent.u.UnloadDll.lpBaseOfDll &&
                         hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE)

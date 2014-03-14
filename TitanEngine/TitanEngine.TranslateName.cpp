@@ -26,6 +26,7 @@ __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
         }
         szDeviceName[0]++;
     }
+
     while(szDeviceCOMName[3] <= 0x39)
     {
         RtlZeroMemory(TranslatedName, 0x1000);
@@ -43,8 +44,10 @@ __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
         }
         szDeviceCOMName[3]++;
     }
+
     VirtualFree(TranslatedName, NULL, MEM_RELEASE);
-    return(NULL);
+    
+    return NULL;
 }
 
 __declspec(dllexport) void* TITCALL TranslateNativeNameW(wchar_t* szNativeName)
@@ -71,6 +74,7 @@ __declspec(dllexport) void* TITCALL TranslateNativeNameW(wchar_t* szNativeName)
         }
         szDeviceName[0]++;
     }
+
     while(szDeviceCOMName[3] <= 0x39)
     {
         RtlZeroMemory(TranslatedName, 0x1000);
@@ -88,6 +92,8 @@ __declspec(dllexport) void* TITCALL TranslateNativeNameW(wchar_t* szNativeName)
         }
         szDeviceCOMName[3]++;
     }
+
     VirtualFree(TranslatedName, NULL, MEM_RELEASE);
-    return(NULL);
+
+    return NULL;
 }
