@@ -726,6 +726,8 @@ public:
     using DumperX::ConvertVAtoFileOffsetEx;
     using DumperX::ConvertFileOffsetToVA;
     using DumperX::ConvertFileOffsetToVAEx;
+    using DumperX::MemoryReadSafe;
+    using DumperX::MemoryWriteSafe;
 };
 
 class RealignerA;
