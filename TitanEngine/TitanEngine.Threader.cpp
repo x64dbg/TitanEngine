@@ -53,7 +53,7 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                 NewThreadData.ContextSwitches = pIterThread->ContextSwitches;
                 NewThreadData.Priority = pIterThread->Priority;
                 NewThreadData.BasePriority = pIterThread->BasePriority;
-                NewThreadData.ThreadStartAddress = pIterThread->StartAddress;
+                //NewThreadData.ThreadStartAddress = pIterThread->StartAddress; <- wrong value
                 NewThreadData.ThreadState = pIterThread->ThreadState;
                 NewThreadData.WaitReason = pIterThread->WaitReason;
                 NewThreadData.WaitTime = pIterThread->WaitTime;
@@ -63,6 +63,12 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                 if (NewThreadData.hThread)
                 {
                     NewThreadData.TebAddress = GetTEBLocation(NewThreadData.hThread);
+
+                    PVOID startAddress = 0;
+                    if (NtQueryInformationThread(NewThreadData.hThread, ThreadQuerySetWin32StartAddress, &startAddress, sizeof(PVOID), NULL) == STATUS_SUCCESS)
+                    {
+                        NewThreadData.ThreadStartAddress = startAddress;
+                    }
                 }
 
                 hListThread.push_back(NewThreadData);
