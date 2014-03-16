@@ -208,9 +208,10 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
     if(SuspendThread(hThread)) //if previous suspend count is above 0 (which means thread is suspended)
     {
         ResumeThread(hThread); //decrement suspend count
-        return true;
+        return false; //meaning the thread is not active
     }
-    return false;
+    ResumeThread(hThread); //decrement suspend count
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()
