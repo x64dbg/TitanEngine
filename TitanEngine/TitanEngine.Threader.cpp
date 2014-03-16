@@ -5,13 +5,66 @@
 #include "Global.Threader.h"
 #include "Global.Debugger.h"
 
+void updateThreadList( THREAD_ITEM_DATA* NewThreadData )
+{
+    bool notInList = true;
+    unsigned int count = hListThread.size();
+
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if (hListThread.at(i).dwThreadId == NewThreadData->dwThreadId)
+        {
+            notInList = false;
+            CloseHandle(NewThreadData->hThread); //handle not needed
+            hListThread.at(i).BasePriority = NewThreadData->BasePriority;
+            hListThread.at(i).ContextSwitches = NewThreadData->ContextSwitches;
+            hListThread.at(i).Priority = NewThreadData->Priority;
+            hListThread.at(i).TebAddress = NewThreadData->TebAddress;
+            hListThread.at(i).ThreadStartAddress = NewThreadData->ThreadStartAddress;
+            hListThread.at(i).WaitReason = NewThreadData->WaitReason;
+            hListThread.at(i).WaitTime = NewThreadData->WaitTime;
+            hListThread.at(i).ThreadState = NewThreadData->ThreadState;
+            break;
+        }
+    }
+
+    if (notInList)
+    {
+        hListThread.push_back(*NewThreadData);
+    }
+}
+
 // TitanEngine.Threader.functions:
 __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD ProcessId)
 {
-    if(dbgProcessInformation.hProcess != NULL || ProcessId == NULL)
-        return false;
+    bool updateList = false;
+    DWORD dwProcessId = 0;
 
-    std::vector<THREAD_ITEM_DATA>().swap(hListThread); //clear thread list
+    if (ProcessId == NULL && dbgProcessInformation.hProcess != NULL)
+    {
+        updateList = true;
+        dwProcessId = GetProcessId(dbgProcessInformation.hProcess);
+    }
+    else if (ProcessId != NULL && dbgProcessInformation.hProcess != NULL)
+    {
+        updateList = true;
+        dwProcessId = ProcessId;
+    }
+    else if (ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
+    {
+        updateList = false;
+        dwProcessId = ProcessId;
+    }
+    else if (ProcessId == NULL && dbgProcessInformation.hProcess == NULL)
+    {
+        return false;
+    }
+
+    if (updateList == false)
+    {
+        std::vector<THREAD_ITEM_DATA>().swap(hListThread); //clear thread list
+    }
+
 
     THREAD_ITEM_DATA NewThreadData;
     ULONG retLength = 0;
@@ -42,7 +95,7 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
 
     while(TRUE)
     {
-        if (pIter->UniqueProcessId == (HANDLE)ProcessId)
+        if (pIter->UniqueProcessId == (HANDLE)dwProcessId)
         {
             pIterThread = &pIter->Threads[0];
             for (ULONG i = 0; i < pIter->NumberOfThreads; i++)
@@ -71,7 +124,14 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                     }
                 }
 
-                hListThread.push_back(NewThreadData);
+                if (updateList == false)
+                {
+                    hListThread.push_back(NewThreadData);
+                }
+                else
+                {
+                    updateThreadList(&NewThreadData);
+                }
 
                 pIterThread++;
             }
