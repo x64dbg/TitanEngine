@@ -10,31 +10,81 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
 {
     if(dbgProcessInformation.hProcess != NULL || ProcessId == NULL)
         return false;
+
     std::vector<THREAD_ITEM_DATA>().swap(hListThread); //clear thread list
-    THREADENTRY32 ThreadEntry = {};
-    ThreadEntry.dwSize = sizeof THREADENTRY32;
-    HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, ProcessId);
-    if(hSnapShot != INVALID_HANDLE_VALUE)
+
+    THREAD_ITEM_DATA NewThreadData;
+    ULONG retLength = 0;
+    ULONG bufferLength = 1;
+    PSYSTEM_PROCESS_INFORMATION pBuffer = (PSYSTEM_PROCESS_INFORMATION)malloc(bufferLength);
+    PSYSTEM_PROCESS_INFORMATION pIter;
+    PSYSTEM_THREAD_INFORMATION pIterThread;
+
+    if (NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) == STATUS_INFO_LENGTH_MISMATCH)
     {
-        if(Thread32First(hSnapShot, &ThreadEntry))
+        free(pBuffer);
+        bufferLength = retLength + sizeof(SYSTEM_PROCESS_INFORMATION);
+        pBuffer = (PSYSTEM_PROCESS_INFORMATION)malloc(bufferLength);
+        if (!pBuffer)
+            return false;
+
+        if (NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) != STATUS_SUCCESS)
         {
-            do
-            {
-                if(ThreadEntry.th32OwnerProcessID == ProcessId)
-                {
-                    THREAD_ITEM_DATA NewThreadData;
-                    memset(&NewThreadData, 0, sizeof(THREAD_ITEM_DATA));
-                    NewThreadData.dwThreadId = ThreadEntry.th32ThreadID;
-                    NewThreadData.hThread = OpenThread(THREAD_ALL_ACCESS, false, NewThreadData.dwThreadId);
-                    hListThread.push_back(NewThreadData);
-                }
-            }
-            while(Thread32Next(hSnapShot, &ThreadEntry));
+            return false;
         }
-        EngineCloseHandle(hSnapShot);
-        return true;
     }
-    return false;
+    else
+    {
+        return false;
+    }
+
+    pIter = pBuffer;
+
+    while(TRUE)
+    {
+        if (pIter->UniqueProcessId == (HANDLE)ProcessId)
+        {
+            pIterThread = &pIter->Threads[0];
+            for (ULONG i = 0; i < pIter->NumberOfThreads; i++)
+            {
+                ZeroMemory(&NewThreadData, sizeof(THREAD_ITEM_DATA));
+
+                NewThreadData.BasePriority = pIterThread->BasePriority;
+                NewThreadData.ContextSwitches = pIterThread->ContextSwitches;
+                NewThreadData.Priority = pIterThread->Priority;
+                NewThreadData.BasePriority = pIterThread->BasePriority;
+                NewThreadData.ThreadStartAddress = pIterThread->StartAddress;
+                NewThreadData.ThreadState = pIterThread->ThreadState;
+                NewThreadData.WaitReason = pIterThread->WaitReason;
+                NewThreadData.WaitTime = pIterThread->WaitTime;
+                NewThreadData.dwThreadId = (DWORD)pIterThread->ClientId.UniqueThread;
+
+                NewThreadData.hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, NewThreadData.dwThreadId);
+                if (NewThreadData.hThread)
+                {
+                    NewThreadData.TebAddress = GetTEBLocation(NewThreadData.hThread);
+                }
+
+                hListThread.push_back(NewThreadData);
+
+                pIterThread++;
+            }
+
+            break;
+        }
+
+        if (pIter->NextEntryOffset == 0)
+        {
+            break;
+        }
+        else
+        {
+            pIter = (PSYSTEM_PROCESS_INFORMATION)((DWORD_PTR)pIter + (DWORD_PTR)pIter->NextEntryOffset);
+        }
+    }
+
+    free(pBuffer);
+    return (hListThread.size() > 0);
 }
 
 __declspec(dllexport) void* TITCALL ThreaderGetThreadInfo(HANDLE hThread, DWORD ThreadId)
