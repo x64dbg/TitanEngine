@@ -25,7 +25,7 @@ extern DEBUG_EVENT DBGEvent;
 extern DEBUG_EVENT TerminateDBGEvent;
 extern DWORD ProcessExitCode;
 extern HANDLE DBGFileHandle;
-extern ULONG_PTR tlsCallBackList[100];
+extern std::vector<ULONG_PTR> tlsCallBackList;
 extern std::vector<PROCESS_ITEM_DATA> hListProcess;
 extern int engineStepCount;
 extern LPVOID engineStepCallBack;
@@ -42,6 +42,7 @@ extern LPVOID StepOutCallBack;
 long DebugLoopInSecondThread(LPVOID InputParameter);
 void DebuggerReset();
 void ClearProcessList();
+void ClearTlsCallBackList();
 void StepOutStepCallBack();
 
 #endif //_GLOBAL_DEBUGGER_H

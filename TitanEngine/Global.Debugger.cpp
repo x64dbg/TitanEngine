@@ -25,7 +25,7 @@ DEBUG_EVENT DBGEvent = {};
 DEBUG_EVENT TerminateDBGEvent = {};
 DWORD ProcessExitCode = 0;
 HANDLE DBGFileHandle;
-ULONG_PTR tlsCallBackList[100];
+std::vector<ULONG_PTR> tlsCallBackList;
 std::vector<PROCESS_ITEM_DATA> hListProcess;
 int engineStepCount = INFINITE;
 LPVOID engineStepCallBack = NULL;
@@ -72,6 +72,11 @@ void DebuggerReset()
 void ClearProcessList()
 {
     std::vector<PROCESS_ITEM_DATA>().swap(hListProcess);
+}
+
+void ClearTlsCallBackList()
+{
+    std::vector<ULONG_PTR>().swap(tlsCallBackList);
 }
 
 void StepOutStepCallBack()

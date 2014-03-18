@@ -9,72 +9,52 @@ static bool engineBackupTLSx64 = false;
 static IMAGE_TLS_DIRECTORY32 engineBackupTLSDataX86 = {};
 static IMAGE_TLS_DIRECTORY64 engineBackupTLSDataX64 = {};
 static DWORD engineBackupNumberOfCallBacks = NULL;
-static LPVOID engineBackupArrayOfCallBacks = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
+static std::vector<ULONG_PTR> engineBackupArrayOfCallBacks;
 static DWORD engineBackupTLSAddress = NULL;
 
-// TitanEngine.TLSFixer.functions:
+// TitanEngine.TLS.functions:
 __declspec(dllexport) bool TITCALL TLSBreakOnCallBack(LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks, LPVOID bpxCallBack)
 {
+    ULONG_PTR* ReadArrayOfCallBacks = (ULONG_PTR*)ArrayOfCallBacks;
 
-    unsigned int i;
-    LPVOID ReadArrayOfCallBacks = ArrayOfCallBacks;
-
-    if(NumberOfCallBacks > NULL)
+    if(NumberOfCallBacks && EngineIsValidReadPtrEx(ReadArrayOfCallBacks, sizeof(ULONG_PTR)*NumberOfCallBacks) && bpxCallBack)
     {
-        for(i = 0; i < NumberOfCallBacks; i++)
-        {
-            RtlMoveMemory(&tlsCallBackList[i], ReadArrayOfCallBacks, sizeof ULONG_PTR);
-            ReadArrayOfCallBacks = (LPVOID)((ULONG_PTR)ReadArrayOfCallBacks + sizeof ULONG_PTR);
-        }
+        ClearTlsCallBackList(); //clear TLS cb list
+        for(unsigned int i=0; i<NumberOfCallBacks; i++)
+            tlsCallBackList.push_back(ReadArrayOfCallBacks[i]);
         engineTLSBreakOnCallBackAddress = (ULONG_PTR)bpxCallBack;
         engineTLSBreakOnCallBack = true;
         return true;
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSGrabCallBackData(char* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szFileName != NULL)
+    if(szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(TLSGrabCallBackDataW(uniFileName, ArrayOfCallBacks, NumberOfCallBacks));
+        return TLSGrabCallBackDataW(uniFileName, ArrayOfCallBacks, NumberOfCallBacks);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks)
 {
-
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    BOOL FileIs64;
-    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86;
-    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64;
-    ULONG_PTR TLSDirectoryAddress;
-    ULONG_PTR TLSCallBackAddress;
-    ULONG_PTR TLSCompareData = NULL;
-    DWORD NumberOfTLSCallBacks = NULL;
-
+    
     if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
+        PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
         {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            DWORD NumberOfTLSCallBacks = 0;
+            PIMAGE_NT_HEADERS32 PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS64 PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            bool FileIs64;
             if(PEHeader32->OptionalHeader.Magic == 0x10B)
             {
                 FileIs64 = false;
@@ -88,70 +68,84 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 return false;
             }
-            if(!FileIs64)
+            if(!FileIs64) //x86
             {
                 if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != NULL)
                 {
-                    TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                    TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                    ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                     if(TLSDirectoryX86->AddressOfCallBacks != NULL)
                     {
-                        TLSCallBackAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX86->AddressOfCallBacks, true);
+                        ULONG_PTR TLSCompareData = 0;
+                        ULONG_PTR TLSCallBackAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX86->AddressOfCallBacks, true);
                         while(memcmp((LPVOID)TLSCallBackAddress, &TLSCompareData, sizeof ULONG_PTR) != NULL)
                         {
-                            RtlMoveMemory(ArrayOfCallBacks, (LPVOID)TLSCallBackAddress, sizeof ULONG_PTR);
-                            ArrayOfCallBacks = (LPVOID)((ULONG_PTR)ArrayOfCallBacks + sizeof ULONG_PTR);
+                            if(ArrayOfCallBacks)
+                            {
+                                RtlMoveMemory(ArrayOfCallBacks, (LPVOID)TLSCallBackAddress, sizeof ULONG_PTR);
+                                ArrayOfCallBacks = (LPVOID)((ULONG_PTR)ArrayOfCallBacks + sizeof ULONG_PTR);
+                            }
                             TLSCallBackAddress = TLSCallBackAddress + sizeof ULONG_PTR;
                             NumberOfTLSCallBacks++;
                         }
-                        *NumberOfCallBacks = NumberOfTLSCallBacks;
+                        if(NumberOfCallBacks)
+                            *NumberOfCallBacks = NumberOfTLSCallBacks;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         return true;
                     }
                     else
                     {
-                        *NumberOfCallBacks = NULL;
+                        if(NumberOfCallBacks)
+                            *NumberOfCallBacks = 0;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         return false;
                     }
                 }
                 else
                 {
-                    *NumberOfCallBacks = NULL;
+                    if(NumberOfCallBacks)
+                        *NumberOfCallBacks = 0;
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     return false;
                 }
             }
-            else
+            else //x64
             {
                 if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != NULL)
                 {
-                    TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                    TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                    ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                     if(TLSDirectoryX64->AddressOfCallBacks != NULL)
                     {
-                        TLSCallBackAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX64->AddressOfCallBacks, true);
+                        ULONG_PTR TLSCompareData = NULL;
+                        ULONG_PTR TLSCallBackAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX64->AddressOfCallBacks, true);
                         while(memcmp((LPVOID)TLSCallBackAddress, &TLSCompareData, sizeof ULONG_PTR) != NULL)
                         {
-                            RtlMoveMemory(ArrayOfCallBacks, (LPVOID)TLSCallBackAddress, sizeof ULONG_PTR);
-                            ArrayOfCallBacks = (LPVOID)((ULONG_PTR)ArrayOfCallBacks + sizeof ULONG_PTR);
+                            if(ArrayOfCallBacks)
+                            {
+                                RtlMoveMemory(ArrayOfCallBacks, (LPVOID)TLSCallBackAddress, sizeof ULONG_PTR);
+                                ArrayOfCallBacks = (LPVOID)((ULONG_PTR)ArrayOfCallBacks + sizeof ULONG_PTR);
+                            }
                             TLSCallBackAddress = TLSCallBackAddress + sizeof ULONG_PTR;
                             NumberOfTLSCallBacks++;
                         }
-                        *NumberOfCallBacks = NumberOfTLSCallBacks;
+                        if(NumberOfCallBacks)
+                            *NumberOfCallBacks = NumberOfTLSCallBacks;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         return true;
                     }
                     else
                     {
-                        *NumberOfCallBacks = NULL;
+                        if(NumberOfCallBacks)
+                            *NumberOfCallBacks = 0;
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         return false;
                     }
                 }
                 else
                 {
-                    *NumberOfCallBacks = NULL;
+                    if(NumberOfCallBacks)
+                        *NumberOfCallBacks = 0;
                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                     return false;
                 }
@@ -159,89 +153,65 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
         }
         else
         {
-            *NumberOfCallBacks = NULL;
+            if(NumberOfCallBacks)
+                *NumberOfCallBacks = 0;
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             return false;
         }
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBreakOnCallBackEx(char* szFileName, LPVOID bpxCallBack)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szFileName != NULL)
+    if(szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(TLSBreakOnCallBackExW(uniFileName, bpxCallBack));
+        return TLSBreakOnCallBackExW(uniFileName, bpxCallBack);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBreakOnCallBackExW(wchar_t* szFileName, LPVOID bpxCallBack)
 {
-
-    ULONG_PTR TlsArrayOfCallBacks[100];
-    DWORD TlsNumberOfCallBacks;
-
-    RtlZeroMemory(&TlsArrayOfCallBacks, 100 * sizeof ULONG_PTR);
-    if(szFileName != NULL)
+    DWORD NumberOfCallBacks;
+    if(TLSGrabCallBackDataW(szFileName, NULL, &NumberOfCallBacks))
     {
-        if(TLSGrabCallBackDataW(szFileName, &TlsArrayOfCallBacks, &TlsNumberOfCallBacks))
+        DynBuf TlsArrayOfCallBacks(NumberOfCallBacks*sizeof(ULONG_PTR));
+        if(TLSGrabCallBackDataW(szFileName, TlsArrayOfCallBacks.GetPtr(), &NumberOfCallBacks))
         {
-            TLSBreakOnCallBack(&TlsArrayOfCallBacks, TlsNumberOfCallBacks, bpxCallBack);
-            return true;
-        }
-        else
-        {
-            return false;
+            return TLSBreakOnCallBack(TlsArrayOfCallBacks.GetPtr(), NumberOfCallBacks, bpxCallBack);
         }
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSRemoveCallback(char* szFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szFileName != NULL)
+    if(szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(TLSRemoveCallbackW(uniFileName));
+        return TLSRemoveCallbackW(uniFileName);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
 {
-
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    BOOL FileIs64;
-    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86;
-    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64;
-    ULONG_PTR TLSDirectoryAddress;
-
     if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
+        PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
         {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS32 PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS64 PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            bool FileIs64;
             if(PEHeader32->OptionalHeader.Magic == 0x10B)
             {
                 FileIs64 = false;
@@ -261,8 +231,8 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
                 {
                     __try
                     {
-                        TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                        TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                        ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                        PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                         if(TLSDirectoryX86->AddressOfCallBacks != NULL)
                         {
                             TLSDirectoryX86->AddressOfCallBacks = NULL;
@@ -293,8 +263,8 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
                 {
                     __try
                     {
-                        TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                        TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                        ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                        PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                         if(TLSDirectoryX64->AddressOfCallBacks != NULL)
                         {
                             TLSDirectoryX64->AddressOfCallBacks = NULL;
@@ -328,43 +298,32 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallbackW(wchar_t* szFileName)
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSRemoveTable(char* szFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szFileName != NULL)
+    if(szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(TLSRemoveTableW(uniFileName));
+        return TLSRemoveTableW(uniFileName);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
 {
-
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    BOOL FileIs64;
-    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86;
-    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64;
-    ULONG_PTR TLSDirectoryAddress;
-
     if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
+        PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
         {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS32 PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS64 PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            bool FileIs64;
             if(PEHeader32->OptionalHeader.Magic == 0x10B)
             {
                 FileIs64 = false;
@@ -384,8 +343,8 @@ __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
                 {
                     __try
                     {
-                        TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                        TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                        ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                        PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                         PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = NULL;
                         PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = NULL;
                         RtlZeroMemory(TLSDirectoryX86, sizeof IMAGE_TLS_DIRECTORY32);
@@ -410,8 +369,8 @@ __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
                 {
                     __try
                     {
-                        TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                        TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                        ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                        PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                         PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = NULL;
                         PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = NULL;
                         RtlZeroMemory(TLSDirectoryX64, sizeof IMAGE_TLS_DIRECTORY64);
@@ -439,52 +398,41 @@ __declspec(dllexport) bool TITCALL TLSRemoveTableW(wchar_t* szFileName)
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBackupData(char* szFileName)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szFileName != NULL)
+    if(szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(TLSBackupDataW(uniFileName));
+        return TLSBackupDataW(uniFileName);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
 {
-
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    BOOL FileIs64;
-    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86;
-    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64;
-    ULONG_PTR TLSDirectoryAddress;
-    ULONG_PTR TLSCallBackAddress;
-    ULONG_PTR TLSCompareData = NULL;
-    DWORD NumberOfTLSCallBacks = NULL;
-    LPVOID ArrayOfCallBacks = &engineBackupArrayOfCallBacks;
-    LPDWORD NumberOfCallBacks = &engineBackupNumberOfCallBacks;
-
-    engineBackupTLSAddress = NULL;
-    RtlZeroMemory(engineBackupArrayOfCallBacks, 0x1000);
-    RtlZeroMemory(&engineBackupTLSDataX86, sizeof IMAGE_TLS_DIRECTORY32);
-    RtlZeroMemory(&engineBackupTLSDataX64, sizeof IMAGE_TLS_DIRECTORY64);
     if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
+        PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
         {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            DWORD NumberOfTLSCallBacks = NULL;
+            engineBackupTLSAddress = NULL;
+            RtlZeroMemory(&engineBackupTLSDataX86, sizeof IMAGE_TLS_DIRECTORY32);
+            RtlZeroMemory(&engineBackupTLSDataX64, sizeof IMAGE_TLS_DIRECTORY64);
+            ClearTlsVector(&engineBackupArrayOfCallBacks); //clear backup array
+
+            std::vector<ULONG_PTR>* ArrayOfCallBacks = &engineBackupArrayOfCallBacks;
+            LPDWORD NumberOfCallBacks = &engineBackupNumberOfCallBacks;
+
+            PIMAGE_NT_HEADERS32 PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS64 PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            bool FileIs64;
             if(PEHeader32->OptionalHeader.Magic == 0x10B)
             {
                 FileIs64 = false;
@@ -498,7 +446,7 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 return false;
             }
-            if(!FileIs64)
+            if(!FileIs64) //x86
             {
                 if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != NULL)
                 {
@@ -506,17 +454,17 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
                     {
                         engineBackupTLSx64 = false;
                         engineBackupTLSAddress = PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
-                        TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                        TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                        ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader32->OptionalHeader.ImageBase + PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                        PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                         RtlMoveMemory(&engineBackupTLSDataX86, (LPVOID)TLSDirectoryX86, sizeof IMAGE_TLS_DIRECTORY32);
                         if(TLSDirectoryX86->AddressOfCallBacks != NULL)
                         {
-                            TLSCallBackAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX86->AddressOfCallBacks, true);
+                            ULONG_PTR TLSCompareData = 0;
+                            ULONG_PTR* TLSCallBackAddress = (ULONG_PTR*)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX86->AddressOfCallBacks, true);
                             while(memcmp((LPVOID)TLSCallBackAddress, &TLSCompareData, sizeof ULONG_PTR) != NULL)
                             {
-                                RtlMoveMemory(ArrayOfCallBacks, (LPVOID)TLSCallBackAddress, sizeof ULONG_PTR);
-                                ArrayOfCallBacks = (LPVOID)((ULONG_PTR)ArrayOfCallBacks + sizeof ULONG_PTR);
-                                TLSCallBackAddress = TLSCallBackAddress + sizeof ULONG_PTR;
+                                ArrayOfCallBacks->push_back(*TLSCallBackAddress);
+                                TLSCallBackAddress++; //next callback
                                 NumberOfTLSCallBacks++;
                             }
                             *NumberOfCallBacks = NumberOfTLSCallBacks;
@@ -544,7 +492,7 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
                     return false;
                 }
             }
-            else
+            else //x64
             {
                 if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != NULL)
                 {
@@ -552,17 +500,17 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
                     {
                         engineBackupTLSx64 = true;
                         engineBackupTLSAddress = PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
-                        TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-                        TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
+                        ULONG_PTR TLSDirectoryAddress = (ULONG_PTR)((ULONG_PTR)PEHeader64->OptionalHeader.ImageBase + PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                        PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryAddress, true);
                         RtlMoveMemory(&engineBackupTLSDataX64, (LPVOID)TLSDirectoryX64, sizeof IMAGE_TLS_DIRECTORY64);
                         if(TLSDirectoryX64->AddressOfCallBacks != NULL)
                         {
-                            TLSCallBackAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX64->AddressOfCallBacks, true);
+                            ULONG_PTR TLSCompareData = 0;
+                            ULONG_PTR* TLSCallBackAddress = (ULONG_PTR*)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)TLSDirectoryX64->AddressOfCallBacks, true);
                             while(memcmp((LPVOID)TLSCallBackAddress, &TLSCompareData, sizeof ULONG_PTR) != NULL)
                             {
-                                RtlMoveMemory(ArrayOfCallBacks, (LPVOID)TLSCallBackAddress, sizeof ULONG_PTR);
-                                ArrayOfCallBacks = (LPVOID)((ULONG_PTR)ArrayOfCallBacks + sizeof ULONG_PTR);
-                                TLSCallBackAddress = TLSCallBackAddress + sizeof ULONG_PTR;
+                                ArrayOfCallBacks->push_back(*TLSCallBackAddress);
+                                TLSCallBackAddress++; //next callback
                                 NumberOfTLSCallBacks++;
                             }
                             *NumberOfCallBacks = NumberOfTLSCallBacks;
@@ -593,18 +541,16 @@ __declspec(dllexport) bool TITCALL TLSBackupDataW(wchar_t* szFileName)
         }
         else
         {
-            *NumberOfCallBacks = NULL;
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             return false;
         }
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSRestoreData()
 {
-
     ULONG_PTR ueNumberOfBytesRead = NULL;
-
     if(dbgProcessInformation.hProcess != NULL && engineBackupTLSAddress != NULL)
     {
         if(engineBackupTLSx64)
@@ -613,7 +559,11 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
             {
                 if(engineBackupTLSDataX64.AddressOfCallBacks != NULL && engineBackupNumberOfCallBacks != NULL)
                 {
-                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX64.AddressOfCallBacks + GetDebuggedFileBaseAddress()), engineBackupArrayOfCallBacks, sizeof IMAGE_TLS_DIRECTORY64, &ueNumberOfBytesRead))
+                    DynBuf BackupData(sizeof(ULONG_PTR)*engineBackupArrayOfCallBacks.size());
+                    ULONG_PTR* Backup=(ULONG_PTR*)BackupData.GetPtr();
+                    for(unsigned int i=0; i<engineBackupArrayOfCallBacks.size(); i++)
+                        Backup[i]=engineBackupArrayOfCallBacks.at(i);
+                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX64.AddressOfCallBacks + GetDebuggedFileBaseAddress()), Backup, BackupData.Size(), &ueNumberOfBytesRead))
                     {
                         engineBackupTLSAddress = NULL;
                         return true;
@@ -632,7 +582,11 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
             {
                 if(engineBackupTLSDataX86.AddressOfCallBacks != NULL && engineBackupNumberOfCallBacks != NULL)
                 {
-                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX86.AddressOfCallBacks + GetDebuggedFileBaseAddress()), engineBackupArrayOfCallBacks, sizeof IMAGE_TLS_DIRECTORY32, &ueNumberOfBytesRead))
+                    DynBuf BackupData(sizeof(ULONG_PTR)*engineBackupArrayOfCallBacks.size());
+                    ULONG_PTR* Backup=(ULONG_PTR*)BackupData.GetPtr();
+                    for(unsigned int i=0; i<engineBackupArrayOfCallBacks.size(); i++)
+                        Backup[i]=engineBackupArrayOfCallBacks.at(i);
+                    if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX86.AddressOfCallBacks + GetDebuggedFileBaseAddress()), Backup, BackupData.Size(), &ueNumberOfBytesRead))
                     {
                         engineBackupTLSAddress = NULL;
                         return true;
@@ -648,24 +602,18 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_PTR StorePlace, ULONG_PTR StorePlaceRVA, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
-
-    BOOL FileIs64;
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
-    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86;
-    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64;
-    ULONG_PTR TLSWriteData = StorePlaceRVA;
-
     if(FileMapVA != NULL)
     {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
+        PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, NULL, NULL, DOSHeader, true))
         {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS32 PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            PIMAGE_NT_HEADERS64 PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+            bool FileIs64;
+            ULONG_PTR TLSWriteData = StorePlaceRVA;
             if(PEHeader32->OptionalHeader.Magic == 0x10B)
             {
                 FileIs64 = false;
@@ -684,7 +632,7 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_P
                 {
                     PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = (DWORD)StorePlaceRVA;
                     PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = sizeof IMAGE_TLS_DIRECTORY32;
-                    TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)StorePlace;
+                    PIMAGE_TLS_DIRECTORY32 TLSDirectoryX86 = (PIMAGE_TLS_DIRECTORY32)StorePlace;
                     TLSDirectoryX86->StartAddressOfRawData = (DWORD)TLSWriteData;
                     TLSDirectoryX86->EndAddressOfRawData = (DWORD)TLSWriteData + 0x10;
                     TLSDirectoryX86->AddressOfIndex = (DWORD)TLSWriteData + 0x14;
@@ -703,7 +651,7 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_P
                 {
                     PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress = (DWORD)StorePlaceRVA;
                     PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size = sizeof IMAGE_TLS_DIRECTORY64;
-                    TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)StorePlace;
+                    PIMAGE_TLS_DIRECTORY64 TLSDirectoryX64 = (PIMAGE_TLS_DIRECTORY64)StorePlace;
                     TLSDirectoryX64->StartAddressOfRawData = TLSWriteData;
                     TLSDirectoryX64->EndAddressOfRawData = TLSWriteData + 0x20;
                     TLSDirectoryX64->AddressOfIndex = TLSWriteData + 0x28;
@@ -724,39 +672,30 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTable(ULONG_PTR FileMapVA, ULONG_P
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBuildNewTableEx(char* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
-
     wchar_t uniFileName[MAX_PATH] = {};
-
-    if(szFileName != NULL)
+    if(szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        return(TLSBuildNewTableExW(uniFileName, szSectionName, ArrayOfCallBacks, NumberOfCallBacks));
+        return TLSBuildNewTableExW(uniFileName, szSectionName, ArrayOfCallBacks, NumberOfCallBacks);
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 __declspec(dllexport) bool TITCALL TLSBuildNewTableExW(wchar_t* szFileName, char* szSectionName, LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks)
 {
-
+    ULONG_PTR tlsImageBase = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_IMAGEBASE);
+    DWORD NewSectionVO = AddNewSectionW(szFileName, szSectionName, sizeof IMAGE_TLS_DIRECTORY64 * 2);
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    DWORD NewSectionVO = NULL;
-    DWORD NewSectionFO = NULL;
-    bool ReturnValue = false;
-    ULONG_PTR tlsImageBase;
-
-    tlsImageBase = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_IMAGEBASE);
-    NewSectionVO = AddNewSectionW(szFileName, szSectionName, sizeof IMAGE_TLS_DIRECTORY64 * 2);
     if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
-        NewSectionFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, NewSectionVO + tlsImageBase, true);
-        ReturnValue = TLSBuildNewTable(FileMapVA, NewSectionFO, NewSectionVO, ArrayOfCallBacks, NumberOfCallBacks);
+        DWORD NewSectionFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, NewSectionVO + tlsImageBase, true);
+        bool ReturnValue = TLSBuildNewTable(FileMapVA, NewSectionFO, NewSectionVO, ArrayOfCallBacks, NumberOfCallBacks);
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
         if(ReturnValue)
         {
@@ -767,8 +706,5 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTableExW(wchar_t* szFileName, char
             return false;
         }
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }

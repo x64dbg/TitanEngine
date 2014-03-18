@@ -588,13 +588,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         if(engineTLSBreakOnCallBack) //set TLS callback breakpoints
                         {
-                            int i = NULL;
-                            while(tlsCallBackList[i] != NULL)
-                            {
-                                SetBPX((ULONG_PTR)tlsCallBackList[i], UE_SINGLESHOOT, (LPVOID)engineTLSBreakOnCallBackAddress);
-                                tlsCallBackList[i] = NULL;
-                                i++;
-                            }
+                            for(unsigned int i=0; i<tlsCallBackList.size(); i++)
+                                SetBPX(tlsCallBackList.at(i), UE_SINGLESHOOT, (LPVOID)engineTLSBreakOnCallBackAddress);
+                            ClearTlsCallBackList();
                             engineTLSBreakOnCallBackAddress = NULL;
                             engineTLSBreakOnCallBack = false;
                         }
