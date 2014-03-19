@@ -15,6 +15,12 @@ __declspec(dllexport) void TITCALL SetBPXOptions(long DefaultBreakPointType)
 {
     if(DefaultBreakPointType == UE_BREAKPOINT_INT3 || DefaultBreakPointType == UE_BREAKPOINT_LONG_INT3 || DefaultBreakPointType == UE_BREAKPOINT_UD2)
         engineDefaultBreakPointType = DefaultBreakPointType;
+    else if(DefaultBreakPointType == UE_BREAKPOINT_TYPE_INT3)
+        engineDefaultBreakPointType = UE_BREAKPOINT_INT3;
+    else if(DefaultBreakPointType == UE_BREAKPOINT_TYPE_LONG_INT3)
+        engineDefaultBreakPointType = UE_BREAKPOINT_LONG_INT3;
+    else if(DefaultBreakPointType == UE_BREAKPOINT_TYPE_UD2)
+        engineDefaultBreakPointType = UE_BREAKPOINT_UD2;
 }
 
 __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
