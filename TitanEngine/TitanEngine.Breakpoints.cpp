@@ -13,7 +13,8 @@ static BYTE INT3LongBreakPoint[2] = {0xCD, 0x03};
 
 __declspec(dllexport) void TITCALL SetBPXOptions(long DefaultBreakPointType)
 {
-    engineDefaultBreakPointType = DefaultBreakPointType;
+    if(DefaultBreakPointType == UE_BREAKPOINT_INT3 || DefaultBreakPointType == UE_BREAKPOINT_LONG_INT3 || DefaultBreakPointType == UE_BREAKPOINT_UD2)
+        engineDefaultBreakPointType = DefaultBreakPointType;
 }
 
 __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
@@ -191,13 +192,7 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
     memset(&NewBreakPoint, 0, sizeof(BreakPointDetail));
     if(bpxType < UE_BREAKPOINT_TYPE_INT3)
     {
-        if(engineDefaultBreakPointType == UE_BREAKPOINT_INT3)
-        {
-            SelectedBreakPointType = UE_BREAKPOINT_INT3;
-            NewBreakPoint.BreakPointSize = 1;
-            bpxDataPrt = &INT3BreakPoint;
-        }
-        else if(engineDefaultBreakPointType == UE_BREAKPOINT_LONG_INT3)
+        if(engineDefaultBreakPointType == UE_BREAKPOINT_LONG_INT3)
         {
             SelectedBreakPointType = UE_BREAKPOINT_LONG_INT3;
             NewBreakPoint.BreakPointSize = 2;
@@ -208,6 +203,12 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
             SelectedBreakPointType = UE_BREAKPOINT_UD2;
             NewBreakPoint.BreakPointSize = 2;
             bpxDataPrt = &UD2BreakPoint;
+        }
+        else //default
+        {
+            SelectedBreakPointType = UE_BREAKPOINT_INT3;
+            NewBreakPoint.BreakPointSize = 1;
+            bpxDataPrt = &INT3BreakPoint;
         }
     }
     else
@@ -235,8 +236,6 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
     }
     //set breakpoint in process
     bpxDataCmpPtr = (PMEMORY_COMPARE_HANDLER)bpxDataPrt;
-    VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-    OldProtect = MemInfo.Protect;
     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, NewBreakPoint.BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
     if(ReadProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &NewBreakPoint.OriginalByte[0], NewBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
     {
