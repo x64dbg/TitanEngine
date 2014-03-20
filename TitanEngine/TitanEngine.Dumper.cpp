@@ -45,11 +45,18 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         DOSHeader = (PIMAGE_DOS_HEADER)ueReadBuffer;
         PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
 
-        if((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
+        if ((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
         {
-            if(CalculatedHeaderSize % 0x1000 == NULL)
+            return false;
+        }
+
+        CalculatedHeaderSize = DOSHeader->e_lfanew + sizeof(IMAGE_NT_HEADERS64) + (sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections);
+
+        if(CalculatedHeaderSize > 0x1000)
+        {
+            if(CalculatedHeaderSize % 0x1000 != NULL)
             {
-                AlignedHeaderSize = 0x1000;
+                AlignedHeaderSize = ((CalculatedHeaderSize / 0x1000) + 1) * 0x1000;
             }
             else
             {
