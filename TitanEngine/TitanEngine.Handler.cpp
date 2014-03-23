@@ -9,11 +9,11 @@ bool NtQuerySysHandleInfo(DynBuf& buf)
 
     buf.Allocate(sizeof(SYSTEM_HANDLE_INFORMATION));
 
-    NtQuerySystemInformation(SystemHandleInformation, buf.GetPtr(), buf.Size(), &RequiredSize);
+    NtQuerySystemInformation(SystemHandleInformation, buf.GetPtr(), (ULONG)buf.Size(), &RequiredSize);
 
     buf.Allocate(RequiredSize + sizeof(SYSTEM_HANDLE_INFORMATION));
 
-    return (NtQuerySystemInformation(SystemHandleInformation, buf.GetPtr(), buf.Size(), &RequiredSize) >= 0);
+    return (NtQuerySystemInformation(SystemHandleInformation, buf.GetPtr(), (ULONG)buf.Size(), &RequiredSize) >= 0);
 }
 
 
@@ -75,12 +75,9 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
     bool NameFound = false;
     HANDLE myHandle = NULL;
     ULONG RequiredSize = NULL;
-    OBJECT_BASIC_INFORMATION ObjectBasicInfo = {0};
     char ObjectNameInfo[0x1000] = {0};
     POBJECT_NAME_INFORMATION pObjectNameInfo = (POBJECT_NAME_INFORMATION)ObjectNameInfo;
     LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    LPVOID tmpHandleFullName = NULL;
-
 
     DynBuf hinfo;
     if (!NtQuerySysHandleInfo(hinfo))
@@ -97,23 +94,19 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
     {
         if((DWORD)pHandle->UniqueProcessId == ProcessId && (HANDLE)pHandle->HandleValue == hHandle)
         {
-            //if(!(HandleInfo->GrantedAccess & SYNCHRONIZE) || ((HandleInfo->GrantedAccess & SYNCHRONIZE) && ((WORD)HandleInfo->GrantedAccess != 0x19F9))){// && (WORD)HandleInfo->GrantedAccess != 0x89))){
-            if(pHandle->GrantedAccess != 0x0012019F)
+            if(pHandle->GrantedAccess != 0x0012019F) //Filter, because this GrantedAccess type can cause deadlocks!
             {
                 if(DuplicateHandle(hProcess, hHandle, GetCurrentProcess(), &myHandle, NULL, FALSE, DUPLICATE_SAME_ACCESS))
                 {
-                    RtlZeroMemory(&ObjectBasicInfo, sizeof(OBJECT_BASIC_INFORMATION));
-                    NtQueryObject(myHandle, ObjectBasicInformation, &ObjectBasicInfo, sizeof(OBJECT_BASIC_INFORMATION), &RequiredSize);
                     NtQueryObject(myHandle, ObjectNameInformation, ObjectNameInfo, sizeof(ObjectNameInfo), &RequiredSize);
-                    RtlZeroMemory(HandleFullName, 0x1000);
+                    ZeroMemory(HandleFullName, 0x1000);
                     if(pObjectNameInfo->Name.Length != NULL)
                     {
-                        //WideCharToMultiByte(CP_ACP, NULL, (LPCWSTR)pObjectNameInfo->Name.Buffer, -1, (LPSTR)HandleFullName, 0x1000, NULL, NULL);
-                        wcscpy((wchar_t*)HandleFullName, (wchar_t*)pObjectNameInfo->Name.Buffer);
+                        wcscpy((wchar_t*)HandleFullName, pObjectNameInfo->Name.Buffer);
                         NameFound = true;
                         if(TranslateName)
                         {
-                            tmpHandleFullName = TranslateNativeNameW((wchar_t*)HandleFullName);
+                            LPVOID tmpHandleFullName = TranslateNativeNameW((wchar_t*)HandleFullName);
                             if(tmpHandleFullName != NULL)
                             {
                                 VirtualFree(HandleFullName, NULL, MEM_RELEASE);
@@ -147,7 +140,7 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
     if (name)
     {
         LPVOID HandleFullName = VirtualAlloc(NULL, wcslen(name) + 1, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
-        WideCharToMultiByte(CP_ACP, NULL, name, -1, (LPSTR)HandleFullName, wcslen(name) + 1, NULL, NULL);
+        WideCharToMultiByte(CP_ACP, NULL, name, -1, (LPSTR)HandleFullName, (int)wcslen(name) + 1, NULL, NULL);
         VirtualFree(name, NULL, MEM_RELEASE);
 
         return HandleFullName;
@@ -707,12 +700,11 @@ __declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandleW(HANDLE hProce
 }
 __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutex(char* szMutexString)
 {
-
-    wchar_t uniMutexString[MAX_PATH] = {};
+    wchar_t uniMutexString[MAX_PATH] = {0};
 
     if(szMutexString != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szMutexString, lstrlenA(szMutexString)+1, uniMutexString, sizeof(uniMutexString)/(sizeof(uniMutexString[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szMutexString, -1, uniMutexString, _countof(uniMutexString));
         return(HandlerGetProcessIdWhichCreatedMutexW(uniMutexString));
     }
     else
@@ -722,7 +714,7 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutex(char* sz
 }
 __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t* szMutexString)
 {
-    if(!szMutexString || lstrlenW(szMutexString)>=512)
+    if(!szMutexString || wcslen(szMutexString) >= 450)
         return 0;
     HANDLE hProcess = NULL;
     DWORD ReturnData = NULL;
@@ -757,7 +749,7 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
             {
                 EngineCloseHandle(hProcess);
             }
-            hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
+            hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, FALSE, HandleInfo->ProcessId);
             LastProcessId = HandleInfo->ProcessId;
         }
         if(hProcess != NULL)
