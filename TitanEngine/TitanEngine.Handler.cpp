@@ -3,69 +3,69 @@
 #include "Global.Handle.h"
 
 
-void NtQuerySysHandleInfo(DynBuf& buf)
+bool NtQuerySysHandleInfo(DynBuf& buf)
 {
-    DynBuf QSB;
     ULONG RequiredSize = NULL;
 
-    QSB.Allocate(0x2000);
-    while(NtQuerySystemInformation(SystemHandleInformation, QSB.GetPtr(), QSB.Size(), &RequiredSize) == (NTSTATUS)0xC0000004L)
-    {
-        QSB.Allocate(RequiredSize);
-    }
+    buf.Allocate(sizeof(SYSTEM_HANDLE_INFORMATION));
+
+    NtQuerySystemInformation(SystemHandleInformation, buf.GetPtr(), buf.Size(), &RequiredSize);
+
+    buf.Allocate(RequiredSize + sizeof(SYSTEM_HANDLE_INFORMATION));
+
+    return (NtQuerySystemInformation(SystemHandleInformation, buf.GetPtr(), buf.Size(), &RequiredSize) >= 0);
 }
 
 
 // TitanEngine.Handler.functions:
 __declspec(dllexport) long TITCALL HandlerGetActiveHandleCount(DWORD ProcessId)
 {
-
     int HandleCount = 0;
-    ULONG TotalHandleCount = 0;
-    PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
+
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
+    PSYSTEM_HANDLE_INFORMATION HandleInfo = (PSYSTEM_HANDLE_INFORMATION)QuerySystemBuffer;
+    PSYSTEM_HANDLE_TABLE_ENTRY_INFO pHandle = HandleInfo->Handles;
 
-    RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
-    QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
-    HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
-    while(TotalHandleCount > NULL)
+    for (ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
     {
-        if(HandleInfo->ProcessId == ProcessId)
+        if((DWORD)pHandle->UniqueProcessId == ProcessId)
         {
             HandleCount++;
         }
-        HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
-        TotalHandleCount--;
+
+        pHandle++;
     }
 
-    return(HandleCount);
+    return HandleCount;
 }
 __declspec(dllexport) bool TITCALL HandlerIsHandleOpen(DWORD ProcessId, HANDLE hHandle)
 {
     bool HandleActive = false;
-    ULONG TotalHandleCount = NULL;
-    PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return false;
+
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
-    RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
-    QuerySystemBuffer = (LPVOID)((ULONG_PTR)QuerySystemBuffer + 4);
-    HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)QuerySystemBuffer;
-    while(TotalHandleCount > NULL)
+    PSYSTEM_HANDLE_INFORMATION HandleInfo = (PSYSTEM_HANDLE_INFORMATION)QuerySystemBuffer;
+    PSYSTEM_HANDLE_TABLE_ENTRY_INFO pHandle = HandleInfo->Handles;
+
+
+    for (ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
     {
-        if(HandleInfo->ProcessId == ProcessId && (HANDLE)HandleInfo->hHandle == hHandle)
+        if((DWORD)pHandle->UniqueProcessId == ProcessId && (HANDLE)pHandle->HandleValue == hHandle)
         {
             HandleActive = true;
             break;
         }
-        HandleInfo = (PNTDLL_QUERY_HANDLE_INFO)((ULONG_PTR)HandleInfo + sizeof NTDLL_QUERY_HANDLE_INFO);
-        TotalHandleCount--;
+
+        pHandle++;
     }
 
     return HandleActive;
@@ -86,7 +86,8 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD 
 
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
 
@@ -155,7 +156,8 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
     LPVOID tmpHandleFullName = NULL;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
 
@@ -222,7 +224,8 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenHandles(DWORD ProcessId, 
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
@@ -258,7 +261,8 @@ __declspec(dllexport) long long TITCALL HandlerGetHandleDetails(HANDLE hProcess,
 
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
@@ -380,7 +384,8 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandlesW(wchar_t* szFileO
     LPVOID tmpHandleFullName = NULL;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
 
@@ -486,7 +491,8 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
 
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
 
@@ -588,7 +594,8 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
     LPVOID tmpHandleFullName = NULL;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
 
@@ -670,7 +677,8 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
     PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
@@ -793,7 +801,8 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
     lstrcatW(RealMutexName, szMutexString);
 
     DynBuf hinfo;
-    NtQuerySysHandleInfo(hinfo);
+    if (!NtQuerySysHandleInfo(hinfo))
+        return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
     RtlMoveMemory(&TotalHandleCount, QuerySystemBuffer, sizeof ULONG);
