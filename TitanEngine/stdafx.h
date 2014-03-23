@@ -784,42 +784,7 @@ typedef struct
     ACCESS_MASK GrantedAccess;
 } NTDLL_QUERY_HANDLE_INFO, *PNTDLL_QUERY_HANDLE_INFO;
 
-/*typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
-	ULONG Attributes;
-	ACCESS_MASK GrantedAccess;
-	ULONG HandleCount;
-	ULONG PointerCount;
-	ULONG PagedPoolUsage;
-	ULONG NonPagedPoolUsage;
-	ULONG Reserved[3];
-	ULONG NameInformationLength;
-	ULONG TypeInformationLength;
-	ULONG SecurityDescriptorLength;
-	LARGE_INTEGER CreateTime;
-} PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;*/
 
-typedef struct _PUBLIC_OBJECT_NAME_INFORMATION   // Information Class 1
-{
-    UNICODE_STRING Name;
-} PUBLIC_OBJECT_NAME_INFORMATION, *PPUBLIC_OBJECT_NAME_INFORMATION;
-
-/*typedef struct _PUBLIC_OBJECT_TYPE_INFORMATION { // Information Class 2
-	UNICODE_STRING Name;
-	ULONG ObjectCount;
-	ULONG HandleCount;
-	ULONG Reserved1[4];
-	ULONG PeakObjectCount;
-	ULONG PeakHandleCount;
-	ULONG Reserved2[4];
-	ULONG InvalidAttributes;
-	GENERIC_MAPPING GenericMapping;
-	ULONG ValidAccess;
-	UCHAR Unknown;
-	BOOLEAN MaintainHandleDatabase;
-	POOL_TYPE PoolType;
-	ULONG PagedPoolUsage;
-	ULONG NonPagedPoolUsage;
-} PUBLIC_OBJECT_TYPE_INFORMATION, *PPUBLIC_OBJECT_TYPE_INFORMATION;*/
 
 typedef void (*PPEBLOCKROUTINE)(
     PVOID PebLock

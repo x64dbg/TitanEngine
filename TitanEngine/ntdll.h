@@ -170,16 +170,68 @@ typedef struct _SYSTEM_PROCESS_INFORMATION
     SYSTEM_THREAD_INFORMATION Threads[1];
 } SYSTEM_PROCESS_INFORMATION, *PSYSTEM_PROCESS_INFORMATION;
 
-typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION
+
+typedef struct _OBJECT_BASIC_INFORMATION
 {
     ULONG Attributes;
     ACCESS_MASK GrantedAccess;
     ULONG HandleCount;
     ULONG PointerCount;
+    ULONG PagedPoolCharge;
+    ULONG NonPagedPoolCharge;
+    ULONG Reserved[ 3 ];
+    ULONG NameInfoSize;
+    ULONG TypeInfoSize;
+    ULONG SecurityDescriptorSize;
+    LARGE_INTEGER CreationTime;
+} OBJECT_BASIC_INFORMATION, *POBJECT_BASIC_INFORMATION;
 
-    ULONG Reserved[10];    // reserved for internal use
+typedef struct _OBJECT_NAME_INFORMATION
+{
+    UNICODE_STRING Name;
+} OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
 
-} PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;
+typedef struct _OBJECT_TYPE_INFORMATION
+{
+    UNICODE_STRING TypeName;
+    ULONG TotalNumberOfObjects;
+    ULONG TotalNumberOfHandles;
+    ULONG TotalPagedPoolUsage;
+    ULONG TotalNonPagedPoolUsage;
+    ULONG TotalNamePoolUsage;
+    ULONG TotalHandleTableUsage;
+    ULONG HighWaterNumberOfObjects;
+    ULONG HighWaterNumberOfHandles;
+    ULONG HighWaterPagedPoolUsage;
+    ULONG HighWaterNonPagedPoolUsage;
+    ULONG HighWaterNamePoolUsage;
+    ULONG HighWaterHandleTableUsage;
+    ULONG InvalidAttributes;
+    GENERIC_MAPPING GenericMapping;
+    ULONG ValidAccessMask;
+    BOOLEAN SecurityRequired;
+    BOOLEAN MaintainHandleCount;
+    ULONG PoolType;
+    ULONG DefaultPagedPoolCharge;
+    ULONG DefaultNonPagedPoolCharge;
+} OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
+
+typedef struct _OBJECT_TYPES_INFORMATION
+{
+    ULONG NumberOfTypes;
+    OBJECT_TYPE_INFORMATION TypeInformation[1];
+} OBJECT_TYPES_INFORMATION, *POBJECT_TYPES_INFORMATION;
+
+//typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION
+//{
+//    ULONG Attributes;
+//    ACCESS_MASK GrantedAccess;
+//    ULONG HandleCount;
+//    ULONG PointerCount;
+//
+//    ULONG Reserved[10];    // reserved for internal use
+//
+//} PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;
 
 typedef struct __PUBLIC_OBJECT_TYPE_INFORMATION
 {
