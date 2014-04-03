@@ -5,36 +5,152 @@
 #include "Global.Threader.h"
 #include "Global.Debugger.h"
 
+void updateThreadList( THREAD_ITEM_DATA* NewThreadData )
+{
+    bool notInList = true;
+    unsigned int count = hListThread.size();
+
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if (hListThread.at(i).dwThreadId == NewThreadData->dwThreadId)
+        {
+            notInList = false;
+            CloseHandle(NewThreadData->hThread); //handle not needed
+            hListThread.at(i).BasePriority = NewThreadData->BasePriority;
+            hListThread.at(i).ContextSwitches = NewThreadData->ContextSwitches;
+            hListThread.at(i).Priority = NewThreadData->Priority;
+            hListThread.at(i).TebAddress = NewThreadData->TebAddress;
+            hListThread.at(i).ThreadStartAddress = NewThreadData->ThreadStartAddress;
+            hListThread.at(i).WaitReason = NewThreadData->WaitReason;
+            hListThread.at(i).WaitTime = NewThreadData->WaitTime;
+            hListThread.at(i).ThreadState = NewThreadData->ThreadState;
+            break;
+        }
+    }
+
+    if (notInList)
+    {
+        hListThread.push_back(*NewThreadData);
+    }
+}
+
 // TitanEngine.Threader.functions:
 __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD ProcessId)
 {
-    if(dbgProcessInformation.hProcess != NULL || ProcessId == NULL)
-        return false;
-    std::vector<THREAD_ITEM_DATA>().swap(hListThread); //clear thread list
-    THREADENTRY32 ThreadEntry = {};
-    ThreadEntry.dwSize = sizeof THREADENTRY32;
-    HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, ProcessId);
-    if(hSnapShot != INVALID_HANDLE_VALUE)
+    bool updateList = false;
+    DWORD dwProcessId = 0;
+
+    if (ProcessId == NULL && dbgProcessInformation.hProcess != NULL)
     {
-        if(Thread32First(hSnapShot, &ThreadEntry))
+        updateList = true;
+        dwProcessId = GetProcessId(dbgProcessInformation.hProcess);
+    }
+    else if (ProcessId != NULL && dbgProcessInformation.hProcess != NULL)
+    {
+        updateList = true;
+        dwProcessId = ProcessId;
+    }
+    else if (ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
+    {
+        updateList = false;
+        dwProcessId = ProcessId;
+    }
+    else if (ProcessId == NULL && dbgProcessInformation.hProcess == NULL)
+    {
+        return false;
+    }
+
+    if (updateList == false)
+    {
+        std::vector<THREAD_ITEM_DATA>().swap(hListThread); //clear thread list
+    }
+
+
+    THREAD_ITEM_DATA NewThreadData;
+    ULONG retLength = 0;
+    ULONG bufferLength = 1;
+    PSYSTEM_PROCESS_INFORMATION pBuffer = (PSYSTEM_PROCESS_INFORMATION)malloc(bufferLength);
+    PSYSTEM_PROCESS_INFORMATION pIter;
+    PSYSTEM_THREAD_INFORMATION pIterThread;
+
+    if (NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) == STATUS_INFO_LENGTH_MISMATCH)
+    {
+        free(pBuffer);
+        bufferLength = retLength + sizeof(SYSTEM_PROCESS_INFORMATION);
+        pBuffer = (PSYSTEM_PROCESS_INFORMATION)malloc(bufferLength);
+        if (!pBuffer)
+            return false;
+
+        if (NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) != STATUS_SUCCESS)
         {
-            do
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+
+    pIter = pBuffer;
+
+    while(TRUE)
+    {
+        if (pIter->UniqueProcessId == (HANDLE)dwProcessId)
+        {
+            pIterThread = &pIter->Threads[0];
+            for (ULONG i = 0; i < pIter->NumberOfThreads; i++)
             {
-                if(ThreadEntry.th32OwnerProcessID == ProcessId)
+                ZeroMemory(&NewThreadData, sizeof(THREAD_ITEM_DATA));
+
+                NewThreadData.BasePriority = pIterThread->BasePriority;
+                NewThreadData.ContextSwitches = pIterThread->ContextSwitches;
+                NewThreadData.Priority = pIterThread->Priority;
+                NewThreadData.BasePriority = pIterThread->BasePriority;
+                //NewThreadData.ThreadStartAddress = pIterThread->StartAddress; <- wrong value
+                NewThreadData.ThreadState = pIterThread->ThreadState;
+                NewThreadData.WaitReason = pIterThread->WaitReason;
+                NewThreadData.WaitTime = pIterThread->WaitTime;
+                NewThreadData.dwThreadId = (DWORD)pIterThread->ClientId.UniqueThread;
+
+                NewThreadData.hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, NewThreadData.dwThreadId);
+                if (NewThreadData.hThread)
                 {
-                    THREAD_ITEM_DATA NewThreadData;
-                    memset(&NewThreadData, 0, sizeof(THREAD_ITEM_DATA));
-                    NewThreadData.dwThreadId = ThreadEntry.th32ThreadID;
-                    NewThreadData.hThread = OpenThread(THREAD_ALL_ACCESS, false, NewThreadData.dwThreadId);
+                    NewThreadData.TebAddress = GetTEBLocation(NewThreadData.hThread);
+
+                    PVOID startAddress = 0;
+                    if (NtQueryInformationThread(NewThreadData.hThread, ThreadQuerySetWin32StartAddress, &startAddress, sizeof(PVOID), NULL) == STATUS_SUCCESS)
+                    {
+                        NewThreadData.ThreadStartAddress = startAddress;
+                    }
+                }
+
+                if (updateList == false)
+                {
                     hListThread.push_back(NewThreadData);
                 }
+                else
+                {
+                    updateThreadList(&NewThreadData);
+                }
+
+                pIterThread++;
             }
-            while(Thread32Next(hSnapShot, &ThreadEntry));
+
+            break;
         }
-        EngineCloseHandle(hSnapShot);
-        return true;
+
+        if (pIter->NextEntryOffset == 0)
+        {
+            break;
+        }
+        else
+        {
+            pIter = (PSYSTEM_PROCESS_INFORMATION)((DWORD_PTR)pIter + (DWORD_PTR)pIter->NextEntryOffset);
+        }
     }
-    return false;
+
+    free(pBuffer);
+    return (hListThread.size() > 0);
 }
 
 __declspec(dllexport) void* TITCALL ThreaderGetThreadInfo(HANDLE hThread, DWORD ThreadId)
@@ -208,9 +324,10 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
     if(SuspendThread(hThread)) //if previous suspend count is above 0 (which means thread is suspended)
     {
         ResumeThread(hThread); //decrement suspend count
-        return true;
+        return false; //meaning the thread is not active
     }
-    return false;
+    ResumeThread(hThread); //decrement suspend count
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()

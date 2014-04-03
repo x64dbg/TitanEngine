@@ -13,6 +13,20 @@
 
 // Global.Constant.Structure.Declaration:
 // Engine.External:
+const BYTE UE_STRUCT_PE32STRUCT = 1;
+const BYTE UE_STRUCT_PE64STRUCT = 2;
+const BYTE UE_STRUCT_PESTRUCT = 3;
+const BYTE UE_STRUCT_IMPORTENUMDATA = 4;
+const BYTE UE_STRUCT_THREAD_ITEM_DATA = 5;
+const BYTE UE_STRUCT_LIBRARY_ITEM_DATA = 6;
+const BYTE UE_STRUCT_LIBRARY_ITEM_DATAW = 7;
+const BYTE UE_STRUCT_PROCESS_ITEM_DATA = 8;
+const BYTE UE_STRUCT_HANDLERARRAY = 9;
+const BYTE UE_STRUCT_PLUGININFORMATION = 10;
+const BYTE UE_STRUCT_HOOK_ENTRY = 11;
+const BYTE UE_STRUCT_FILE_STATUS_INFO = 12;
+const BYTE UE_STRUCT_FILE_FIX_INFO = 13;
+
 const BYTE UE_ACCESS_READ = 0;
 const BYTE UE_ACCESS_WRITE = 1;
 const BYTE UE_ACCESS_ALL = 2;
@@ -321,6 +335,13 @@ typedef struct
     DWORD dwThreadId;
     void* ThreadStartAddress;
     void* ThreadLocalBase;
+    void* TebAddress;
+    ULONG WaitTime;
+    LONG Priority;
+    LONG BasePriority;
+    ULONG ContextSwitches;
+    ULONG ThreadState;
+    ULONG WaitReason;
 } THREAD_ITEM_DATA, *PTHREAD_ITEM_DATA;
 
 typedef struct
@@ -914,6 +935,7 @@ __declspec(dllimport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess
 __declspec(dllimport) bool TITCALL EngineDeleteCreatedDependencies();
 __declspec(dllimport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack);
 __declspec(dllimport) void TITCALL EngineAddUnpackerWindowLogMessage(char* szLogMessage);
+__declspec(dllimport) bool TITCALL EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize);
 // Global.Engine.Extension.Functions:
 __declspec(dllimport) bool TITCALL ExtensionManagerIsPluginLoaded(char* szPluginName);
 __declspec(dllimport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPluginName);

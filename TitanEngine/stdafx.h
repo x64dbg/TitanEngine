@@ -70,6 +70,21 @@
 #pragma pack(push)
 #pragma pack(1)
 
+//EngineCheckStructAlignment
+#define UE_STRUCT_PE32STRUCT 1
+#define UE_STRUCT_PE64STRUCT 2
+#define UE_STRUCT_PESTRUCT 3
+#define UE_STRUCT_IMPORTENUMDATA 4
+#define UE_STRUCT_THREAD_ITEM_DATA 5
+#define UE_STRUCT_LIBRARY_ITEM_DATA 6
+#define UE_STRUCT_LIBRARY_ITEM_DATAW 7
+#define UE_STRUCT_PROCESS_ITEM_DATA 8
+#define UE_STRUCT_HANDLERARRAY 9
+#define UE_STRUCT_PLUGININFORMATION 10
+#define UE_STRUCT_HOOK_ENTRY 11
+#define UE_STRUCT_FILE_STATUS_INFO 12
+#define UE_STRUCT_FILE_FIX_INFO 13
+
 typedef struct
 {
     ULONG_PTR BreakPointAddress;
@@ -243,6 +258,13 @@ typedef struct
     DWORD dwThreadId;
     void* ThreadStartAddress;
     void* ThreadLocalBase;
+    void* TebAddress;
+    ULONG WaitTime;
+    LONG Priority;
+    LONG BasePriority;
+    ULONG ContextSwitches;
+    ULONG ThreadState;
+    ULONG WaitReason;
 } THREAD_ITEM_DATA, *PTHREAD_ITEM_DATA;
 
 typedef struct
@@ -588,6 +610,12 @@ typedef struct
     DWORD NumberOfRvaAndSizes;
 } PE64Struct, *PPE64Struct;
 
+#ifdef _WIN64
+typedef PE64Struct PEStruct;
+#else
+typedef PE32Struct PEStruct;
+#endif
+
 typedef struct
 {
     bool NewDll;
@@ -756,42 +784,7 @@ typedef struct
     ACCESS_MASK GrantedAccess;
 } NTDLL_QUERY_HANDLE_INFO, *PNTDLL_QUERY_HANDLE_INFO;
 
-/*typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
-	ULONG Attributes;
-	ACCESS_MASK GrantedAccess;
-	ULONG HandleCount;
-	ULONG PointerCount;
-	ULONG PagedPoolUsage;
-	ULONG NonPagedPoolUsage;
-	ULONG Reserved[3];
-	ULONG NameInformationLength;
-	ULONG TypeInformationLength;
-	ULONG SecurityDescriptorLength;
-	LARGE_INTEGER CreateTime;
-} PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;*/
 
-typedef struct _PUBLIC_OBJECT_NAME_INFORMATION   // Information Class 1
-{
-    UNICODE_STRING Name;
-} PUBLIC_OBJECT_NAME_INFORMATION, *PPUBLIC_OBJECT_NAME_INFORMATION;
-
-/*typedef struct _PUBLIC_OBJECT_TYPE_INFORMATION { // Information Class 2
-	UNICODE_STRING Name;
-	ULONG ObjectCount;
-	ULONG HandleCount;
-	ULONG Reserved1[4];
-	ULONG PeakObjectCount;
-	ULONG PeakHandleCount;
-	ULONG Reserved2[4];
-	ULONG InvalidAttributes;
-	GENERIC_MAPPING GenericMapping;
-	ULONG ValidAccess;
-	UCHAR Unknown;
-	BOOLEAN MaintainHandleDatabase;
-	POOL_TYPE PoolType;
-	ULONG PagedPoolUsage;
-	ULONG NonPagedPoolUsage;
-} PUBLIC_OBJECT_TYPE_INFORMATION, *PPUBLIC_OBJECT_TYPE_INFORMATION;*/
 
 typedef void (*PPEBLOCKROUTINE)(
     PVOID PebLock

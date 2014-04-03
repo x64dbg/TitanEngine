@@ -4,6 +4,7 @@
 #include "Global.Mapping.h"
 #include "Global.Engine.Hook.h"
 #include "Global.Engine.GUI.h"
+#include "Global.Engine.Extension.h"
 
 // TitanEngine.Engine.functions:
 __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool VariableSet)
@@ -56,6 +57,7 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileN
         return(NULL);
     }
 }
+
 __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szFileName, wchar_t* szOutputFolder, bool LogCreatedFiles)
 {
 
@@ -226,6 +228,7 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess)
 {
 
@@ -236,6 +239,7 @@ __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess
     }
     return false;
 }
+
 __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies()
 {
 
@@ -292,13 +296,48 @@ __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpack
         return false;
     }
 }
+
 __declspec(dllexport) void TITCALL EngineAddUnpackerWindowLogMessage(char* szLogMessage)
 {
-
     int cSelect;
 
     SendMessageA(EngineBoxHandle, LB_ADDSTRING, NULL, (LPARAM)szLogMessage);
     cSelect = (int)SendMessageA(EngineBoxHandle, LB_GETCOUNT, NULL, NULL);
     cSelect--;
     SendMessageA(EngineBoxHandle, LB_SETCURSEL, (WPARAM)cSelect, NULL);
+}
+
+__declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize)
+{
+    int blub=1;
+    switch(StructureType)
+    {
+    case UE_STRUCT_PE32STRUCT:
+        return (sizeof(PE32Struct)==StructureSize);
+    case UE_STRUCT_PE64STRUCT:
+        return (sizeof(PE64Struct)==StructureSize);
+    case UE_STRUCT_PESTRUCT:
+        return (sizeof(PEStruct)==StructureSize);
+    case UE_STRUCT_IMPORTENUMDATA:
+        return (sizeof(ImportEnumData)==StructureSize);
+    case UE_STRUCT_THREAD_ITEM_DATA:
+        return (sizeof(THREAD_ITEM_DATA)==StructureSize);
+    case UE_STRUCT_LIBRARY_ITEM_DATA:
+        return (sizeof(LIBRARY_ITEM_DATA)==StructureSize);
+    case UE_STRUCT_LIBRARY_ITEM_DATAW:
+        return (sizeof(LIBRARY_ITEM_DATAW)==StructureSize);
+    case UE_STRUCT_PROCESS_ITEM_DATA:
+        return (sizeof(PROCESS_ITEM_DATA)==StructureSize);
+    case UE_STRUCT_HANDLERARRAY:
+        return (sizeof(HandlerArray)==StructureSize);
+    case UE_STRUCT_PLUGININFORMATION:
+        return (sizeof(PluginInformation)==StructureSize);
+    case UE_STRUCT_HOOK_ENTRY:
+        return (sizeof(HOOK_ENTRY)==StructureSize);
+    case UE_STRUCT_FILE_STATUS_INFO:
+        return (sizeof(FILE_STATUS_INFO)==StructureSize);
+    case UE_STRUCT_FILE_FIX_INFO:
+        return (sizeof(FILE_FIX_INFO)==StructureSize);
+    }
+    return false;
 }

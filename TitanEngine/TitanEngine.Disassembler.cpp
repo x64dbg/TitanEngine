@@ -50,7 +50,8 @@ long IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
 
                     section += (ULONG_PTR)MemInfo.RegionSize;
 
-                } while (res < length);
+                }
+                while (res < length);
 
                 return length; //good
             }
@@ -95,7 +96,7 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
 {
     _DecodedInst engineDecodedInstructions[1];
     unsigned int DecodedInstructionsCount = 0;
-    BYTE readBuffer[MAXIMUM_INSTRUCTION_SIZE] = {0};    
+    BYTE readBuffer[MAXIMUM_INSTRUCTION_SIZE] = {0};
 
     if(hProcess != NULL)
     {

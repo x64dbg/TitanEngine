@@ -425,6 +425,7 @@ __declspec(dllexport) bool TITCALL EngineFakeMissingDependencies(HANDLE hProcess
 __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies();
 __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(char* WindowUnpackerTitle, char* WindowUnpackerLongTitle, char* WindowUnpackerName, char* WindowUnpackerAuthor, void* StartUnpackingCallBack);
 __declspec(dllexport) void TITCALL EngineAddUnpackerWindowLogMessage(char* szLogMessage);
+__declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize);
 // Global.Engine.Extension.Functions:
 __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginLoaded(char* szPluginName);
 __declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(char* szPluginName);
