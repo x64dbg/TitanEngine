@@ -59,43 +59,43 @@ __declspec(dllexport) long long TITCALL GetContextDataEx(HANDLE hActiveThread, D
 #ifdef _WIN64
     if(IndexOfRegister == UE_EAX)
     {
-        retValue = DBGContext.Rax;
+        retValue = DBGContext.Rax&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EBX)
     {
-        retValue = DBGContext.Rbx;
+        retValue = DBGContext.Rbx&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_ECX)
     {
-        retValue = DBGContext.Rcx;
+        retValue = DBGContext.Rcx&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EDX)
     {
-        retValue = DBGContext.Rdx;
+        retValue = DBGContext.Rdx&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EDI)
     {
-        retValue = DBGContext.Rdi;
+        retValue = DBGContext.Rdi&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_ESI)
     {
-        retValue = DBGContext.Rsi;
+        retValue = DBGContext.Rsi&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EBP)
     {
-        retValue = DBGContext.Rbp;
+        retValue = DBGContext.Rbp&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_ESP)
     {
-        retValue = DBGContext.Rsp;
+        retValue = DBGContext.Rsp&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EIP)
     {
-        retValue = DBGContext.Rip;
+        retValue = DBGContext.Rip&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EFLAGS)
     {
-        retValue = DBGContext.EFlags;
+        retValue = DBGContext.EFlags&0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_RAX)
     {
