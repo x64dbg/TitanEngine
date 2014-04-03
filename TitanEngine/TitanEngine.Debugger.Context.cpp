@@ -14,292 +14,318 @@ __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, voi
     {
         RtlZeroMemory(&DBGContext, sizeof CONTEXT);
         DBGContext.ContextFlags = CONTEXT_ALL;
-        if(!GetThreadContext(hActiveThread, &DBGContext))
+
+        if(-1 == SuspendThread(hActiveThread))
             return false;
+
+        if(!GetThreadContext(hActiveThread, &DBGContext))
+        {
+            ResumeThread(hActiveThread);
+            return false;
+        }
+
 #ifndef _WIN64
         RtlMoveMemory(FPUSaveArea, &DBGContext.FloatSave, sizeof FLOATING_SAVE_AREA);
 #else
         RtlMoveMemory(FPUSaveArea, &DBGContext.FltSave, sizeof XMM_SAVE_AREA32);
 #endif
+
+        ResumeThread(hActiveThread);
         return true;
     }
+
+    ResumeThread(hActiveThread);
     return false;
 }
 
 __declspec(dllexport) long long TITCALL GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister)
 {
     MutexLocker locker("DBGContext"); //lock DBGContext
+
+    DWORD64 retValue = 0;
+
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
     DBGContext.ContextFlags = CONTEXT_ALL;
-    GetThreadContext(hActiveThread, &DBGContext);
+
+    if(-1 == SuspendThread(hActiveThread))
+        return retValue;
+
+    if(!GetThreadContext(hActiveThread, &DBGContext))
+    {
+        ResumeThread(hActiveThread);
+        return retValue;
+    }
+
 #ifdef _WIN64
     if(IndexOfRegister == UE_EAX)
     {
-        return((DWORD)DBGContext.Rax);
+        retValue = DBGContext.Rax;
     }
     else if(IndexOfRegister == UE_EBX)
     {
-        return((DWORD)DBGContext.Rbx);
+        retValue = DBGContext.Rbx;
     }
     else if(IndexOfRegister == UE_ECX)
     {
-        return((DWORD)DBGContext.Rcx);
+        retValue = DBGContext.Rcx;
     }
     else if(IndexOfRegister == UE_EDX)
     {
-        return((DWORD)DBGContext.Rdx);
+        retValue = DBGContext.Rdx;
     }
     else if(IndexOfRegister == UE_EDI)
     {
-        return((DWORD)DBGContext.Rdi);
+        retValue = DBGContext.Rdi;
     }
     else if(IndexOfRegister == UE_ESI)
     {
-        return((DWORD)DBGContext.Rsi);
+        retValue = DBGContext.Rsi;
     }
     else if(IndexOfRegister == UE_EBP)
     {
-        return((DWORD)DBGContext.Rbp);
+        retValue = DBGContext.Rbp;
     }
     else if(IndexOfRegister == UE_ESP)
     {
-        return((DWORD)DBGContext.Rsp);
+        retValue = DBGContext.Rsp;
     }
     else if(IndexOfRegister == UE_EIP)
     {
-        return((DWORD)DBGContext.Rip);
+        retValue = DBGContext.Rip;
     }
     else if(IndexOfRegister == UE_EFLAGS)
     {
-        return((DWORD)DBGContext.EFlags);
+        retValue = DBGContext.EFlags;
     }
     else if(IndexOfRegister == UE_RAX)
     {
-        return(DBGContext.Rax);
+        retValue = DBGContext.Rax;
     }
     else if(IndexOfRegister == UE_RBX)
     {
-        return(DBGContext.Rbx);
+        retValue = DBGContext.Rbx;
     }
     else if(IndexOfRegister == UE_RCX)
     {
-        return(DBGContext.Rcx);
+        retValue = DBGContext.Rcx;
     }
     else if(IndexOfRegister == UE_RDX)
     {
-        return(DBGContext.Rdx);
+        retValue = DBGContext.Rdx;
     }
     else if(IndexOfRegister == UE_RDI)
     {
-        return(DBGContext.Rdi);
+        retValue = DBGContext.Rdi;
     }
     else if(IndexOfRegister == UE_RSI)
     {
-        return(DBGContext.Rsi);
+        retValue = DBGContext.Rsi;
     }
     else if(IndexOfRegister == UE_RBP)
     {
-        return(DBGContext.Rbp);
+        retValue = DBGContext.Rbp;
     }
     else if(IndexOfRegister == UE_RSP)
     {
-        return(DBGContext.Rsp);
+        retValue = DBGContext.Rsp;
     }
     else if(IndexOfRegister == UE_RIP)
     {
-        return(DBGContext.Rip);
+        retValue = DBGContext.Rip;
     }
     else if(IndexOfRegister == UE_RFLAGS)
     {
-        return(DBGContext.EFlags);
+        retValue = DBGContext.EFlags;
     }
     else if(IndexOfRegister == UE_DR0)
     {
-        return(DBGContext.Dr0);
+        retValue = DBGContext.Dr0;
     }
     else if(IndexOfRegister == UE_DR1)
     {
-        return(DBGContext.Dr1);
+        retValue = DBGContext.Dr1;
     }
     else if(IndexOfRegister == UE_DR2)
     {
-        return(DBGContext.Dr2);
+        retValue = DBGContext.Dr2;
     }
     else if(IndexOfRegister == UE_DR3)
     {
-        return(DBGContext.Dr3);
+        retValue = DBGContext.Dr3;
     }
     else if(IndexOfRegister == UE_DR6)
     {
-        return(DBGContext.Dr6);
+        retValue = DBGContext.Dr6;
     }
     else if(IndexOfRegister == UE_DR7)
     {
-        return(DBGContext.Dr7);
+        retValue = DBGContext.Dr7;
     }
     else if(IndexOfRegister == UE_R8)
     {
-        return(DBGContext.R8);
+        retValue = DBGContext.R8;
     }
     else if(IndexOfRegister == UE_R9)
     {
-        return(DBGContext.R9);
+        retValue = DBGContext.R9;
     }
     else if(IndexOfRegister == UE_R10)
     {
-        return(DBGContext.R10);
+        retValue = DBGContext.R10;
     }
     else if(IndexOfRegister == UE_R11)
     {
-        return(DBGContext.R11);
+        retValue = DBGContext.R11;
     }
     else if(IndexOfRegister == UE_R12)
     {
-        return(DBGContext.R12);
+        retValue = DBGContext.R12;
     }
     else if(IndexOfRegister == UE_R13)
     {
-        return(DBGContext.R13);
+        retValue = DBGContext.R13;
     }
     else if(IndexOfRegister == UE_R14)
     {
-        return(DBGContext.R14);
+        retValue = DBGContext.R14;
     }
     else if(IndexOfRegister == UE_R15)
     {
-        return(DBGContext.R15);
+        retValue = DBGContext.R15;
     }
     else if(IndexOfRegister == UE_CIP)
     {
-        return(DBGContext.Rip);
+        retValue = DBGContext.Rip;
     }
     else if(IndexOfRegister == UE_CSP)
     {
-        return(DBGContext.Rsp);
+        retValue = DBGContext.Rsp;
     }
     else if(IndexOfRegister == UE_SEG_GS)
     {
-        return(DBGContext.SegGs);
+        retValue = DBGContext.SegGs;
     }
     else if(IndexOfRegister == UE_SEG_FS)
     {
-        return(DBGContext.SegFs);
+        retValue = DBGContext.SegFs;
     }
     else if(IndexOfRegister == UE_SEG_ES)
     {
-        return(DBGContext.SegEs);
+        retValue = DBGContext.SegEs;
     }
     else if(IndexOfRegister == UE_SEG_DS)
     {
-        return(DBGContext.SegDs);
+        retValue = DBGContext.SegDs;
     }
     else if(IndexOfRegister == UE_SEG_CS)
     {
-        return(DBGContext.SegCs);
+        retValue = DBGContext.SegCs;
     }
     else if(IndexOfRegister == UE_SEG_SS)
     {
-        return(DBGContext.SegSs);
+        retValue = DBGContext.SegSs;
     }
 #else
     if(IndexOfRegister == UE_EAX)
     {
-        return(DBGContext.Eax);
+        retValue = (DWORD)DBGContext.Eax;
     }
     else if(IndexOfRegister == UE_EBX)
     {
-        return(DBGContext.Ebx);
+        retValue = (DWORD)DBGContext.Ebx;
     }
     else if(IndexOfRegister == UE_ECX)
     {
-        return(DBGContext.Ecx);
+        retValue = (DWORD)DBGContext.Ecx;
     }
     else if(IndexOfRegister == UE_EDX)
     {
-        return(DBGContext.Edx);
+        retValue = (DWORD)DBGContext.Edx;
     }
     else if(IndexOfRegister == UE_EDI)
     {
-        return(DBGContext.Edi);
+        retValue = (DWORD)DBGContext.Edi;
     }
     else if(IndexOfRegister == UE_ESI)
     {
-        return(DBGContext.Esi);
+        retValue = (DWORD)DBGContext.Esi;
     }
     else if(IndexOfRegister == UE_EBP)
     {
-        return(DBGContext.Ebp);
+        retValue = (DWORD)DBGContext.Ebp;
     }
     else if(IndexOfRegister == UE_ESP)
     {
-        return(DBGContext.Esp);
+        retValue = (DWORD)DBGContext.Esp;
     }
     else if(IndexOfRegister == UE_EIP)
     {
-        return(DBGContext.Eip);
+        retValue = (DWORD)DBGContext.Eip;
     }
     else if(IndexOfRegister == UE_EFLAGS)
     {
-        return(DBGContext.EFlags);
+        retValue = (DWORD)DBGContext.EFlags;
     }
     else if(IndexOfRegister == UE_DR0)
     {
-        return(DBGContext.Dr0);
+        retValue = (DWORD)DBGContext.Dr0;
     }
     else if(IndexOfRegister == UE_DR1)
     {
-        return(DBGContext.Dr1);
+        retValue = (DWORD)DBGContext.Dr1;
     }
     else if(IndexOfRegister == UE_DR2)
     {
-        return(DBGContext.Dr2);
+        retValue = (DWORD)DBGContext.Dr2;
     }
     else if(IndexOfRegister == UE_DR3)
     {
-        return(DBGContext.Dr3);
+        retValue = (DWORD)DBGContext.Dr3;
     }
     else if(IndexOfRegister == UE_DR6)
     {
-        return(DBGContext.Dr6);
+        retValue = (DWORD)DBGContext.Dr6;
     }
     else if(IndexOfRegister == UE_DR7)
     {
-        return(DBGContext.Dr7);
+        retValue = (DWORD)DBGContext.Dr7;
     }
     else if(IndexOfRegister == UE_CIP)
     {
-        return(DBGContext.Eip);
+        retValue = (DWORD)DBGContext.Eip;
     }
     else if(IndexOfRegister == UE_CSP)
     {
-        return(DBGContext.Esp);
+        retValue = (DWORD)DBGContext.Esp;
     }
     else if(IndexOfRegister == UE_SEG_GS)
     {
-        return(DBGContext.SegGs);
+        retValue = (DWORD)DBGContext.SegGs;
     }
     else if(IndexOfRegister == UE_SEG_FS)
     {
-        return(DBGContext.SegFs);
+        retValue = (DWORD)DBGContext.SegFs;
     }
     else if(IndexOfRegister == UE_SEG_ES)
     {
-        return(DBGContext.SegEs);
+        retValue = (DWORD)DBGContext.SegEs;
     }
     else if(IndexOfRegister == UE_SEG_DS)
     {
-        return(DBGContext.SegDs);
+        retValue = (DWORD)DBGContext.SegDs;
     }
     else if(IndexOfRegister == UE_SEG_CS)
     {
-        return(DBGContext.SegCs);
+        retValue = (DWORD)DBGContext.SegCs;
     }
     else if(IndexOfRegister == UE_SEG_SS)
     {
-        return(DBGContext.SegSs);
+        retValue = (DWORD)DBGContext.SegSs;
     }
 #endif
-    return NULL;
+
+    ResumeThread(hActiveThread);
+    return retValue;
 }
 
 __declspec(dllexport) long long TITCALL GetContextData(DWORD IndexOfRegister)
@@ -318,16 +344,29 @@ __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, voi
     {
         RtlZeroMemory(&DBGContext, sizeof CONTEXT);
         DBGContext.ContextFlags = CONTEXT_ALL;
-        if(!GetThreadContext(hActiveThread, &DBGContext))
+
+        if(-1 == SuspendThread(hActiveThread))
             return false;
+
+        if(!GetThreadContext(hActiveThread, &DBGContext))
+        {
+            ResumeThread(hActiveThread);
+            return false;
+        }
+
 #ifndef _WIN64
         RtlMoveMemory(&DBGContext.FloatSave, FPUSaveArea, sizeof FLOATING_SAVE_AREA);
 #else
         RtlMoveMemory(&DBGContext.FltSave, FPUSaveArea, sizeof XMM_SAVE_AREA32);
 #endif
         if(SetThreadContext(hActiveThread, &DBGContext))
+        {
+            ResumeThread(hActiveThread);
             return true;
+        }
     }
+
+    ResumeThread(hActiveThread);
     return false;
 }
 
@@ -336,9 +375,16 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     MutexLocker locker("DBGContext"); //lock DBGContext
     RtlZeroMemory(&DBGContext, sizeof CONTEXT);
     DBGContext.ContextFlags = CONTEXT_ALL;
-    if(!GetThreadContext(hActiveThread, &DBGContext))
+
+    if(-1 == SuspendThread(hActiveThread))
         return false;
-    SuspendThread(hActiveThread);
+
+    if(!GetThreadContext(hActiveThread, &DBGContext))
+    {
+        ResumeThread(hActiveThread);
+        return false;
+    }
+    
 #ifdef _WIN64
     if(IndexOfRegister == UE_EAX)
     {
@@ -620,11 +666,13 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
         ResumeThread(hActiveThread);
         return false;
     }
+
     if(SetThreadContext(hActiveThread, &DBGContext))
     {
         ResumeThread(hActiveThread);
         return true;
     }
+
     ResumeThread(hActiveThread);
     return false;
 }

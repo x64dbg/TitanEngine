@@ -152,7 +152,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_USRDLL;UNPACKERENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_AMD64_;_WIN64;NDEBUG;_WINDOWS;_USRDLL;UNPACKERENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -191,7 +191,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_USRDLL;UNPACKERENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_AMD64_;_WIN64;NDEBUG;_WINDOWS;_USRDLL;UNPACKERENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <FunctionLevelLinking>true</FunctionLevelLinking>
