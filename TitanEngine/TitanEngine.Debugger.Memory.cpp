@@ -76,7 +76,7 @@ __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfM
     }
 }
 
-__declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
+__declspec(dllexport) ULONG_PTR TITCALL FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
     if(!hProcess || !MemoryStart ||!MemorySize || !SearchPattern || !PatternSize)
         return 0;
@@ -147,7 +147,7 @@ __declspec(dllexport) long long TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
     return Return;
 }
 
-extern "C" __declspec(dllexport) long long TITCALL Find(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
+extern "C" __declspec(dllexport) ULONG_PTR TITCALL Find(LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
 
     if(dbgProcessInformation.hProcess != NULL)

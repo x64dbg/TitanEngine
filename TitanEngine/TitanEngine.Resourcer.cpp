@@ -5,12 +5,12 @@
 #include "Global.Handle.h"
 
 // TitanEngine.Resourcer.functions:
-__declspec(dllexport) long long TITCALL ResourcerLoadFileForResourceUse(char* szFileName)
+__declspec(dllexport) ULONG_PTR TITCALL ResourcerLoadFileForResourceUse(char* szFileName)
 {
     return((ULONG_PTR)EngineSimulateNtLoader(szFileName));
 }
 
-__declspec(dllexport) long long TITCALL ResourcerLoadFileForResourceUseW(wchar_t* szFileName)
+__declspec(dllexport) ULONG_PTR TITCALL ResourcerLoadFileForResourceUseW(wchar_t* szFileName)
 {
     return((ULONG_PTR)EngineSimulateNtLoaderW(szFileName));
 }

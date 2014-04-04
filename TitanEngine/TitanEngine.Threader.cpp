@@ -261,7 +261,7 @@ __declspec(dllexport) bool TITCALL ThreaderResumeProcess()
     return ThreaderResumeAllThreads(false);
 }
 
-__declspec(dllexport) long long TITCALL ThreaderCreateRemoteThread(ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
+__declspec(dllexport) ULONG_PTR TITCALL ThreaderCreateRemoteThread(ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
 {
     return ThreaderCreateRemoteThreadEx(dbgProcessInformation.hProcess, ThreadStartAddress, AutoCloseTheHandle, ThreadPassParameter, ThreadId);
 }
@@ -271,7 +271,7 @@ __declspec(dllexport) bool TITCALL ThreaderInjectAndExecuteCode(LPVOID InjectCod
     return ThreaderInjectAndExecuteCodeEx(dbgProcessInformation.hProcess, InjectCode, StartDelta, InjectSize);
 }
 
-__declspec(dllexport) long long TITCALL ThreaderCreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
+__declspec(dllexport) ULONG_PTR TITCALL ThreaderCreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, LPVOID ThreadPassParameter, LPDWORD ThreadId)
 {
     if(hProcess != NULL)
     {
@@ -349,7 +349,7 @@ __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads()
     return false;
 }
 
-__declspec(dllexport) long long TITCALL ThreaderGetOpenHandleForThread(DWORD ThreadId)
+__declspec(dllexport) ULONG_PTR TITCALL ThreaderGetOpenHandleForThread(DWORD ThreadId)
 {
     int threadcount=hListThread.size();
     for(int i=0; i<threadcount; i++)

@@ -30,14 +30,14 @@ __declspec(dllexport) long TITCALL GetExitCode()
     return(ProcessExitCode);
 }
 
-__declspec(dllexport) long long TITCALL GetDebuggedDLLBaseAddress()
+__declspec(dllexport) ULONG_PTR TITCALL GetDebuggedDLLBaseAddress()
 {
     return((ULONG_PTR)DebugDebuggingDLLBase);
 }
 
-__declspec(dllexport) unsigned long long TITCALL GetDebuggedFileBaseAddress()
+__declspec(dllexport) ULONG_PTR TITCALL GetDebuggedFileBaseAddress()
 {
-    return (unsigned long long)DebugDebuggingMainModuleBase;
+    return (ULONG_PTR)DebugDebuggingMainModuleBase;
 }
 
 __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID CallBack)

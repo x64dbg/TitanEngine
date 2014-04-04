@@ -8,7 +8,7 @@
 
 
 // Global.Engine.Tracer.functions:
-static long long EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressToTrace, bool HashInstructions, DWORD InputNumberOfInstructions)
+static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressToTrace, bool HashInstructions, DWORD InputNumberOfInstructions)
 {
 
     SIZE_T memSize = 0;
@@ -530,12 +530,12 @@ __declspec(dllexport) void TITCALL TracerInit()
     return;		// UE 1.5 compatibility mode
 }
 
-__declspec(dllexport) long long TITCALL TracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace)
+__declspec(dllexport) ULONG_PTR TITCALL TracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace)
 {
     return((ULONG_PTR)EngineGlobalTracerHandler1(hProcess, AddressToTrace, false, NULL));
 }
 
-__declspec(dllexport) long long TITCALL HashTracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD InputNumberOfInstructions)
+__declspec(dllexport) ULONG_PTR TITCALL HashTracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD InputNumberOfInstructions)
 {
 
     unsigned int i = 0;
@@ -1112,7 +1112,7 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
     }
     return(NULL);
 }
-__declspec(dllexport) long long TITCALL TracerFixKnownRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD RedirectionId)
+__declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD RedirectionId)
 {
 
     int i = NULL;

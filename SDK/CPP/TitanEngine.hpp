@@ -370,7 +370,7 @@ protected:
 
     typedef UE::PEStruct PEStruct;
 
-    static long long GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, ePE32Data WhichData)
+    static ULONG_PTR GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, ePE32Data WhichData)
     {
         return UE::GetPE32DataFromMappedFile(FileMapVA, WhichSection, WhichData);
     }
@@ -390,19 +390,19 @@ protected:
     {
         return UE::GetPE32SectionNumberFromVA(FileMapVA, AddressToConvert);
     }
-    static long long ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
+    static ULONG_PTR ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
     {
         return UE::ConvertVAtoFileOffset(FileMapVA, AddressToConvert, ReturnType);
     }
-    static long long ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType)
+    static ULONG_PTR ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType)
     {
         return UE::ConvertVAtoFileOffsetEx(FileMapVA, FileSize, ImageBase, AddressToConvert, AddressIsRVA, ReturnType);
     }
-    static long long ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
+    static ULONG_PTR ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
     {
         return UE::ConvertFileOffsetToVA(FileMapVA, AddressToConvert, ReturnType);
     }
-    static long long ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType)
+    static ULONG_PTR ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType)
     {
         return UE::ConvertFileOffsetToVAEx(FileMapVA, FileSize, ImageBase, AddressToConvert, ReturnType);
     }
@@ -516,7 +516,7 @@ public:
     {
         return UE::DeleteLastSectionEx((char*)szFileName, NumberOfSections);
     }
-    static long long GetPE32Data(const char* szFileName, DWORD WhichSection, ePE32Data WhichData)
+    static ULONG_PTR GetPE32Data(const char* szFileName, DWORD WhichSection, ePE32Data WhichData)
     {
         return UE::GetPE32Data((char*)szFileName, WhichSection, WhichData);
     }
@@ -634,7 +634,7 @@ public:
     {
         return UE::DeleteLastSectionExW((wchar_t*)szFileName, NumberOfSections);
     }
-    static long long GetPE32Data(const wchar_t* szFileName, DWORD WhichSection, ePE32Data WhichData)
+    static ULONG_PTR GetPE32Data(const wchar_t* szFileName, DWORD WhichSection, ePE32Data WhichData)
     {
         return UE::GetPE32DataW((wchar_t*)szFileName, WhichSection, WhichData);
     }
@@ -1009,7 +1009,7 @@ class ResourcerA
 {
 public:
 
-    static long long LoadFileForResourceUse(char* szFileName)
+    static ULONG_PTR LoadFileForResourceUse(char* szFileName)
     {
         return UE::ResourcerLoadFileForResourceUse(szFileName);
     }
@@ -1031,7 +1031,7 @@ class ResourcerW
 {
 public:
 
-    static long long LoadFileForResourceUse(wchar_t* szFileName)
+    static ULONG_PTR LoadFileForResourceUse(wchar_t* szFileName)
     {
         return UE::ResourcerLoadFileForResourceUseW(szFileName);
     }
@@ -1118,7 +1118,7 @@ public:
     {
         return UE::ThreaderResumeProcess();
     }
-    static long long CreateRemoteThread(ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, void* ThreadPassParameter, DWORD* ThreadId)
+    static ULONG_PTR CreateRemoteThread(ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, void* ThreadPassParameter, DWORD* ThreadId)
     {
         return UE::ThreaderCreateRemoteThread(ThreadStartAddress, AutoCloseTheHandle, ThreadPassParameter, ThreadId);
     }
@@ -1126,7 +1126,7 @@ public:
     {
         return UE::ThreaderInjectAndExecuteCode(InjectCode, StartDelta, InjectSize);
     }
-    static long long CreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, void* ThreadPassParameter, DWORD* ThreadId)
+    static ULONG_PTR CreateRemoteThreadEx(HANDLE hProcess, ULONG_PTR ThreadStartAddress, bool AutoCloseTheHandle, void* ThreadPassParameter, DWORD* ThreadId)
     {
         return UE::ThreaderCreateRemoteThreadEx(hProcess, ThreadStartAddress, AutoCloseTheHandle, ThreadPassParameter, ThreadId);
     }
@@ -1154,7 +1154,7 @@ public:
     {
         return UE::ThreaderExecuteOnlyInjectedThreads();
     }
-    static long long GetOpenHandleForThread(DWORD ThreadId)
+    static ULONG_PTR GetOpenHandleForThread(DWORD ThreadId)
     {
         return UE::ThreaderGetOpenHandleForThread(ThreadId);
     }
@@ -1271,11 +1271,11 @@ protected:
     {
         return UE::GetContextFPUDataEx(hActiveThread, FPUSaveArea);
     }
-    static long long GetContextDataEx(HANDLE hActiveThread, eContextData IndexOfRegister)
+    static ULONG_PTR GetContextDataEx(HANDLE hActiveThread, eContextData IndexOfRegister)
     {
         return UE::GetContextDataEx(hActiveThread, IndexOfRegister);
     }
-    static long long GetContextData(eContextData IndexOfRegister)
+    static ULONG_PTR GetContextData(eContextData IndexOfRegister)
     {
         return UE::GetContextData(IndexOfRegister);
     }
@@ -1311,11 +1311,11 @@ protected:
     {
         return UE::MatchPattern(MemoryToCheck, SizeOfMemoryToCheck, (void*)PatternToMatch, SizeOfPatternToMatch, (BYTE*)WildCard);
     }
-    static long long FindEx(HANDLE hProcess, void* MemoryStart, DWORD MemorySize, const void* SearchPattern, DWORD PatternSize, const BYTE* WildCard)
+    static ULONG_PTR FindEx(HANDLE hProcess, void* MemoryStart, DWORD MemorySize, const void* SearchPattern, DWORD PatternSize, const BYTE* WildCard)
     {
         return UE::FindEx(hProcess, MemoryStart, MemorySize, (void*)SearchPattern, PatternSize, (BYTE*)WildCard);
     }
-    static long long Find(void* MemoryStart, DWORD MemorySize, const void* SearchPattern, DWORD PatternSize, const BYTE* WildCard)
+    static ULONG_PTR Find(void* MemoryStart, DWORD MemorySize, const void* SearchPattern, DWORD PatternSize, const BYTE* WildCard)
     {
         return UE::Find(MemoryStart, MemorySize, (void*)SearchPattern, PatternSize, (BYTE*)WildCard);
     }
@@ -1355,11 +1355,11 @@ protected:
     {
         return UE::GetExitCode();
     }
-    static long long GetDebuggedDLLBaseAddress()
+    static ULONG_PTR GetDebuggedDLLBaseAddress()
     {
         return UE::GetDebuggedDLLBaseAddress();
     }
-    static long long GetDebuggedFileBaseAddress()
+    static ULONG_PTR GetDebuggedFileBaseAddress()
     {
         return UE::GetDebuggedFileBaseAddress();
     }
@@ -1367,15 +1367,15 @@ protected:
     {
         return UE::GetRemoteString(hProcess, StringAddress, StringStorage, MaximumStringSize);
     }
-    static long long GetFunctionParameter(HANDLE hProcess, eFunctionType FunctionType, DWORD ParameterNumber, eParameterType ParameterType)
+    static ULONG_PTR GetFunctionParameter(HANDLE hProcess, eFunctionType FunctionType, DWORD ParameterNumber, eParameterType ParameterType)
     {
         return UE::GetFunctionParameter(hProcess, FunctionType, ParameterNumber, ParameterType);
     }
-    static long long GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
+    static ULONG_PTR GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
     {
         return UE::GetJumpDestinationEx(hProcess, InstructionAddress, JustJumps);
     }
-    static long long GetJumpDestination(HANDLE hProcess, ULONG_PTR InstructionAddress)
+    static ULONG_PTR GetJumpDestination(HANDLE hProcess, ULONG_PTR InstructionAddress)
     {
         return UE::GetJumpDestination(hProcess, InstructionAddress);
     }
@@ -1694,19 +1694,19 @@ protected:
     {
         return UE::ImporterEstimatedSize();
     }
-    static long long FindAPIWriteLocation(const char* szAPIName)
+    static ULONG_PTR FindAPIWriteLocation(const char* szAPIName)
     {
         return UE::ImporterFindAPIWriteLocation((char*)szAPIName);
     }
-    static long long FindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
+    static ULONG_PTR FindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
     {
         return UE::ImporterFindOrdinalAPIWriteLocation(OrdinalNumber);
     }
-    static long long FindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
+    static ULONG_PTR FindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
     {
         return UE::ImporterFindAPIByWriteLocation(APIWriteLocation);
     }
-    static long long FindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
+    static ULONG_PTR FindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
     {
         return UE::ImporterFindDLLByWriteLocation(APIWriteLocation);
     }
@@ -1722,7 +1722,7 @@ protected:
     {
         return (const char*)UE::ImporterGetAPIName(APIAddress);
     }
-    static long long GetAPIOrdinalNumber(ULONG_PTR APIAddress)
+    static ULONG_PTR GetAPIOrdinalNumber(ULONG_PTR APIAddress)
     {
         return UE::ImporterGetAPIOrdinalNumber(APIAddress);
     }
@@ -1730,15 +1730,15 @@ protected:
     {
         return (const char*)UE::ImporterGetAPINameEx(APIAddress, (ULONG_PTR)DLLBasesList);
     }
-    static long long GetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+    static ULONG_PTR GetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterGetRemoteAPIAddress(hProcess, APIAddress);
     }
-    static long long GetRemoteAPIAddressEx(const char* szDLLName, const char* szAPIName)
+    static ULONG_PTR GetRemoteAPIAddressEx(const char* szDLLName, const char* szAPIName)
     {
         return UE::ImporterGetRemoteAPIAddressEx((char*)szDLLName, (char*)szAPIName);
     }
-    static long long GetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+    static ULONG_PTR GetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterGetLocalAPIAddress(hProcess, APIAddress);
     }
@@ -1754,7 +1754,7 @@ protected:
     {
         return (const char*)UE::ImporterGetAPINameFromDebugee(hProcess, APIAddress);
     }
-    static long long GetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
+    static ULONG_PTR GetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterGetAPIOrdinalNumberFromDebugee(hProcess, APIAddress);
     }
@@ -1766,11 +1766,11 @@ protected:
     {
         return UE::ImporterGetDLLIndex(hProcess, APIAddress, (ULONG_PTR)DLLBasesList);
     }
-    static long long GetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
+    static ULONG_PTR GetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
     {
         return UE::ImporterGetRemoteDLLBase(hProcess, LocalModuleBase);
     }
-    static long long GetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+    static ULONG_PTR GetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
     {
         return UE::ImporterGetRemoteDLLBaseEx(hProcess, szModuleName);
     }
@@ -1794,11 +1794,11 @@ protected:
     {
         return UE::ImporterGetForwardedDLLIndex(hProcess, APIAddress, (ULONG_PTR)DLLBasesList);
     }
-    static long long GetForwardedAPIOrdinalNumber(HANDLE hProcess, ULONG_PTR APIAddress)
+    static ULONG_PTR GetForwardedAPIOrdinalNumber(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterGetForwardedAPIOrdinalNumber(hProcess, APIAddress);
     }
-    static long long GetNearestAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+    static ULONG_PTR GetNearestAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
     {
         return UE::ImporterGetNearestAPIAddress(hProcess, APIAddress);
     }
@@ -2137,11 +2137,11 @@ public:
     {
         UE::TracerInit();
     }
-    static long long Level1(HANDLE hProcess, ULONG_PTR AddressToTrace)
+    static ULONG_PTR Level1(HANDLE hProcess, ULONG_PTR AddressToTrace)
     {
         return UE::TracerLevel1(hProcess, AddressToTrace);
     }
-    static long long HashTracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD InputNumberOfInstructions)
+    static ULONG_PTR HashTracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD InputNumberOfInstructions)
     {
         return UE::HashTracerLevel1(hProcess, AddressToTrace, InputNumberOfInstructions);
     }
@@ -2149,15 +2149,15 @@ public:
     {
         return UE::TracerDetectRedirection(hProcess, AddressToTrace);
     }
-    static long long FixKnownRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD RedirectionId)
+    static ULONG_PTR FixKnownRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD RedirectionId)
     {
         return UE::TracerFixKnownRedirection(hProcess, AddressToTrace, RedirectionId);
     }
-    static long long FixRedirectionViaModule(HMODULE hModuleHandle, HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD IdParameter)
+    static ULONG_PTR FixRedirectionViaModule(HMODULE hModuleHandle, HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD IdParameter)
     {
         return UE::TracerFixRedirectionViaModule(hModuleHandle, hProcess, AddressToTrace, IdParameter);
     }
-    static long long DetectRedirectionViaModule(HMODULE hModuleHandle, HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD* ReturnedId)
+    static ULONG_PTR DetectRedirectionViaModule(HMODULE hModuleHandle, HANDLE hProcess, ULONG_PTR AddressToTrace, DWORD* ReturnedId)
     {
         return UE::TracerDetectRedirectionViaModule(hModuleHandle, hProcess, AddressToTrace, ReturnedId);
     }
@@ -2445,7 +2445,7 @@ protected:
     {
         return UE::HandlerEnumerateOpenHandles(ProcessId, HandleBuffer, MaxHandleCount);
     }
-    static long long GetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, eHandlerReturnType InformationReturn)
+    static ULONG_PTR GetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, eHandlerReturnType InformationReturn)
     {
         return UE::HandlerGetHandleDetails(hProcess, ProcessId, hHandle, InformationReturn);
     }
@@ -2479,7 +2479,7 @@ public:
     {
         return UE::HandlerIsFileLocked(szFileOrFolderName, NameIsFolder, NameIsTranslated);
     }
-    static long long GetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, char* szMutexString)
+    static ULONG_PTR GetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, char* szMutexString)
     {
         return UE::HandlerGetOpenMutexHandle(hProcess, ProcessId, szMutexString);
     }
@@ -2509,7 +2509,7 @@ public:
     {
         return UE::HandlerIsFileLockedW(szFileOrFolderName, NameIsFolder, NameIsTranslated);
     }
-    static long long GetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
+    static ULONG_PTR GetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
     {
         return UE::HandlerGetOpenMutexHandleW(hProcess, ProcessId, szMutexString);
     }

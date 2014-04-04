@@ -31,6 +31,27 @@
     <Filter Include="Header Files\ThirdParty">
       <UniqueIdentifier>{db6d0b8a-e5c1-4a1e-9157-5818612589f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SDK">
+      <UniqueIdentifier>{78336e4f-e571-4dd2-8769-e408515a5493}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK\C">
+      <UniqueIdentifier>{2efe2f1a-4ee7-4249-a67c-c51a63aa8f0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK\CPP">
+      <UniqueIdentifier>{a1fcc566-fbcf-45e0-a99e-0dc7c8f1f3b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK\Delphi">
+      <UniqueIdentifier>{6ead5e95-3e59-431b-a190-f031c0195a6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK\LUA">
+      <UniqueIdentifier>{4f08d968-e800-4208-b62a-147d69620060}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK\MASM">
+      <UniqueIdentifier>{1012361d-2057-4706-9c0f-e864e2c7a7c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDK\Python">
+      <UniqueIdentifier>{a7ccfa4b-cc58-4f5f-88a1-35d65ab8b5a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -305,6 +326,15 @@
     <ClInclude Include="scylla_wrapper.h">
       <Filter>Header Files\ThirdParty</Filter>
     </ClInclude>
+    <ClInclude Include="..\SDK\C\TitanEngine.h">
+      <Filter>Header Files\SDK\C</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SDK\CPP\TitanEngine.h">
+      <Filter>Header Files\SDK\CPP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SDK\CPP\TitanEngine.hpp">
+      <Filter>Header Files\SDK\CPP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TitanEngine.rc">
@@ -326,6 +356,18 @@
     </None>
     <None Include="Global.Engine.Hash.h">
       <Filter>Header Files\TitanEngine</Filter>
+    </None>
+    <None Include="..\SDK\Delphi\TitanEngine.pas">
+      <Filter>Header Files\SDK\Delphi</Filter>
+    </None>
+    <None Include="..\SDK\LUA\TitanEngine.lua">
+      <Filter>Header Files\SDK\LUA</Filter>
+    </None>
+    <None Include="..\SDK\MASM\TitanEngine.INC">
+      <Filter>Header Files\SDK\MASM</Filter>
+    </None>
+    <None Include="..\SDK\Python\TitanEngine.py">
+      <Filter>Header Files\SDK\Python</Filter>
     </None>
   </ItemGroup>
 </Project>

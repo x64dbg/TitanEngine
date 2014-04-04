@@ -87,7 +87,7 @@ __declspec(dllexport) long TITCALL GetPE32SectionNumberFromVA(ULONG_PTR FileMapV
     }
     return(-2);
 }
-__declspec(dllexport) long long TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
+__declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -208,7 +208,7 @@ __declspec(dllexport) long long TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
     }
     return(0);
 }
-__declspec(dllexport) long long TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType)
+__declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool AddressIsRVA, bool ReturnType)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -391,7 +391,7 @@ __declspec(dllexport) long long TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMa
     }
     return(0);
 }
-__declspec(dllexport) long long TITCALL ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
+__declspec(dllexport) ULONG_PTR TITCALL ConvertFileOffsetToVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -506,7 +506,7 @@ __declspec(dllexport) long long TITCALL ConvertFileOffsetToVA(ULONG_PTR FileMapV
     }
     return(0);
 }
-__declspec(dllexport) long long TITCALL ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType)
+__declspec(dllexport) ULONG_PTR TITCALL ConvertFileOffsetToVAEx(ULONG_PTR FileMapVA, DWORD FileSize, ULONG_PTR ImageBase, ULONG_PTR AddressToConvert, bool ReturnType)
 {
 
     ULONG_PTR ConvertedAddress = NULL;

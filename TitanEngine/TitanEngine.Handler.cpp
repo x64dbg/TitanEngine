@@ -179,7 +179,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenHandles(DWORD ProcessId, 
     }
     return(HandleCount);
 }
-__declspec(dllexport) long long TITCALL HandlerGetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, DWORD InformationReturn)
+__declspec(dllexport) ULONG_PTR TITCALL HandlerGetHandleDetails(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, DWORD InformationReturn)
 {
 
     HANDLE myHandle = NULL;
@@ -652,7 +652,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
     return(HandleCount);
 
 }
-__declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, char* szMutexString)
+__declspec(dllexport) ULONG_PTR TITCALL HandlerGetOpenMutexHandle(HANDLE hProcess, DWORD ProcessId, char* szMutexString)
 {
 
     wchar_t uniMutexString[MAX_PATH] = {};
@@ -667,7 +667,7 @@ __declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandle(HANDLE hProces
         return(NULL);
     }
 }
-__declspec(dllexport) long long TITCALL HandlerGetOpenMutexHandleW(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
+__declspec(dllexport) ULONG_PTR TITCALL HandlerGetOpenMutexHandleW(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
 {
     if(!szMutexString || lstrlenW(szMutexString)>=512)
         return 0;

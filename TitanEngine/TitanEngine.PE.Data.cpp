@@ -3,7 +3,7 @@
 #include "Global.Engine.h"
 #include "Global.Mapping.h"
 
-__declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -152,7 +152,7 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                         if(WhichData == UE_SECTIONNAME)
                         {
                             memcpy(sectionName, PESections->Name, 8);
-                            return (long long)sectionName;
+                            return (ULONG_PTR)sectionName;
                         }
                         else if(WhichData == UE_SECTIONVIRTUALOFFSET)
                         {
@@ -339,14 +339,14 @@ __declspec(dllexport) long long TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
     }
     return(0);
 }
-__declspec(dllexport) long long TITCALL GetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) ULONG_PTR TITCALL GetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData)
 {
 
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileEx(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -359,14 +359,14 @@ __declspec(dllexport) long long TITCALL GetPE32Data(char* szFileName, DWORD Whic
         return(0);
     }
 }
-__declspec(dllexport) long long TITCALL GetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) ULONG_PTR TITCALL GetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData)
 {
 
     HANDLE FileHandle;
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -483,7 +483,7 @@ __declspec(dllexport) bool TITCALL GetPE32DataEx(char* szFileName, LPVOID DataSt
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileEx(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -510,7 +510,7 @@ __declspec(dllexport) bool TITCALL GetPE32DataExW(wchar_t* szFileName, LPVOID Da
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -945,7 +945,7 @@ __declspec(dllexport) bool TITCALL SetPE32Data(char* szFileName, DWORD WhichSect
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileEx(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -972,7 +972,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataW(wchar_t* szFileName, DWORD Which
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -1109,7 +1109,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataEx(char* szFileName, LPVOID DataSt
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileEx(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
@@ -1136,7 +1136,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataExW(wchar_t* szFileName, LPVOID Da
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    long long ReturnValue = 0;
+    ULONG_PTR ReturnValue = 0;
 
     if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {

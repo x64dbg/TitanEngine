@@ -92,7 +92,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 DBGEntryPoint = DBGEvent.u.CreateProcessInfo.lpStartAddress;
                 DBGFileHandle = DBGEvent.u.CreateProcessInfo.hFile;
                 EngineCloseHandle(DBGFileHandle); //handle is never used inside the code
-                DebugDebuggingMainModuleBase = (unsigned long long) DBGEvent.u.CreateProcessInfo.lpBaseOfImage;
+                DebugDebuggingMainModuleBase = (ULONG_PTR) DBGEvent.u.CreateProcessInfo.lpBaseOfImage;
                 if(DebugAttachedToProcess) //we attached, set information
                 {
                     dbgProcessInformation.hProcess = DBGEvent.u.CreateProcessInfo.hProcess;

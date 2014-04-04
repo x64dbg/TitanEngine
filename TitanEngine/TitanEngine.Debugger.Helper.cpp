@@ -39,7 +39,7 @@ __declspec(dllexport) bool TITCALL GetRemoteString(HANDLE hProcess, LPVOID Strin
         return false;
     }
 }
-__declspec(dllexport) long long TITCALL GetFunctionParameter(HANDLE hProcess, DWORD FunctionType, DWORD ParameterNumber, DWORD ParameterType)
+__declspec(dllexport) ULONG_PTR TITCALL GetFunctionParameter(HANDLE hProcess, DWORD FunctionType, DWORD ParameterNumber, DWORD ParameterType)
 {
 
     MEMORY_BASIC_INFORMATION MemInfo;
@@ -207,7 +207,7 @@ __declspec(dllexport) long long TITCALL GetFunctionParameter(HANDLE hProcess, DW
     }
     return(-1);
 }
-__declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
+__declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, ULONG_PTR InstructionAddress, bool JustJumps)
 {
 
     char ReadMemory[MAXIMUM_INSTRUCTION_SIZE] = {0};
@@ -493,7 +493,7 @@ __declspec(dllexport) long long TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
     }
     return(NULL);
 }
-__declspec(dllexport) long long TITCALL GetJumpDestination(HANDLE hProcess, ULONG_PTR InstructionAddress)
+__declspec(dllexport) ULONG_PTR TITCALL GetJumpDestination(HANDLE hProcess, ULONG_PTR InstructionAddress)
 {
     return((ULONG_PTR)GetJumpDestinationEx(hProcess, InstructionAddress, false));
 }

@@ -71,22 +71,22 @@ __declspec(dllexport) bool TITCALL ImporterExportIATExW(wchar_t* szDumpFileName,
     return (scylla_fixDump(szDumpFileName, szExportFileName, szSectionName) == SCY_ERROR_SUCCESS);
 }
 
-__declspec(dllexport) long long TITCALL ImporterFindAPIWriteLocation(char* szAPIName)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterFindAPIWriteLocation(char* szAPIName)
 {
     return scylla_findImportWriteLocation(szAPIName);
 }
 
-__declspec(dllexport) long long TITCALL ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterFindOrdinalAPIWriteLocation(ULONG_PTR OrdinalNumber)
 {
     return scylla_findOrdinalImportWriteLocation(OrdinalNumber);
 }
 
-__declspec(dllexport) long long TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterFindAPIByWriteLocation(ULONG_PTR APIWriteLocation)
 {
     return scylla_findImportNameByWriteLocation(APIWriteLocation);
 }
 
-__declspec(dllexport) long long TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterFindDLLByWriteLocation(ULONG_PTR APIWriteLocation)
 {
     return scylla_findModuleNameByWriteLocation(APIWriteLocation);
 }
@@ -101,17 +101,17 @@ __declspec(dllexport) void* TITCALL ImporterGetDLLNameW(ULONG_PTR APIAddress)
     return ImporterGetDLLNameFromDebugeeW(GetCurrentProcess(), APIAddress);
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetRemoteAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return EngineGetAddressRemote(hProcess, APIAddress);
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetRemoteAPIAddressEx(char* szDLLName, char* szAPIName)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetRemoteAPIAddressEx(char* szDLLName, char* szAPIName)
 {
     return EngineGetProcAddressRemote(0, szDLLName, szAPIName);
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetLocalAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return EngineGetAddressLocal(hProcess, APIAddress);
 }
@@ -145,12 +145,12 @@ __declspec(dllexport) void* TITCALL ImporterGetRemoteDLLBaseExW(HANDLE hProcess,
     return (void*)EngineGetModuleBaseRemote(hProcess, szModuleName);
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetRemoteDLLBaseEx(HANDLE hProcess, char* szModuleName)
 {
     return EngineGetModuleBaseRemote(hProcess, szModuleName);
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetRemoteDLLBase(HANDLE hProcess, HMODULE LocalModuleBase)
 {
     return EngineGetAddressRemote(hProcess, (ULONG_PTR)LocalModuleBase);
 }
@@ -160,7 +160,7 @@ __declspec(dllexport) void* TITCALL ImporterGetAPIName(ULONG_PTR APIAddress)
     return ImporterGetAPINameFromDebugee(GetCurrentProcess(), APIAddress);
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetAPIOrdinalNumber(ULONG_PTR APIAddress)
 {
     return ImporterGetAPIOrdinalNumberFromDebugee(GetCurrentProcess(), APIAddress);
 }
@@ -179,7 +179,7 @@ __declspec(dllexport) void* TITCALL ImporterGetAPINameFromDebugee(HANDLE hProces
     return 0;
 }
 
-__declspec(dllexport) long long TITCALL ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetAPIOrdinalNumberFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return EngineGetAPIOrdinalRemote(hProcess, APIAddress);
 }
@@ -219,11 +219,11 @@ __declspec(dllexport) long TITCALL ImporterGetForwardedDLLIndex(HANDLE hProcess,
 {
     return((DWORD)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_DLLINDEX));
 }
-__declspec(dllexport) long long TITCALL ImporterGetForwardedAPIOrdinalNumber(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetForwardedAPIOrdinalNumber(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((DWORD)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_FORWARDER_API_ORDINAL_NUMBER));
 }
-__declspec(dllexport) long long TITCALL ImporterGetNearestAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
+__declspec(dllexport) ULONG_PTR TITCALL ImporterGetNearestAPIAddress(HANDLE hProcess, ULONG_PTR APIAddress)
 {
     return((ULONG_PTR)EngineGlobalAPIHandler(hProcess, NULL, APIAddress, NULL, UE_OPTION_IMPORTER_RETURN_NEAREST_APIADDRESS));
 }

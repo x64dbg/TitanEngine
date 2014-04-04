@@ -31,7 +31,7 @@ wchar_t* EngineExtractFileNameW(wchar_t* szFileName);
 bool EngineIsPointedMemoryString(ULONG_PTR PossibleStringPtr);
 int EnginePointedMemoryStringLength(ULONG_PTR PossibleStringPtr);
 bool EngineCompareResourceString(wchar_t* String1, wchar_t* String2);
-long long EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA);
+ULONG_PTR EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA);
 bool EngineExtractForwarderData(ULONG_PTR PossibleStringPtr, LPVOID szFwdDLLName, LPVOID szFwdAPIName);
 bool EngineGrabDataFromMappedFile(HANDLE hFile, ULONG_PTR FileMapVA, ULONG_PTR FileOffset, DWORD CopySize, LPVOID CopyToMemory);
 bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName);
@@ -44,12 +44,12 @@ long EngineHashMemory(char* MemoryAddress, int MemorySize, DWORD InitialHashValu
 bool EngineIsValidReadPtrEx(LPVOID DataPointer, DWORD DataSize);
 bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, LONG_PTR lParam);
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile);
-long long EngineSimulateNtLoaderW(wchar_t* szFileName);
-long long EngineSimulateNtLoader(char* szFileName);
-long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName);
-long long EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName);
-long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName);
+ULONG_PTR EngineSimulateNtLoaderW(wchar_t* szFileName);
+ULONG_PTR EngineSimulateNtLoader(char* szFileName);
+ULONG_PTR EngineSimulateDllLoader(HANDLE hProcess, char* szFileName);
+ULONG_PTR EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName);
+ULONG_PTR EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName);
 bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, LPDWORD ptrOrdinalCount);
-long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);
+ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);
 
 #endif //_GLOBAL_ENGINE_H

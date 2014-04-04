@@ -295,7 +295,7 @@ bool EngineCompareResourceString(wchar_t* String1, wchar_t* String2)
     return false;
 }
 
-long long EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA)
+ULONG_PTR EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA)
 {
 
     PIMAGE_DOS_HEADER DOSHeader;
@@ -850,7 +850,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     return false;
 }
 
-long long EngineSimulateNtLoaderW(wchar_t* szFileName)
+ULONG_PTR EngineSimulateNtLoaderW(wchar_t* szFileName)
 {
 
     DWORD PeHeaderSize;
@@ -946,7 +946,7 @@ long long EngineSimulateNtLoaderW(wchar_t* szFileName)
     return(NULL);
 }
 
-long long EngineSimulateNtLoader(char* szFileName)
+ULONG_PTR EngineSimulateNtLoader(char* szFileName)
 {
     wchar_t uniFileName[MAX_PATH] = {0};
 
@@ -961,7 +961,7 @@ long long EngineSimulateNtLoader(char* szFileName)
     }
 }
 
-long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
+ULONG_PTR EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
 {
     WCHAR uniFileName[MAX_PATH] = {0};
 
@@ -974,7 +974,7 @@ long long EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
     return 0;
 }
 
-long long EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName)
+ULONG_PTR EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName)
 {
     int n;
     BOOL FileIs64;
@@ -1136,7 +1136,7 @@ long long EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName)
     return(NULL);
 }
 
-long long EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName)
+ULONG_PTR EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName)
 {
 
     int i = 0;
@@ -1257,7 +1257,7 @@ bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, L
     return false;
 }
 
-long long EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType)
+ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType)
 {
 
     unsigned int i = 0;
