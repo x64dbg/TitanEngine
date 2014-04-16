@@ -384,6 +384,7 @@ FindOEPGenericallyW
 GetActiveProcessId
 GetActiveProcessIdW
 EnumProcessesWithLibrary
+TitanOpenProcess
 EngineFakeMissingDependencies
 EngineDeleteCreatedDependencies
 EngineCreateMissingDependencies

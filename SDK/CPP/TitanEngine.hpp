@@ -2262,6 +2262,11 @@ protected:
     {
         UE::EnumProcessesWithLibrary(szLibraryName, (void*)EnumFunction);
     }
+
+    static HANDLE Open(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId)
+    {
+        return UE::TitanOpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId);
+    }
 };
 
 class ProcessA
@@ -2293,6 +2298,7 @@ public:
     using ProcessA::GetActiveProcessId;
     using ProcessW::GetActiveProcessId;
     using ProcessX::EnumProcessesWithLibrary;
+    using ProcessX::Open;
 };
 
 class TLSX

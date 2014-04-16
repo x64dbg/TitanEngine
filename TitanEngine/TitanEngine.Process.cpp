@@ -131,3 +131,8 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
         }
     }
 }
+
+__declspec(dllexport) HANDLE TITCALL TitanOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId)
+{
+    return EngineOpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId);
+}

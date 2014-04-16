@@ -860,6 +860,7 @@ __declspec(dllimport) void TITCALL LibrarianEnumLibraryInfoW(void* EnumCallBack)
 __declspec(dllimport) long TITCALL GetActiveProcessId(char* szImageName);
 __declspec(dllimport) long TITCALL GetActiveProcessIdW(wchar_t* szImageName);
 __declspec(dllimport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName, void* EnumFunction);
+__declspec(dllimport) HANDLE TITCALL TitanOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId);
 // TitanEngine.TLSFixer.functions:
 __declspec(dllimport) bool TITCALL TLSBreakOnCallBack(LPVOID ArrayOfCallBacks, DWORD NumberOfCallBacks, LPVOID bpxCallBack);
 __declspec(dllimport) bool TITCALL TLSGrabCallBackData(char* szFileName, LPVOID ArrayOfCallBacks, LPDWORD NumberOfCallBacks);
