@@ -273,6 +273,8 @@ __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
     LPVOID funcDebugActiveProcessStop = NULL;
     bool FuncReturn = false;
 
+    RemoveAllBreakPoints(UE_OPTION_REMOVEALL);
+
     if(ProcessId != NULL)
     {
         funcDebugActiveProcessStop = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugActiveProcessStop");

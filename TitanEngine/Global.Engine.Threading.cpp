@@ -4,7 +4,11 @@
 
 MutexLocker::MutexLocker(const char* name)
 {
-    gMutex=CreateMutexA(0, false, name);
+    int len=strlen(name);
+    DynBuf newNameBuf(len+20);
+    char* newName = (char*)newNameBuf.GetPtr();
+    sprintf(newName, "%s%X", name, GetCurrentProcessId());
+    gMutex=CreateMutexA(0, false, newName);
     bUnlocked=false;
     WaitForSingleObject(gMutex, INFINITE);
 }
