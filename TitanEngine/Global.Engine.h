@@ -51,5 +51,6 @@ ULONG_PTR EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName);
 ULONG_PTR EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName);
 bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, LPDWORD ptrOrdinalCount);
 ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);
+DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege);
 
 #endif //_GLOBAL_ENGINE_H

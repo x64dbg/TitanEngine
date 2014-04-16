@@ -2021,3 +2021,29 @@ ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     }
     return(NULL);
 }
+
+DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege)
+{
+    DWORD dwLastError;
+    HANDLE hToken = 0;
+    if(!OpenProcessToken(hProcess, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+    {
+        dwLastError = GetLastError();
+        if(hToken)
+            CloseHandle(hToken);
+        return dwLastError;
+    }
+    TOKEN_PRIVILEGES tokenPrivileges;
+    memset(&tokenPrivileges, 0, sizeof(TOKEN_PRIVILEGES));
+    LUID luid;
+    if(!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid))
+        return false;
+    tokenPrivileges.PrivilegeCount = 1; 
+    tokenPrivileges.Privileges[0].Luid = luid; 
+    if(bEnablePrivilege)
+        tokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; 
+    else 
+        tokenPrivileges.Privileges[0].Attributes = 0;
+    AdjustTokenPrivileges(hToken, FALSE, &tokenPrivileges, sizeof(TOKEN_PRIVILEGES), NULL, NULL); 
+    return GetLastError();
+}
