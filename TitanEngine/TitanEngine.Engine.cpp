@@ -38,6 +38,10 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     {
         engineExecutePluginCallBack = VariableSet;
     }
+    else if(VariableId == UE_ENGINE_SET_DEBUG_PRIVILEGE)
+    {
+        engineEnableDebugPrivilege = VariableSet;
+    }
 }
 
 __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)

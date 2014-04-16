@@ -36,7 +36,7 @@ __declspec(dllexport) long TITCALL GetActiveProcessIdW(wchar_t* szImageName)
         {
             if(bProcessId[i] != NULL)
             {
-                hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
+                hProcess = EngineOpenProcess(PROCESS_QUERY_INFORMATION, false, bProcessId[i]);
                 if(hProcess != NULL)
                 {
                     if(GetProcessImageFileNameW(hProcess, szProcessPath, _countof(szProcessPath)) > NULL)
@@ -96,7 +96,7 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
             {
                 if(bProcessId[i] != NULL)
                 {
-                    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, 0, bProcessId[i]);
+                    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, 0, bProcessId[i]);
                     if(hProcess != NULL)
                     {
                         RtlZeroMemory(EnumeratedModules, sizeof(EnumeratedModules));

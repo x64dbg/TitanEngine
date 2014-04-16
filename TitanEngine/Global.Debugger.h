@@ -15,6 +15,7 @@ extern ULONG_PTR DebugModuleEntryPoint;
 extern ULONG_PTR DebugModuleImageBase;
 extern ULONG_PTR DebugAttachedProcessCallBack;
 extern bool DebugAttachedToProcess;
+extern bool DebugRemoveDebugPrivilege;
 extern ULONG_PTR DebugReserveModuleBase;
 extern ULONG_PTR DebugDebuggingMainModuleBase;
 extern ULONG_PTR DebugDebuggingDLLBase;

@@ -18,6 +18,7 @@ ULONG_PTR DebugReserveModuleBase = NULL;
 ULONG_PTR DebugDebuggingMainModuleBase = NULL;
 ULONG_PTR DebugDebuggingDLLBase = NULL;
 bool DebugAttachedToProcess = false;
+bool DebugRemoveDebugPrivilege = false;
 bool DebugDebuggingDLL = false;
 wchar_t* DebugDebuggingDLLFullFileName;
 wchar_t* DebugDebuggingDLLFileName;

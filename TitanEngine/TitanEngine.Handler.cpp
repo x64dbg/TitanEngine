@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Handle.h"
-
+#include "Global.Engine.h"
 
 bool NtQuerySysHandleInfo(DynBuf& buf)
 {
@@ -334,7 +334,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandlesW(wchar_t* szFileO
             {
                 EngineCloseHandle(hProcess);
             }
-            hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
+            hProcess = EngineOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
             LastProcessId = HandleInfo->ProcessId;
         }
         if(hProcess != NULL)
@@ -441,7 +441,7 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
             {
                 EngineCloseHandle(hProcess);
             }
-            hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
+            hProcess = EngineOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
             LastProcessId = HandleInfo->ProcessId;
         }
         if(hProcess != NULL)
@@ -544,7 +544,7 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
             {
                 EngineCloseHandle(hProcess);
             }
-            hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
+            hProcess = EngineOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, false, HandleInfo->ProcessId);
             LastProcessId = HandleInfo->ProcessId;
         }
         if(hProcess != NULL)
@@ -749,7 +749,7 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
             {
                 EngineCloseHandle(hProcess);
             }
-            hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, FALSE, HandleInfo->ProcessId);
+            hProcess = EngineOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, FALSE, HandleInfo->ProcessId);
             LastProcessId = HandleInfo->ProcessId;
         }
         if(hProcess != NULL)

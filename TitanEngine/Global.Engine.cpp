@@ -17,6 +17,7 @@ bool engineRemoveConsoleForDebugee = false;
 bool enginePassAllExceptions = true;
 bool engineExecutePluginCallBack = true;
 bool engineAutoHideFromDebugger = false; // hardcoded
+bool engineEnableDebugPrivilege = false;
 
 char engineFoundDLLName[512] = {0};
 char engineFoundAPIName[512] = {0};
@@ -2037,13 +2038,31 @@ DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege)
     memset(&tokenPrivileges, 0, sizeof(TOKEN_PRIVILEGES));
     LUID luid;
     if(!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid))
-        return false;
-    tokenPrivileges.PrivilegeCount = 1; 
-    tokenPrivileges.Privileges[0].Luid = luid; 
+    {
+        dwLastError = GetLastError();
+        CloseHandle(hToken);
+        return dwLastError;
+    }
+    tokenPrivileges.PrivilegeCount = 1;
+    tokenPrivileges.Privileges[0].Luid = luid;
     if(bEnablePrivilege)
-        tokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; 
-    else 
+        tokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    else
         tokenPrivileges.Privileges[0].Attributes = 0;
-    AdjustTokenPrivileges(hToken, FALSE, &tokenPrivileges, sizeof(TOKEN_PRIVILEGES), NULL, NULL); 
-    return GetLastError();
+    AdjustTokenPrivileges(hToken, FALSE, &tokenPrivileges, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+    dwLastError = GetLastError();
+    CloseHandle(hToken);
+    return dwLastError;
+}
+
+HANDLE EngineOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId)
+{
+    if(engineEnableDebugPrivilege)
+        EngineSetDebugPrivilege(GetCurrentProcess(), true);
+    HANDLE hProcess = OpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId);
+    DWORD dwLastError = GetLastError();
+    if(engineEnableDebugPrivilege)
+        EngineSetDebugPrivilege(GetCurrentProcess(), false);
+    SetLastError(dwLastError);
+    return hProcess;
 }

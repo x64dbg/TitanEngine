@@ -20,6 +20,7 @@ extern bool engineRemoveConsoleForDebugee;
 extern bool enginePassAllExceptions;
 extern bool engineExecutePluginCallBack;
 extern bool engineAutoHideFromDebugger;
+extern bool engineEnableDebugPrivilege;
 
 //Global.Engine.Functions
 void EngineInit();
@@ -52,5 +53,6 @@ ULONG_PTR EngineGetProcAddress(ULONG_PTR ModuleBase, char* szAPIName);
 bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, LPDWORD ptrOrdinalCount);
 ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);
 DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege);
+HANDLE EngineOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId);
 
 #endif //_GLOBAL_ENGINE_H

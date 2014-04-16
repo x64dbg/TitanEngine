@@ -555,7 +555,7 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULON
     {
         if(GetTempFileNameW(szTempFolder, L"DumpTemp", GetTickCount() + 102, szTempName))
         {
-            HANDLE hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+            HANDLE hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
 
             DumpProcessW(hProcess, (LPVOID)ImageBase, szTempName, NULL);
             ImporterAutoSearchIATW(ProcessId, szTempName, SearchStart, pIATStart, pIATSize);
@@ -609,7 +609,7 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     //do we need to dump first?
     if(DumpRunningProcess)
     {
-        HANDLE hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+        HANDLE hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
 
         if(!DumpProcessW(hProcess, (LPVOID)ImageBase, szDumpedFile, EntryPointAddress))
         {

@@ -11,7 +11,6 @@ static wchar_t szBackupDebuggedFileName[512];
 // TitanEngine.Debugger.functions:
 __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder)
 {
-
     wchar_t* PtrUniFileName = NULL;
     wchar_t uniFileName[MAX_PATH] = {};
     wchar_t* PtrUniCommandLine = NULL;
@@ -55,10 +54,17 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         DebugConsoleFlag = CREATE_NO_WINDOW;
     }
     std::vector<BreakPointDetail>().swap(BreakPointBuffer);
+    if(engineEnableDebugPrivilege)
+    {
+        EngineSetDebugPrivilege(GetCurrentProcess(), true);
+        DebugRemoveDebugPrivilege = true;
+    }
     if(szCommandLine == NULL)
     {
         if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
+            if(engineEnableDebugPrivilege)
+                EngineSetDebugPrivilege(GetCurrentProcess(), false);
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
             std::vector<BreakPointDetail>().swap(BreakPointBuffer);
@@ -66,6 +72,11 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         }
         else
         {
+            if(engineEnableDebugPrivilege)
+            {
+                EngineSetDebugPrivilege(GetCurrentProcess(), false);
+                DebugRemoveDebugPrivilege = false;
+            }
             RtlZeroMemory(&dbgProcessInformation,sizeof PROCESS_INFORMATION);
             return(0);
         }
@@ -75,6 +86,8 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         wsprintfW(szCreateWithCmdLine, L"\"%s\" %s", szFileName, szCommandLine);
         if(CreateProcessW(NULL, szCreateWithCmdLine, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
+            if(engineEnableDebugPrivilege)
+                EngineSetDebugPrivilege(GetCurrentProcess(), false);
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
             std::vector<BreakPointDetail>().swap(BreakPointBuffer);
@@ -82,6 +95,11 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         }
         else
         {
+            if(engineEnableDebugPrivilege)
+            {
+                EngineSetDebugPrivilege(GetCurrentProcess(), false);
+                DebugRemoveDebugPrivilege = false;
+            }
             RtlZeroMemory(&dbgProcessInformation,sizeof PROCESS_INFORMATION);
             return(0);
         }
@@ -191,11 +209,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         DebugModuleEntryPointCallBack = EntryCallBack;
         return(InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder));
     }
-    else
-    {
-        return(NULL);
-    }
-    return(NULL);
+    return 0;
 }
 
 __declspec(dllexport) bool TITCALL StopDebug()
@@ -207,15 +221,11 @@ __declspec(dllexport) bool TITCALL StopDebug()
         Sleep(10); //allow thread switching
         return true;
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
 {
-
     typedef void(WINAPI *fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
     fDebugSetProcessKillOnExit myDebugSetProcessKillOnExit;
     LPVOID funcDebugSetProcessKillOnExit = NULL;
@@ -223,8 +233,15 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
     if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
         std::vector<BreakPointDetail>().swap(BreakPointBuffer);
+        if(engineEnableDebugPrivilege)
+        {
+            EngineSetDebugPrivilege(GetCurrentProcess(), true);
+            DebugRemoveDebugPrivilege = true;
+        }
         if(DebugActiveProcess(ProcessId))
         {
+            if(engineEnableDebugPrivilege)
+                EngineSetDebugPrivilege(GetCurrentProcess(), false);
             if(KillOnExit)
             {
                 funcDebugSetProcessKillOnExit = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugSetProcessKillOnExit");
@@ -245,10 +262,6 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
             DebugAttachedProcessCallBack = NULL;
             return true;
         }
-    }
-    else
-    {
-        return false;
     }
     return false;
 }

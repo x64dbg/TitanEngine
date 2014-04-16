@@ -274,7 +274,7 @@ __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageB
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpProcessW(hProcess, ImageBase, szDumpFileName, EntryPoint);
@@ -364,7 +364,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpMemoryW(hProcess, MemoryStart, MemorySize, szDumpFileName);
@@ -466,7 +466,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpRegionsW(hProcess, szDumpFolder, DumpAboveImageBaseOnly);
@@ -537,7 +537,7 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = OpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess) //If the function fails, the return value is NULL. To get extended error information, call GetLastError.
     {
         ReturnValue = DumpModuleW(hProcess, ModuleBase, szDumpFileName);

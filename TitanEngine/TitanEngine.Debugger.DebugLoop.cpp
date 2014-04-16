@@ -26,6 +26,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
     bool hListThreadFirst = true;
     bool hListLibraryFirst = true;
     bool MemoryBpxFound = false;
+    bool RemoveDebugPrivilege = DebugRemoveDebugPrivilege; //store the flag in a local variable
+    DebugRemoveDebugPrivilege = false; //reset this flag
     PLIBRARY_ITEM_DATAW hLoadedLibData = NULL;
     PLIBRARY_BREAK_DATA ptrLibrarianData = NULL;
     typedef void(TITCALL *fCustomBreakPoint)(void);
@@ -87,7 +89,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
         case CREATE_PROCESS_DEBUG_EVENT:
         {
-            if(DBGFileHandle == NULL) //we didn't set the handle yet
+            if(DBGFileHandle == NULL) //we didn't set the handle yet (initial process)
             {
                 DBGEntryPoint = DBGEvent.u.CreateProcessInfo.lpStartAddress;
                 DBGFileHandle = DBGEvent.u.CreateProcessInfo.hFile;
@@ -137,6 +139,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 NewThreadData.ThreadStartAddress = (void*)DBGEvent.u.CreateProcessInfo.lpStartAddress;
                 NewThreadData.ThreadLocalBase = (void*)DBGEvent.u.CreateProcessInfo.lpThreadLocalBase;
                 hListThread.push_back(NewThreadData);
+                //remove debug privilege from child process
+                if(RemoveDebugPrivilege)
+                    EngineSetDebugPrivilege(DBGEvent.u.CreateProcessInfo.hProcess, false);
             }
             //update process list
             PROCESS_ITEM_DATA NewProcessItem;
