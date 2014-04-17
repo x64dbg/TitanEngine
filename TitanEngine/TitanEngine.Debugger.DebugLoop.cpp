@@ -93,7 +93,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 DBGEntryPoint = DBGEvent.u.CreateProcessInfo.lpStartAddress;
                 DBGFileHandle = DBGEvent.u.CreateProcessInfo.hFile;
-                EngineCloseHandle(DBGFileHandle); //handle is never used inside the code
                 DebugDebuggingMainModuleBase = (ULONG_PTR) DBGEvent.u.CreateProcessInfo.lpBaseOfImage;
                 if(DebugAttachedToProcess) //we attached, set information
                 {
@@ -117,6 +116,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(!WriteProcessMemory(DBGEvent.u.CreateProcessInfo.hProcess, (LPVOID)DLLPatchAddress, DebugDebuggingDLLFullFileName, lstrlenW(DebugDebuggingDLLFullFileName) * 2, &NumberOfBytesReadWritten))
                     {
                         StopDebug();
+                        EngineCloseHandle(DBGFileHandle); //close file handle
                         return;
                     }
                     if(DebugReserveModuleBase) //reserve original image base
@@ -169,6 +169,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DBGCustomHandler->chCreateProcess = NULL;
                 }
             }
+
+            EngineCloseHandle(DBGFileHandle); //close file handle
         }
         break;
 
@@ -345,6 +347,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     }
                 }
             }
+
+            //maintain library list
+            hListLibrary.push_back(NewLibraryData);
+
             //loadDLL callback
             if(DBGCustomHandler->chLoadDll != NULL)
             {
