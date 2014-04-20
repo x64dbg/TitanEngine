@@ -124,13 +124,18 @@ void BreakPointPostReadFilter(ULONG_PTR lpBaseAddress, unsigned char* lpBuffer, 
         if(curBp->BreakPointActive != UE_BPXACTIVE || (curBp->BreakPointType != UE_BREAKPOINT && curBp->BreakPointType != UE_SINGLESHOOT))
             continue;
         ULONG_PTR cur_addr=curBp->BreakPointAddress;
-        if(cur_addr>=start && cur_addr<end) //breakpoint is in range
+        for(int j=0; j<curBp->BreakPointSize; j++)
         {
-            ULONG_PTR index=cur_addr-start; //calculate where to write in the buffer
-            int n=curBp->BreakPointSize;
-            if((cur_addr+n)>end)
-                n=end-cur_addr; //do not overflow the buffer
-            memcpy(lpBuffer+index, curBp->OriginalByte, n);
+            if(cur_addr+j==start && cur_addr+j<end) //breakpoint is in range
+            {
+                ULONG_PTR index=cur_addr+j-start; //calculate where to write in the buffer
+                int n=curBp->BreakPointSize-j;
+                if((cur_addr+n)>end)
+                    n=end-cur_addr; //do not overflow the buffer
+                memcpy(lpBuffer+index, &curBp->OriginalByte[j], n);
+                if(n==curBp->BreakPointSize)
+                    break;
+            }
         }
     }
 }
@@ -147,12 +152,16 @@ void BreakPointPreWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize, MutexLocker
         if(curBp->BreakPointActive != UE_BPXACTIVE || (curBp->BreakPointType != UE_BREAKPOINT && curBp->BreakPointType != UE_SINGLESHOOT))
             continue;
         ULONG_PTR cur_addr=curBp->BreakPointAddress;
-        if(cur_addr>=start && cur_addr<end) //breakpoint is in range
+        for(int j=0; j<curBp->BreakPointSize; j++)
         {
-            lock->unlock();
-            DisableBPX(cur_addr); //needs a cleaner solution
-            lock->relock();
-            curBp->BreakPointActive = UE_BPXACTIVE; //little hack
+            if(cur_addr+j==start && cur_addr+j<end) //breakpoint byte is in range
+            {
+                lock->unlock();
+                DisableBPX(cur_addr);
+                lock->relock();
+                curBp->BreakPointActive = UE_BPXACTIVE; //little hack
+                break;
+            }
         }
     }
 }
@@ -169,12 +178,16 @@ void BreakPointPostWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize, MutexLocke
         if(curBp->BreakPointActive != UE_BPXACTIVE || (curBp->BreakPointType != UE_BREAKPOINT && curBp->BreakPointType != UE_SINGLESHOOT))
             continue;
         ULONG_PTR cur_addr=curBp->BreakPointAddress;
-        if(cur_addr>=start && cur_addr<end) //breakpoint is in range
+        for(int j=0; j<curBp->BreakPointSize; j++)
         {
-            curBp->BreakPointActive = UE_BPXINACTIVE; //little hack
-            lock->unlock();
-            EnableBPX(cur_addr); //needs a cleaner solution
-            lock->relock();
+            if(cur_addr+j==start && cur_addr+j<end) //breakpoint byte is in range
+            {
+                curBp->BreakPointActive = UE_BPXINACTIVE; //little hack
+                lock->unlock();
+                EnableBPX(cur_addr); //needs a cleaner solution
+                lock->relock();
+                break;
+            }
         }
     }
 }
