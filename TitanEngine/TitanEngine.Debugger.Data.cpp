@@ -42,7 +42,6 @@ __declspec(dllexport) ULONG_PTR TITCALL GetDebuggedFileBaseAddress()
 
 __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID CallBack)
 {
-
     if(ExceptionId == UE_CH_BREAKPOINT)
     {
         DBGCustomHandler->chBreakPoint = (ULONG_PTR)CallBack;
@@ -139,18 +138,9 @@ __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
     {
         DBGCustomHandler->chRipEvent = (ULONG_PTR)CallBack;
     }
-    else if(ExceptionId == UE_CH_ALLEVENTS)
+    else if(ExceptionId == UE_CH_DEBUGEVENT)
     {
-        DBGCustomHandler->chEverythingElse = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chCreateThread = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chExitThread = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chCreateProcess = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chExitProcess = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chLoadDll = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chUnloadDll = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chOutputDebugString = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chSystemBreakpoint = (ULONG_PTR)CallBack;
-        DBGCustomHandler->chRipEvent = (ULONG_PTR)CallBack;
+        DBGCustomHandler->chDebugEvent = (ULONG_PTR)CallBack;
     }
 }
 

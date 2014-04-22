@@ -84,6 +84,20 @@ __declspec(dllexport) void TITCALL DebugLoop()
             ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_EXCEPTION);
         }
 
+        //Debug event custom handler
+        if(DBGCustomHandler->chDebugEvent != NULL)
+        {
+            myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chDebugEvent);
+            __try
+            {
+                myCustomHandler(&DBGEvent);
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                DBGCustomHandler->chDebugEvent = NULL;
+            }
+        }
+
         //Debug event
         switch(DBGEvent.dwDebugEventCode)
         {
@@ -1349,7 +1363,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
-                    DBGCustomHandler->chSystemBreakpoint = NULL;
+                    DBGCustomHandler->chRipEvent = NULL;
                 }
             }
         }
