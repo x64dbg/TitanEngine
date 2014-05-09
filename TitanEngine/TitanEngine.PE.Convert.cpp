@@ -4,88 +4,72 @@
 
 __declspec(dllexport) long TITCALL GetPE32SectionNumberFromVA(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert)
 {
+    if(!FileMapVA)
+        return -2;
 
-    PIMAGE_DOS_HEADER DOSHeader;
-    PIMAGE_NT_HEADERS32 PEHeader32;
-    PIMAGE_NT_HEADERS64 PEHeader64;
-    PIMAGE_SECTION_HEADER PESections;
-    ULONG_PTR FoundInSection = -1;
-    DWORD SectionNumber = 0;
-    DWORD ConvertAddress = 0;
-    BOOL FileIs64;
-
-    if(FileMapVA != NULL)
+    PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
+    if(EngineValidateHeader(FileMapVA, NULL, NULL, DOSHeader, true))
     {
-        DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
-        if(EngineValidateHeader(FileMapVA, NULL, NULL, DOSHeader, true))
+        PIMAGE_NT_HEADERS32 PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+        PIMAGE_NT_HEADERS64 PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
+        BOOL FileIs64;
+        if(PEHeader32->OptionalHeader.Magic == 0x10B)
+            FileIs64 = false;
+        else if(PEHeader32->OptionalHeader.Magic == 0x20B)
+            FileIs64 = true;
+        else
+            return -2;
+
+        if(!FileIs64) //x86
         {
-            PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-            if(PEHeader32->OptionalHeader.Magic == 0x10B)
+            __try
             {
-                FileIs64 = false;
-            }
-            else if(PEHeader32->OptionalHeader.Magic == 0x20B)
-            {
-                FileIs64 = true;
-            }
-            else
-            {
-                return(-2);
-            }
-            if(!FileIs64)
-            {
-                __try
+                ULONG_PTR ConvertAddress = AddressToConvert - PEHeader32->OptionalHeader.ImageBase;
+                PIMAGE_SECTION_HEADER PESections = IMAGE_FIRST_SECTION(PEHeader32);
+                DWORD SectionNumber = PEHeader32->FileHeader.NumberOfSections;
+                DWORD FoundInSection = -1;
+                while(SectionNumber > 0)
                 {
-                    ConvertAddress = (DWORD)((DWORD)AddressToConvert - PEHeader32->OptionalHeader.ImageBase);
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
-                    SectionNumber = PEHeader32->FileHeader.NumberOfSections;
-                    while(SectionNumber > 0)
+                    if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + PESections->Misc.VirtualSize)
                     {
-                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + PESections->Misc.VirtualSize)
-                        {
-                            FoundInSection = PEHeader32->FileHeader.NumberOfSections - SectionNumber;
-                        }
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
-                        SectionNumber--;
+                        FoundInSection = PEHeader32->FileHeader.NumberOfSections - SectionNumber;
                     }
-                    return((DWORD)FoundInSection);
+                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
+                    SectionNumber--;
                 }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    return(-2);
-                }
+                return FoundInSection;
             }
-            else
+            __except(EXCEPTION_EXECUTE_HANDLER)
             {
-                __try
-                {
-                    ConvertAddress = (DWORD)(AddressToConvert - PEHeader64->OptionalHeader.ImageBase);
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
-                    SectionNumber = PEHeader64->FileHeader.NumberOfSections;
-                    while(SectionNumber > 0)
-                    {
-                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + PESections->Misc.VirtualSize)
-                        {
-                            FoundInSection = PEHeader64->FileHeader.NumberOfSections - SectionNumber;
-                        }
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
-                        SectionNumber--;
-                    }
-                    return((DWORD)FoundInSection);
-                }
-                __except(EXCEPTION_EXECUTE_HANDLER)
-                {
-                    return(-2);
-                }
+                return -2;
             }
         }
-        else
+        else //x64
         {
-            return(-2);
+            __try
+            {
+                ULONG_PTR ConvertAddress = AddressToConvert - PEHeader64->OptionalHeader.ImageBase;
+                PIMAGE_SECTION_HEADER PESections = IMAGE_FIRST_SECTION(PEHeader64);
+                DWORD SectionNumber = PEHeader64->FileHeader.NumberOfSections;
+                DWORD FoundInSection = -1;
+                while(SectionNumber > 0)
+                {
+                    if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                    {
+                        FoundInSection = PEHeader64->FileHeader.NumberOfSections - SectionNumber;
+                    }
+                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + IMAGE_SIZEOF_SECTION_HEADER);
+                    SectionNumber--;
+                }
+                return FoundInSection;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return -2;
+            }
         }
     }
-    return(-2);
+    return -2;
 }
 __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
 {
