@@ -5,13 +5,11 @@
 #include "Global.Handle.h"
 #include "Global.Engine.Threading.h"
 
-static CONTEXT DBGContext = {};
-
 __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
 {
-    MutexLocker locker("DBGContext"); //lock DBGContext
     if(FPUSaveArea)
     {
+        CONTEXT DBGContext;
         memset(&DBGContext, 0, sizeof(CONTEXT));
         DBGContext.ContextFlags = CONTEXT_ALL;
 
@@ -36,10 +34,8 @@ __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, voi
 
 __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister)
 {
-    MutexLocker locker("DBGContext"); //lock DBGContext
-
     ULONG_PTR retValue = 0;
-
+    CONTEXT DBGContext;
     memset(&DBGContext, 0, sizeof(CONTEXT));
     DBGContext.ContextFlags = CONTEXT_ALL;
 
@@ -277,7 +273,6 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
 
 __declspec(dllexport) ULONG_PTR TITCALL GetContextData(DWORD IndexOfRegister)
 {
-    MutexLocker locker("DBGContext"); //lock DBGContext
     HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME|THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
     ULONG_PTR ContextReturn = GetContextDataEx(hActiveThread, IndexOfRegister);
     EngineCloseHandle(hActiveThread);
@@ -286,9 +281,9 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextData(DWORD IndexOfRegister)
 
 __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
 {
-    MutexLocker locker("DBGContext"); //lock DBGContext
     if(FPUSaveArea)
     {
+        CONTEXT DBGContext;
         memset(&DBGContext, 0, sizeof(CONTEXT));
         DBGContext.ContextFlags = CONTEXT_ALL;
 
@@ -317,7 +312,7 @@ __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, voi
 
 __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-    MutexLocker locker("DBGContext"); //lock DBGContext
+    CONTEXT DBGContext;
     memset(&DBGContext, 0, sizeof(CONTEXT));
     DBGContext.ContextFlags = CONTEXT_ALL;
 
@@ -576,7 +571,6 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
 
 __declspec(dllexport) bool TITCALL SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-    MutexLocker locker("DBGContext"); //lock DBGContext
     HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME|THREAD_SET_CONTEXT|THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
     bool ContextReturn = SetContextDataEx(hActiveThread, IndexOfRegister, NewRegisterValue);
     EngineCloseHandle(hActiveThread);
