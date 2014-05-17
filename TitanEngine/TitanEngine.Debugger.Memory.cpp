@@ -387,7 +387,7 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
         return false;
     }
 
-    MutexLocker lock("BreakPointBuffer"); //thread-safe
+    CriticalSectionLocker lock(LockBreakPointBuffer); //thread-safe
     //disable breakpoints that interfere with the memory to write
     BreakPointPreWriteFilter((ULONG_PTR)lpBaseAddress, nSize, &lock);
 

@@ -48,7 +48,7 @@ __declspec(dllexport) long TITCALL GetPE32SectionNumberFromVA(ULONG_PTR FileMapV
         {
             __try
             {
-                ULONG_PTR ConvertAddress = AddressToConvert - PEHeader64->OptionalHeader.ImageBase;
+                ULONG_PTR ConvertAddress = AddressToConvert - (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase;
                 PIMAGE_SECTION_HEADER PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 DWORD SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 DWORD FoundInSection = -1;

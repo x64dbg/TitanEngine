@@ -2,35 +2,37 @@
 #include "definitions.h"
 #include "Global.Engine.Threading.h"
 
-MutexLocker::MutexLocker(const char* name)
+static CRITICAL_SECTION locks[LockLast];
+
+void CriticalSectionInitializeLocks()
 {
-    int len=strlen(name);
-    DynBuf newNameBuf(len+20);
-    char* newName = (char*)newNameBuf.GetPtr();
-    sprintf(newName, "Local\\%s%X", name, GetCurrentProcessId());
-    gMutex=CreateMutexA(0, true, newName);
-    bUnlocked=false;
-    WaitForSingleObject(gMutex, INFINITE);
+    for(int i=0; i<LockLast; i++)
+        InitializeCriticalSection(&locks[i]);
 }
 
-MutexLocker::~MutexLocker()
+void CriticalSectionDeleteLocks()
 {
-    if(!bUnlocked)
-        ReleaseMutex(gMutex);
-    CloseHandle(gMutex);
+    for(int i=0; i<LockLast; i++)
+        DeleteCriticalSection(&locks[i]);
 }
 
-void MutexLocker::relock()
+CriticalSectionLocker::CriticalSectionLocker(CriticalSectionLock lock)
 {
-    if(bUnlocked)
-    {
-        bUnlocked=false;
-        WaitForSingleObject(gMutex, INFINITE);
-    }
+    gCriticalSection=&locks[lock];
+    EnterCriticalSection(gCriticalSection);
 }
 
-void MutexLocker::unlock()
+CriticalSectionLocker::~CriticalSectionLocker()
 {
-    ReleaseMutex(gMutex);
-    bUnlocked=true;
+    LeaveCriticalSection(gCriticalSection);
+}
+
+void CriticalSectionLocker::unlock()
+{
+    LeaveCriticalSection(gCriticalSection);
+}
+
+void CriticalSectionLocker::relock()
+{
+    EnterCriticalSection(gCriticalSection);
 }

@@ -4,6 +4,7 @@
 #include "Global.Garbage.h"
 #include "Global.Injector.h"
 #include "Global.Engine.Extension.h"
+#include "Global.Engine.Threading.h"
 
 // Global.Engine.Entry:
 BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -11,6 +12,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     switch(fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+        CriticalSectionInitializeLocks(); //initialize critical sections
         engineHandle=hinstDLL;
         EngineInit();
         EmptyGarbage();
@@ -23,6 +25,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         if(lpvReserved)
             ExtensionManagerPluginReleaseCallBack();
         RemoveDirectoryW(engineSzEngineGarbageFolder);
+        CriticalSectionDeleteLocks(); //delete critical sections
         break;
     }
     return TRUE;

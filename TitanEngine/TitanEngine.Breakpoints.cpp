@@ -25,7 +25,7 @@ __declspec(dllexport) void TITCALL SetBPXOptions(long DefaultBreakPointType)
 
 __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     BYTE ReadData[10] = {};
@@ -59,7 +59,7 @@ __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
 
 __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
@@ -129,7 +129,7 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
 
 __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
@@ -168,10 +168,9 @@ __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
 
 __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, LPVOID bpxCallBack)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     void* bpxDataPrt;
     PMEMORY_COMPARE_HANDLER bpxDataCmpPtr;
-    MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     BYTE SelectedBreakPointType;
     DWORD checkBpxType;
@@ -269,7 +268,7 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
 
 __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD OldProtect;
     int bpcount=BreakPointBuffer.size();
@@ -435,7 +434,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T Si
 
 __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD NewProtect = 0;
@@ -476,7 +475,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
 
 __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD NewProtect = 0;
@@ -786,7 +785,7 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
 
 __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
 {
-    MutexLocker lock("BreakPointBuffer");
+    CriticalSectionLocker lock(LockBreakPointBuffer);
     int bpcount=BreakPointBuffer.size();
     if(RemoveOption == UE_OPTION_REMOVEALL)
     {

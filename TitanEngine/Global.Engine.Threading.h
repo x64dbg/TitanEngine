@@ -1,16 +1,25 @@
 #ifndef _GLOBAL_ENGINE_THREADING_H
 #define _GLOBAL_ENGINE_THREADING_H
 
-class MutexLocker
+enum CriticalSectionLock
+{
+    LockBreakPointBuffer,
+    LockLast
+};
+
+void CriticalSectionInitializeLocks();
+void CriticalSectionDeleteLocks();
+
+class CriticalSectionLocker
 {
 public:
-    MutexLocker(const char* name);
-    ~MutexLocker();
-    void relock();
+    CriticalSectionLocker(CriticalSectionLock lock);
+    ~CriticalSectionLocker();
     void unlock();
+    void relock();
+    
 private:
-    HANDLE gMutex;
-    bool bUnlocked;
+    LPCRITICAL_SECTION gCriticalSection;
 };
 
 #endif //_GLOBAL_ENGINE_THREADING_H
