@@ -35,7 +35,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 if(WhichData < UE_SECTIONNAME)
                 {
@@ -184,7 +184,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 if(WhichData < UE_SECTIONNAME)
                 {
@@ -562,7 +562,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 __try
                 {
@@ -748,7 +748,7 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 __try
                 {

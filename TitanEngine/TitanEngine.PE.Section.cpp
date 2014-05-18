@@ -58,7 +58,7 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 if(SectionNumber <= PEHeader32->FileHeader.NumberOfSections)
                 {
                     PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + SectionNumber * IMAGE_SIZEOF_SECTION_HEADER);
@@ -87,7 +87,7 @@ __declspec(dllexport) bool TITCALL ExtractSectionW(wchar_t* szFileName, wchar_t*
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 if(SectionNumber <= PEHeader64->FileHeader.NumberOfSections)
                 {
                     PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + SectionNumber * IMAGE_SIZEOF_SECTION_HEADER);
@@ -201,7 +201,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                 {
                     RtlMoveMemory(sortedFileName, (LPVOID)FileMapVA, FileSize);
                     SectionNumber = PEHeader32->FileHeader.NumberOfSections;
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader32);
                     while(SectionNumber > 0)
                     {
                         fileSectionData[i][0] = (ULONG_PTR)(PESections->PointerToRawData);
@@ -268,7 +268,7 @@ __declspec(dllexport) bool TITCALL ResortFileSectionsW(wchar_t* szFileName)
                 {
                     RtlMoveMemory(sortedFileName, (LPVOID)FileMapVA, FileSize);
                     SectionNumber = PEHeader64->FileHeader.NumberOfSections;
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader64);
                     while(SectionNumber > 0)
                     {
                         fileSectionData[i][0] = (ULONG_PTR)(PESections->PointerToRawData);
@@ -406,7 +406,7 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 __try
                 {
@@ -445,7 +445,7 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWEW(wchar_t* szFileName)
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 __try
                 {
@@ -595,7 +595,7 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 __try
                 {
@@ -628,7 +628,7 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 __try
                 {
@@ -703,7 +703,7 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
                         {
                             alignedSectionSize = alignedSectionSize + PEHeader32->OptionalHeader.SectionAlignment;
                         }
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                        PESections = IMAGE_FIRST_SECTION(PEHeader32);
                         SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                         PEHeader32->FileHeader.NumberOfSections = PEHeader32->FileHeader.NumberOfSections + 1;
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + (SectionNumber - 1)* IMAGE_SIZEOF_SECTION_HEADER);
@@ -785,7 +785,7 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
                         {
                             alignedSectionSize = alignedSectionSize + PEHeader64->OptionalHeader.SectionAlignment;
                         }
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                        PESections = IMAGE_FIRST_SECTION(PEHeader64);
                         SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                         PEHeader32->FileHeader.NumberOfSections = PEHeader32->FileHeader.NumberOfSections + 1;
                         PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + (SectionNumber - 1)* IMAGE_SIZEOF_SECTION_HEADER);
@@ -945,7 +945,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 SectionNumber--;
                 PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + SectionNumber * IMAGE_SIZEOF_SECTION_HEADER);
@@ -1014,7 +1014,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSectionW(wchar_t* szFileName, DWORD
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 SectionNumber--;
                 PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + SectionNumber * IMAGE_SIZEOF_SECTION_HEADER);
@@ -1161,7 +1161,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 __try
                 {
@@ -1207,7 +1207,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionW(wchar_t* szFileName)
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 __try
                 {
@@ -1362,7 +1362,7 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
                 {
                     WipeSectionVirSize = (DWORD)GetPE32DataFromMappedFile(FileMapVA, WipeSectionNumber, UE_SECTIONVIRTUALSIZE);
                     WipeSectionSize = (DWORD)GetPE32DataFromMappedFile(FileMapVA, WipeSectionNumber, UE_SECTIONRAWSIZE);
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader32);
                     FileAlignment = PEHeader32->OptionalHeader.FileAlignment;
                     __try
                     {
@@ -1448,7 +1448,7 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
                         WipeSectionVirSize = ((WipeSectionVirSize / PEHeader32->OptionalHeader.SectionAlignment) + 1) * PEHeader32->OptionalHeader.SectionAlignment;
                     }
                     WipeSectionSize = (DWORD)GetPE32DataFromMappedFile(FileMapVA, WipeSectionNumber, UE_SECTIONRAWSIZE);
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader64);
                     FileAlignment = PEHeader64->OptionalHeader.FileAlignment;
                     __try
                     {

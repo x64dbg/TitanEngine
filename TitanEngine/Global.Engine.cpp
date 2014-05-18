@@ -327,7 +327,7 @@ ULONG_PTR EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA)
 
         if(!FileIs64)
         {
-            PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+            PESections = IMAGE_FIRST_SECTION(PEHeader32);
             SectionNumber = PEHeader32->FileHeader.NumberOfSections;
             __try
             {
@@ -346,7 +346,7 @@ ULONG_PTR EngineEstimateNewSectionRVA(ULONG_PTR FileMapVA)
         }
         else
         {
-            PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+            PESections = IMAGE_FIRST_SECTION(PEHeader64);
             SectionNumber = PEHeader64->FileHeader.NumberOfSections;
             __try
             {
@@ -895,7 +895,7 @@ ULONG_PTR EngineSimulateNtLoaderW(wchar_t* szFileName)
                 __try
                 {
                     PeHeaderSize = DOSHeader->e_lfanew + PEHeader32->FileHeader.SizeOfOptionalHeader + (sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections) + sizeof(IMAGE_FILE_HEADER) + 4;
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader32);
                     SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                     RtlCopyMemory(AllocatedFile, (LPVOID)FileMapVA, PeHeaderSize);
                     while(SectionNumber > 0)
@@ -919,7 +919,7 @@ ULONG_PTR EngineSimulateNtLoaderW(wchar_t* szFileName)
                 __try
                 {
                     PeHeaderSize = DOSHeader->e_lfanew + PEHeader64->FileHeader.SizeOfOptionalHeader + (sizeof(IMAGE_SECTION_HEADER) * PEHeader64->FileHeader.NumberOfSections) + sizeof(IMAGE_FILE_HEADER) + 4;
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader64);
                     SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                     RtlCopyMemory(AllocatedFile, (LPVOID)FileMapVA, PeHeaderSize);
                     while(SectionNumber > 0)

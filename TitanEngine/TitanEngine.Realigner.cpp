@@ -79,7 +79,7 @@ __declspec(dllexport) long TITCALL RealignPE(ULONG_PTR FileMapVA, DWORD FileSize
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 FileAlignment = PEHeader32->OptionalHeader.FileAlignment;
                 if(FileAlignment == 0x1000)
@@ -143,7 +143,7 @@ __declspec(dllexport) long TITCALL RealignPE(ULONG_PTR FileMapVA, DWORD FileSize
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 FileAlignment = PEHeader64->OptionalHeader.FileAlignment;
                 if(FileAlignment == 0x1000)
@@ -286,7 +286,7 @@ __declspec(dllexport) long TITCALL RealignPEExW(wchar_t* szFileName, DWORD Reali
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 if(ForcedFileAlignment == 0x0)
                 {
@@ -376,7 +376,7 @@ __declspec(dllexport) long TITCALL RealignPEExW(wchar_t* szFileName, DWORD Reali
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 if(ForcedFileAlignment == 0x0)
                 {

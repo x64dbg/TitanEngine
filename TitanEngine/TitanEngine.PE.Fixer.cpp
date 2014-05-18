@@ -735,7 +735,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     /*
                     	Section check
                     */
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader32);
                     NumberOfSections = PEHeader32->FileHeader.NumberOfSections;
                     while(NumberOfSections > NULL)
                     {
@@ -1474,7 +1474,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     /*
                     	Section check
                     */
-                    PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                    PESections = IMAGE_FIRST_SECTION(PEHeader64);
                     NumberOfSections = PEHeader64->FileHeader.NumberOfSections;
                     while(NumberOfSections > NULL)
                     {
@@ -2215,7 +2215,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                         */
                         if(myFileStatusInfo->SectionTable != UE_FIELD_OK || myFileStatusInfo->SizeOfImage != UE_FIELD_OK)
                         {
-                            PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                            PESections = IMAGE_FIRST_SECTION(PEHeader32);
                             NumberOfSections = PEHeader32->FileHeader.NumberOfSections;
                             while(NumberOfSections > NULL)
                             {
@@ -2808,7 +2808,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                         */
                         if(myFileStatusInfo->SectionTable != UE_FIELD_OK || myFileStatusInfo->SizeOfImage != UE_FIELD_OK)
                         {
-                            PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                            PESections = IMAGE_FIRST_SECTION(PEHeader64);
                             NumberOfSections = PEHeader64->FileHeader.NumberOfSections;
                             while(NumberOfSections > NULL)
                             {

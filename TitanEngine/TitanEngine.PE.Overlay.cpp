@@ -61,7 +61,7 @@ __declspec(dllexport) bool TITCALL FindOverlayW(wchar_t* szFileName, LPDWORD Ove
             }
             if(!FileIs64)
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader32);
                 SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                 __try
                 {
@@ -101,7 +101,7 @@ __declspec(dllexport) bool TITCALL FindOverlayW(wchar_t* szFileName, LPDWORD Ove
             }
             else
             {
-                PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                PESections = IMAGE_FIRST_SECTION(PEHeader64);
                 SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                 __try
                 {

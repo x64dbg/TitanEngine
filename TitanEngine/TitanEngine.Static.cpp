@@ -128,7 +128,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                     if(!FileIs64)
                     {
                         PeHeaderSize = PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_SECTION_HEADER) * PEHeader32->FileHeader.NumberOfSections;
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader32 + PEHeader32->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                        PESections = IMAGE_FIRST_SECTION(PEHeader32);
                         SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                         RtlMoveMemory((LPVOID)myFileMapVA, (LPVOID)FileMapVA, PeHeaderSize);
 
@@ -147,7 +147,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnloadW(wchar_t* szFileName, bool C
                     else
                     {
                         PeHeaderSize = PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_SECTION_HEADER) * PEHeader64->FileHeader.NumberOfSections;
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEHeader64 + PEHeader64->FileHeader.SizeOfOptionalHeader + sizeof(IMAGE_FILE_HEADER) + 4);
+                        PESections = IMAGE_FIRST_SECTION(PEHeader64);
                         SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                         RtlMoveMemory((LPVOID)myFileMapVA, (LPVOID)FileMapVA, PeHeaderSize);
 
