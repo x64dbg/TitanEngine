@@ -222,6 +222,22 @@ __declspec(dllexport) void TITCALL DebugLoop()
             NewThreadData.ThreadLocalBase = (void*)DBGEvent.u.CreateThread.lpThreadLocalBase;
             hListThread.push_back(NewThreadData);
 
+            //Set hardware breakpoints to all threads
+            HANDLE hThread = NewThreadData.hThread;
+            if(DebugRegister[0].DrxEnabled)
+                SetHardwareBreakPointEx(hThread, DebugRegister[0].DrxBreakAddress, UE_DR0, DebugRegister[0].DrxBreakPointType, DebugRegister[0].DrxBreakPointSize, (void*)DebugRegister[0].DrxCallBack, 0);
+            if(DebugRegister[1].DrxEnabled)
+                SetHardwareBreakPointEx(hThread, DebugRegister[1].DrxBreakAddress, UE_DR1, DebugRegister[1].DrxBreakPointType, DebugRegister[1].DrxBreakPointSize, (void*)DebugRegister[1].DrxCallBack, 0);
+            if(DebugRegister[2].DrxEnabled)
+                SetHardwareBreakPointEx(hThread, DebugRegister[2].DrxBreakAddress, UE_DR2, DebugRegister[2].DrxBreakPointType, DebugRegister[2].DrxBreakPointSize, (void*)DebugRegister[2].DrxCallBack, 0);
+            if(DebugRegister[3].DrxEnabled)
+                SetHardwareBreakPointEx(hThread, DebugRegister[3].DrxBreakAddress, UE_DR3, DebugRegister[3].DrxBreakPointType, DebugRegister[3].DrxBreakPointSize, (void*)DebugRegister[3].DrxCallBack, 0);
+            if(ResetHwBPX)
+            {
+                SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (void*)DebugRegisterX.DrxCallBack);
+                ResetHwBPX=false;
+            }
+
             //custom handler
             if(DBGCustomHandler->chCreateThread != NULL)
             {
@@ -1381,6 +1397,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
             break;
         }
+        if(!ThreaderGetThreadInfo(0, DBGEvent.dwThreadId)) //switch thread
+            DBGEvent.dwThreadId=dbgProcessInformation.dwThreadId;
     }
 
     if(!SecondChance) //debugger didn't close with a second chance exception (normal exit)

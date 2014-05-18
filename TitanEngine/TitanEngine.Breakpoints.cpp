@@ -5,6 +5,7 @@
 #include "Global.Engine.h"
 #include "Global.Engine.Threading.h"
 #include "Global.Engine.Importer.h"
+#include "Global.Threader.h"
 
 static long engineDefaultBreakPointType = UE_BREAKPOINT_INT3;
 static BYTE UD2BreakPoint[2] = {0x0F, 0x0B};
@@ -605,8 +606,11 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, D
     dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
     dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
 
-    SetContextData(UE_DR7, dr7uint(&dr7)); //NOTE: MUST SET THIS FIRST FOR X64!
-    SetContextData(IndexOfRegister, (ULONG_PTR)bpxAddress);
+    for(int i=0; i<hListThread.size(); i++)
+    {
+        SetContextDataEx(hListThread.at(i).hThread, UE_DR7, dr7uint(&dr7)); //NOTE: MUST SET THIS FIRST FOR X64!
+        SetContextDataEx(hListThread.at(i).hThread, IndexOfRegister, bpxAddress);
+    }
 
     DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
     DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
@@ -733,8 +737,11 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
         HardwareBPX = HardwareBPX &~ (1 << 0);
         HardwareBPX = HardwareBPX &~ (1 << 1);
-        SetContextData(UE_DR0, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
+        for(int i=0; i<hListThread.size(); i++)
+        {
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR0, bpxAddress);
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
+        }
         DebugRegister[0].DrxEnabled = false;
         DebugRegister[0].DrxBreakAddress = NULL;
         DebugRegister[0].DrxCallBack = NULL;
@@ -745,8 +752,11 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
         HardwareBPX = HardwareBPX &~ (1 << 2);
         HardwareBPX = HardwareBPX &~ (1 << 3);
-        SetContextData(UE_DR1, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
+        for(int i=0; i<hListThread.size(); i++)
+        {
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR1, bpxAddress);
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
+        }
         DebugRegister[1].DrxEnabled = false;
         DebugRegister[1].DrxBreakAddress = NULL;
         DebugRegister[1].DrxCallBack = NULL;
@@ -757,8 +767,11 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
         HardwareBPX = HardwareBPX &~ (1 << 4);
         HardwareBPX = HardwareBPX &~ (1 << 5);
-        SetContextData(UE_DR2, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
+        for(int i=0; i<hListThread.size(); i++)
+        {
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR2, bpxAddress);
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
+        }
         DebugRegister[2].DrxEnabled = false;
         DebugRegister[2].DrxBreakAddress = NULL;
         DebugRegister[2].DrxCallBack = NULL;
@@ -769,8 +782,11 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
         HardwareBPX = HardwareBPX &~ (1 << 6);
         HardwareBPX = HardwareBPX &~ (1 << 7);
-        SetContextData(UE_DR3, (ULONG_PTR)bpxAddress);
-        SetContextData(UE_DR7, HardwareBPX);
+        for(int i=0; i<hListThread.size(); i++)
+        {
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR3, bpxAddress);
+            SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
+        }
         DebugRegister[3].DrxEnabled = false;
         DebugRegister[3].DrxBreakAddress = NULL;
         DebugRegister[3].DrxCallBack = NULL;
