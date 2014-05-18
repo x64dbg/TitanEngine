@@ -12,7 +12,6 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     switch(fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        CriticalSectionInitializeLocks(); //initialize critical sections
         engineHandle=hinstDLL;
         EngineInit();
         EmptyGarbage();

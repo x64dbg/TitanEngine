@@ -7,7 +7,6 @@ enum CriticalSectionLock
     LockLast
 };
 
-void CriticalSectionInitializeLocks();
 void CriticalSectionDeleteLocks();
 
 class CriticalSectionLocker
@@ -19,7 +18,7 @@ public:
     void relock();
     
 private:
-    LPCRITICAL_SECTION gCriticalSection;
+    CriticalSectionLock gLock;
 };
 
 #endif //_GLOBAL_ENGINE_THREADING_H

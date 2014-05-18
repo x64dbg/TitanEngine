@@ -126,15 +126,10 @@ void BreakPointPostReadFilter(ULONG_PTR lpBaseAddress, unsigned char* lpBuffer, 
         ULONG_PTR cur_addr=curBp->BreakPointAddress;
         for(SIZE_T j=0; j<curBp->BreakPointSize; j++)
         {
-            if(cur_addr+j==start && cur_addr+j<end) //breakpoint is in range
+            if(cur_addr+j>=start && cur_addr+j<end) //breakpoint is in range
             {
                 ULONG_PTR index=cur_addr+j-start; //calculate where to write in the buffer
-                int n=curBp->BreakPointSize-j;
-                if((cur_addr+n)>end)
-                    n=end-cur_addr; //do not overflow the buffer
-                memcpy(lpBuffer+index, &curBp->OriginalByte[j], n);
-                if(n==curBp->BreakPointSize)
-                    break;
+                memcpy(lpBuffer+index, &curBp->OriginalByte[j], sizeof(char));
             }
         }
     }
@@ -154,7 +149,7 @@ void BreakPointPreWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize, CriticalSec
         ULONG_PTR cur_addr=curBp->BreakPointAddress;
         for(SIZE_T j=0; j<curBp->BreakPointSize; j++)
         {
-            if(cur_addr+j==start && cur_addr+j<end) //breakpoint byte is in range
+            if(cur_addr+j>=start && cur_addr+j<end) //breakpoint byte is in range
             {
                 lock->unlock();
                 DisableBPX(cur_addr);
@@ -180,7 +175,7 @@ void BreakPointPostWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize, CriticalSe
         ULONG_PTR cur_addr=curBp->BreakPointAddress;
         for(SIZE_T j=0; j<curBp->BreakPointSize; j++)
         {
-            if(cur_addr+j==start && cur_addr+j<end) //breakpoint byte is in range
+            if(cur_addr+j>=start && cur_addr+j<end) //breakpoint byte is in range
             {
                 curBp->BreakPointActive = UE_BPXINACTIVE; //little hack
                 lock->unlock();

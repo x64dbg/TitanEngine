@@ -170,22 +170,17 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
     {
         i--;
     }
+    wchar_t DLLLoaderName[64]=L"";
+#ifdef _WIN64
+    wsprintfW(DLLLoaderName, L"DLLLoader64_%.4X.exe", GetTickCount()&0xFFFF);
+#else
+    wsprintfW(DLLLoaderName, L"DLLLoader32_%.4X.exe", GetTickCount()&0xFFFF);
+#endif
     if(i)
-    {
-#ifdef _WIN64
-        lstrcpyW(szDebuggerName+i+1, L"DLLLoader64.exe");
-#else
-        lstrcpyW(szDebuggerName+i+1, L"DLLLoader32.exe");
-#endif
-    }
+        lstrcpyW(szDebuggerName+i+1, DLLLoaderName);
     else
-    {
-#ifdef _WIN64
-        lstrcpyW(szDebuggerName, L"DLLLoader64.exe");
-#else
-        lstrcpyW(szDebuggerName, L"DLLLoader32.exe");
-#endif
-    }
+        lstrcpyW(szDebuggerName, DLLLoaderName);
+
 #if defined(_WIN64)
     ReturnData = EngineExtractResource("LOADERX64", szDebuggerName);
 #else
