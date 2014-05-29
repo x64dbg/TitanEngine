@@ -338,7 +338,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         if(engineFakeDLLHandle == NULL)
                         {
-                            if(lstrcmpiW(&DLLDebugFileName[i+1], L"kernel32.dll") == NULL)
+                            if(_wcsicmp(&DLLDebugFileName[i+1], L"kernel32.dll") == NULL)
                             {
                                 engineFakeDLLHandle = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
                             }
@@ -354,7 +354,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         for(int i = LibrarianData.size() - 1; i >= 0; i--)
                         {
                             ptrLibrarianData=&LibrarianData.at(i);
-                            if(!lstrcmpiA(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
+                            if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
                             {
                                 if(ptrLibrarianData->bpxType == UE_ON_LIB_LOAD || ptrLibrarianData->bpxType == UE_ON_LIB_ALL)
                                 {
@@ -423,7 +423,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 for(int i= LibrarianData.size() - 1; i >= 0; i--)
                 {
                     ptrLibrarianData = &LibrarianData.at(i);
-                    if(!lstrcmpiA(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
+                    if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
                     {
                         if(ptrLibrarianData->bpxType == UE_ON_LIB_UNLOAD || ptrLibrarianData->bpxType == UE_ON_LIB_ALL)
                         {

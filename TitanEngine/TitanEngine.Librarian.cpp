@@ -22,7 +22,7 @@ __declspec(dllexport) bool TITCALL LibrarianRemoveBreakPoint(char* szLibraryName
 {
     for(int i = LibrarianData.size() - 1; i >= 0; i--)
     {
-        if(!lstrcmpiA(szLibraryName, LibrarianData.at(i).szLibraryName) && (LibrarianData.at(i).bpxType == bpxType || bpxType == UE_ON_LIB_ALL))
+        if(!_stricmp(szLibraryName, LibrarianData.at(i).szLibraryName) && (LibrarianData.at(i).bpxType == bpxType || bpxType == UE_ON_LIB_ALL))
         {
             LibrarianData.erase(LibrarianData.begin() + i);
         }

@@ -44,7 +44,6 @@ __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandL
 }
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
 {
-
     wchar_t szCreateWithCmdLine[1024];
     int DebugConsoleFlag = NULL;
 
@@ -59,7 +58,7 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         EngineSetDebugPrivilege(GetCurrentProcess(), true);
         DebugRemoveDebugPrivilege = true;
     }
-    if(szCommandLine == NULL)
+    if(szCommandLine == NULL || !lstrlenW(szCommandLine))
     {
         if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
         {
@@ -68,17 +67,19 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
             std::vector<BreakPointDetail>().swap(BreakPointBuffer);
-            return(&dbgProcessInformation);
+            return &dbgProcessInformation;
         }
         else
         {
+            DWORD lastError = GetLastError();
             if(engineEnableDebugPrivilege)
             {
                 EngineSetDebugPrivilege(GetCurrentProcess(), false);
                 DebugRemoveDebugPrivilege = false;
             }
-            RtlZeroMemory(&dbgProcessInformation,sizeof PROCESS_INFORMATION);
-            return(0);
+            memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
+            SetLastError(lastError);
+            return 0;
         }
     }
     else
@@ -91,30 +92,35 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
             DebugAttachedToProcess = false;
             DebugAttachedProcessCallBack = NULL;
             std::vector<BreakPointDetail>().swap(BreakPointBuffer);
-            return(&dbgProcessInformation);
+            return &dbgProcessInformation;
         }
         else
         {
+            DWORD lastError = GetLastError();
             if(engineEnableDebugPrivilege)
             {
                 EngineSetDebugPrivilege(GetCurrentProcess(), false);
                 DebugRemoveDebugPrivilege = false;
             }
-            RtlZeroMemory(&dbgProcessInformation,sizeof PROCESS_INFORMATION);
-            return(0);
+            memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
+            SetLastError(lastError);
+            return 0;
         }
     }
 }
+
 __declspec(dllexport) void* TITCALL InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
 {
     DebugExeFileEntryPointCallBack = EntryCallBack;
     return(InitDebug(szFileName, szCommandLine, szCurrentFolder));
 }
+
 __declspec(dllexport) void* TITCALL InitDebugExW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
 {
     DebugExeFileEntryPointCallBack = EntryCallBack;
     return(InitDebugW(szFileName, szCommandLine, szCurrentFolder));
 }
+
 __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
 {
 
@@ -149,6 +155,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveM
         return NULL;
     }
 }
+
 __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
 {
 
@@ -202,7 +209,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         DebugReserveModuleBase = DebugModuleImageBase;
         DebugModuleEntryPoint = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_OEP);
         DebugModuleEntryPointCallBack = EntryCallBack;
-        return(InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder));
+        return InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder);
     }
     return 0;
 }
