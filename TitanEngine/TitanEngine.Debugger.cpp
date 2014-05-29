@@ -3,7 +3,6 @@
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
 #include "Global.Handle.h"
-#include "Global.Breakpoints.h"
 #include "Global.Threader.h"
 
 static wchar_t szBackupDebuggedFileName[512];
@@ -44,68 +43,56 @@ __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandL
 }
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
 {
-    wchar_t szCreateWithCmdLine[1024];
     int DebugConsoleFlag = NULL;
 
     DebuggerReset();
-    if(engineRemoveConsoleForDebugee)
+    if(DebugDebuggingDLL)
+    {
+        DebugConsoleFlag = CREATE_NO_WINDOW|CREATE_SUSPENDED;
+    }
+    else if(engineRemoveConsoleForDebugee)
     {
         DebugConsoleFlag = CREATE_NO_WINDOW;
     }
-    std::vector<BreakPointDetail>().swap(BreakPointBuffer);
+    
     if(engineEnableDebugPrivilege)
     {
         EngineSetDebugPrivilege(GetCurrentProcess(), true);
         DebugRemoveDebugPrivilege = true;
     }
+    wchar_t* szFileNameCreateProcess;
+    wchar_t* szCommandLineCreateProcess;
     if(szCommandLine == NULL || !lstrlenW(szCommandLine))
     {
-        if(CreateProcessW(szFileName, NULL, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
-        {
-            if(engineEnableDebugPrivilege)
-                EngineSetDebugPrivilege(GetCurrentProcess(), false);
-            DebugAttachedToProcess = false;
-            DebugAttachedProcessCallBack = NULL;
-            std::vector<BreakPointDetail>().swap(BreakPointBuffer);
-            return &dbgProcessInformation;
-        }
-        else
-        {
-            DWORD lastError = GetLastError();
-            if(engineEnableDebugPrivilege)
-            {
-                EngineSetDebugPrivilege(GetCurrentProcess(), false);
-                DebugRemoveDebugPrivilege = false;
-            }
-            memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
-            SetLastError(lastError);
-            return 0;
-        }
+        szCommandLineCreateProcess=0;
+        szFileNameCreateProcess=szFileName;
     }
     else
     {
+        wchar_t szCreateWithCmdLine[1024];
         wsprintfW(szCreateWithCmdLine, L"\"%s\" %s", szFileName, szCommandLine);
-        if(CreateProcessW(NULL, szCreateWithCmdLine, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
+        szCommandLineCreateProcess=szCreateWithCmdLine;
+        szFileNameCreateProcess=0;
+    }
+    if(CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
+    {
+        if(engineEnableDebugPrivilege)
+            EngineSetDebugPrivilege(GetCurrentProcess(), false);
+        DebugAttachedToProcess = false;
+        DebugAttachedProcessCallBack = NULL;
+        return &dbgProcessInformation;
+    }
+    else
+    {
+        DWORD lastError = GetLastError();
+        if(engineEnableDebugPrivilege)
         {
-            if(engineEnableDebugPrivilege)
-                EngineSetDebugPrivilege(GetCurrentProcess(), false);
-            DebugAttachedToProcess = false;
-            DebugAttachedProcessCallBack = NULL;
-            std::vector<BreakPointDetail>().swap(BreakPointBuffer);
-            return &dbgProcessInformation;
+            EngineSetDebugPrivilege(GetCurrentProcess(), false);
+            DebugRemoveDebugPrivilege = false;
         }
-        else
-        {
-            DWORD lastError = GetLastError();
-            if(engineEnableDebugPrivilege)
-            {
-                EngineSetDebugPrivilege(GetCurrentProcess(), false);
-                DebugRemoveDebugPrivilege = false;
-            }
-            memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
-            SetLastError(lastError);
-            return 0;
-        }
+        memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
+        SetLastError(lastError);
+        return 0;
     }
 }
 
@@ -158,25 +145,17 @@ __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveM
 
 __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
 {
-
-    int i = NULL;
-    int j = NULL;
-    bool ReturnData = false;
-    DebugReserveModuleBase = NULL;
-
-    RtlZeroMemory(&szDebuggerName, sizeof szDebuggerName);
-    if(lstrlenW(szFileName) < 512)
+    memset(szDebuggerName, 0, sizeof(szDebuggerName));
+    if(lstrlenW(szFileName) < sizeof(szDebuggerName))
     {
-        RtlZeroMemory(&szBackupDebuggedFileName, sizeof szBackupDebuggedFileName);
+        memset(szBackupDebuggedFileName, 0, sizeof(szBackupDebuggedFileName));
         lstrcpyW(szBackupDebuggedFileName, szFileName);
         szFileName = &szBackupDebuggedFileName[0];
     }
     lstrcpyW(szDebuggerName, szFileName);
-    i = lstrlenW(szDebuggerName);
+    int i = lstrlenW(szDebuggerName);
     while(szDebuggerName[i] != '\\' && i)
-    {
         i--;
-    }
     wchar_t DLLLoaderName[64]=L"";
 #ifdef _WIN64
     wsprintfW(DLLLoaderName, L"DLLLoader64_%.4X.exe", GetTickCount()&0xFFFF);
@@ -189,27 +168,40 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         lstrcpyW(szDebuggerName, DLLLoaderName);
 
 #if defined(_WIN64)
-    ReturnData = EngineExtractResource("LOADERX64", szDebuggerName);
+    if(EngineExtractResource("LOADERX64", szDebuggerName))
 #else
-    ReturnData = EngineExtractResource("LOADERX86", szDebuggerName);
+    if(EngineExtractResource("LOADERX86", szDebuggerName))
 #endif
-    if(ReturnData)
     {
         DebugDebuggingDLL = true;
-        i = lstrlenW(szFileName);
-        while(szFileName[i] != 0x5C && i >= NULL)
-        {
+        int i = lstrlenW(szFileName);
+        while(szFileName[i] != '\\' && i)
             i--;
-        }
         DebugDebuggingDLLBase = NULL;
         DebugDebuggingMainModuleBase = NULL;
         DebugDebuggingDLLFullFileName = szFileName;
         DebugDebuggingDLLFileName = &szFileName[i+1];
         DebugModuleImageBase = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_IMAGEBASE);
-        DebugReserveModuleBase = DebugModuleImageBase;
         DebugModuleEntryPoint = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_OEP);
         DebugModuleEntryPointCallBack = EntryCallBack;
-        return InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder);
+        DebugReserveModuleBase = 0;
+        if(ReserveModuleBase)
+            DebugReserveModuleBase = DebugModuleImageBase;
+        PPROCESS_INFORMATION ReturnValue = (PPROCESS_INFORMATION)InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder);
+        wchar_t szName[256]=L"";
+        swprintf(szName, L"Global\\szLibraryName%X", (unsigned int)ReturnValue->dwProcessId);
+        DebugDLLFileMapping=CreateFileMappingW(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, 512*sizeof(wchar_t), szName);
+        if(DebugDLLFileMapping)
+        {
+            wchar_t* szLibraryPathMapping=(wchar_t*)MapViewOfFile(DebugDLLFileMapping, FILE_MAP_ALL_ACCESS, 0, 0, 512*sizeof(wchar_t));
+            if(szLibraryPathMapping)
+            {
+                wcscpy(szLibraryPathMapping, DebugDebuggingDLLFullFileName);
+                UnmapViewOfFile(szLibraryPathMapping);
+            }
+        }
+        ResumeThread(ReturnValue->hThread);
+        return ReturnValue;
     }
     return 0;
 }
@@ -234,7 +226,7 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 
     if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
-        std::vector<BreakPointDetail>().swap(BreakPointBuffer);
+        DebuggerReset();
         if(engineEnableDebugPrivilege)
         {
             EngineSetDebugPrivilege(GetCurrentProcess(), true);
@@ -253,7 +245,6 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
                     myDebugSetProcessKillOnExit(KillOnExit);
                 }
             }
-            std::vector<BreakPointDetail>().swap(BreakPointBuffer);
             DebugDebuggingDLL = false;
             DebugAttachedToProcess = true;
             DebugAttachedProcessCallBack = (ULONG_PTR)CallBack;
@@ -353,7 +344,7 @@ __declspec(dllexport) void TITCALL AutoDebugEx(char* szFileName, bool ReserveMod
 
 __declspec(dllexport) void TITCALL AutoDebugExW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, DWORD TimeOut, LPVOID EntryCallBack)
 {
-    DebugReserveModuleBase = NULL;
+    DebugReserveModuleBase = 0;
     DWORD ThreadId;
     DWORD ExitCode = 0;
     HANDLE hSecondThread;

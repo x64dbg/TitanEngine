@@ -19,6 +19,7 @@ extern bool DebugRemoveDebugPrivilege;
 extern ULONG_PTR DebugReserveModuleBase;
 extern ULONG_PTR DebugDebuggingMainModuleBase;
 extern ULONG_PTR DebugDebuggingDLLBase;
+extern HANDLE DebugDLLFileMapping;
 extern bool DebugDebuggingDLL;
 extern wchar_t* DebugDebuggingDLLFullFileName;
 extern wchar_t* DebugDebuggingDLLFileName;

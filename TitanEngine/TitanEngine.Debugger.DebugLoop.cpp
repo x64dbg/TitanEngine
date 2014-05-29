@@ -127,12 +127,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DLLPatchAddress = (ULONG_PTR)DBGEvent.u.CreateProcessInfo.lpBaseOfImage;
                     DLLPatchAddress = (ULONG_PTR)DLLPatchAddress + UE_MODULEx86;
 #endif
-                    if(!WriteProcessMemory(DBGEvent.u.CreateProcessInfo.hProcess, (LPVOID)DLLPatchAddress, DebugDebuggingDLLFullFileName, lstrlenW(DebugDebuggingDLLFullFileName) * 2, &NumberOfBytesReadWritten))
-                    {
-                        StopDebug();
-                        EngineCloseHandle(DBGFileHandle); //close file handle
-                        return;
-                    }
                     if(DebugReserveModuleBase) //reserve original image base
                     {
                         VirtualAllocEx(dbgProcessInformation.hProcess, (void*)DebugReserveModuleBase, 0x1000, MEM_RESERVE, PAGE_READWRITE); //return value nt used, yea just ignore. return value doesnt matter and there is no possible fix when failed :D this is only used to make sure DLL loads on another image base
@@ -325,6 +319,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
                             if(lstrcmpiW(&DLLDebugFileName[i+1], DebugDebuggingDLLFileName) == NULL)
                             {
+                                CloseHandle(DebugDLLFileMapping); //close file mapping handle
                                 SetBPX(DebugModuleEntryPoint + (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll, UE_SINGLESHOOT, DebugModuleEntryPointCallBack);
                                 DebugDebuggingDLLBase = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
                             }

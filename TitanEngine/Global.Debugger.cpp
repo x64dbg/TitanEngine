@@ -2,6 +2,7 @@
 #include "definitions.h"
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
+#include "Global.Breakpoints.h"
 
 HARDWARE_DATA DebugRegister[4] = {};
 PROCESS_INFORMATION dbgProcessInformation = {};
@@ -17,6 +18,7 @@ ULONG_PTR DebugAttachedProcessCallBack = NULL;
 ULONG_PTR DebugReserveModuleBase = NULL;
 ULONG_PTR DebugDebuggingMainModuleBase = NULL;
 ULONG_PTR DebugDebuggingDLLBase = NULL;
+HANDLE DebugDLLFileMapping;
 bool DebugAttachedToProcess = false;
 bool DebugRemoveDebugPrivilege = false;
 bool DebugDebuggingDLL = false;
@@ -45,7 +47,7 @@ long DebugLoopInSecondThread(LPVOID InputParameter)
 {
     __try
     {
-        if(InputParameter == NULL)
+        if(InputParameter == NULL) //IsFileDll
         {
             InitDebugExW(expertDebug.szFileName, expertDebug.szCommandLine, expertDebug.szCurrentFolder, expertDebug.EntryCallBack);
         }
@@ -68,6 +70,7 @@ void DebuggerReset()
     {
         RtlZeroMemory(&myDBGCustomHandler, sizeof CustomHandler);
     }
+    std::vector<BreakPointDetail>().swap(BreakPointBuffer);
 }
 
 void ClearProcessList()
