@@ -211,7 +211,8 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocationExW(wchar_t* szFileN
         if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
         {
             NewSectionFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, NewSectionVO + (ULONG_PTR)GetPE32DataFromMappedFile(FileMapVA, NULL, UE_IMAGEBASE), true);
-            ReturnValue = RelocaterExportRelocation(NewSectionFO, NewSectionVO, FileMapVA);
+            if(NewSectionFO)
+                ReturnValue = RelocaterExportRelocation(NewSectionFO, NewSectionVO, FileMapVA);
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             if(ReturnValue)
             {

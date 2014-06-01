@@ -119,52 +119,56 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                 ImportTableAddress = (ULONG_PTR)PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
                 ImportTableAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportTableAddress + ImageBase, true);
                 ImportPointer = (PIMAGE_IMPORT_DESCRIPTOR)ImportTableAddress;
-                while(ImportPointer->FirstThunk != NULL)
+                while(ImportPointer && ImportPointer->FirstThunk != NULL)
                 {
                     ImportDllName = (PCHAR)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->Name + ImageBase, true));
-                    MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
-                    if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
+                    if(ImportDllName)
                     {
-                        RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
-                        lstrcatW(BuildExportName, szOutputFolder);
-                        if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
+                        MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
+                        if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
                         {
-                            BuildExportName[lstrlenW(BuildExportName)] = 0x5C;
-                        }
-                        lstrcatW(BuildExportName, ImportDllNameW);
-                        if(LogCreatedFiles)
-                        {
-                            RtlMoveMemory(engineDependencyFilesCWP, &BuildExportName, lstrlenW(BuildExportName) * 2);
-                            engineDependencyFilesCWP = (LPVOID)((ULONG_PTR)engineDependencyFilesCWP + (lstrlenW(BuildExportName) * 2) + 2);
-                        }
-                        EngineExtractResource("MODULEx86", BuildExportName);
-                        ExporterInit(20 * 1024, (ULONG_PTR)GetPE32DataW(BuildExportName, NULL, UE_IMAGEBASE), NULL, ImportDllName);
-                        ImportThunkAddress = ImportPointer->FirstThunk;
-                        if(ImportPointer->OriginalFirstThunk != NULL)
-                        {
-                            ImportThunkX86 = (PIMAGE_THUNK_DATA32)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->OriginalFirstThunk + ImageBase, true));
-                        }
-                        else
-                        {
-                            ImportThunkX86 = (PIMAGE_THUNK_DATA32)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->FirstThunk + ImageBase, true));
-                        }
-                        while(ImportThunkX86->u1.Function != NULL)
-                        {
-                            if(ImportThunkX86->u1.Ordinal & IMAGE_ORDINAL_FLAG32)
+                            RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
+                            lstrcatW(BuildExportName, szOutputFolder);
+                            if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
                             {
-                                ExporterAddNewOrdinalExport(ImportThunkX86->u1.Ordinal ^ IMAGE_ORDINAL_FLAG32, 0x1000);
+                                BuildExportName[lstrlenW(BuildExportName)] = 0x5C;
+                            }
+                            lstrcatW(BuildExportName, ImportDllNameW);
+                            if(LogCreatedFiles)
+                            {
+                                RtlMoveMemory(engineDependencyFilesCWP, &BuildExportName, lstrlenW(BuildExportName) * 2);
+                                engineDependencyFilesCWP = (LPVOID)((ULONG_PTR)engineDependencyFilesCWP + (lstrlenW(BuildExportName) * 2) + 2);
+                            }
+                            EngineExtractResource("MODULEx86", BuildExportName);
+                            ExporterInit(20 * 1024, (ULONG_PTR)GetPE32DataW(BuildExportName, NULL, UE_IMAGEBASE), NULL, ImportDllName);
+                            ImportThunkAddress = ImportPointer->FirstThunk;
+                            if(ImportPointer->OriginalFirstThunk != NULL)
+                            {
+                                ImportThunkX86 = (PIMAGE_THUNK_DATA32)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->OriginalFirstThunk + ImageBase, true));
                             }
                             else
                             {
-                                ImportThunkName = (ULONG_PTR)(ConvertVAtoFileOffset(FileMapVA, ImportThunkX86->u1.AddressOfData + ImageBase, true) + 2);
-                                ExporterAddNewExport((PCHAR)ImportThunkName, 0x1000);
+                                ImportThunkX86 = (PIMAGE_THUNK_DATA32)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->FirstThunk + ImageBase, true));
                             }
-                            ImportThunkX86 = (PIMAGE_THUNK_DATA32)((ULONG_PTR)ImportThunkX86 + 4);
-                            ImportThunkAddress = ImportThunkAddress + 4;
+                            while(ImportThunkX86 && ImportThunkX86->u1.Function != NULL)
+                            {
+                                if(ImportThunkX86->u1.Ordinal & IMAGE_ORDINAL_FLAG32)
+                                {
+                                    ExporterAddNewOrdinalExport(ImportThunkX86->u1.Ordinal ^ IMAGE_ORDINAL_FLAG32, 0x1000);
+                                }
+                                else
+                                {
+                                    ImportThunkName = (ULONG_PTR)(ConvertVAtoFileOffset(FileMapVA, ImportThunkX86->u1.AddressOfData + ImageBase, true) + 2);
+                                    if(ImportThunkName)
+                                        ExporterAddNewExport((PCHAR)ImportThunkName, 0x1000);
+                                }
+                                ImportThunkX86 = (PIMAGE_THUNK_DATA32)((ULONG_PTR)ImportThunkX86 + 4);
+                                ImportThunkAddress = ImportThunkAddress + 4;
+                            }
+                            ExporterBuildExportTableExW(BuildExportName, ".export");
                         }
-                        ExporterBuildExportTableExW(BuildExportName, ".export");
+                        ImportPointer = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportPointer + sizeof IMAGE_IMPORT_DESCRIPTOR);
                     }
-                    ImportPointer = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportPointer + sizeof IMAGE_IMPORT_DESCRIPTOR);
                 }
             }
             else
@@ -173,52 +177,56 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                 ImportTableAddress = (ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
                 ImportTableAddress = (ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportTableAddress + ImageBase, true);
                 ImportPointer = (PIMAGE_IMPORT_DESCRIPTOR)ImportTableAddress;
-                while(ImportPointer->FirstThunk != NULL)
+                while(ImportPointer && ImportPointer->FirstThunk != NULL)
                 {
                     ImportDllName = (PCHAR)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->Name + ImageBase, true));
-                    MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
-                    if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
+                    if(ImportDllName)
                     {
-                        RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
-                        lstrcatW(BuildExportName, szOutputFolder);
-                        if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
+                        MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
+                        if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
                         {
-                            BuildExportName[lstrlenW(BuildExportName)] = 0x5C;
-                        }
-                        lstrcatW(BuildExportName, ImportDllNameW);
-                        if(LogCreatedFiles)
-                        {
-                            RtlMoveMemory(engineDependencyFilesCWP, &BuildExportName, lstrlenW(BuildExportName) * 2);
-                            engineDependencyFilesCWP = (LPVOID)((ULONG_PTR)engineDependencyFilesCWP + (lstrlenW(BuildExportName) * 2) + 2);
-                        }
-                        EngineExtractResource("MODULEx64", BuildExportName);
-                        ExporterInit(20 * 1024, (ULONG_PTR)GetPE32DataW(BuildExportName, NULL, UE_IMAGEBASE), NULL, ImportDllName);
-                        ImportThunkAddress = ImportPointer->FirstThunk;
-                        if(ImportPointer->OriginalFirstThunk != NULL)
-                        {
-                            ImportThunkX64 = (PIMAGE_THUNK_DATA64)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->OriginalFirstThunk + ImageBase, true));
-                        }
-                        else
-                        {
-                            ImportThunkX64 = (PIMAGE_THUNK_DATA64)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->FirstThunk + ImageBase, true));
-                        }
-                        while(ImportThunkX64->u1.Function != NULL)
-                        {
-                            if(ImportThunkX64->u1.Ordinal & IMAGE_ORDINAL_FLAG64)
+                            RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
+                            lstrcatW(BuildExportName, szOutputFolder);
+                            if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
                             {
-                                ExporterAddNewOrdinalExport((DWORD)(ImportThunkX64->u1.Ordinal ^ IMAGE_ORDINAL_FLAG64), 0x1000);
+                                BuildExportName[lstrlenW(BuildExportName)] = 0x5C;
+                            }
+                            lstrcatW(BuildExportName, ImportDllNameW);
+                            if(LogCreatedFiles)
+                            {
+                                RtlMoveMemory(engineDependencyFilesCWP, &BuildExportName, lstrlenW(BuildExportName) * 2);
+                                engineDependencyFilesCWP = (LPVOID)((ULONG_PTR)engineDependencyFilesCWP + (lstrlenW(BuildExportName) * 2) + 2);
+                            }
+                            EngineExtractResource("MODULEx64", BuildExportName);
+                            ExporterInit(20 * 1024, (ULONG_PTR)GetPE32DataW(BuildExportName, NULL, UE_IMAGEBASE), NULL, ImportDllName);
+                            ImportThunkAddress = ImportPointer->FirstThunk;
+                            if(ImportPointer->OriginalFirstThunk != NULL)
+                            {
+                                ImportThunkX64 = (PIMAGE_THUNK_DATA64)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->OriginalFirstThunk + ImageBase, true));
                             }
                             else
                             {
-                                ImportThunkName = (ULONG_PTR)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(ImportThunkX64->u1.AddressOfData + ImageBase), true) + 2);
-                                ExporterAddNewExport((PCHAR)ImportThunkName, 0x1000);
+                                ImportThunkX64 = (PIMAGE_THUNK_DATA64)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->FirstThunk + ImageBase, true));
                             }
-                            ImportThunkX64 = (PIMAGE_THUNK_DATA64)((ULONG_PTR)ImportThunkX64 + 8);
-                            ImportThunkAddress = ImportThunkAddress + 8;
+                            while(ImportThunkX64 && ImportThunkX64->u1.Function != NULL)
+                            {
+                                if(ImportThunkX64->u1.Ordinal & IMAGE_ORDINAL_FLAG64)
+                                {
+                                    ExporterAddNewOrdinalExport((DWORD)(ImportThunkX64->u1.Ordinal ^ IMAGE_ORDINAL_FLAG64), 0x1000);
+                                }
+                                else
+                                {
+                                    ImportThunkName = (ULONG_PTR)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(ImportThunkX64->u1.AddressOfData + ImageBase), true) + 2);
+                                    if(ImportThunkName)
+                                        ExporterAddNewExport((PCHAR)ImportThunkName, 0x1000);
+                                }
+                                ImportThunkX64 = (PIMAGE_THUNK_DATA64)((ULONG_PTR)ImportThunkX64 + 8);
+                                ImportThunkAddress = ImportThunkAddress + 8;
+                            }
+                            ExporterBuildExportTableExW(BuildExportName, ".export");
                         }
-                        ExporterBuildExportTableExW(BuildExportName, ".export");
+                        ImportPointer = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportPointer + sizeof IMAGE_IMPORT_DESCRIPTOR);
                     }
-                    ImportPointer = (PIMAGE_IMPORT_DESCRIPTOR)((ULONG_PTR)ImportPointer + sizeof IMAGE_IMPORT_DESCRIPTOR);
                 }
             }
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);

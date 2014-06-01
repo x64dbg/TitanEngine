@@ -73,7 +73,6 @@ __declspec(dllexport) long TITCALL GetPE32SectionNumberFromVA(ULONG_PTR FileMapV
 }
 __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapVA, ULONG_PTR AddressToConvert, bool ReturnType)
 {
-
     PIMAGE_DOS_HEADER DOSHeader;
     PIMAGE_NT_HEADERS32 PEHeader32;
     PIMAGE_NT_HEADERS64 PEHeader64;
@@ -129,14 +128,14 @@ __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
                     {
                         if(ConvertedAddress != NULL)
                         {
-                            ConvertedAddress = ConvertedAddress + FileMapVA;
+                            ConvertedAddress += FileMapVA;
                         }
                         else if(ConvertAddress == NULL)
                         {
                             ConvertedAddress = FileMapVA;
                         }
                     }
-                    return(ConvertedAddress);
+                    return ConvertedAddress;
                 }
                 __except(EXCEPTION_EXECUTE_HANDLER)
                 {
@@ -170,7 +169,7 @@ __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
                     {
                         if(ConvertedAddress != NULL)
                         {
-                            ConvertedAddress = ConvertedAddress + FileMapVA;
+                            ConvertedAddress += FileMapVA;
                         }
                         else if(ConvertAddress == NULL)
                         {

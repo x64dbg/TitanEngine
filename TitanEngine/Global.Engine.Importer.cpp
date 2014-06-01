@@ -239,27 +239,37 @@ bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName
                 ExportDirectorySize=(ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
             }
             PIMAGE_EXPORT_DIRECTORY ExportDirectory=(PIMAGE_EXPORT_DIRECTORY)ConvertVAtoFileOffset(FileMapVA, ExportDirectoryVA+ImageBase, true);
-            DWORD* AddrOfFunctions=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfFunctions+ImageBase, true);
-            DWORD* AddrOfNames=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfNames+ImageBase, true);
-            SHORT* AddrOfNameOrdinals=(SHORT*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfNameOrdinals+ImageBase, true);
-            unsigned int NumberOfNames=ExportDirectory->NumberOfNames;
-            for(unsigned int i=0; i<NumberOfNames; i++)
+            if(ExportDirectory)
             {
-                const char* curName=(const char*)ConvertVAtoFileOffset(FileMapVA, AddrOfNames[i]+ImageBase, true);
-                unsigned int curRva=AddrOfFunctions[AddrOfNameOrdinals[i]];
-                if(curRva<ExportDirectoryVA || curRva>=ExportDirectoryVA+ExportDirectorySize) //non-forwarded exports
+                DWORD* AddrOfFunctions=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfFunctions+ImageBase, true);
+                DWORD* AddrOfNames=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfNames+ImageBase, true);
+                SHORT* AddrOfNameOrdinals=(SHORT*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfNameOrdinals+ImageBase, true);
+                if(AddrOfFunctions && AddrOfNames && AddrOfNameOrdinals)
                 {
-                    if(curRva+ModuleBase==APIAddress)
+                    unsigned int NumberOfNames=ExportDirectory->NumberOfNames;
+                    for(unsigned int i=0; i<NumberOfNames; i++)
                     {
-                        if(APIName && APINameSize>strlen(curName))
+                        const char* curName=(const char*)ConvertVAtoFileOffset(FileMapVA, AddrOfNames[i]+ImageBase, true);
+                        if(!curName)
+                            continue;
+                        unsigned int curRva=AddrOfFunctions[AddrOfNameOrdinals[i]];
+                        if(curRva<ExportDirectoryVA || curRva>=ExportDirectoryVA+ExportDirectorySize) //non-forwarded exports
                         {
-                            strcpy(APIName, curName);
-                            return true;
-                        }
-                        if(APINameSizeNeeded)
-                        {
-                            *APINameSizeNeeded=strlen(curName);
-                            return true;
+                            if(curRva+ModuleBase==APIAddress)
+                            {
+                                if(APIName && APINameSize>strlen(curName))
+                                {
+                                    strcpy(APIName, curName);
+                                    UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                                    return true;
+                                }
+                                if(APINameSizeNeeded)
+                                {
+                                    *APINameSizeNeeded=strlen(curName);
+                                    UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
@@ -312,18 +322,27 @@ DWORD EngineGetAPIOrdinalRemote(HANDLE hProcess, ULONG_PTR APIAddress)
                 ExportDirectorySize=(ULONG_PTR)PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
             }
             PIMAGE_EXPORT_DIRECTORY ExportDirectory=(PIMAGE_EXPORT_DIRECTORY)ConvertVAtoFileOffset(FileMapVA, ExportDirectoryVA+ImageBase, true);
-            DWORD* AddrOfFunctions=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfFunctions+ImageBase, true);
-            unsigned int NumberOfFunctions=ExportDirectory->NumberOfFunctions;
-            for(unsigned int i=0,j=0; i<NumberOfFunctions; i++)
+            if(ExportDirectory)
             {
-                unsigned int curRva=AddrOfFunctions[i];
-                if(!curRva)
-                    continue;
-                j++; //ordinal
-                if(curRva<ExportDirectoryVA || curRva>=ExportDirectoryVA+ExportDirectorySize) //non-forwarded exports
+                DWORD* AddrOfFunctions=(DWORD*)ConvertVAtoFileOffset(FileMapVA, ExportDirectory->AddressOfFunctions+ImageBase, true);
+                if(AddrOfFunctions)
                 {
-                    if(curRva+ModuleBase==APIAddress)
-                        return j;
+                    unsigned int NumberOfFunctions=ExportDirectory->NumberOfFunctions;
+                    for(unsigned int i=0,j=0; i<NumberOfFunctions; i++)
+                    {
+                        unsigned int curRva=AddrOfFunctions[i];
+                        if(!curRva)
+                            continue;
+                        j++; //ordinal
+                        if(curRva<ExportDirectoryVA || curRva>=ExportDirectoryVA+ExportDirectorySize) //non-forwarded exports
+                        {
+                            if(curRva+ModuleBase==APIAddress)
+                            {
+                                UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+                                return j;
+                            }
+                        }
+                    }
                 }
             }
         }

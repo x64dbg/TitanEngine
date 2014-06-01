@@ -470,7 +470,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR File
                                 ThunkData32 = (PIMAGE_THUNK_DATA32)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)((ULONG_PTR)ImportIID->FirstThunk + PEHeader32->OptionalHeader.ImageBase), true);
                                 CurrentThunk = (ULONG_PTR)ImportIID->FirstThunk;
                             }
-                            while(ThunkData32->u1.AddressOfData != NULL)
+                            while(ThunkData32 && ThunkData32->u1.AddressOfData != NULL)
                             {
                                 if(!(ThunkData32->u1.Ordinal & IMAGE_ORDINAL_FLAG32))
                                 {
@@ -519,7 +519,7 @@ __declspec(dllexport) bool TITCALL HooksInsertNewIATRedirectionEx(ULONG_PTR File
                                 ThunkData64 = (PIMAGE_THUNK_DATA64)ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)((ULONG_PTR)ImportIID->FirstThunk + PEHeader64->OptionalHeader.ImageBase), true);
                                 CurrentThunk = (ULONG_PTR)ImportIID->FirstThunk;
                             }
-                            while(ThunkData64->u1.AddressOfData != NULL)
+                            while(ThunkData64 && ThunkData64->u1.AddressOfData != NULL)
                             {
                                 if(!(ThunkData64->u1.Ordinal & IMAGE_ORDINAL_FLAG64))
                                 {

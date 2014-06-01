@@ -276,7 +276,8 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTableExW(wchar_t* szExport
         if(MapFileExW(szExportFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
         {
             NewSectionFO = (DWORD)ConvertVAtoFileOffset(FileMapVA, NewSectionVO + (ULONG_PTR)GetPE32DataFromMappedFile(FileMapVA, NULL, UE_IMAGEBASE), true);
-            ReturnValue = ExporterBuildExportTable(NewSectionFO, FileMapVA);
+            if(NewSectionFO)
+                ReturnValue = ExporterBuildExportTable(NewSectionFO, FileMapVA);
             UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
             if(ReturnValue)
             {
@@ -359,9 +360,15 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTableW(wchar_t* szFileName)
                 if(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress != NULL)
                 {
                     PEExports = (PIMAGE_EXPORT_DIRECTORY)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + PEHeader32->OptionalHeader.ImageBase), true));
-                    ExportedFunctions = (PEXPORTED_DATA)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEExports->AddressOfFunctions + PEHeader32->OptionalHeader.ImageBase), true));
-                    ExporterInit(50 * 1024, (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->Base, NULL);
-                    ExportPresent = true;
+                    if(PEExports)
+                    {
+                        ExportedFunctions = (PEXPORTED_DATA)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEExports->AddressOfFunctions + PEHeader32->OptionalHeader.ImageBase), true));
+                        if(ExportedFunctions)
+                        {
+                            ExporterInit(50 * 1024, (ULONG_PTR)PEHeader32->OptionalHeader.ImageBase, PEExports->Base, NULL);
+                            ExportPresent = true;
+                        }
+                    }
                 }
             }
             else
@@ -369,9 +376,15 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTableW(wchar_t* szFileName)
                 if(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress != NULL)
                 {
                     PEExports = (PIMAGE_EXPORT_DIRECTORY)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress + PEHeader64->OptionalHeader.ImageBase), true));
-                    ExportedFunctions = (PEXPORTED_DATA)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEExports->AddressOfFunctions + PEHeader64->OptionalHeader.ImageBase), true));
-                    ExporterInit(50 * 1024, (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->Base, NULL);
-                    ExportPresent = true;
+                    if(PEExports)
+                    {
+                        ExportedFunctions = (PEXPORTED_DATA)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEExports->AddressOfFunctions + PEHeader64->OptionalHeader.ImageBase), true));
+                        if(ExportedFunctions)
+                        {
+                            ExporterInit(50 * 1024, (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase, PEExports->Base, NULL);
+                            ExportPresent = true;
+                        }
+                    }
                 }
             }
             if(ExportPresent)
@@ -390,32 +403,36 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTableW(wchar_t* szFileName)
                         ExportedFunctionNames = (PEXPORTED_DATA)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEExports->AddressOfNames + PEHeader64->OptionalHeader.ImageBase), true));
                         ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(PEExports->AddressOfNameOrdinals + PEHeader64->OptionalHeader.ImageBase), true));
                     }
-                    for(j = 0; j <= PEExports->NumberOfNames; j++)
+                    if(ExportedFunctionNames && ExportedFunctionOrdinals)
                     {
-                        if(ExportedFunctionOrdinals->OrdinalNumber != x)
+                        for(j = 0; j <= PEExports->NumberOfNames; j++)
                         {
-                            ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + 2);
+                            if(ExportedFunctionOrdinals->OrdinalNumber != x)
+                            {
+                                ExportedFunctionOrdinals = (PEXPORTED_DATA_WORD)((ULONG_PTR)ExportedFunctionOrdinals + 2);
+                            }
+                            else
+                            {
+                                ExportPresent = true;
+                                break;
+                            }
                         }
-                        else
+                        if(ExportPresent)
                         {
-                            ExportPresent = true;
-                            break;
+                            ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctionNames + j * 4);
+                            if(!FileIs64)
+                            {
+                                ExportName = (char*)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(ExportedFunctionNames->ExportedItem + PEHeader32->OptionalHeader.ImageBase), true));
+                            }
+                            else
+                            {
+                                ExportName = (char*)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(ExportedFunctionNames->ExportedItem + PEHeader64->OptionalHeader.ImageBase), true));
+                            }
+                            if(ExportName)
+                                ExporterAddNewExport(ExportName, ExportedFunctions->ExportedItem);
                         }
+                        ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + 4);
                     }
-                    if(ExportPresent)
-                    {
-                        ExportedFunctionNames = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctionNames + j * 4);
-                        if(!FileIs64)
-                        {
-                            ExportName = (char*)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(ExportedFunctionNames->ExportedItem + PEHeader32->OptionalHeader.ImageBase), true));
-                        }
-                        else
-                        {
-                            ExportName = (char*)(ConvertVAtoFileOffset(FileMapVA, (ULONG_PTR)(ExportedFunctionNames->ExportedItem + PEHeader64->OptionalHeader.ImageBase), true));
-                        }
-                        ExporterAddNewExport(ExportName, ExportedFunctions->ExportedItem);
-                    }
-                    ExportedFunctions = (PEXPORTED_DATA)((ULONG_PTR)ExportedFunctions + 4);
                 }
                 UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                 return true;
