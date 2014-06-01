@@ -1340,6 +1340,9 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
         DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
         {
+            ULONG_PTR WipeRawSize=GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWSIZE);
+            if(!WipeRawSize)
+                RemovePhysically = false;
             PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             PEHeader64 = (PIMAGE_NT_HEADERS64)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
             if(PEHeader32->OptionalHeader.Magic == 0x10B)
