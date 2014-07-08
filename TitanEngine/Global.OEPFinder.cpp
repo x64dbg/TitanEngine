@@ -17,7 +17,7 @@ void GenericOEPVirtualProtectHit()
     DWORD NewProtect = 0;
     DWORD OldProtect = 0;
 
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         BreakPointDetail curDetail=BreakPointBuffer.at(i);

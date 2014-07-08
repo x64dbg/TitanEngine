@@ -678,7 +678,7 @@ bool EngineGetDependencyLocationW(wchar_t* szFileName, wchar_t* szDependencyForF
         if(szDependencyForFile != NULL)
         {
             RtlZeroMemory(szTryFileName, sizeof(szTryFileName));
-            i = wcslen(szDependencyForFile);
+            i = (int)wcslen(szDependencyForFile);
             while(i > 0 && szDependencyForFile[i] != L'\\')
             {
                 i--;

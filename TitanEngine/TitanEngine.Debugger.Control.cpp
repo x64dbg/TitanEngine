@@ -8,7 +8,7 @@
 __declspec(dllexport) void TITCALL ForceClose()
 {
     //manage process list
-    int processcount=hListProcess.size();
+    int processcount=(int)hListProcess.size();
     for(int i=0; i<processcount; i++)
     {
         EngineCloseHandle(hListProcess.at(i).hFile);
@@ -16,12 +16,12 @@ __declspec(dllexport) void TITCALL ForceClose()
     }
     ClearProcessList();
     //manage thread list
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         EngineCloseHandle(hListThread.at(i).hThread);
     ClearThreadList();
     //manage library list
-    int libcount=hListLibrary.size();
+    int libcount=(int)hListLibrary.size();
     for(int i=0; i<libcount; i++)
     {
         if(hListLibrary.at(i).hFile != (HANDLE)-1)

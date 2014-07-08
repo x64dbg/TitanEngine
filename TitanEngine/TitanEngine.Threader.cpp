@@ -8,9 +8,9 @@
 void updateThreadList( THREAD_ITEM_DATA* NewThreadData )
 {
     bool notInList = true;
-    unsigned int count = hListThread.size();
+    int count = (int)hListThread.size();
 
-    for (unsigned int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
         if (hListThread.at(i).dwThreadId == NewThreadData->dwThreadId)
         {
@@ -159,7 +159,7 @@ __declspec(dllexport) void* TITCALL ThreaderGetThreadInfo(HANDLE hThread, DWORD 
         return NULL;
     static THREAD_ITEM_DATA ThreadData;
     memset(&ThreadData, 0, sizeof(THREAD_ITEM_DATA));
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         if(hListThread.at(i).hThread == hThread || hListThread.at(i).dwThreadId == ThreadId)
         {
@@ -173,7 +173,7 @@ __declspec(dllexport) void TITCALL ThreaderEnumThreadInfo(void* EnumCallBack)
 {
     typedef void(TITCALL *fEnumCallBack)(LPVOID fThreadDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
     {
         __try
@@ -189,7 +189,7 @@ __declspec(dllexport) void TITCALL ThreaderEnumThreadInfo(void* EnumCallBack)
 
 __declspec(dllexport) bool TITCALL ThreaderPauseThread(HANDLE hThread)
 {
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         if(hListThread.at(i).hThread == hThread && SuspendThread(hThread) != -1)
             return true;
@@ -198,7 +198,7 @@ __declspec(dllexport) bool TITCALL ThreaderPauseThread(HANDLE hThread)
 
 __declspec(dllexport) bool TITCALL ThreaderResumeThread(HANDLE hThread)
 {
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         if(hListThread.at(i).hThread == hThread && ResumeThread(hThread) != -1)
             return true;
@@ -207,7 +207,7 @@ __declspec(dllexport) bool TITCALL ThreaderResumeThread(HANDLE hThread)
 
 __declspec(dllexport) bool TITCALL ThreaderTerminateThread(HANDLE hThread, DWORD ThreadExitCode)
 {
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         if(hListThread.at(i).hThread == hThread && TerminateThread(hThread, ThreadExitCode) != NULL)
         {
@@ -220,7 +220,7 @@ __declspec(dllexport) bool TITCALL ThreaderTerminateThread(HANDLE hThread, DWORD
 __declspec(dllexport) bool TITCALL ThreaderPauseAllThreads(bool LeaveMainRunning)
 {
     bool ret=true;
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
     {
         DWORD suspended;
@@ -237,7 +237,7 @@ __declspec(dllexport) bool TITCALL ThreaderPauseAllThreads(bool LeaveMainRunning
 __declspec(dllexport) bool TITCALL ThreaderResumeAllThreads(bool LeaveMainPaused)
 {
     bool ret=true;
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
     {
         DWORD resumed;
@@ -332,7 +332,7 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
 
 __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()
 {
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         if(ThreaderIsThreadActive(hListThread.at(i).hThread))
             return true;
@@ -351,7 +351,7 @@ __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads()
 
 __declspec(dllexport) ULONG_PTR TITCALL ThreaderGetOpenHandleForThread(DWORD ThreadId)
 {
-    int threadcount=hListThread.size();
+    int threadcount=(int)hListThread.size();
     for(int i=0; i<threadcount; i++)
         if(hListThread.at(i).dwThreadId == ThreadId)
             return (ULONG_PTR)hListThread.at(i).hThread;

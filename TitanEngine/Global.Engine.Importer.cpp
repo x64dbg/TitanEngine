@@ -265,7 +265,7 @@ bool EngineGetAPINameRemote(HANDLE hProcess, ULONG_PTR APIAddress, char* APIName
                                 }
                                 if(APINameSizeNeeded)
                                 {
-                                    *APINameSizeNeeded=strlen(curName);
+                                    *APINameSizeNeeded=(DWORD)strlen(curName);
                                     UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                                     return true;
                                 }

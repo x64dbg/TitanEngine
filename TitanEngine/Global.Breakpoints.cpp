@@ -116,7 +116,7 @@ void BreakPointPostReadFilter(ULONG_PTR lpBaseAddress, unsigned char* lpBuffer, 
     CriticalSectionLocker lock(LockBreakPointBuffer);
     ULONG_PTR start=lpBaseAddress;
     ULONG_PTR end=start+nSize;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         BreakPointDetail* curBp=&BreakPointBuffer.at(i);
@@ -139,7 +139,7 @@ void BreakPointPreWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize, CriticalSec
 {
     ULONG_PTR start=lpBaseAddress;
     ULONG_PTR end=start+nSize;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         BreakPointDetail* curBp=&BreakPointBuffer.at(i);
@@ -165,7 +165,7 @@ void BreakPointPostWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize, CriticalSe
 {
     ULONG_PTR start=lpBaseAddress;
     ULONG_PTR end=start+nSize;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         BreakPointDetail* curBp=&BreakPointBuffer.at(i);

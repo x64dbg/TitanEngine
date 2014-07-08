@@ -5,7 +5,7 @@
 
 bool IsStrEqual( const char* const a, const char* const b, bool considercase/*=true*/ )
 {
-    const int stringlen = std::strlen(a);
+    const int stringlen = (int)std::strlen(a);
     if(stringlen != std::strlen(b))
         return false; //cheap
 

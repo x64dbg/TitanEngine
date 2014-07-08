@@ -30,7 +30,7 @@ __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     BYTE ReadData[10] = {};
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
@@ -66,7 +66,7 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
     DWORD MaximumBreakPoints = 0;
     bool testWrite = false;
     DWORD OldProtect;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
@@ -135,7 +135,7 @@ __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     DWORD OldProtect;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     for(int i=0; i<bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
@@ -181,7 +181,7 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
     {
         return false;
     }
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     //search for breakpoint
     for(int i=0; i<bpcount; i++)
     {
@@ -272,7 +272,7 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
     CriticalSectionLocker lock(LockBreakPointBuffer);
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD OldProtect;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     int found=-1;
     for(int i=0; i<bpcount; i++)
     {
@@ -440,7 +440,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
     CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     //search for breakpoint
     for(int i=0; i<bpcount; i++)
     {
@@ -487,7 +487,7 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
     CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     int found=-1;
     //search for breakpoint
     for(int i=0; i<bpcount; i++)
@@ -817,7 +817,7 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
 __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
 {
     CriticalSectionLocker lock(LockBreakPointBuffer);
-    int bpcount=BreakPointBuffer.size();
+    int bpcount=(int)BreakPointBuffer.size();
     if(RemoveOption == UE_OPTION_REMOVEALL)
     {
         for(int i=bpcount-1; i>-1; i--)

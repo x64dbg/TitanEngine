@@ -29,7 +29,7 @@ __declspec(dllexport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray
     {
         if(!TransitionStart || ThreaderImportRunningThreadData(GetCurrentProcessId()))
         {
-            int threadcount=hListThread.size();
+            int threadcount=(int)hListThread.size();
             for(int i=0; i<threadcount; i++)
             {
                 PTHREAD_ITEM_DATA hListThreadPtr=&hListThread.at(i);

@@ -12,7 +12,7 @@ _DecodeType DecodingType = Decode64Bits;
 #endif
 
 
-long IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
+SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
 {
     MEMORY_BASIC_INFORMATION MemInfo = {0};
     ULONG_PTR section = 0;
@@ -55,7 +55,7 @@ long IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
 
                 return length; //good
             }
-        }
+        }   
 
     }
 
@@ -67,7 +67,7 @@ __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, 
     _DecodedInst engineDecodedInstructions[1];
     unsigned int DecodedInstructionsCount = 0;
 
-    long MaxDisassmSize = IsBadReadPtrRemote(GetCurrentProcess(), DisassmAddress, MAXIMUM_INSTRUCTION_SIZE);
+    int MaxDisassmSize = (int)IsBadReadPtrRemote(GetCurrentProcess(), DisassmAddress, MAXIMUM_INSTRUCTION_SIZE);
     if(MaxDisassmSize)
     {
         if (distorm_decode((ULONG_PTR)DisassmStart, (const unsigned char*)DisassmAddress, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
@@ -100,21 +100,11 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
 
     if(hProcess != NULL)
     {
-        long MaxDisassmSize = IsBadReadPtrRemote(hProcess,DisassmAddress, sizeof(readBuffer));
+        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess,DisassmAddress, sizeof(readBuffer));
 
         if(MaxDisassmSize)
         {
-            bool isbp=false;
-            if(IsBPXEnabled((ULONG_PTR)DisassmAddress))
-            {
-                isbp=true;
-                DisableBPX((ULONG_PTR)DisassmAddress);
-            }
             BOOL rpm = MemoryReadSafe(hProcess, DisassmAddress, readBuffer, MaxDisassmSize, 0);
-            if(isbp)
-            {
-                EnableBPX((ULONG_PTR)DisassmAddress);
-            }
             if(rpm)
             {
                 if (distorm_decode((ULONG_PTR)DisassmAddress, readBuffer, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
@@ -159,7 +149,7 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
 
     if(hProcess != NULL)
     {
-        long MaxDisassmSize = IsBadReadPtrRemote(hProcess,DisassmAddress, sizeof(readBuffer));
+        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess,DisassmAddress, sizeof(readBuffer));
 
         if (MaxDisassmSize && MemoryReadSafe(hProcess, (LPVOID)DisassmAddress, readBuffer, MaxDisassmSize, 0))
         {

@@ -20,7 +20,7 @@ __declspec(dllexport) bool TITCALL LibrarianSetBreakPoint(char* szLibraryName, D
 
 __declspec(dllexport) bool TITCALL LibrarianRemoveBreakPoint(char* szLibraryName, DWORD bpxType)
 {
-    for(int i = LibrarianData.size() - 1; i >= 0; i--)
+    for(int i = (int)LibrarianData.size() - 1; i >= 0; i--)
     {
         if(!_stricmp(szLibraryName, LibrarianData.at(i).szLibraryName) && (LibrarianData.at(i).bpxType == bpxType || bpxType == UE_ON_LIB_ALL))
         {

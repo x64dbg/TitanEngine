@@ -346,7 +346,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         WideCharToMultiByte(CP_ACP, NULL, NewLibraryData.szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
 
                         //library breakpoint
-                        for(int i = LibrarianData.size() - 1; i >= 0; i--)
+                        for(int i = (int)LibrarianData.size() - 1; i >= 0; i--)
                         {
                             ptrLibrarianData=&LibrarianData.at(i);
                             if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
@@ -415,7 +415,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 RtlZeroMemory(szAnsiLibraryName, sizeof(szAnsiLibraryName));
                 WideCharToMultiByte(CP_ACP, NULL, hLoadedLibData->szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
 
-                for(int i= LibrarianData.size() - 1; i >= 0; i--)
+                for(int i= (int)LibrarianData.size() - 1; i >= 0; i--)
                 {
                     ptrLibrarianData = &LibrarianData.at(i);
                     if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
@@ -520,7 +520,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 bool bFoundBreakPoint=false;
                 BreakPointDetail FoundBreakPoint;
-                int bpcount=BreakPointBuffer.size();
+                int bpcount=(int)BreakPointBuffer.size();
                 for(int i=0; i<bpcount; i++)
                 {
                     if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress - (BreakPointBuffer.at(i).BreakPointSize - 1) &&
@@ -916,7 +916,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 ULONG_PTR bpaddr;
                 bool bFoundBreakPoint=false;
                 BreakPointDetail FoundBreakPoint;
-                int bpcount=BreakPointBuffer.size();
+                int bpcount=(int)BreakPointBuffer.size();
                 for(int i=0; i<bpcount; i++)
                 {
                     ULONG_PTR addr=BreakPointBuffer.at(i).BreakPointAddress;
@@ -1123,7 +1123,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 //UD2 breakpoint
                 bool bFoundBreakPoint=false;
                 BreakPointDetail FoundBreakPoint;
-                int bpcount=BreakPointBuffer.size();
+                int bpcount=(int)BreakPointBuffer.size();
                 for(int i=0; i<bpcount; i++)
                 {
                     if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress &&
