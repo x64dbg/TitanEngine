@@ -1434,11 +1434,11 @@ protected:
     }
     static const PROCESS_INFORMATION* GetProcessInformation()
     {
-        return (const PROCESS_INFORMATION*)UE::GetProcessInformation();
+        return (const PROCESS_INFORMATION*)UE::TitanGetProcessInformation();
     }
     static const STARTUPINFOW* GetStartupInformation()
     {
-        return (const STARTUPINFOW*)UE::GetStartupInformation();
+        return (const STARTUPINFOW*)UE::TitanGetStartupInformation();
     }
     static void DebugLoop()
     {

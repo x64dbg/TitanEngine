@@ -153,8 +153,8 @@ GetJumpDestinationEx
 IsJumpGoingToExecuteEx
 IsJumpGoingToExecute
 SetDebugLoopTimeOut
-GetProcessInformation
-GetStartupInformation
+TitanGetProcessInformation
+TitanGetStartupInformation
 AutoDebugEx
 AutoDebugExW
 IsFileBeingDebugged

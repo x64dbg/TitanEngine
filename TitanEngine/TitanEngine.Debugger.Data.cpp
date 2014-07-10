@@ -144,12 +144,12 @@ __declspec(dllexport) void TITCALL SetCustomHandler(DWORD ExceptionId, LPVOID Ca
     }
 }
 
-__declspec(dllexport) void* TITCALL GetProcessInformation()
+__declspec(dllexport) PROCESS_INFORMATION* TITCALL TitanGetProcessInformation()
 {
     return(&dbgProcessInformation);
 }
 
-__declspec(dllexport) void* TITCALL GetStartupInformation()
+__declspec(dllexport) STARTUPINFOW* TITCALL TitanGetStartupInformation()
 {
     return(&dbgStartupInfo);
 }
