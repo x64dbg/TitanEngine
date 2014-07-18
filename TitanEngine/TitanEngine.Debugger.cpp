@@ -45,7 +45,6 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
 {
     int DebugConsoleFlag = NULL;
 
-    DebuggerReset();
     if(DebugDebuggingDLL)
     {
         DebugConsoleFlag = CREATE_NO_WINDOW|CREATE_SUSPENDED;
@@ -226,7 +225,6 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 
     if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
-        DebuggerReset();
         if(engineEnableDebugPrivilege)
         {
             EngineSetDebugPrivilege(GetCurrentProcess(), true);

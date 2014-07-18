@@ -194,7 +194,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                     }
                     else if(WhichData == UE_IMAGEBASE)
                     {
-                        return(PEHeader64->OptionalHeader.ImageBase);
+                        return (ULONG_PTR)(PEHeader64->OptionalHeader.ImageBase);
                     }
                     else if(WhichData == UE_OEP)
                     {

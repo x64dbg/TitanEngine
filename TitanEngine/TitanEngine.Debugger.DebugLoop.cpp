@@ -1406,6 +1406,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     {
         ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_POSTDEBUG);
     }
+    DebuggerReset();
 }
 
 __declspec(dllexport) void TITCALL DebugLoopEx(DWORD TimeOut)
