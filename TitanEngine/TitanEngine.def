@@ -154,7 +154,9 @@ IsJumpGoingToExecuteEx
 IsJumpGoingToExecute
 SetDebugLoopTimeOut
 TitanGetProcessInformation
+GetProcessInformation = TitanGetProcessInformation
 TitanGetStartupInformation
+GetStartupInformation = TitanGetStartupInformation
 AutoDebugEx
 AutoDebugExW
 IsFileBeingDebugged
