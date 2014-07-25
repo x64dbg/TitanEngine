@@ -660,17 +660,17 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 if(ResetBPX == true || ResetHwBPX == true || ResetMemBPX == true) //restore breakpoints (internal step)
                 {
                     DBGCode = DBG_CONTINUE;
+                    if(PushfBPX) //remove trap flag from stack
+                    {
+                        PushfBPX = false;
+                        void* csp=(void*)GetContextData(UE_CSP);
+                        ULONG_PTR data=0;
+                        ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
+                        data &= ~UE_TRAP_FLAG;
+                        WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
+                    }
                     if(ResetBPX) //restore 'normal' breakpoint
                     {
-                        if(PushfBPX) //remove trap flag from stack
-                        {
-                            PushfBPX = false;
-                            void* csp=(void*)GetContextData(UE_CSP);
-                            ULONG_PTR data=0;
-                            ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
-                            data &= ~UE_TRAP_FLAG;
-                            WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
-                        }
                         if(ResetBPXAddressTo + ResetBPXSize != (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress)
                         {
                             EnableBPX(ResetBPXAddressTo);
@@ -791,7 +791,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     else //handle hardware breakpoints
                     {
                         hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
-                        myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+                        myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
                         {
@@ -906,6 +906,15 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                         }
                         EngineCloseHandle(hActiveThread);
+                        if(ResetHwBPX) //a hardware breakpoint was reached
+                        {
+                            ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+                            unsigned char instr[16];
+                            MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                            char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                            if(strstr(DisassembledString, "PUSHF"))
+                                PushfBPX = true;
+                        }
                     }
                 }
                 if(DBGCode==DBG_EXCEPTION_NOT_HANDLED) //NOTE: only call the chSingleStep callback when the debuggee generated the exception
@@ -1094,6 +1103,15 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 else //no memory breakpoint found
                 {
                     DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                }
+                if(ResetMemBPX) //memory breakpoint hit
+                {
+                    ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+                    unsigned char instr[16];
+                    MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                    char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                    if(strstr(DisassembledString, "PUSHF"))
+                        PushfBPX = true;
                 }
 
                 //debuggee generated GUARD_PAGE exception
