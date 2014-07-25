@@ -18,6 +18,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 {
     bool FirstBPX = true;
     bool ResetBPX = false;
+    bool PushfBPX = false;
     bool BreakDBG = false;
     bool ResetHwBPX = false;
     bool ResetMemBPX = false;
@@ -543,7 +544,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
                             myDBGContext.EFlags |= UE_TRAP_FLAG;
-                        myDBGContext.EFlags |= UE_RESUME_FLAG;
 #if defined(_WIN64)
                         myDBGContext.Rip = myDBGContext.Rip - FoundBreakPoint.BreakPointSize;
 #else
@@ -552,6 +552,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         SetThreadContext(hActiveThread, &myDBGContext);
                         EngineCloseHandle(hActiveThread);
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
+                        ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
+                        unsigned char instr[16];
+                        MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                        char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                        if(strstr(DisassembledString, "PUSHF"))
+                            PushfBPX = true;
                         myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
                         //execute callback
                         __try
@@ -656,6 +662,15 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     DBGCode = DBG_CONTINUE;
                     if(ResetBPX) //restore 'normal' breakpoint
                     {
+                        if(PushfBPX) //remove trap flag from stack
+                        {
+                            PushfBPX = false;
+                            void* csp=(void*)GetContextData(UE_CSP);
+                            ULONG_PTR data=0;
+                            ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
+                            data &= ~UE_TRAP_FLAG;
+                            WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
+                        }
                         if(ResetBPXAddressTo + ResetBPXSize != (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress)
                         {
                             EnableBPX(ResetBPXAddressTo);
@@ -1146,7 +1161,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
                             myDBGContext.EFlags |= UE_TRAP_FLAG;
-                        myDBGContext.EFlags |= UE_RESUME_FLAG;
                         SetThreadContext(hActiveThread, &myDBGContext);
                         EngineCloseHandle(hActiveThread);
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);

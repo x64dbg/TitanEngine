@@ -49,28 +49,31 @@ __declspec(dllexport) void TITCALL ForceClose()
 
 __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 {
-    ULONG_PTR ueContext = NULL;
-
-    ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-    ueContext |= UE_TRAP_FLAG;
-    SetContextData(UE_EFLAGS, ueContext);
-    engineStepActive = true;
-    engineStepCallBack = StepCallBack;
-    engineStepCount = NULL;
+    ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+    unsigned char instr[16];
+    MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+    char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+    if(strstr(DisassembledString, "PUSHF"))
+        StepOver(StepCallBack);
+    else
+    {
+        ULONG_PTR ueContext = NULL;
+        ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
+        ueContext |= UE_TRAP_FLAG;
+        SetContextData(UE_EFLAGS, ueContext);
+        engineStepActive = true;
+        engineStepCallBack = StepCallBack;
+        engineStepCount = NULL;
+    }
 }
 
 __declspec(dllexport) void TITCALL StepOver(LPVOID StepCallBack)
 {
-    ULONG_PTR ueCurrentPosition = NULL;
-#if !defined(_WIN64)
-    ueCurrentPosition = (ULONG_PTR)GetContextData(UE_EIP);
-#else
-    ueCurrentPosition = GetContextData(UE_RIP);
-#endif
+    ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
     unsigned char instr[16];
-    ReadProcessMemory(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+    MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
     char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
-    if(strstr(DisassembledString, "CALL")||strstr(DisassembledString, "REP")||strstr(DisassembledString, "PUSHF"))
+    if(strstr(DisassembledString, "CALL") || strstr(DisassembledString, "REP") || strstr(DisassembledString, "PUSHF"))
     {
         ueCurrentPosition+=StaticLengthDisassemble((void*)instr);
         SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3+UE_SINGLESHOOT, StepCallBack);
@@ -88,7 +91,6 @@ __declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal)
 
 __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack)
 {
-
     ULONG_PTR ueContext = NULL;
 
     ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
@@ -102,7 +104,6 @@ __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBa
 
 __declspec(dllexport) void TITCALL SetNextDbgContinueStatus(DWORD SetDbgCode)
 {
-
     if(SetDbgCode != DBG_CONTINUE)
     {
         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
