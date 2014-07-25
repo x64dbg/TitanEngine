@@ -766,6 +766,132 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
                 else //no resetting needed (debugger reached hardware breakpoint or the user stepped)
                 {
+                    //handle hardware breakpoints
+                    hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                    myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
+                    GetThreadContext(hActiveThread, &myDBGContext);
+                    if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
+                    {
+                        if(DebugRegister[0].DrxEnabled)
+                        {
+                            DBGCode = DBG_CONTINUE;
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            myCustomHandler = (fCustomHandler)(DebugRegister[0].DrxCallBack);
+                            __try
+                            {
+                                myCustomHandler((void*)myDBGContext.Dr0);
+                            }
+                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            {
+
+                            }
+                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
+                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[0], sizeof HARDWARE_DATA);
+                            DeleteHardwareBreakPoint(UE_DR0);
+                            DebugRegisterXId = UE_DR0;
+                            ResetHwBPX = true;
+                        }
+                        else
+                        {
+                            DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                        }
+                    }
+                    else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr1 || (myDBGContext.Dr6 & 0x2))
+                    {
+                        if(DebugRegister[1].DrxEnabled)
+                        {
+                            DBGCode = DBG_CONTINUE;
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            myCustomHandler = (fCustomHandler)(DebugRegister[1].DrxCallBack);
+                            __try
+                            {
+                                myCustomHandler((void*)myDBGContext.Dr1);
+                            }
+                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            {
+
+                            }
+                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
+                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[1], sizeof HARDWARE_DATA);
+                            DeleteHardwareBreakPoint(UE_DR1);
+                            DebugRegisterXId = UE_DR1;
+                            ResetHwBPX = true;
+                        }
+                        else
+                        {
+                            DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                        }
+                    }
+                    else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr2 || (myDBGContext.Dr6 & 0x4))
+                    {
+                        if(DebugRegister[2].DrxEnabled)
+                        {
+                            DBGCode = DBG_CONTINUE;
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            myCustomHandler = (fCustomHandler)(DebugRegister[2].DrxCallBack);
+                            __try
+                            {
+                                myCustomHandler((void*)myDBGContext.Dr2);
+                            }
+                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            {
+
+                            }
+                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
+                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[2], sizeof HARDWARE_DATA);
+                            DeleteHardwareBreakPoint(UE_DR2);
+                            DebugRegisterXId = UE_DR2;
+                            ResetHwBPX = true;
+                        }
+                        else
+                        {
+                            DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                        }
+                    }
+                    else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr3 || (myDBGContext.Dr6 & 0x8))
+                    {
+                        if(DebugRegister[3].DrxEnabled)
+                        {
+                            DBGCode = DBG_CONTINUE;
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            myCustomHandler = (fCustomHandler)(DebugRegister[3].DrxCallBack);
+                            __try
+                            {
+                                myCustomHandler((void*)myDBGContext.Dr3);
+                            }
+                            __except(EXCEPTION_EXECUTE_HANDLER)
+                            {
+
+                            }
+                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
+                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[3], sizeof HARDWARE_DATA);
+                            DeleteHardwareBreakPoint(UE_DR3);
+                            DebugRegisterXId = UE_DR3;
+                            ResetHwBPX = true;
+                        }
+                        else
+                        {
+                            DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                        }
+                    }
+                    else //debuggee generated exception
+                    {
+                        DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                    }
+                    EngineCloseHandle(hActiveThread);
+                    if(ResetHwBPX) //a hardware breakpoint was reached
+                    {
+                        ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+                        unsigned char instr[16];
+                        MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                        char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                        if(strstr(DisassembledString, "PUSHF"))
+                            PushfBPX = true;
+                    }
                     if(engineStepActive)
                     {
                         DBGCode = DBG_CONTINUE;
@@ -786,134 +912,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         else
                         {
                             SingleStep(engineStepCount, engineStepCallBack);
-                        }
-                    }
-                    else //handle hardware breakpoints
-                    {
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
-                        myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
-                        GetThreadContext(hActiveThread, &myDBGContext);
-                        if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
-                        {
-                            if(DebugRegister[0].DrxEnabled)
-                            {
-                                DBGCode = DBG_CONTINUE;
-                                myDBGContext.EFlags |= UE_TRAP_FLAG;
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister[0].DrxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)myDBGContext.Dr0);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                                RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[0], sizeof HARDWARE_DATA);
-                                DeleteHardwareBreakPoint(UE_DR0);
-                                DebugRegisterXId = UE_DR0;
-                                ResetHwBPX = true;
-                            }
-                            else
-                            {
-                                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                            }
-                        }
-                        else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr1 || (myDBGContext.Dr6 & 0x2))
-                        {
-                            if(DebugRegister[1].DrxEnabled)
-                            {
-                                DBGCode = DBG_CONTINUE;
-                                myDBGContext.EFlags |= UE_TRAP_FLAG;
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister[1].DrxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)myDBGContext.Dr1);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                                RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[1], sizeof HARDWARE_DATA);
-                                DeleteHardwareBreakPoint(UE_DR1);
-                                DebugRegisterXId = UE_DR1;
-                                ResetHwBPX = true;
-                            }
-                            else
-                            {
-                                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                            }
-                        }
-                        else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr2 || (myDBGContext.Dr6 & 0x4))
-                        {
-                            if(DebugRegister[2].DrxEnabled)
-                            {
-                                DBGCode = DBG_CONTINUE;
-                                myDBGContext.EFlags |= UE_TRAP_FLAG;
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister[2].DrxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)myDBGContext.Dr2);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                                RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[2], sizeof HARDWARE_DATA);
-                                DeleteHardwareBreakPoint(UE_DR2);
-                                DebugRegisterXId = UE_DR2;
-                                ResetHwBPX = true;
-                            }
-                            else
-                            {
-                                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                            }
-                        }
-                        else if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr3 || (myDBGContext.Dr6 & 0x8))
-                        {
-                            if(DebugRegister[3].DrxEnabled)
-                            {
-                                DBGCode = DBG_CONTINUE;
-                                myDBGContext.EFlags |= UE_TRAP_FLAG;
-                                SetThreadContext(hActiveThread, &myDBGContext);
-                                myCustomHandler = (fCustomHandler)(DebugRegister[3].DrxCallBack);
-                                __try
-                                {
-                                    myCustomHandler((void*)myDBGContext.Dr3);
-                                }
-                                __except(EXCEPTION_EXECUTE_HANDLER)
-                                {
-
-                                }
-                                RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                                RtlMoveMemory(&DebugRegisterX, &DebugRegister[3], sizeof HARDWARE_DATA);
-                                DeleteHardwareBreakPoint(UE_DR3);
-                                DebugRegisterXId = UE_DR3;
-                                ResetHwBPX = true;
-                            }
-                            else
-                            {
-                                DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                            }
-                        }
-                        else //debuggee generated exception
-                        {
-                            DBGCode = DBG_EXCEPTION_NOT_HANDLED;
-                        }
-                        EngineCloseHandle(hActiveThread);
-                        if(ResetHwBPX) //a hardware breakpoint was reached
-                        {
-                            ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
-                            unsigned char instr[16];
-                            MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                            char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
-                            if(strstr(DisassembledString, "PUSHF"))
-                                PushfBPX = true;
                         }
                     }
                 }
