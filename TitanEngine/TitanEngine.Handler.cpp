@@ -120,7 +120,7 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
             }
         }
 
-         pHandle++;
+        pHandle++;
     }
 
     if(!NameFound)
