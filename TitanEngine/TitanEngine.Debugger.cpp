@@ -19,9 +19,9 @@ __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandL
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine)+1, uniCommandLine, sizeof(uniCommandLine)/(sizeof(uniCommandLine[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder)+1, uniCurrentFolder, sizeof(uniCurrentFolder)/(sizeof(uniCurrentFolder[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine) + 1, uniCommandLine, sizeof(uniCommandLine) / (sizeof(uniCommandLine[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder) + 1, uniCurrentFolder, sizeof(uniCurrentFolder) / (sizeof(uniCurrentFolder[0])));
         if(szFileName != NULL)
         {
             PtrUniFileName = &uniFileName[0];
@@ -47,13 +47,13 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
 
     if(DebugDebuggingDLL)
     {
-        DebugConsoleFlag = CREATE_NO_WINDOW|CREATE_SUSPENDED;
+        DebugConsoleFlag = CREATE_NO_WINDOW | CREATE_SUSPENDED;
     }
     else if(engineRemoveConsoleForDebugee)
     {
         DebugConsoleFlag = CREATE_NO_WINDOW;
     }
-    
+
     if(engineEnableDebugPrivilege)
     {
         EngineSetDebugPrivilege(GetCurrentProcess(), true);
@@ -63,17 +63,17 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     wchar_t* szCommandLineCreateProcess;
     if(szCommandLine == NULL || !lstrlenW(szCommandLine))
     {
-        szCommandLineCreateProcess=0;
-        szFileNameCreateProcess=szFileName;
+        szCommandLineCreateProcess = 0;
+        szFileNameCreateProcess = szFileName;
     }
     else
     {
         wchar_t szCreateWithCmdLine[1024];
         wsprintfW(szCreateWithCmdLine, L"\"%s\" %s", szFileName, szCommandLine);
-        szCommandLineCreateProcess=szCreateWithCmdLine;
-        szFileNameCreateProcess=0;
+        szCommandLineCreateProcess = szCreateWithCmdLine;
+        szFileNameCreateProcess = 0;
     }
-    if(CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS|DebugConsoleFlag|CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
+    if(CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS | DebugConsoleFlag | CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
     {
         if(engineEnableDebugPrivilege)
             EngineSetDebugPrivilege(GetCurrentProcess(), false);
@@ -119,9 +119,9 @@ __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveM
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine)+1, uniCommandLine, sizeof(uniCommandLine)/(sizeof(uniCommandLine[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder)+1, uniCurrentFolder, sizeof(uniCurrentFolder)/(sizeof(uniCurrentFolder[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine) + 1, uniCommandLine, sizeof(uniCommandLine) / (sizeof(uniCommandLine[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder) + 1, uniCurrentFolder, sizeof(uniCurrentFolder) / (sizeof(uniCurrentFolder[0])));
         if(szFileName != NULL)
         {
             PtrUniFileName = &uniFileName[0];
@@ -155,14 +155,14 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
     int i = lstrlenW(szDebuggerName);
     while(szDebuggerName[i] != '\\' && i)
         i--;
-    wchar_t DLLLoaderName[64]=L"";
+    wchar_t DLLLoaderName[64] = L"";
 #ifdef _WIN64
-    wsprintfW(DLLLoaderName, L"DLLLoader64_%.4X.exe", GetTickCount()&0xFFFF);
+    wsprintfW(DLLLoaderName, L"DLLLoader64_%.4X.exe", GetTickCount() & 0xFFFF);
 #else
-    wsprintfW(DLLLoaderName, L"DLLLoader32_%.4X.exe", GetTickCount()&0xFFFF);
+    wsprintfW(DLLLoaderName, L"DLLLoader32_%.4X.exe", GetTickCount() & 0xFFFF);
 #endif
     if(i)
-        lstrcpyW(szDebuggerName+i+1, DLLLoaderName);
+        lstrcpyW(szDebuggerName + i + 1, DLLLoaderName);
     else
         lstrcpyW(szDebuggerName, DLLLoaderName);
 
@@ -179,7 +179,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         DebugDebuggingDLLBase = NULL;
         DebugDebuggingMainModuleBase = NULL;
         DebugDebuggingDLLFullFileName = szFileName;
-        DebugDebuggingDLLFileName = &szFileName[i+1];
+        DebugDebuggingDLLFileName = &szFileName[i + 1];
         DebugModuleImageBase = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_IMAGEBASE);
         DebugModuleEntryPoint = (ULONG_PTR)GetPE32DataW(szFileName, NULL, UE_OEP);
         DebugModuleEntryPointCallBack = EntryCallBack;
@@ -187,12 +187,12 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         if(ReserveModuleBase)
             DebugReserveModuleBase = DebugModuleImageBase;
         PPROCESS_INFORMATION ReturnValue = (PPROCESS_INFORMATION)InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder);
-        wchar_t szName[256]=L"";
+        wchar_t szName[256] = L"";
         swprintf(szName, 256, L"Global\\szLibraryName%X", (unsigned int)ReturnValue->dwProcessId);
-        DebugDLLFileMapping=CreateFileMappingW(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, 512*sizeof(wchar_t), szName);
+        DebugDLLFileMapping = CreateFileMappingW(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, 512 * sizeof(wchar_t), szName);
         if(DebugDLLFileMapping)
         {
-            wchar_t* szLibraryPathMapping=(wchar_t*)MapViewOfFile(DebugDLLFileMapping, FILE_MAP_ALL_ACCESS, 0, 0, 512*sizeof(wchar_t));
+            wchar_t* szLibraryPathMapping = (wchar_t*)MapViewOfFile(DebugDLLFileMapping, FILE_MAP_ALL_ACCESS, 0, 0, 512 * sizeof(wchar_t));
             if(szLibraryPathMapping)
             {
                 wcscpy(szLibraryPathMapping, DebugDebuggingDLLFullFileName);
@@ -219,7 +219,7 @@ __declspec(dllexport) bool TITCALL StopDebug()
 
 __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
 {
-    typedef void(WINAPI *fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
+    typedef void(WINAPI * fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
     fDebugSetProcessKillOnExit myDebugSetProcessKillOnExit;
     LPVOID funcDebugSetProcessKillOnExit = NULL;
 
@@ -259,7 +259,7 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 
 __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
 {
-    typedef bool(WINAPI *fDebugActiveProcessStop)(DWORD dwProcessId);
+    typedef bool(WINAPI * fDebugActiveProcessStop)(DWORD dwProcessId);
     fDebugActiveProcessStop myDebugActiveProcessStop;
     LPVOID funcDebugActiveProcessStop = NULL;
     bool FuncReturn = false;
@@ -292,10 +292,10 @@ __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
 __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
 {
     ThreaderPauseProcess();
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
     {
-        HANDLE hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, hListThread.at(i).dwThreadId);
+        HANDLE hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, hListThread.at(i).dwThreadId);
         CONTEXT myDBGContext;
         myDBGContext.ContextFlags = CONTEXT_CONTROL;
         GetThreadContext(hActiveThread, &myDBGContext);
@@ -321,9 +321,9 @@ __declspec(dllexport) void TITCALL AutoDebugEx(char* szFileName, bool ReserveMod
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine)+1, uniCommandLine, sizeof(uniCommandLine)/(sizeof(uniCommandLine[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder)+1, uniCurrentFolder, sizeof(uniCurrentFolder)/(sizeof(uniCurrentFolder[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine) + 1, uniCommandLine, sizeof(uniCommandLine) / (sizeof(uniCommandLine[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder) + 1, uniCurrentFolder, sizeof(uniCurrentFolder) / (sizeof(uniCurrentFolder[0])));
         if(szFileName != NULL)
         {
             PtrUniFileName = &uniFileName[0];

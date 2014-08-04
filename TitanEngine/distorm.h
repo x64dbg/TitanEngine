@@ -60,14 +60,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 #ifdef _MSC_VER
 /* Since MSVC isn't shipped with stdint.h, we will have our own: */
-typedef signed __int64		int64_t;
-typedef unsigned __int64	uint64_t;
-typedef signed __int32		int32_t;
-typedef unsigned __int32	uint32_t;
-typedef signed __int16		int16_t;
-typedef unsigned __int16	uint16_t;
-typedef signed __int8		int8_t;
-typedef unsigned __int8		uint8_t;
+typedef signed __int64      int64_t;
+typedef unsigned __int64    uint64_t;
+typedef signed __int32      int32_t;
+typedef unsigned __int32    uint32_t;
+typedef signed __int16      int16_t;
+typedef unsigned __int16    uint16_t;
+typedef signed __int8       int8_t;
+typedef unsigned __int8     uint8_t;
 #endif
 
 /* Support C++ compilers */
@@ -115,7 +115,8 @@ extern "C" {
 
 
 /* Decodes modes of the disassembler, 16 bits or 32 bits or 64 bits for AMD64, x86-64. */
-typedef enum {
+typedef enum
+{
     Decode16Bits = 0, Decode32Bits = 1, Decode64Bits = 2
 }
 _DecodeType;
@@ -167,36 +168,36 @@ typedef union
 typedef struct
 {
     /* Type of operand:
-    	O_NONE: operand is to be ignored.
-    	O_REG: index holds global register index.
-    	O_IMM: instruction.imm.
-    	O_IMM1: instruction.imm.ex.i1.
-    	O_IMM2: instruction.imm.ex.i2.
-    	O_DISP: memory dereference with displacement only, instruction.disp.
-    	O_SMEM: simple memory dereference with optional displacement (a single register memory dereference).
-    	O_MEM: complex memory dereference (optional fields: s/i/b/disp).
-    	O_PC: the relative address of a branch instruction (instruction.imm.addr).
-    	O_PTR: the absolute target address of a far branch instruction (instruction.imm.ptr.seg/off).
+        O_NONE: operand is to be ignored.
+        O_REG: index holds global register index.
+        O_IMM: instruction.imm.
+        O_IMM1: instruction.imm.ex.i1.
+        O_IMM2: instruction.imm.ex.i2.
+        O_DISP: memory dereference with displacement only, instruction.disp.
+        O_SMEM: simple memory dereference with optional displacement (a single register memory dereference).
+        O_MEM: complex memory dereference (optional fields: s/i/b/disp).
+        O_PC: the relative address of a branch instruction (instruction.imm.addr).
+        O_PTR: the absolute target address of a far branch instruction (instruction.imm.ptr.seg/off).
     */
     uint8_t type; /* _OperandType */
 
     /* Index of:
-    	O_REG: holds global register index
-    	O_SMEM: holds the 'base' register. E.G: [ECX], [EBX+0x1234] are both in operand.index.
-    	O_MEM: holds the 'index' register. E.G: [EAX*4] is in operand.index.
+        O_REG: holds global register index
+        O_SMEM: holds the 'base' register. E.G: [ECX], [EBX+0x1234] are both in operand.index.
+        O_MEM: holds the 'index' register. E.G: [EAX*4] is in operand.index.
     */
     uint8_t index;
 
     /* Size of:
-    	O_REG: register
-    	O_IMM: instruction.imm
-    	O_IMM1: instruction.imm.ex.i1
-    	O_IMM2: instruction.imm.ex.i2
-    	O_DISP: instruction.disp
-    	O_SMEM: size of indirection.
-    	O_MEM: size of indirection.
-    	O_PC: size of the relative offset
-    	O_PTR: size of instruction.imm.ptr.off (16 or 32)
+        O_REG: register
+        O_IMM: instruction.imm
+        O_IMM1: instruction.imm.ex.i1
+        O_IMM2: instruction.imm.ex.i2
+        O_DISP: instruction.disp
+        O_SMEM: size of indirection.
+        O_MEM: size of indirection.
+        O_PC: size of the relative offset
+        O_PTR: size of instruction.imm.ptr.off (16 or 32)
     */
     uint16_t size;
 } _Operand;

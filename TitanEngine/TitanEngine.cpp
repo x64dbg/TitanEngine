@@ -12,10 +12,10 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     switch(fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        engineHandle=hinstDLL;
+        engineHandle = hinstDLL;
         EngineInit();
         EmptyGarbage();
-        for(int i=0; i<UE_MAX_RESERVED_MEMORY_LEFT; i++)
+        for(int i = 0; i < UE_MAX_RESERVED_MEMORY_LEFT; i++)
             engineReservedMemoryLeft[i] = NULL;
         break;
     case DLL_THREAD_ATTACH:

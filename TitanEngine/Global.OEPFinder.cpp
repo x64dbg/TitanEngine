@@ -17,10 +17,10 @@ void GenericOEPVirtualProtectHit()
     DWORD NewProtect = 0;
     DWORD OldProtect = 0;
 
-    int bpcount=(int)BreakPointBuffer.size();
-    for(int i=0; i<bpcount; i++)
+    int bpcount = (int)BreakPointBuffer.size();
+    for(int i = 0; i < bpcount; i++)
     {
-        BreakPointDetail curDetail=BreakPointBuffer.at(i);
+        BreakPointDetail curDetail = BreakPointBuffer.at(i);
         if(curDetail.BreakPointType == UE_MEMORY && curDetail.BreakPointActive == UE_BPXACTIVE)
         {
             VirtualQueryEx(dbgProcessInformation.hProcess, (LPVOID)curDetail.BreakPointAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -39,7 +39,7 @@ void GenericOEPTraceHit()
 {
 
     char* szInstructionType;
-    typedef void(TITCALL *fEPCallBack)();
+    typedef void(TITCALL * fEPCallBack)();
     fEPCallBack myEPCallBack = (fEPCallBack)glbEntryTracerData.EPCallBack;
     LPDEBUG_EVENT myDbgEvent = (LPDEBUG_EVENT)GetDebugData();
 
@@ -59,7 +59,7 @@ void GenericOEPTraceHited()
     bool FakeEPDetected = false;
     ULONG_PTR NumberOfBytesRW;
     LPDEBUG_EVENT myDbgEvent = (LPDEBUG_EVENT)GetDebugData();
-    typedef void(TITCALL *fEPCallBack)();
+    typedef void(TITCALL * fEPCallBack)();
     fEPCallBack myEPCallBack = (fEPCallBack)glbEntryTracerData.EPCallBack;
     PMEMORY_COMPARE_HANDLER myCmpHandler;
     ULONG_PTR memBpxAddress;
@@ -98,11 +98,11 @@ void GenericOEPTraceHited()
                             if(ReadProcessMemory(dbgProcessInformation.hProcess, (void*)(glbEntryTracerData.CurrentIntructionPointer), lpHashBuffer, MAXIMUM_INSTRUCTION_SIZE, &NumberOfBytesRW))
                             {
                                 myCmpHandler = (PMEMORY_COMPARE_HANDLER)(lpHashBuffer);
-                                if(myCmpHandler->Array.bArrayEntry[0] == 0xC3) 		// RET
+                                if(myCmpHandler->Array.bArrayEntry[0] == 0xC3)      // RET
                                 {
                                     FakeEPDetected = true;
                                 }
-                                else if(myCmpHandler->Array.bArrayEntry[0] == 0x33 && myCmpHandler->Array.bArrayEntry[1] == 0xC0 && myCmpHandler->Array.bArrayEntry[2] == 0xC3) 	// XOR EAX,EAX; RET
+                                else if(myCmpHandler->Array.bArrayEntry[0] == 0x33 && myCmpHandler->Array.bArrayEntry[1] == 0xC0 && myCmpHandler->Array.bArrayEntry[2] == 0xC3)     // XOR EAX,EAX; RET
                                 {
                                     FakeEPDetected = true;
                                 }
@@ -201,7 +201,7 @@ void GenericOEPTraceInit()
     int i;
     void* lpHashBuffer;
     ULONG_PTR NumberOfBytesRW;
-    typedef void(TITCALL *fInitCallBack)();
+    typedef void(TITCALL * fInitCallBack)();
     fInitCallBack myInitCallBack = (fInitCallBack)glbEntryTracerData.InitCallBack;
 
     if(glbEntryTracerData.FileIsDLL)

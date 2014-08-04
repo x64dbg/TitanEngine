@@ -12,17 +12,17 @@ _DecodeType DecodingType = Decode64Bits;
 #endif
 
 
-SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
+SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID* lp, SIZE_T length)
 {
     MEMORY_BASIC_INFORMATION MemInfo = {0};
     ULONG_PTR section = 0;
 
-    if (VirtualQueryEx(hProcess, lp, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION)))
+    if(VirtualQueryEx(hProcess, lp, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION)))
     {
         if(MemInfo.State == MEM_COMMIT)
         {
             SIZE_T res = (SIZE_T)MemInfo.BaseAddress + (SIZE_T)MemInfo.RegionSize - (SIZE_T)lp;
-            if (res >= length)
+            if(res >= length)
             {
                 return length; //good
             }
@@ -32,7 +32,7 @@ SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
 
                 do
                 {
-                    if (VirtualQueryEx(hProcess, (LPVOID)section, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION)))
+                    if(VirtualQueryEx(hProcess, (LPVOID)section, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION)))
                     {
                         if(MemInfo.State == MEM_COMMIT)
                         {
@@ -51,11 +51,11 @@ SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID *lp, SIZE_T length)
                     section += (ULONG_PTR)MemInfo.RegionSize;
 
                 }
-                while (res < length);
+                while(res < length);
 
                 return length; //good
             }
-        }   
+        }
 
     }
 
@@ -70,7 +70,7 @@ __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, 
     int MaxDisassmSize = (int)IsBadReadPtrRemote(GetCurrentProcess(), DisassmAddress, MAXIMUM_INSTRUCTION_SIZE);
     if(MaxDisassmSize)
     {
-        if (distorm_decode((ULONG_PTR)DisassmStart, (const unsigned char*)DisassmAddress, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
+        if(distorm_decode((ULONG_PTR)DisassmStart, (const unsigned char*)DisassmAddress, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
         {
             RtlZeroMemory(engineDisassembledInstruction, sizeof(engineDisassembledInstruction));
 
@@ -100,14 +100,14 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
 
     if(hProcess != NULL)
     {
-        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess,DisassmAddress, sizeof(readBuffer));
+        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess, DisassmAddress, sizeof(readBuffer));
 
         if(MaxDisassmSize)
         {
             BOOL rpm = MemoryReadSafe(hProcess, DisassmAddress, readBuffer, MaxDisassmSize, 0);
             if(rpm)
             {
-                if (distorm_decode((ULONG_PTR)DisassmAddress, readBuffer, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
+                if(distorm_decode((ULONG_PTR)DisassmAddress, readBuffer, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
                 {
                     RtlZeroMemory(engineDisassembledInstruction, sizeof(engineDisassembledInstruction));
 
@@ -149,18 +149,18 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
 
     if(hProcess != NULL)
     {
-        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess,DisassmAddress, sizeof(readBuffer));
+        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess, DisassmAddress, sizeof(readBuffer));
 
-        if (MaxDisassmSize && MemoryReadSafe(hProcess, (LPVOID)DisassmAddress, readBuffer, MaxDisassmSize, 0))
+        if(MaxDisassmSize && MemoryReadSafe(hProcess, (LPVOID)DisassmAddress, readBuffer, MaxDisassmSize, 0))
         {
             decomposerCi.code = readBuffer;
             decomposerCi.codeLen = MaxDisassmSize;
             decomposerCi.dt = DecodingType;
             decomposerCi.codeOffset = (LONG_PTR)DisassmAddress;
 
-            if (distorm_decompose(&decomposerCi, decomposerResult, _countof(decomposerResult), &DecodedInstructionsCount) != DECRES_INPUTERR)
+            if(distorm_decompose(&decomposerCi, decomposerResult, _countof(decomposerResult), &DecodedInstructionsCount) != DECRES_INPUTERR)
             {
-                if (decomposerResult[0].flags != FLAG_NOT_DECODABLE)
+                if(decomposerResult[0].flags != FLAG_NOT_DECODABLE)
                 {
                     return decomposerResult[0].size;
                 }

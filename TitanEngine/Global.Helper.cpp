@@ -3,7 +3,7 @@
 
 
 
-bool IsStrEqual( const char* const a, const char* const b, bool considercase/*=true*/ )
+bool IsStrEqual(const char* const a, const char* const b, bool considercase/*=true*/)
 {
     const int stringlen = (int)std::strlen(a);
     if(stringlen != std::strlen(b))
@@ -12,13 +12,13 @@ bool IsStrEqual( const char* const a, const char* const b, bool considercase/*=t
     if(considercase)
     {
         //plain old strcmp
-        return std::strcmp(a, b)==0;
+        return std::strcmp(a, b) == 0;
     }
     else
     {
-        for(int i=0; i<stringlen; i++)
+        for(int i = 0; i < stringlen; i++)
         {
-            if (tolower(a[i]) != tolower(b[i]))
+            if(tolower(a[i]) != tolower(b[i]))
                 return false;
         }
 
@@ -26,7 +26,7 @@ bool IsStrEqual( const char* const a, const char* const b, bool considercase/*=t
     }
 }
 
-void* MemAlloc( size_t sz )
+void* MemAlloc(size_t sz)
 {
     void* r = malloc(sz);
     if(r)
@@ -34,7 +34,7 @@ void* MemAlloc( size_t sz )
     return r;
 }
 
-void MemFree( void* mem )
+void MemFree(void* mem)
 {
     free(mem);
 }

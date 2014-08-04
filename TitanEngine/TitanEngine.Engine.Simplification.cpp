@@ -11,14 +11,14 @@ __declspec(dllexport) void TITCALL EngineUnpackerInitialize(char* szFileName, ch
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         if(szUnpackedFileName == NULL)
         {
             return EngineUnpackerInitializeW(uniFileName, NULL, DoLogData, DoRealignFile, DoMoveOverlay, EntryCallBack);
         }
         else
         {
-            MultiByteToWideChar(CP_ACP, NULL, szUnpackedFileName, lstrlenA(szUnpackedFileName)+1, uniUnpackedFileName, sizeof(uniUnpackedFileName)/(sizeof(uniUnpackedFileName[0])));
+            MultiByteToWideChar(CP_ACP, NULL, szUnpackedFileName, lstrlenA(szUnpackedFileName) + 1, uniUnpackedFileName, sizeof(uniUnpackedFileName) / (sizeof(uniUnpackedFileName[0])));
             EngineUnpackerInitializeW(uniFileName, uniUnpackedFileName, DoLogData, DoRealignFile, DoMoveOverlay, EntryCallBack);
         }
     }
@@ -26,7 +26,7 @@ __declspec(dllexport) void TITCALL EngineUnpackerInitialize(char* szFileName, ch
 
 __declspec(dllexport) void TITCALL EngineUnpackerInitializeW(wchar_t* szFileName, wchar_t* szUnpackedFileName, bool DoLogData, bool DoRealignFile, bool DoMoveOverlay, void* EntryCallBack)
 {
-    int i,j;
+    int i, j;
     wchar_t TempBackBuffer[MAX_PATH] = {};
 
     if(szFileName != NULL)

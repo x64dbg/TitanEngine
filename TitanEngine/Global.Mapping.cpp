@@ -24,13 +24,13 @@ bool MapFileEx(char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD
     }
     else if(ReadOrWrite == UE_ACCESS_ALL)
     {
-        FileAccess = GENERIC_READ+GENERIC_WRITE+GENERIC_EXECUTE;
+        FileAccess = GENERIC_READ + GENERIC_WRITE + GENERIC_EXECUTE;
         FileMapType = PAGE_EXECUTE_READWRITE;
         FileMapViewType = FILE_MAP_WRITE;
     }
     else
     {
-        FileAccess = GENERIC_READ+GENERIC_WRITE+GENERIC_EXECUTE;
+        FileAccess = GENERIC_READ + GENERIC_WRITE + GENERIC_EXECUTE;
         FileMapType = PAGE_EXECUTE_READWRITE;
         FileMapViewType = FILE_MAP_ALL_ACCESS;
     }
@@ -39,7 +39,7 @@ bool MapFileEx(char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD
     if(hFile != INVALID_HANDLE_VALUE)
     {
         *FileHandle = hFile;
-        DWORD mfFileSize = GetFileSize(hFile,NULL);
+        DWORD mfFileSize = GetFileSize(hFile, NULL);
         mfFileSize = mfFileSize + SizeModifier;
         *FileSize = mfFileSize;
         HANDLE mfFileMap = CreateFileMappingA(hFile, NULL, FileMapType, NULL, mfFileSize, NULL);
@@ -85,13 +85,13 @@ bool MapFileExW(wchar_t* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPD
     }
     else if(ReadOrWrite == UE_ACCESS_ALL)
     {
-        FileAccess = GENERIC_READ+GENERIC_WRITE+GENERIC_EXECUTE;
+        FileAccess = GENERIC_READ + GENERIC_WRITE + GENERIC_EXECUTE;
         FileMapType = PAGE_EXECUTE_READWRITE;
         FileMapViewType = FILE_MAP_WRITE;
     }
     else
     {
-        FileAccess = GENERIC_READ+GENERIC_WRITE+GENERIC_EXECUTE;
+        FileAccess = GENERIC_READ + GENERIC_WRITE + GENERIC_EXECUTE;
         FileMapType = PAGE_EXECUTE_READWRITE;
         FileMapViewType = FILE_MAP_ALL_ACCESS;
     }
@@ -100,7 +100,7 @@ bool MapFileExW(wchar_t* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPD
     if(hFile != INVALID_HANDLE_VALUE)
     {
         *FileHandle = hFile;
-        DWORD mfFileSize = GetFileSize(hFile,NULL);
+        DWORD mfFileSize = GetFileSize(hFile, NULL);
         mfFileSize = mfFileSize + SizeModifier;
         *FileSize = mfFileSize;
         HANDLE mfFileMap = CreateFileMappingA(hFile, NULL, FileMapType, NULL, mfFileSize, NULL);
@@ -131,7 +131,7 @@ void UnMapFileEx(HANDLE FileHandle, DWORD FileSize, HANDLE FileMap, ULONG_PTR Fi
     if(UnmapViewOfFile((void*)FileMapVA))
     {
         EngineCloseHandle(FileMap);
-        SetFilePointer(FileHandle,FileSize,NULL,FILE_BEGIN);
+        SetFilePointer(FileHandle, FileSize, NULL, FILE_BEGIN);
         SetEndOfFile(FileHandle);
         EngineCloseHandle(FileHandle);
     }

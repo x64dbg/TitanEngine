@@ -30,8 +30,8 @@ __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     BYTE ReadData[10] = {};
-    int bpcount=(int)BreakPointBuffer.size();
-    for(int i=0; i<bpcount; i++)
+    int bpcount = (int)BreakPointBuffer.size();
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
@@ -66,8 +66,8 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
     DWORD MaximumBreakPoints = 0;
     bool testWrite = false;
     DWORD OldProtect;
-    int bpcount=(int)BreakPointBuffer.size();
-    for(int i=0; i<bpcount; i++)
+    int bpcount = (int)BreakPointBuffer.size();
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
@@ -135,8 +135,8 @@ __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD MaximumBreakPoints = 0;
     DWORD OldProtect;
-    int bpcount=(int)BreakPointBuffer.size();
-    for(int i=0; i<bpcount; i++)
+    int bpcount = (int)BreakPointBuffer.size();
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
@@ -181,9 +181,9 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
     {
         return false;
     }
-    int bpcount=(int)BreakPointBuffer.size();
+    int bpcount = (int)BreakPointBuffer.size();
     //search for breakpoint
-    for(int i=0; i<bpcount; i++)
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE && (BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT || BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT))
             return false;
@@ -248,10 +248,10 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
         if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, bpxDataPrt, NewBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
         {
             //add new breakpoint to the list
-            NewBreakPoint.AdvancedBreakPointType = SelectedBreakPointType&0xFF;
+            NewBreakPoint.AdvancedBreakPointType = SelectedBreakPointType & 0xFF;
             NewBreakPoint.BreakPointActive = UE_BPXACTIVE;
             NewBreakPoint.BreakPointAddress = bpxAddress;
-            NewBreakPoint.BreakPointType = bpxType&0xFF;
+            NewBreakPoint.BreakPointType = bpxType & 0xFF;
             NewBreakPoint.ExecuteCallBack = (ULONG_PTR)bpxCallBack;
             BreakPointBuffer.push_back(NewBreakPoint);
             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, NewBreakPoint.BreakPointSize, OldProtect, &OldProtect);
@@ -272,13 +272,13 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
     CriticalSectionLocker lock(LockBreakPointBuffer);
     ULONG_PTR NumberOfBytesReadWritten = 0;
     DWORD OldProtect;
-    int bpcount=(int)BreakPointBuffer.size();
-    int found=-1;
-    for(int i=0; i<bpcount; i++)
+    int bpcount = (int)BreakPointBuffer.size();
+    int found = -1;
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress && (BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT || BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT))
         {
-            found=i;
+            found = i;
             break;
         }
     }
@@ -296,7 +296,7 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
     }
     lock.relock();
     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
-    BreakPointBuffer.erase(BreakPointBuffer.begin()+found);
+    BreakPointBuffer.erase(BreakPointBuffer.begin() + found);
     return true;
 }
 
@@ -328,7 +328,7 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                         do //search for forwarding indicators
                         {
                             i += len;
-                            if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                            if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress + i), CmdBuffer, sizeof(CmdBuffer), 0))
                                 return false;
                             if(CmdBuffer[0] == 0xCC || CmdBuffer[0] == 0x90) //padding
                             {
@@ -351,7 +351,7 @@ __declspec(dllexport) bool TITCALL SetAPIBreakPoint(const char* szDLLName, const
                 do  //search for RET
                 {
                     i += len;
-                    if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                    if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress + i), CmdBuffer, sizeof(CmdBuffer), 0))
                         return false;
                     len = StaticLengthDisassemble(CmdBuffer);
                 }
@@ -386,7 +386,7 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                         do //search for forwarding indicators
                         {
                             i += len;
-                            if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                            if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress + i), CmdBuffer, sizeof(CmdBuffer), 0))
                                 return false;
                             if(CmdBuffer[0] == 0xCC || CmdBuffer[0] == 0x90) //padding
                             {
@@ -409,7 +409,7 @@ __declspec(dllexport) bool TITCALL DeleteAPIBreakPoint(const char* szDLLName, co
                 do  //search for RET
                 {
                     i += len;
-                    if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress+i), CmdBuffer, sizeof(CmdBuffer), 0))
+                    if(!MemoryReadSafe(dbgProcessInformation.hProcess, (void*)(APIAddress + i), CmdBuffer, sizeof(CmdBuffer), 0))
                         return false;
                     len = StaticLengthDisassemble(CmdBuffer);
                 }
@@ -440,9 +440,9 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
     CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
-    int bpcount=(int)BreakPointBuffer.size();
+    int bpcount = (int)BreakPointBuffer.size();
     //search for breakpoint
-    for(int i=0; i<bpcount; i++)
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == MemoryStart &&
                 (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
@@ -456,7 +456,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
     }
     //set PAGE_GUARD on all the pages separately
     size_t pages = SizeOfMemory / TITANENGINE_PAGESIZE;
-    for(size_t i=0; i<pages; i++)
+    for(size_t i = 0; i < pages; i++)
     {
         const LPVOID curPage = (LPVOID)(MemoryStart + i * TITANENGINE_PAGESIZE);
         VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
@@ -487,10 +487,10 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
     CriticalSectionLocker lock(LockBreakPointBuffer);
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
-    int bpcount=(int)BreakPointBuffer.size();
-    int found=-1;
+    int bpcount = (int)BreakPointBuffer.size();
+    int found = -1;
     //search for breakpoint
-    for(int i=0; i<bpcount; i++)
+    for(int i = 0; i < bpcount; i++)
     {
         if(BreakPointBuffer.at(i).BreakPointAddress == MemoryStart &&
                 (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
@@ -499,17 +499,17 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
                  BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
           )
         {
-            found=i;
+            found = i;
             break;
         }
     }
-    if(found==-1) //not found
+    if(found == -1) //not found
         return false;
     if(!SizeOfMemory)
         SizeOfMemory = BreakPointBuffer.at(found).BreakPointSize;
     //remove PAGE_GUARD from all the pages in the range
     size_t pages = SizeOfMemory / TITANENGINE_PAGESIZE;
-    for(size_t i=0; i<pages; i++)
+    for(size_t i = 0; i < pages; i++)
     {
         const LPVOID curPage = (LPVOID)(MemoryStart + i * TITANENGINE_PAGESIZE);
         VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
@@ -521,7 +521,7 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
         }
     }
     //remove breakpoint from list
-    BreakPointBuffer.erase(BreakPointBuffer.begin()+found);
+    BreakPointBuffer.erase(BreakPointBuffer.begin() + found);
     return true;
 }
 
@@ -535,27 +535,27 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, D
     HWBP_SIZE hwbpSize;
     HWBP_MODE hwbpMode;
     HWBP_TYPE hwbpType;
-    int hwbpIndex=-1;
+    int hwbpIndex = -1;
     DR7 dr7;
 
     switch(bpxSize)
     {
     case UE_HARDWARE_SIZE_1:
-        hwbpSize=SIZE_1;
+        hwbpSize = SIZE_1;
         break;
     case UE_HARDWARE_SIZE_2:
-        hwbpSize=SIZE_2;
-        if((bpxAddress%2)!=0)
+        hwbpSize = SIZE_2;
+        if((bpxAddress % 2) != 0)
             return false;
         break;
     case UE_HARDWARE_SIZE_4:
-        hwbpSize=SIZE_4;
-        if((bpxAddress%4)!=0)
+        hwbpSize = SIZE_4;
+        if((bpxAddress % 4) != 0)
             return false;
         break;
     case UE_HARDWARE_SIZE_8:
-        hwbpSize=SIZE_8;
-        if((bpxAddress%8)!=0)
+        hwbpSize = SIZE_8;
+        if((bpxAddress % 8) != 0)
             return false;
         break;
     default:
@@ -579,16 +579,16 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, D
     switch(IndexOfRegister)
     {
     case UE_DR0:
-        hwbpIndex=0;
+        hwbpIndex = 0;
         break;
     case UE_DR1:
-        hwbpIndex=1;
+        hwbpIndex = 1;
         break;
     case UE_DR2:
-        hwbpIndex=2;
+        hwbpIndex = 2;
         break;
     case UE_DR3:
-        hwbpIndex=3;
+        hwbpIndex = 3;
         break;
     default:
         return false;
@@ -596,42 +596,42 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, D
 
     uintdr7((ULONG_PTR)GetContextData(UE_DR7), &dr7);
 
-    DebugRegister[hwbpIndex].DrxExecution=false;
+    DebugRegister[hwbpIndex].DrxExecution = false;
 
     switch(bpxType)
     {
     case UE_HARDWARE_EXECUTE:
-        hwbpSize=SIZE_1;
-        hwbpType=TYPE_EXECUTE;
-        DebugRegister[hwbpIndex].DrxExecution=true;
+        hwbpSize = SIZE_1;
+        hwbpType = TYPE_EXECUTE;
+        DebugRegister[hwbpIndex].DrxExecution = true;
         break;
     case UE_HARDWARE_WRITE:
-        hwbpType=TYPE_WRITE;
+        hwbpType = TYPE_WRITE;
         break;
     case UE_HARDWARE_READWRITE:
-        hwbpType=TYPE_READWRITE;
+        hwbpType = TYPE_READWRITE;
         break;
     default:
         return false;
     }
 
-    hwbpMode=MODE_LOCAL;
+    hwbpMode = MODE_LOCAL;
 
-    dr7.HWBP_MODE[hwbpIndex]=hwbpMode;
-    dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
-    dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
+    dr7.HWBP_MODE[hwbpIndex] = hwbpMode;
+    dr7.HWBP_SIZE[hwbpIndex] = hwbpSize;
+    dr7.HWBP_TYPE[hwbpIndex] = hwbpType;
 
-    for(unsigned int i=0; i<hListThread.size(); i++)
+    for(unsigned int i = 0; i < hListThread.size(); i++)
     {
         SetContextDataEx(hListThread.at(i).hThread, UE_DR7, dr7uint(&dr7)); //NOTE: MUST SET THIS FIRST FOR X64!
         SetContextDataEx(hListThread.at(i).hThread, IndexOfRegister, bpxAddress);
     }
 
-    DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
-    DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
-    DebugRegister[hwbpIndex].DrxEnabled=true;
-    DebugRegister[hwbpIndex].DrxBreakAddress=(ULONG_PTR)bpxAddress;
-    DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
+    DebugRegister[hwbpIndex].DrxBreakPointType = bpxType;
+    DebugRegister[hwbpIndex].DrxBreakPointSize = bpxSize;
+    DebugRegister[hwbpIndex].DrxEnabled = true;
+    DebugRegister[hwbpIndex].DrxBreakAddress = (ULONG_PTR)bpxAddress;
+    DebugRegister[hwbpIndex].DrxCallBack = (ULONG_PTR)bpxCallBack;
 
     return true;
 }
@@ -641,27 +641,27 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread,
     HWBP_SIZE hwbpSize;
     HWBP_MODE hwbpMode;
     HWBP_TYPE hwbpType;
-    int hwbpIndex=-1;
+    int hwbpIndex = -1;
     DR7 dr7;
 
     switch(bpxSize)
     {
     case UE_HARDWARE_SIZE_1:
-        hwbpSize=SIZE_1;
+        hwbpSize = SIZE_1;
         break;
     case UE_HARDWARE_SIZE_2:
-        hwbpSize=SIZE_2;
-        if((bpxAddress%2)!=0)
+        hwbpSize = SIZE_2;
+        if((bpxAddress % 2) != 0)
             return false;
         break;
     case UE_HARDWARE_SIZE_4:
-        hwbpSize=SIZE_4;
-        if((bpxAddress%4)!=0)
+        hwbpSize = SIZE_4;
+        if((bpxAddress % 4) != 0)
             return false;
         break;
     case UE_HARDWARE_SIZE_8:
-        hwbpSize=SIZE_8;
-        if((bpxAddress%8)!=0)
+        hwbpSize = SIZE_8;
+        if((bpxAddress % 8) != 0)
             return false;
         break;
     default:
@@ -683,21 +683,21 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread,
     }
 
     if(IndexOfSelectedRegister)
-        *IndexOfSelectedRegister=IndexOfRegister;
+        *IndexOfSelectedRegister = IndexOfRegister;
 
     switch(IndexOfRegister)
     {
     case UE_DR0:
-        hwbpIndex=0;
+        hwbpIndex = 0;
         break;
     case UE_DR1:
-        hwbpIndex=1;
+        hwbpIndex = 1;
         break;
     case UE_DR2:
-        hwbpIndex=2;
+        hwbpIndex = 2;
         break;
     case UE_DR3:
-        hwbpIndex=3;
+        hwbpIndex = 3;
         break;
     default:
         return false;
@@ -705,39 +705,39 @@ __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread,
 
     uintdr7((ULONG_PTR)GetContextDataEx(hActiveThread, UE_DR7), &dr7);
 
-    DebugRegister[hwbpIndex].DrxExecution=false;
+    DebugRegister[hwbpIndex].DrxExecution = false;
 
     switch(bpxType)
     {
     case UE_HARDWARE_EXECUTE:
-        hwbpSize=SIZE_1;
-        hwbpType=TYPE_EXECUTE;
-        DebugRegister[hwbpIndex].DrxExecution=true;
+        hwbpSize = SIZE_1;
+        hwbpType = TYPE_EXECUTE;
+        DebugRegister[hwbpIndex].DrxExecution = true;
         break;
     case UE_HARDWARE_WRITE:
-        hwbpType=TYPE_WRITE;
+        hwbpType = TYPE_WRITE;
         break;
     case UE_HARDWARE_READWRITE:
-        hwbpType=TYPE_READWRITE;
+        hwbpType = TYPE_READWRITE;
         break;
     default:
         return false;
     }
 
-    hwbpMode=MODE_LOCAL;
+    hwbpMode = MODE_LOCAL;
 
-    dr7.HWBP_MODE[hwbpIndex]=hwbpMode;
-    dr7.HWBP_SIZE[hwbpIndex]=hwbpSize;
-    dr7.HWBP_TYPE[hwbpIndex]=hwbpType;
+    dr7.HWBP_MODE[hwbpIndex] = hwbpMode;
+    dr7.HWBP_SIZE[hwbpIndex] = hwbpSize;
+    dr7.HWBP_TYPE[hwbpIndex] = hwbpType;
 
     SetContextDataEx(hActiveThread, UE_DR7, dr7uint(&dr7));
     SetContextDataEx(hActiveThread, IndexOfRegister, (ULONG_PTR)bpxAddress);
 
-    DebugRegister[hwbpIndex].DrxBreakPointType=bpxType;
-    DebugRegister[hwbpIndex].DrxBreakPointSize=bpxSize;
-    DebugRegister[hwbpIndex].DrxEnabled=true;
-    DebugRegister[hwbpIndex].DrxBreakAddress=(ULONG_PTR)bpxAddress;
-    DebugRegister[hwbpIndex].DrxCallBack=(ULONG_PTR)bpxCallBack;
+    DebugRegister[hwbpIndex].DrxBreakPointType = bpxType;
+    DebugRegister[hwbpIndex].DrxBreakPointSize = bpxSize;
+    DebugRegister[hwbpIndex].DrxEnabled = true;
+    DebugRegister[hwbpIndex].DrxBreakAddress = (ULONG_PTR)bpxAddress;
+    DebugRegister[hwbpIndex].DrxCallBack = (ULONG_PTR)bpxCallBack;
 
     return true;
 }
@@ -750,9 +750,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
     if(IndexOfRegister == UE_DR0)
     {
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 0);
-        HardwareBPX = HardwareBPX &~ (1 << 1);
-        for(unsigned int i=0; i<hListThread.size(); i++)
+        HardwareBPX = HardwareBPX & ~(1 << 0);
+        HardwareBPX = HardwareBPX & ~(1 << 1);
+        for(unsigned int i = 0; i < hListThread.size(); i++)
         {
             SetContextDataEx(hListThread.at(i).hThread, UE_DR0, bpxAddress);
             SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
@@ -765,9 +765,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
     else if(IndexOfRegister == UE_DR1)
     {
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 2);
-        HardwareBPX = HardwareBPX &~ (1 << 3);
-        for(unsigned int i=0; i<hListThread.size(); i++)
+        HardwareBPX = HardwareBPX & ~(1 << 2);
+        HardwareBPX = HardwareBPX & ~(1 << 3);
+        for(unsigned int i = 0; i < hListThread.size(); i++)
         {
             SetContextDataEx(hListThread.at(i).hThread, UE_DR1, bpxAddress);
             SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
@@ -780,9 +780,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
     else if(IndexOfRegister == UE_DR2)
     {
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 4);
-        HardwareBPX = HardwareBPX &~ (1 << 5);
-        for(unsigned int i=0; i<hListThread.size(); i++)
+        HardwareBPX = HardwareBPX & ~(1 << 4);
+        HardwareBPX = HardwareBPX & ~(1 << 5);
+        for(unsigned int i = 0; i < hListThread.size(); i++)
         {
             SetContextDataEx(hListThread.at(i).hThread, UE_DR2, bpxAddress);
             SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
@@ -795,9 +795,9 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
     else if(IndexOfRegister == UE_DR3)
     {
         HardwareBPX = (ULONG_PTR)GetContextData(UE_DR7);
-        HardwareBPX = HardwareBPX &~ (1 << 6);
-        HardwareBPX = HardwareBPX &~ (1 << 7);
-        for(unsigned int i=0; i<hListThread.size(); i++)
+        HardwareBPX = HardwareBPX & ~(1 << 6);
+        HardwareBPX = HardwareBPX & ~(1 << 7);
+        for(unsigned int i = 0; i < hListThread.size(); i++)
         {
             SetContextDataEx(hListThread.at(i).hThread, UE_DR3, bpxAddress);
             SetContextDataEx(hListThread.at(i).hThread, UE_DR7, HardwareBPX);
@@ -817,10 +817,10 @@ __declspec(dllexport) bool TITCALL DeleteHardwareBreakPoint(DWORD IndexOfRegiste
 __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
 {
     CriticalSectionLocker lock(LockBreakPointBuffer);
-    int bpcount=(int)BreakPointBuffer.size();
+    int bpcount = (int)BreakPointBuffer.size();
     if(RemoveOption == UE_OPTION_REMOVEALL)
     {
-        for(int i=bpcount-1; i>-1; i--)
+        for(int i = bpcount - 1; i > -1; i--)
         {
             if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT)
             {
@@ -846,7 +846,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     }
     else if(RemoveOption == UE_OPTION_DISABLEALL)
     {
-        for(int i=bpcount-1; i>-1; i--)
+        for(int i = bpcount - 1; i > -1; i--)
         {
             if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
@@ -868,7 +868,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     }
     else if(RemoveOption == UE_OPTION_REMOVEALLDISABLED)
     {
-        for(int i=bpcount-1; i>-1; i--)
+        for(int i = bpcount - 1; i > -1; i--)
         {
             if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE)
             {
@@ -881,7 +881,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     }
     else if(RemoveOption == UE_OPTION_REMOVEALLENABLED)
     {
-        for(int i=bpcount-1; i>-1; i--)
+        for(int i = bpcount - 1; i > -1; i--)
         {
             if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {

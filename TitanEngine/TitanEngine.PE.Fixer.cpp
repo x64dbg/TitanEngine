@@ -10,7 +10,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidEx(char* szFileName, DWORD Che
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(IsPE32FileValidExW(uniFileName, CheckDepth, FileStatusInfo));
     }
     else
@@ -89,7 +89,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
             if(!FileIs64)
             {
                 /*
-                	x86 Surface check
+                    x86 Surface check
                 */
                 __try
                 {
@@ -144,19 +144,19 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.FileAlignment, false);
                     /*
-                    	Get the console flag
+                        Get the console flag
                     */
                     if(PEHeader32->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI)
                     {
                         myFileStatusInfo.FileIsConsole = true;
                     }
                     /*
-                    	Export and relocation checks [for DLL and EXE]
+                        Export and relocation checks [for DLL and EXE]
                     */
                     if(PEHeader32->FileHeader.Characteristics & 0x2000)
                     {
                         /*
-                        	Export table check
+                            Export table check
                         */
                         FileIsDLL = true;
                         myFileStatusInfo.FileIsDLL = true;
@@ -256,7 +256,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             myFileStatusInfo.ExportTable = UE_FIELD_NOT_PRESET;
                         }
                         /*
-                        	Relocation table check
+                            Relocation table check
                         */
                         if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_BASERELOC && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress != NULL)
                         {
@@ -311,7 +311,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     else
                     {
                         /*
-                        	Export table check
+                            Export table check
                         */
                         if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_EXPORT && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress != NULL)
                         {
@@ -357,7 +357,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             myFileStatusInfo.ExportTable = UE_FIELD_NOT_PRESET;
                         }
                         /*
-                        	Relocation table check
+                            Relocation table check
                         */
                         if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_BASERELOC && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress != NULL)
                         {
@@ -381,7 +381,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         }
                     }
                     /*
-                    	Import table check
+                        Import table check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_IMPORT && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress != NULL)
                     {
@@ -520,7 +520,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         myFileStatusInfo.ImportTable = UE_FIELD_NOT_PRESET;
                     }
                     /*
-                    	TLS table check
+                        TLS table check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_TLS && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != NULL)
                     {
@@ -579,7 +579,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         myFileStatusInfo.TLSTable = UE_FIELD_NOT_PRESET;
                     }
                     /*
-                    	Load config table check
+                        Load config table check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress != NULL)
                     {
@@ -602,7 +602,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.LoadConfigTable, false);
                     /*
-                    	Bound import table check
+                        Bound import table check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress != NULL)
                     {
@@ -641,7 +641,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.BoundImportTable, false);
                     /*
-                    	IAT check
+                        IAT check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_IAT && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress != NULL)
                     {
@@ -664,7 +664,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.IATTable, false);
                     /*
-                    	COM header check
+                        COM header check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress != NULL)
                     {
@@ -687,7 +687,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.COMHeaderTable, false);
                     /*
-                    	Resource header check
+                        Resource header check
                     */
                     if(PEHeader32->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_RESOURCE && PEHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress != NULL)
                     {
@@ -733,7 +733,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         myFileStatusInfo.ResourceTable = UE_FIELD_NOT_PRESET;
                     }
                     /*
-                    	Section check
+                        Section check
                     */
                     PESections = IMAGE_FIRST_SECTION(PEHeader32);
                     NumberOfSections = PEHeader32->FileHeader.NumberOfSections;
@@ -770,7 +770,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SizeOfImage, true);
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SectionTable, true);
                     /*
-                    	Entry point check
+                        Entry point check
                     */
                     SectionNumber = GetPE32SectionNumberFromVA(FileMapVA, PEHeader32->OptionalHeader.AddressOfEntryPoint + PEHeader32->OptionalHeader.ImageBase);
                     if(SectionNumber != -1)
@@ -800,7 +800,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.EntryPoint, true);
                     /*
-                    	Return data
+                        Return data
                     */
                     if(FileStatusInfo != NULL)
                     {
@@ -828,7 +828,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
             else
             {
                 /*
-                	x64 Surface check
+                    x64 Surface check
                 */
                 __try
                 {
@@ -883,19 +883,19 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.FileAlignment, false);
                     /*
-                    	Get the console flag
+                        Get the console flag
                     */
                     if(PEHeader64->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI)
                     {
                         myFileStatusInfo.FileIsConsole = true;
                     }
                     /*
-                    	Export and relocation checks [for DLL and EXE]
+                        Export and relocation checks [for DLL and EXE]
                     */
                     if(PEHeader64->FileHeader.Characteristics & 0x2000)
                     {
                         /*
-                        	Export table check
+                            Export table check
                         */
                         FileIsDLL = true;
                         myFileStatusInfo.FileIsDLL = true;
@@ -995,7 +995,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             myFileStatusInfo.ExportTable = UE_FIELD_NOT_PRESET;
                         }
                         /*
-                        	Relocation table check
+                            Relocation table check
                         */
                         if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_BASERELOC && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress != NULL)
                         {
@@ -1050,7 +1050,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     else
                     {
                         /*
-                        	Export table check
+                            Export table check
                         */
                         if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_EXPORT && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress != NULL)
                         {
@@ -1096,7 +1096,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                             myFileStatusInfo.ExportTable = UE_FIELD_NOT_PRESET;
                         }
                         /*
-                        	Relocation table check
+                            Relocation table check
                         */
                         if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_BASERELOC && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress != NULL)
                         {
@@ -1120,7 +1120,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         }
                     }
                     /*
-                    	Import table check
+                        Import table check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_IMPORT && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress != NULL)
                     {
@@ -1259,7 +1259,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         myFileStatusInfo.ImportTable = UE_FIELD_NOT_PRESET;
                     }
                     /*
-                    	TLS table check
+                        TLS table check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_TLS && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != NULL)
                     {
@@ -1318,7 +1318,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         myFileStatusInfo.TLSTable = UE_FIELD_NOT_PRESET;
                     }
                     /*
-                    	Load config table check
+                        Load config table check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG].VirtualAddress != NULL)
                     {
@@ -1341,7 +1341,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.LoadConfigTable, false);
                     /*
-                    	Bound import table check
+                        Bound import table check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT].VirtualAddress != NULL)
                     {
@@ -1380,7 +1380,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.BoundImportTable, false);
                     /*
-                    	IAT check
+                        IAT check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_IAT && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress != NULL)
                     {
@@ -1403,7 +1403,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.IATTable, false);
                     /*
-                    	COM header check
+                        COM header check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress != NULL)
                     {
@@ -1426,7 +1426,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.COMHeaderTable, false);
                     /*
-                    	Resource header check
+                        Resource header check
                     */
                     if(PEHeader64->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_RESOURCE && PEHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress != NULL)
                     {
@@ -1472,7 +1472,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                         myFileStatusInfo.ResourceTable = UE_FIELD_NOT_PRESET;
                     }
                     /*
-                    	Section check
+                        Section check
                     */
                     PESections = IMAGE_FIRST_SECTION(PEHeader64);
                     NumberOfSections = PEHeader64->FileHeader.NumberOfSections;
@@ -1509,7 +1509,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SizeOfImage, true);
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.SectionTable, true);
                     /*
-                    	Entry point check
+                        Entry point check
                     */
                     SectionNumber = GetPE32SectionNumberFromVA(FileMapVA, PEHeader64->OptionalHeader.AddressOfEntryPoint + (ULONG_PTR)PEHeader64->OptionalHeader.ImageBase);
                     if(SectionNumber != -1)
@@ -1539,7 +1539,7 @@ __declspec(dllexport) bool TITCALL IsPE32FileValidExW(wchar_t* szFileName, DWORD
                     }
                     SetOverallFileStatus(&myFileStatusInfo, myFileStatusInfo.EntryPoint, true);
                     /*
-                    	Return data
+                        Return data
                     */
                     if(FileStatusInfo != NULL)
                     {
@@ -1590,7 +1590,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileEx(char* szFileName, LPVOID 
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(FixBrokenPE32FileExW(uniFileName, FileStatusInfo, FileFixInfo));
     }
     else
@@ -1643,7 +1643,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
 
     if(myFileStatusInfo == NULL) //here check for myfilestrus..ah lol, youre right
     {
-        myFileStatusInfo=(PFILE_STATUS_INFO)&filestatusinfo;
+        myFileStatusInfo = (PFILE_STATUS_INFO)&filestatusinfo;
         IsPE32FileValidExW(szFileName, UE_DEPTH_DEEP, myFileStatusInfo);
     }
     if(myFileFixInfo->FileFixPerformed == false && myFileStatusInfo->OveralEvaluation == UE_RESULT_FILE_INVALID_BUT_FIXABLE)
@@ -1702,7 +1702,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                 if(!FileIs64)
                 {
                     /*
-                    	x86 Surface check
+                        x86 Surface check
                     */
                     __try
                     {
@@ -1715,7 +1715,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             CorrectedImageSize = ((PEHeader32->OptionalHeader.SizeOfImage / PEHeader32->OptionalHeader.SectionAlignment) + 1) * PEHeader32->OptionalHeader.SectionAlignment;
                         }
                         /*
-                        	Fixing import table
+                            Fixing import table
                         */
                         if(myFileStatusInfo->MissingDeclaredAPIs)
                         {
@@ -1824,7 +1824,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fixing Export table
+                            Fixing Export table
                         */
                         if(myFileStatusInfo->ExportTable == UE_FIELD_NOT_PRESET_WARNING)
                         {
@@ -1889,7 +1889,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fixing Relocation table
+                            Fixing Relocation table
                         */
                         if(myFileStatusInfo->FileIsDLL == true && myFileStatusInfo->RelocationTable == UE_FIELD_BROKEN_NON_FIXABLE)
                         {
@@ -1981,7 +1981,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             FileFixed = false;
                         }
                         /*
-                        	Fixing Resource table
+                            Fixing Resource table
                         */
                         if(myFileFixInfo->DontFixResources == false && myFileStatusInfo->ResourceData != UE_FIELD_OK && myFileStatusInfo->ResourceData != UE_FIELD_NOT_PRESET)
                         {
@@ -2018,7 +2018,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fixing TLS table
+                            Fixing TLS table
                         */
                         if(myFileFixInfo->DontFixTLS == false && myFileStatusInfo->TLSTable != UE_FIELD_OK && myFileStatusInfo->TLSTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2095,7 +2095,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix Load config table
+                            Fix Load config table
                         */
                         if(myFileFixInfo->DontFixLoadConfig == false && myFileStatusInfo->LoadConfigTable != UE_FIELD_OK && myFileStatusInfo->LoadConfigTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2124,7 +2124,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix Bound import table
+                            Fix Bound import table
                         */
                         if(myFileFixInfo->DontFixBoundImports == false && myFileStatusInfo->BoundImportTable != UE_FIELD_OK && myFileStatusInfo->BoundImportTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2153,7 +2153,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix IAT
+                            Fix IAT
                         */
                         if(myFileFixInfo->DontFixIAT == false && myFileStatusInfo->IATTable != UE_FIELD_OK && myFileStatusInfo->IATTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2182,7 +2182,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix COM header
+                            Fix COM header
                         */
                         if(myFileFixInfo->DontFixCOM == false && myFileStatusInfo->COMHeaderTable != UE_FIELD_OK && myFileStatusInfo->COMHeaderTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2211,7 +2211,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix sections and SizeOfImage
+                            Fix sections and SizeOfImage
                         */
                         if(myFileStatusInfo->SectionTable != UE_FIELD_OK || myFileStatusInfo->SizeOfImage != UE_FIELD_OK)
                         {
@@ -2252,7 +2252,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Entry point check
+                            Entry point check
                         */
                         if(myFileStatusInfo->EntryPoint != UE_FIELD_OK)
                         {
@@ -2275,7 +2275,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix end
+                            Fix end
                         */
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         if(FileFixed)
@@ -2295,7 +2295,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                 else
                 {
                     /*
-                    	x64 Surface check
+                        x64 Surface check
                     */
                     __try
                     {
@@ -2308,7 +2308,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             CorrectedImageSize = ((PEHeader64->OptionalHeader.SizeOfImage / PEHeader64->OptionalHeader.SectionAlignment) + 1) * PEHeader64->OptionalHeader.SectionAlignment;
                         }
                         /*
-                        	Fixing import table
+                            Fixing import table
                         */
                         if(myFileStatusInfo->MissingDeclaredAPIs)
                         {
@@ -2417,7 +2417,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fixing Export table
+                            Fixing Export table
                         */
                         if(myFileStatusInfo->ExportTable == UE_FIELD_NOT_PRESET_WARNING)
                         {
@@ -2482,7 +2482,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fixing Relocation table
+                            Fixing Relocation table
                         */
                         if(myFileStatusInfo->FileIsDLL == true && myFileStatusInfo->RelocationTable == UE_FIELD_BROKEN_NON_FIXABLE)
                         {
@@ -2574,7 +2574,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             FileFixed = false;
                         }
                         /*
-                        	Fixing Resource table
+                            Fixing Resource table
                         */
                         if(myFileFixInfo->DontFixResources == false && myFileStatusInfo->ResourceData != UE_FIELD_OK && myFileStatusInfo->ResourceData != UE_FIELD_NOT_PRESET)
                         {
@@ -2611,7 +2611,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fixing TLS table
+                            Fixing TLS table
                         */
                         if(myFileFixInfo->DontFixTLS == false && myFileStatusInfo->TLSTable != UE_FIELD_OK && myFileStatusInfo->TLSTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2688,7 +2688,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix Load config table
+                            Fix Load config table
                         */
                         if(myFileFixInfo->DontFixLoadConfig == false && myFileStatusInfo->LoadConfigTable != UE_FIELD_OK && myFileStatusInfo->LoadConfigTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2717,7 +2717,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix Bound import table
+                            Fix Bound import table
                         */
                         if(myFileFixInfo->DontFixBoundImports == false && myFileStatusInfo->BoundImportTable != UE_FIELD_OK && myFileStatusInfo->BoundImportTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2746,7 +2746,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix IAT
+                            Fix IAT
                         */
                         if(myFileFixInfo->DontFixIAT == false && myFileStatusInfo->IATTable != UE_FIELD_OK && myFileStatusInfo->IATTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2775,7 +2775,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix COM header
+                            Fix COM header
                         */
                         if(myFileFixInfo->DontFixCOM == false && myFileStatusInfo->COMHeaderTable != UE_FIELD_OK && myFileStatusInfo->COMHeaderTable != UE_FIELD_NOT_PRESET)
                         {
@@ -2804,7 +2804,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix sections and SizeOfImage
+                            Fix sections and SizeOfImage
                         */
                         if(myFileStatusInfo->SectionTable != UE_FIELD_OK || myFileStatusInfo->SizeOfImage != UE_FIELD_OK)
                         {
@@ -2845,7 +2845,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Entry point check
+                            Entry point check
                         */
                         if(myFileStatusInfo->EntryPoint != UE_FIELD_OK)
                         {
@@ -2868,7 +2868,7 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
                             }
                         }
                         /*
-                        	Fix end
+                            Fix end
                         */
                         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
                         if(FileFixed)

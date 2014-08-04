@@ -10,7 +10,7 @@ __declspec(dllexport) bool TITCALL PastePEHeader(HANDLE hProcess, LPVOID ImageBa
 
     if(szDebuggedFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDebuggedFileName, lstrlenA(szDebuggedFileName)+1, uniDebuggedFileName, sizeof(uniDebuggedFileName)/(sizeof(uniDebuggedFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDebuggedFileName, lstrlenA(szDebuggedFileName) + 1, uniDebuggedFileName, sizeof(uniDebuggedFileName) / (sizeof(uniDebuggedFileName[0])));
         return(PastePEHeaderW(hProcess, ImageBase, uniDebuggedFileName));
     }
     else

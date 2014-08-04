@@ -14,7 +14,7 @@ __declspec(dllexport) bool TITCALL FindOEPGenerically(char* szFileName, LPVOID T
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(FindOEPGenericallyW(uniFileName, TraceInitCallBack, CallBack));
     }
     else

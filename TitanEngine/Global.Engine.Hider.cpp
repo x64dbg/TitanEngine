@@ -8,15 +8,15 @@
 // Global.Engine.Hider.functions:
 static bool isAtleastVista()
 {
-    static bool isAtleastVista=false;
-    static bool isSet=false;
+    static bool isAtleastVista = false;
+    static bool isSet = false;
     if(isSet)
         return isAtleastVista;
-    OSVERSIONINFO versionInfo= {0};
-    versionInfo.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
+    OSVERSIONINFO versionInfo = {0};
+    versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&versionInfo);
-    isAtleastVista=versionInfo.dwMajorVersion >= 6;
-    isSet=true;
+    isAtleastVista = versionInfo.dwMajorVersion >= 6;
+    isSet = true;
     return isAtleastVista;
 }
 
@@ -24,10 +24,10 @@ static bool isAtleastVista()
 static bool isWindows64()
 {
     SYSTEM_INFO si = {0};
-    typedef void (WINAPI *tGetNativeSystemInfo)(LPSYSTEM_INFO lpSystemInfo);
+    typedef void (WINAPI * tGetNativeSystemInfo)(LPSYSTEM_INFO lpSystemInfo);
     tGetNativeSystemInfo _GetNativeSystemInfo = (tGetNativeSystemInfo)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetNativeSystemInfo");
 
-    if (_GetNativeSystemInfo)
+    if(_GetNativeSystemInfo)
     {
         _GetNativeSystemInfo(&si);
     }
@@ -45,7 +45,7 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
     {
         0x33, 0xC0,      //XOR EAX,EAX
         0xC2, 0x08, 0x00 //RETN 0x8
-    }; 
+    };
     const BYTE patchGetTickCount32[3] =
     {
         0x33, 0xC0, //XOR EAX,EAX
@@ -69,17 +69,17 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
 
     if(x64) //x64 patches
     {
-        patchCheckRemoteDebuggerPresent=patchCheckRemoteDebuggerPresent64;
-        patchCheckRemoteDebuggerPresentSize=sizeof(patchCheckRemoteDebuggerPresent64);
-        patchGetTickCount=patchGetTickCount64;
-        patchGetTickCountSize=sizeof(patchGetTickCount64);
+        patchCheckRemoteDebuggerPresent = patchCheckRemoteDebuggerPresent64;
+        patchCheckRemoteDebuggerPresentSize = sizeof(patchCheckRemoteDebuggerPresent64);
+        patchGetTickCount = patchGetTickCount64;
+        patchGetTickCountSize = sizeof(patchGetTickCount64);
     }
     else //x86 patches
     {
-        patchCheckRemoteDebuggerPresent=patchCheckRemoteDebuggerPresent32;
-        patchCheckRemoteDebuggerPresentSize=sizeof(patchCheckRemoteDebuggerPresent32);
-        patchGetTickCount=patchGetTickCount32;
-        patchGetTickCountSize=sizeof(patchGetTickCount32);
+        patchCheckRemoteDebuggerPresent = patchCheckRemoteDebuggerPresent32;
+        patchCheckRemoteDebuggerPresentSize = sizeof(patchCheckRemoteDebuggerPresent32);
+        patchGetTickCount = patchGetTickCount32;
+        patchGetTickCountSize = sizeof(patchGetTickCount32);
     }
 
     ULONG_PTR APIPatchAddress = 0;
@@ -89,14 +89,14 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
     if(Hide)
     {
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "CheckRemoteDebuggerPresent");
-        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if(VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), &patchCheckRemoteDebuggerPresent, patchCheckRemoteDebuggerPresentSize, &ueNumberOfBytesRead);
             VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, OldProtect, &OldProtect);
         }
 
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "GetTickCount");
-        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if(VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), &patchGetTickCount, patchGetTickCountSize, &ueNumberOfBytesRead);
             VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
@@ -105,14 +105,14 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
     else
     {
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "CheckRemoteDebuggerPresent");
-        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if(VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), (void*)GetProcAddress(GetModuleHandleA("kernel32.dll"), "CheckRemoteDebuggerPresent"), patchCheckRemoteDebuggerPresentSize, &ueNumberOfBytesRead);
             VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchCheckRemoteDebuggerPresentSize, OldProtect, &OldProtect);
         }
 
         APIPatchAddress = EngineGetProcAddressRemote(hProcess, L"kernel32.dll", "GetTickCount");
-        if (VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
+        if(VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, PAGE_EXECUTE_READWRITE, &OldProtect))
         {
             WriteProcessMemory(hProcess, (LPVOID)(APIPatchAddress), (void*)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetTickCount"), patchGetTickCountSize, &ueNumberOfBytesRead);
             VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
@@ -128,9 +128,9 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
 
 static int getHeapFlagsOffset(bool x64)
 {
-    if (x64) //x64 offsets
+    if(x64)  //x64 offsets
     {
-        if (isAtleastVista())
+        if(isAtleastVista())
         {
             return 0x70;
         }
@@ -141,7 +141,7 @@ static int getHeapFlagsOffset(bool x64)
     }
     else //x86 offsets
     {
-        if (isAtleastVista())
+        if(isAtleastVista())
         {
             return 0x40;
         }
@@ -154,9 +154,9 @@ static int getHeapFlagsOffset(bool x64)
 
 static int getHeapForceFlagsOffset(bool x64)
 {
-    if (x64) //x64 offsets
+    if(x64)  //x64 offsets
     {
-        if (isAtleastVista())
+        if(isAtleastVista())
         {
             return 0x74;
         }
@@ -167,7 +167,7 @@ static int getHeapForceFlagsOffset(bool x64)
     }
     else //x86 offsets
     {
-        if (isAtleastVista())
+        if(isAtleastVista())
         {
             return 0x44;
         }
@@ -182,25 +182,25 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
 {
     PEB_CURRENT myPEB = {0};
     SIZE_T ueNumberOfBytesRead = 0;
-    void * heapFlagsAddress = 0;
+    void* heapFlagsAddress = 0;
     DWORD heapFlags = 0;
-    void * heapForceFlagsAddress = 0;
+    void* heapForceFlagsAddress = 0;
     DWORD heapForceFlags = 0;
 
 #ifndef _WIN64
     PEB64 myPEB64 = {0};
-    void * AddressOfPEB64 = GetPEBLocation64(hProcess);
+    void* AddressOfPEB64 = GetPEBLocation64(hProcess);
 #endif
 
-    void * AddressOfPEB = GetPEBLocation(hProcess);
+    void* AddressOfPEB = GetPEBLocation(hProcess);
 
-    if (!AddressOfPEB)
+    if(!AddressOfPEB)
         return false;
 
     if(ReadProcessMemory(hProcess, AddressOfPEB, (void*)&myPEB, sizeof(PEB_CURRENT), &ueNumberOfBytesRead))
     {
 #ifndef _WIN64
-        if (AddressOfPEB64)
+        if(AddressOfPEB64)
         {
             ReadProcessMemory(hProcess, AddressOfPEB64, (void*)&myPEB64, sizeof(PEB64), &ueNumberOfBytesRead);
         }
@@ -219,17 +219,17 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
 
             //TODO: backup heap flags
 #ifdef _WIN64
-            heapFlagsAddress = (void *)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(true));
-            heapForceFlagsAddress = (void *)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(true));
+            heapFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(true));
+            heapForceFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(true));
 #else
-            heapFlagsAddress = (void *)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(false));
-            heapForceFlagsAddress = (void *)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(false));
+            heapFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(false));
+            heapForceFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(false));
 #endif //_WIN64
             ReadProcessMemory(hProcess, heapFlagsAddress, &heapFlags, sizeof(DWORD), 0);
             ReadProcessMemory(hProcess, heapForceFlagsAddress, &heapForceFlags, sizeof(DWORD), 0);
 
-            heapFlags&=HEAP_GROWABLE;
-            heapForceFlags=0;
+            heapFlags &= HEAP_GROWABLE;
+            heapForceFlags = 0;
 
             WriteProcessMemory(hProcess, heapFlagsAddress, &heapFlags, sizeof(DWORD), 0);
             WriteProcessMemory(hProcess, heapForceFlagsAddress, &heapForceFlags, sizeof(DWORD), 0);
@@ -245,7 +245,7 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
         if(WriteProcessMemory(hProcess, AddressOfPEB, (void*)&myPEB, sizeof(PEB_CURRENT), &ueNumberOfBytesRead))
         {
 #ifndef _WIN64
-            if (AddressOfPEB64)
+            if(AddressOfPEB64)
             {
                 WriteProcessMemory(hProcess, AddressOfPEB64, (void*)&myPEB64, sizeof(PEB64), &ueNumberOfBytesRead);
             }
@@ -260,7 +260,7 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
 {
     if(hProcess)
     {
-        if (FixPebInProcess(hProcess, Hide))
+        if(FixPebInProcess(hProcess, Hide))
         {
             if(PatchAPILevel == UE_HIDE_BASIC)
             {
@@ -280,11 +280,11 @@ bool ChangeHideDebuggerState(HANDLE hProcess, DWORD PatchAPILevel, bool Hide)
 #ifndef _WIN64
 bool IsThisProcessWow64()
 {
-    typedef BOOL (WINAPI * tIsWow64Process)(HANDLE hProcess,PBOOL Wow64Process);
+    typedef BOOL (WINAPI * tIsWow64Process)(HANDLE hProcess, PBOOL Wow64Process);
     BOOL bIsWow64 = FALSE;
     tIsWow64Process fnIsWow64Process = (tIsWow64Process)GetProcAddress(GetModuleHandleA("kernel32.dll"), "IsWow64Process");
 
-    if (fnIsWow64Process)
+    if(fnIsWow64Process)
     {
         fnIsWow64Process(GetCurrentProcess(), &bIsWow64);
     }

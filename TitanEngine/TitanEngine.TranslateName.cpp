@@ -46,7 +46,7 @@ __declspec(dllexport) void* TITCALL TranslateNativeName(char* szNativeName)
     }
 
     VirtualFree(TranslatedName, NULL, MEM_RELEASE);
-    
+
     return NULL;
 }
 

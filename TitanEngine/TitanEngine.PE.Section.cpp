@@ -12,8 +12,8 @@ __declspec(dllexport) bool TITCALL ExtractSection(char* szFileName, char* szDump
 
     if(szFileName != NULL && szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName) + 1, uniDumpFileName, sizeof(uniDumpFileName) / (sizeof(uniDumpFileName[0])));
         return(ExtractSectionW(uniFileName, uniDumpFileName, SectionNumber));
     }
     else
@@ -130,7 +130,7 @@ __declspec(dllexport) bool TITCALL ResortFileSections(char* szFileName)
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(ResortFileSectionsW(uniFileName));
     }
     else
@@ -346,7 +346,7 @@ __declspec(dllexport) bool TITCALL MakeAllSectionsRWE(char* szFileName)
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(MakeAllSectionsRWEW(uniFileName));
     }
     else
@@ -500,7 +500,7 @@ __declspec(dllexport) long TITCALL AddNewSectionEx(char* szFileName, char* szSec
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(AddNewSectionExW(uniFileName, szSectionName, SectionSize, SectionAttributes, SectionContent, ContentSize));
     }
     else
@@ -706,7 +706,7 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
                         PESections = IMAGE_FIRST_SECTION(PEHeader32);
                         SectionNumber = PEHeader32->FileHeader.NumberOfSections;
                         PEHeader32->FileHeader.NumberOfSections = PEHeader32->FileHeader.NumberOfSections + 1;
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + (SectionNumber - 1)* IMAGE_SIZEOF_SECTION_HEADER);
+                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + (SectionNumber - 1) * IMAGE_SIZEOF_SECTION_HEADER);
                         NewSectionVirtualOffset = PESections->VirtualAddress + (PESections->Misc.VirtualSize / PEHeader32->OptionalHeader.SectionAlignment) * PEHeader32->OptionalHeader.SectionAlignment;
                         if(NewSectionVirtualOffset < PESections->VirtualAddress + PESections->Misc.VirtualSize)
                         {
@@ -788,7 +788,7 @@ __declspec(dllexport) long TITCALL AddNewSectionExW(wchar_t* szFileName, char* s
                         PESections = IMAGE_FIRST_SECTION(PEHeader64);
                         SectionNumber = PEHeader64->FileHeader.NumberOfSections;
                         PEHeader32->FileHeader.NumberOfSections = PEHeader32->FileHeader.NumberOfSections + 1;
-                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + (SectionNumber - 1)* IMAGE_SIZEOF_SECTION_HEADER);
+                        PESections = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PESections + (SectionNumber - 1) * IMAGE_SIZEOF_SECTION_HEADER);
                         NewSectionVirtualOffset = PESections->VirtualAddress + (PESections->Misc.VirtualSize / PEHeader64->OptionalHeader.SectionAlignment) * PEHeader64->OptionalHeader.SectionAlignment;
                         if(NewSectionVirtualOffset < PESections->VirtualAddress + PESections->Misc.VirtualSize)
                         {
@@ -883,7 +883,7 @@ __declspec(dllexport) bool TITCALL ResizeLastSection(char* szFileName, DWORD Num
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(ResizeLastSectionW(uniFileName, NumberOfExpandBytes, AlignResizeData));
     }
     else
@@ -1101,7 +1101,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSection(char* szFileName)
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(DeleteLastSectionW(uniFileName));
     }
     else
@@ -1289,7 +1289,7 @@ __declspec(dllexport) bool TITCALL WipeSection(char* szFileName, int WipeSection
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(WipeSectionW(uniFileName, WipeSectionNumber, RemovePhysically));
     }
     else
@@ -1340,7 +1340,7 @@ __declspec(dllexport) bool TITCALL WipeSectionW(wchar_t* szFileName, int WipeSec
         DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
         if(EngineValidateHeader(FileMapVA, FileHandle, NULL, DOSHeader, true))
         {
-            ULONG_PTR WipeRawSize=GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWSIZE);
+            ULONG_PTR WipeRawSize = GetPE32DataFromMappedFile(FileMapVA, SectionNumber, UE_SECTIONRAWSIZE);
             if(!WipeRawSize)
                 RemovePhysically = false;
             PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);

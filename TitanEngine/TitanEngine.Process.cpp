@@ -28,7 +28,7 @@ __declspec(dllexport) long TITCALL GetActiveProcessIdW(wchar_t* szImageName)
     wchar_t szProcessPath[1024] = {};
     DWORD cbNeeded = NULL;
     HANDLE hProcess;
-    wchar_t * nameOnly = 0;
+    wchar_t* nameOnly = 0;
 
     if(EnumProcesses(bProcessId, sizeof(bProcessId), &cbNeeded))
     {
@@ -45,15 +45,15 @@ __declspec(dllexport) long TITCALL GetActiveProcessIdW(wchar_t* szImageName)
                         lstrcpyW(szProcessPath, szTranslatedProcName);
                         VirtualFree((void*)szTranslatedProcName, NULL, MEM_RELEASE);
                         EngineCloseHandle(hProcess);
-                        
+
                         if(_wcsicmp(szProcessPath, szImageName) == 0)
                         {
                             return(bProcessId[i]);
                         }
-                        else 
+                        else
                         {
                             nameOnly = wcsrchr(szProcessPath, L'\\');
-                            if (nameOnly)
+                            if(nameOnly)
                             {
                                 nameOnly++;
                                 if(_wcsicmp(nameOnly, szImageName) == 0)
@@ -79,7 +79,7 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
 
     int i;
     int j;
-    typedef void(TITCALL *fEnumFunction)(DWORD ProcessId, HMODULE ModuleBaseAddress);
+    typedef void(TITCALL * fEnumFunction)(DWORD ProcessId, HMODULE ModuleBaseAddress);
     fEnumFunction myEnumFunction = (fEnumFunction)EnumFunction;
     HMODULE EnumeratedModules[1024] = {0};
     DWORD bProcessId[1024] = {0};
@@ -96,7 +96,7 @@ __declspec(dllexport) void TITCALL EnumProcessesWithLibrary(char* szLibraryName,
             {
                 if(bProcessId[i] != NULL)
                 {
-                    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, 0, bProcessId[i]);
+                    hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, 0, bProcessId[i]);
                     if(hProcess != NULL)
                     {
                         RtlZeroMemory(EnumeratedModules, sizeof(EnumeratedModules));

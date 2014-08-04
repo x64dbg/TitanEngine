@@ -52,8 +52,8 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileN
 
     if(szFileName != NULL && szOutputFolder != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szOutputFolder, lstrlenA(szOutputFolder)+1, uniOutputFolder, sizeof(uniOutputFolder)/(sizeof(uniOutputFolder[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szOutputFolder, lstrlenA(szOutputFolder) + 1, uniOutputFolder, sizeof(uniOutputFolder) / (sizeof(uniOutputFolder[0])));
         return(EngineCreateMissingDependenciesW(uniFileName, uniOutputFolder, LogCreatedFiles));
     }
     else
@@ -124,12 +124,12 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                     ImportDllName = (PCHAR)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->Name + ImageBase, true));
                     if(ImportDllName)
                     {
-                        MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
+                        MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName) + 1, ImportDllNameW, sizeof(ImportDllNameW) / (sizeof(ImportDllNameW[0])));
                         if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
                         {
                             RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
                             lstrcatW(BuildExportName, szOutputFolder);
-                            if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
+                            if(BuildExportName[lstrlenW(BuildExportName) - 1] != 0x5C)
                             {
                                 BuildExportName[lstrlenW(BuildExportName)] = 0x5C;
                             }
@@ -182,12 +182,12 @@ __declspec(dllexport) bool TITCALL EngineCreateMissingDependenciesW(wchar_t* szF
                     ImportDllName = (PCHAR)((ULONG_PTR)ConvertVAtoFileOffset(FileMapVA, ImportPointer->Name + ImageBase, true));
                     if(ImportDllName)
                     {
-                        MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName)+1, ImportDllNameW, sizeof(ImportDllNameW)/(sizeof(ImportDllNameW[0])));
+                        MultiByteToWideChar(CP_ACP, NULL, ImportDllName, lstrlenA(ImportDllName) + 1, ImportDllNameW, sizeof(ImportDllNameW) / (sizeof(ImportDllNameW[0])));
                         if(!EngineIsDependencyPresentW(ImportDllNameW, szFileName, szOutputFolder))
                         {
                             RtlZeroMemory(&BuildExportName, sizeof(BuildExportName));
                             lstrcatW(BuildExportName, szOutputFolder);
-                            if(BuildExportName[lstrlenW(BuildExportName)-1] != 0x5C)
+                            if(BuildExportName[lstrlenW(BuildExportName) - 1] != 0x5C)
                             {
                                 BuildExportName[lstrlenW(BuildExportName)] = 0x5C;
                             }
@@ -321,35 +321,35 @@ __declspec(dllexport) void TITCALL EngineAddUnpackerWindowLogMessage(char* szLog
 
 __declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize)
 {
-    int blub=1;
+    int blub = 1;
     switch(StructureType)
     {
     case UE_STRUCT_PE32STRUCT:
-        return (sizeof(PE32Struct)==StructureSize);
+        return (sizeof(PE32Struct) == StructureSize);
     case UE_STRUCT_PE64STRUCT:
-        return (sizeof(PE64Struct)==StructureSize);
+        return (sizeof(PE64Struct) == StructureSize);
     case UE_STRUCT_PESTRUCT:
-        return (sizeof(PEStruct)==StructureSize);
+        return (sizeof(PEStruct) == StructureSize);
     case UE_STRUCT_IMPORTENUMDATA:
-        return (sizeof(ImportEnumData)==StructureSize);
+        return (sizeof(ImportEnumData) == StructureSize);
     case UE_STRUCT_THREAD_ITEM_DATA:
-        return (sizeof(THREAD_ITEM_DATA)==StructureSize);
+        return (sizeof(THREAD_ITEM_DATA) == StructureSize);
     case UE_STRUCT_LIBRARY_ITEM_DATA:
-        return (sizeof(LIBRARY_ITEM_DATA)==StructureSize);
+        return (sizeof(LIBRARY_ITEM_DATA) == StructureSize);
     case UE_STRUCT_LIBRARY_ITEM_DATAW:
-        return (sizeof(LIBRARY_ITEM_DATAW)==StructureSize);
+        return (sizeof(LIBRARY_ITEM_DATAW) == StructureSize);
     case UE_STRUCT_PROCESS_ITEM_DATA:
-        return (sizeof(PROCESS_ITEM_DATA)==StructureSize);
+        return (sizeof(PROCESS_ITEM_DATA) == StructureSize);
     case UE_STRUCT_HANDLERARRAY:
-        return (sizeof(HandlerArray)==StructureSize);
+        return (sizeof(HandlerArray) == StructureSize);
     case UE_STRUCT_PLUGININFORMATION:
-        return (sizeof(PluginInformation)==StructureSize);
+        return (sizeof(PluginInformation) == StructureSize);
     case UE_STRUCT_HOOK_ENTRY:
-        return (sizeof(HOOK_ENTRY)==StructureSize);
+        return (sizeof(HOOK_ENTRY) == StructureSize);
     case UE_STRUCT_FILE_STATUS_INFO:
-        return (sizeof(FILE_STATUS_INFO)==StructureSize);
+        return (sizeof(FILE_STATUS_INFO) == StructureSize);
     case UE_STRUCT_FILE_FIX_INFO:
-        return (sizeof(FILE_FIX_INFO)==StructureSize);
+        return (sizeof(FILE_FIX_INFO) == StructureSize);
     }
     return false;
 }

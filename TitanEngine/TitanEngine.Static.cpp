@@ -62,7 +62,7 @@ __declspec(dllexport) bool TITCALL StaticFileUnload(char* szFileName, bool Commi
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(StaticFileUnloadW(uniFileName, CommitChanges, FileHandle, LoadedSize, FileMap, FileMapVA));
     }
     else
@@ -183,7 +183,7 @@ __declspec(dllexport) bool TITCALL StaticFileOpen(char* szFileName, DWORD Desire
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
 
         return StaticFileOpenW(uniFileName, DesiredAccess, FileHandle, FileSizeLow, FileSizeHigh);
     }
@@ -251,7 +251,7 @@ __declspec(dllexport) void TITCALL StaticMemoryDecrypt(LPVOID MemoryStart, DWORD
     ULONG64 DataQword = NULL;
 
     //ignore too big stuff
-    if(DecryptionKeySize>sizeof(ULONG_PTR))
+    if(DecryptionKeySize > sizeof(ULONG_PTR))
         return;
 
     if(MemoryStart != NULL && MemorySize > NULL)
@@ -349,7 +349,7 @@ __declspec(dllexport) void TITCALL StaticMemoryDecrypt(LPVOID MemoryStart, DWORD
 __declspec(dllexport) void TITCALL StaticMemoryDecryptEx(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, void* DecryptionCallBack)
 {
     DWORD LoopCount = NULL;
-    typedef bool(TITCALL *fStaticCallBack)(void* sMemoryStart, int sKeySize);
+    typedef bool(TITCALL * fStaticCallBack)(void* sMemoryStart, int sKeySize);
     fStaticCallBack myStaticCallBack = (fStaticCallBack)DecryptionCallBack;
 
     if(MemoryStart != NULL && MemorySize > NULL)
@@ -377,7 +377,7 @@ __declspec(dllexport) void TITCALL StaticMemoryDecryptEx(LPVOID MemoryStart, DWO
 __declspec(dllexport) void TITCALL StaticMemoryDecryptSpecial(LPVOID MemoryStart, DWORD MemorySize, DWORD DecryptionKeySize, DWORD SpecDecryptionType, void* DecryptionCallBack)
 {
     DWORD LoopCount = NULL;
-    typedef bool(TITCALL *fStaticCallBack)(void* sMemoryStart, int sKeySize);
+    typedef bool(TITCALL * fStaticCallBack)(void* sMemoryStart, int sKeySize);
     fStaticCallBack myStaticCallBack = (fStaticCallBack)DecryptionCallBack;
 
     if(MemoryStart != NULL && MemorySize > NULL)
@@ -463,7 +463,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopy(HANDLE hFile, ULONG_PTR F
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(StaticRawMemoryCopyW(hFile, FileMapVA, VitualAddressToCopy, Size, AddressIsRVA, uniFileName));
     }
     else
@@ -564,7 +564,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx(HANDLE hFile, DWORD Raw
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(StaticRawMemoryCopyExW(hFile, RawAddressToCopy, Size, uniFileName));
     }
     else
@@ -651,7 +651,7 @@ __declspec(dllexport) bool TITCALL StaticRawMemoryCopyEx64(HANDLE hFile, DWORD64
 
     if(szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
 
         return StaticRawMemoryCopyEx64W(hFile, RawAddressToCopy, Size, uniFileName);
     }
@@ -895,7 +895,7 @@ __declspec(dllexport) bool TITCALL StaticHashFile(char* szFileName, char* HashDi
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
 
         return StaticHashFileW(uniFileName, HashDigest, OutputString, Algorithm);
     }

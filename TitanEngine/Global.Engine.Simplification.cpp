@@ -54,7 +54,7 @@ void EngineSimplifyLoadLibraryCallBack()
                 ImporterAddNewDll(szReadStringData, (ULONG_PTR)GetContextData((DWORD)EngineUnpackerBreakInfo[i].Parameter2));
                 if(EngineUnpackerOptionLogData)
                 {
-                    wsprintfA(szLogBufferData,"[x] LoadLibrary BPX -> %s",szReadStringData);
+                    wsprintfA(szLogBufferData, "[x] LoadLibrary BPX -> %s", szReadStringData);
                     EngineAddUnpackerWindowLogMessage(szLogBufferData);
                 }
             }
@@ -89,7 +89,7 @@ void EngineSimplifyGetProcAddressCallBack()
                         ImporterAddNewAPI(szReadStringData, (ULONG_PTR)GetContextData((DWORD)EngineUnpackerBreakInfo[i].Parameter2));
                         if(EngineUnpackerOptionLogData)
                         {
-                            wsprintfA(szLogBufferData,"[x] GetProcAddress BPX -> %s",szReadStringData);
+                            wsprintfA(szLogBufferData, "[x] GetProcAddress BPX -> %s", szReadStringData);
                             EngineAddUnpackerWindowLogMessage(szLogBufferData);
                         }
                     }
@@ -99,7 +99,7 @@ void EngineSimplifyGetProcAddressCallBack()
                     ImporterAddNewOrdinalAPI(iParameter1, (ULONG_PTR)GetContextData((DWORD)EngineUnpackerBreakInfo[i].Parameter2));
                     if(EngineUnpackerOptionLogData)
                     {
-                        wsprintfA(szLogBufferData,"[x] GetProcAddress BPX -> %08X",iParameter1);
+                        wsprintfA(szLogBufferData, "[x] GetProcAddress BPX -> %08X", iParameter1);
                         EngineAddUnpackerWindowLogMessage(szLogBufferData);
                     }
                 }
@@ -113,7 +113,7 @@ void EngineSimplifyGetProcAddressCallBack()
                         ImporterAddNewAPI(szReadStringData, (ULONG_PTR)GetContextData((DWORD)EngineUnpackerBreakInfo[i].Parameter2));
                         if(EngineUnpackerOptionLogData)
                         {
-                            wsprintfA(szLogBufferData,"[x] GetProcAddress BPX -> %s",szReadStringData);
+                            wsprintfA(szLogBufferData, "[x] GetProcAddress BPX -> %s", szReadStringData);
                             EngineAddUnpackerWindowLogMessage(szLogBufferData);
                         }
                     }
@@ -123,7 +123,7 @@ void EngineSimplifyGetProcAddressCallBack()
                     ImporterAddNewOrdinalAPI(iParameter1, (ULONG_PTR)GetContextData((DWORD)EngineUnpackerBreakInfo[i].Parameter2));
                     if(EngineUnpackerOptionLogData)
                     {
-                        wsprintfA(szLogBufferData,"[x] GetProcAddress BPX -> %08X",iParameter1);
+                        wsprintfA(szLogBufferData, "[x] GetProcAddress BPX -> %08X", iParameter1);
                         EngineAddUnpackerWindowLogMessage(szLogBufferData);
                     }
                 }
@@ -206,7 +206,7 @@ void EngineSimplifyEntryPointCallBack()
         }
         if(EngineUnpackerOptionLogData)
         {
-            wsprintfA(szLogBufferData,"[x] Entry Point at: %08X", EngineUnpackerOptionUnpackedOEP);
+            wsprintfA(szLogBufferData, "[x] Entry Point at: %08X", EngineUnpackerOptionUnpackedOEP);
             EngineAddUnpackerWindowLogMessage(szLogBufferData);
         }
         if(EngineUnpackerFileStatus.FileIsDLL)

@@ -93,14 +93,14 @@ void StepOutStepCallBack()
             StepOver(StepOutCallBack);
         else
         {
-            typedef void(TITCALL *fCustomBreakPoint)();
+            typedef void(TITCALL * fCustomBreakPoint)();
             __try
             {
                 ((fCustomBreakPoint)StepOutCallBack)();
             }
             __except(EXCEPTION_EXECUTE_HANDLER)
             {
-            }            
+            }
         }
     }
     else

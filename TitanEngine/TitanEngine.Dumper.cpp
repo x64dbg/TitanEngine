@@ -45,7 +45,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         DOSHeader = (PIMAGE_DOS_HEADER)ueReadBuffer;
         PEHeader32 = (PIMAGE_NT_HEADERS32)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
 
-        if ((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
+        if((DOSHeader->e_lfanew > 0x500) || (DOSHeader->e_magic != IMAGE_DOS_SIGNATURE) || (PEHeader32->Signature != IMAGE_NT_SIGNATURE))
         {
             return false;
         }
@@ -126,7 +126,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             }
                             PEFixHeader32->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
                             PEFixHeader32->OptionalHeader.ImageBase = (DWORD)((ULONG_PTR)ImageBase);
-                            for(int i=NumberOfSections; i>=1; i--)
+                            for(int i = NumberOfSections; i >= 1; i--)
                             {
                                 PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
                                 RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader32->OptionalHeader.SectionAlignment) * PEHeader32->OptionalHeader.SectionAlignment;
@@ -200,7 +200,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                             }
                             PEFixHeader64->OptionalHeader.AddressOfEntryPoint = (DWORD)(EntryPoint - (ULONG_PTR)ImageBase);
                             PEFixHeader64->OptionalHeader.ImageBase = (DWORD64)((ULONG_PTR)ImageBase);
-                            for(int i=NumberOfSections; i>=1; i--)
+                            for(int i = NumberOfSections; i >= 1; i--)
                             {
                                 PEFixSection->PointerToRawData = PEFixSection->VirtualAddress;
                                 RealignedVirtualSize = (PEFixSection->Misc.VirtualSize / PEHeader64->OptionalHeader.SectionAlignment) * PEHeader64->OptionalHeader.SectionAlignment;
@@ -212,7 +212,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
                                 PEFixSection->Misc.VirtualSize = RealignedVirtualSize;
                                 PEFixSection = (PIMAGE_SECTION_HEADER)((ULONG_PTR)PEFixSection + IMAGE_SIZEOF_SECTION_HEADER);
                             }
-                            WriteFile(hFile,ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
+                            WriteFile(hFile, ueCopyBuffer, (DWORD)AlignedHeaderSize, &uedNumberOfBytesRead, NULL);
                             ReadBase = (LPVOID)((ULONG_PTR)ReadBase + (DWORD)AlignedHeaderSize - TITANENGINE_PAGESIZE);
                             while(SizeOfImageDump > NULL)
                             {
@@ -246,7 +246,7 @@ __declspec(dllexport) bool TITCALL DumpProcessW(HANDLE hProcess, LPVOID ImageBas
         }//EngineValidateHeader
     }//ReadProcessMemory
 
-    if (hFile != INVALID_HANDLE_VALUE)
+    if(hFile != INVALID_HANDLE_VALUE)
     {
         EngineCloseHandle(hFile);
     }
@@ -274,7 +274,7 @@ __declspec(dllexport) bool TITCALL DumpProcessExW(DWORD ProcessId, LPVOID ImageB
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpProcessW(hProcess, ImageBase, szDumpFileName, EntryPoint);
@@ -320,16 +320,16 @@ __declspec(dllexport) bool TITCALL DumpMemoryW(HANDLE hProcess, LPVOID MemorySta
             ReadBase = (LPVOID)ProcReadBase;
             if(MemorySize >= 0x1000)
             {
-                RtlZeroMemory(ueCopyBuffer,0x2000);
+                RtlZeroMemory(ueCopyBuffer, 0x2000);
 
                 MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, 0x1000, &ueNumberOfBytesRead);
 
-                WriteFile(hFile,ueCopyBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
+                WriteFile(hFile, ueCopyBuffer, 0x1000, &uedNumberOfBytesRead, NULL);
                 MemorySize = MemorySize - 0x1000;
             }
             else
             {
-                RtlZeroMemory(ueCopyBuffer,0x2000);
+                RtlZeroMemory(ueCopyBuffer, 0x2000);
 
                 MemoryReadSafe(hProcess, ReadBase, ueCopyBuffer, MemorySize, &ueNumberOfBytesRead);
 
@@ -364,7 +364,7 @@ __declspec(dllexport) bool TITCALL DumpMemoryExW(DWORD ProcessId, LPVOID MemoryS
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpMemoryW(hProcess, MemoryStart, MemorySize, szDumpFileName);
@@ -403,7 +403,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
 
     if(hProcess != NULL)
     {
-        if (!EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
+        if(!EnumProcessModules(hProcess, EnumeratedModules, sizeof(EnumeratedModules), &cbNeeded))
         {
             return false;
         }
@@ -430,7 +430,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsW(HANDLE hProcess, wchar_t* szDump
                     RtlZeroMemory(&szDumpName, MAX_PATH);
                     RtlZeroMemory(&szDumpFileName, MAX_PATH);
                     lstrcpyW(szDumpFileName, szDumpFolder);
-                    if(szDumpFileName[lstrlenW(szDumpFileName)-1] != L'\\')
+                    if(szDumpFileName[lstrlenW(szDumpFileName) - 1] != L'\\')
                     {
                         szDumpFileName[lstrlenW(szDumpFileName)] = L'\\';
                     }
@@ -466,7 +466,7 @@ __declspec(dllexport) bool TITCALL DumpRegionsExW(DWORD ProcessId, wchar_t* szDu
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess)
     {
         ReturnValue = DumpRegionsW(hProcess, szDumpFolder, DumpAboveImageBaseOnly);
@@ -506,7 +506,7 @@ __declspec(dllexport) bool TITCALL DumpModuleW(HANDLE hProcess, LPVOID ModuleBas
         {
             if(EnumeratedModules[i] == (HMODULE)ModuleBase)
             {
-                if (GetModuleInformation(hProcess, (HMODULE)EnumeratedModules[i], &RemoteModuleInfo, sizeof(MODULEINFO)))
+                if(GetModuleInformation(hProcess, (HMODULE)EnumeratedModules[i], &RemoteModuleInfo, sizeof(MODULEINFO)))
                 {
                     return(DumpMemoryW(hProcess, (LPVOID)EnumeratedModules[i], RemoteModuleInfo.SizeOfImage, szDumpFileName));
                 }
@@ -537,7 +537,7 @@ __declspec(dllexport) bool TITCALL DumpModuleExW(DWORD ProcessId, LPVOID ModuleB
     HANDLE hProcess = 0;
     bool ReturnValue = false;
 
-    hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+    hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
     if(hProcess) //If the function fails, the return value is NULL. To get extended error information, call GetLastError.
     {
         ReturnValue = DumpModuleW(hProcess, ModuleBase, szDumpFileName);

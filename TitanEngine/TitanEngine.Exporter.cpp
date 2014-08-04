@@ -251,7 +251,7 @@ __declspec(dllexport) bool TITCALL ExporterBuildExportTableEx(char* szExportFile
 
     if(szExportFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName)+1, uniExportFileName, sizeof(uniExportFileName)/(sizeof(uniExportFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName) + 1, uniExportFileName, sizeof(uniExportFileName) / (sizeof(uniExportFileName[0])));
         return(ExporterBuildExportTableExW(uniExportFileName, szSectionName));
     }
     else
@@ -305,7 +305,7 @@ __declspec(dllexport) bool TITCALL ExporterLoadExportTable(char* szFileName)
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(ExporterLoadExportTableW(uniFileName));
     }
     else

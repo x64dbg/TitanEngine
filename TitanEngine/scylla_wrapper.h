@@ -11,7 +11,7 @@ const BYTE SCY_ERROR_IATNOTFOUND = -4;
 extern "C" {
 #endif /*__cplusplus*/
 //iat exports
-int scylla_searchIAT(DWORD pid, DWORD_PTR &iatStart, DWORD &iatSize, DWORD_PTR searchStart, bool advancedSearch);
+int scylla_searchIAT(DWORD pid, DWORD_PTR & iatStart, DWORD & iatSize, DWORD_PTR searchStart, bool advancedSearch);
 int scylla_getImports(DWORD_PTR iatAddr, DWORD iatSize, DWORD pid, LPVOID invalidImportCallback = NULL);
 bool scylla_addModule(const WCHAR* moduleName, DWORD_PTR firstThunkRVA);
 bool scylla_addImport(const WCHAR* importName, DWORD_PTR thunkVA);
@@ -29,12 +29,12 @@ DWORD_PTR scylla_findImportNameByWriteLocation(DWORD_PTR thunkVA);
 DWORD_PTR scylla_findModuleNameByWriteLocation(DWORD_PTR thunkVA);
 
 //dumper exports
-bool scylla_dumpProcessW(DWORD_PTR pid, const WCHAR * fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const WCHAR * fileResult);
-bool scylla_dumpProcessA(DWORD_PTR pid, const char * fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const char * fileResult);
+bool scylla_dumpProcessW(DWORD_PTR pid, const WCHAR* fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const WCHAR* fileResult);
+bool scylla_dumpProcessA(DWORD_PTR pid, const char* fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const char* fileResult);
 
 //rebuilder exports
-bool scylla_rebuildFileW(const WCHAR * fileToRebuild, BOOL removeDosStub, BOOL updatePeHeaderChecksum, BOOL createBackup);
-bool scylla_rebuildFileA(const char * fileToRebuild, BOOL removeDosStub, BOOL updatePeHeaderChecksum, BOOL createBackup);
+bool scylla_rebuildFileW(const WCHAR* fileToRebuild, BOOL removeDosStub, BOOL updatePeHeaderChecksum, BOOL createBackup);
+bool scylla_rebuildFileA(const char* fileToRebuild, BOOL removeDosStub, BOOL updatePeHeaderChecksum, BOOL createBackup);
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/

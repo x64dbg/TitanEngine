@@ -3,7 +3,7 @@
 #include "Global.Handle.h"
 #include "Global.Engine.h"
 
-bool NtQuerySysHandleInfo(DynBuf& buf)
+bool NtQuerySysHandleInfo(DynBuf & buf)
 {
     ULONG RequiredSize = NULL;
 
@@ -23,7 +23,7 @@ __declspec(dllexport) long TITCALL HandlerGetActiveHandleCount(DWORD ProcessId)
     int HandleCount = 0;
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
 
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
@@ -31,7 +31,7 @@ __declspec(dllexport) long TITCALL HandlerGetActiveHandleCount(DWORD ProcessId)
     PSYSTEM_HANDLE_INFORMATION HandleInfo = (PSYSTEM_HANDLE_INFORMATION)QuerySystemBuffer;
     PSYSTEM_HANDLE_TABLE_ENTRY_INFO pHandle = HandleInfo->Handles;
 
-    for (ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
+    for(ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
     {
         if((DWORD)pHandle->UniqueProcessId == ProcessId)
         {
@@ -48,7 +48,7 @@ __declspec(dllexport) bool TITCALL HandlerIsHandleOpen(DWORD ProcessId, HANDLE h
     bool HandleActive = false;
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return false;
 
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
@@ -57,7 +57,7 @@ __declspec(dllexport) bool TITCALL HandlerIsHandleOpen(DWORD ProcessId, HANDLE h
     PSYSTEM_HANDLE_TABLE_ENTRY_INFO pHandle = HandleInfo->Handles;
 
 
-    for (ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
+    for(ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
     {
         if((DWORD)pHandle->UniqueProcessId == ProcessId && (HANDLE)pHandle->HandleValue == hHandle)
         {
@@ -80,7 +80,7 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
     LPVOID HandleFullName = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
     {
         VirtualFree(HandleFullName, NULL, MEM_RELEASE);
         return 0;
@@ -90,7 +90,7 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
     PSYSTEM_HANDLE_INFORMATION HandleInfo = (PSYSTEM_HANDLE_INFORMATION)QuerySystemBuffer;
     PSYSTEM_HANDLE_TABLE_ENTRY_INFO pHandle = HandleInfo->Handles;
 
-    for (ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
+    for(ULONG i = 0; i < HandleInfo->NumberOfHandles; i++)
     {
         if((DWORD)pHandle->UniqueProcessId == ProcessId && (HANDLE)pHandle->HandleValue == hHandle)
         {
@@ -135,11 +135,11 @@ __declspec(dllexport) void* TITCALL HandlerGetHandleNameW(HANDLE hProcess, DWORD
 }
 __declspec(dllexport) void* TITCALL HandlerGetHandleName(HANDLE hProcess, DWORD ProcessId, HANDLE hHandle, bool TranslateName)
 {
-    wchar_t * name = (wchar_t *)HandlerGetHandleNameW(hProcess, ProcessId, hHandle, TranslateName);
+    wchar_t* name = (wchar_t*)HandlerGetHandleNameW(hProcess, ProcessId, hHandle, TranslateName);
 
-    if (name)
+    if(name)
     {
-        LPVOID HandleFullName = VirtualAlloc(NULL, wcslen(name) + 1, MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);
+        LPVOID HandleFullName = VirtualAlloc(NULL, wcslen(name) + 1, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         WideCharToMultiByte(CP_ACP, NULL, name, -1, (LPSTR)HandleFullName, (int)wcslen(name) + 1, NULL, NULL);
         VirtualFree(name, NULL, MEM_RELEASE);
 
@@ -158,7 +158,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenHandles(DWORD ProcessId, 
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
@@ -195,7 +195,7 @@ __declspec(dllexport) ULONG_PTR TITCALL HandlerGetHandleDetails(HANDLE hProcess,
 
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
@@ -289,7 +289,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandles(char* szFileOrFol
 
     if(szFileOrFolderName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileOrFolderName, lstrlenA(szFileOrFolderName)+1, uniFileOrFolderName, sizeof(uniFileOrFolderName)/(sizeof(uniFileOrFolderName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileOrFolderName, lstrlenA(szFileOrFolderName) + 1, uniFileOrFolderName, sizeof(uniFileOrFolderName) / (sizeof(uniFileOrFolderName[0])));
         return(HandlerEnumerateLockHandlesW(uniFileOrFolderName, NameIsFolder, NameIsTranslated, HandleDataBuffer, MaxHandleCount));
     }
     else
@@ -318,7 +318,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateLockHandlesW(wchar_t* szFileO
     LPVOID tmpHandleFullName = NULL;
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
@@ -396,7 +396,7 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandles(char* szFileOrFold
 
     if(szFileOrFolderName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileOrFolderName, lstrlenA(szFileOrFolderName)+1, uniFileOrFolderName, sizeof(uniFileOrFolderName)/(sizeof(uniFileOrFolderName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileOrFolderName, lstrlenA(szFileOrFolderName) + 1, uniFileOrFolderName, sizeof(uniFileOrFolderName) / (sizeof(uniFileOrFolderName[0])));
         return(HandlerCloseAllLockHandlesW(uniFileOrFolderName, NameIsFolder, NameIsTranslated));
     }
     else
@@ -425,7 +425,7 @@ __declspec(dllexport) bool TITCALL HandlerCloseAllLockHandlesW(wchar_t* szFileOr
 
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
@@ -500,7 +500,7 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLocked(char* szFileOrFolderName,
 
     if(szFileOrFolderName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileOrFolderName, lstrlenA(szFileOrFolderName)+1, uniFileOrFolderName, sizeof(uniFileOrFolderName)/(sizeof(uniFileOrFolderName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileOrFolderName, lstrlenA(szFileOrFolderName) + 1, uniFileOrFolderName, sizeof(uniFileOrFolderName) / (sizeof(uniFileOrFolderName[0])));
         return(HandlerIsFileLockedW(uniFileOrFolderName, NameIsFolder, NameIsTranslated));
     }
     else
@@ -528,7 +528,7 @@ __declspec(dllexport) bool TITCALL HandlerIsFileLockedW(wchar_t* szFileOrFolderN
     LPVOID tmpHandleFullName = NULL;
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
@@ -611,7 +611,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
     PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 
@@ -659,7 +659,7 @@ __declspec(dllexport) ULONG_PTR TITCALL HandlerGetOpenMutexHandle(HANDLE hProces
 
     if(szMutexString != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szMutexString, lstrlenA(szMutexString)+1, uniMutexString, sizeof(uniMutexString)/(sizeof(uniMutexString[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szMutexString, lstrlenA(szMutexString) + 1, uniMutexString, sizeof(uniMutexString) / (sizeof(uniMutexString[0])));
         return((ULONG_PTR)HandlerGetOpenMutexHandleW(hProcess, ProcessId, uniMutexString));
     }
     else
@@ -669,7 +669,7 @@ __declspec(dllexport) ULONG_PTR TITCALL HandlerGetOpenMutexHandle(HANDLE hProces
 }
 __declspec(dllexport) ULONG_PTR TITCALL HandlerGetOpenMutexHandleW(HANDLE hProcess, DWORD ProcessId, wchar_t* szMutexString)
 {
-    if(!szMutexString || lstrlenW(szMutexString)>=512)
+    if(!szMutexString || lstrlenW(szMutexString) >= 512)
         return 0;
     int i;
     HANDLE myHandle;
@@ -734,7 +734,7 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
     lstrcatW(RealMutexName, szMutexString);
 
     DynBuf hinfo;
-    if (!NtQuerySysHandleInfo(hinfo))
+    if(!NtQuerySysHandleInfo(hinfo))
         return 0;
     LPVOID QuerySystemBuffer = hinfo.GetPtr();
 

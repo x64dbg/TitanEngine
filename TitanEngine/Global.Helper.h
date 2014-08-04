@@ -10,7 +10,7 @@ a : string 1
 b : string 2
 considercase : casesensitivity
 */
-bool IsStrEqual(const char* const a, const char* const b, bool considercase=true);
+bool IsStrEqual(const char* const a, const char* const b, bool considercase = true);
 
 /*
 A basic dynamic buffer, exception free.
@@ -18,7 +18,7 @@ A basic dynamic buffer, exception free.
 class DynBuf
 {
 public:
-    DynBuf(size_t sz=0)
+    DynBuf(size_t sz = 0)
     {
         Allocate(sz);
     }
@@ -26,7 +26,7 @@ public:
 
     void* Allocate(size_t sz)
     {
-        void* r=NULL;
+        void* r = NULL;
         try
         {
             if(Size() < sz)
@@ -52,11 +52,11 @@ public:
     {
         mem.clear();
     }
-    DynBufVec& GetVector()
+    DynBufVec & GetVector()
     {
         return mem;
     }
-    const DynBufVec& GetVector() const
+    const DynBufVec & GetVector() const
     {
         return mem;
     }
@@ -67,11 +67,11 @@ public:
 
 
 protected:
-    char& operator[](std::size_t idx)
+    char & operator[](std::size_t idx)
     {
         return mem[idx];
     };
-    const char& operator[](std::size_t idx) const
+    const char & operator[](std::size_t idx) const
     {
         return mem[idx];
     };

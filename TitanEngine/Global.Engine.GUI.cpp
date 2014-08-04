@@ -45,7 +45,7 @@ long EngineWndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     char szAboutTitle[] = "[ About ]";
     char szAboutText[] = "%s \r\n\r\n ReversingLabs - http://www.reversinglabs.com \r\n\r\n  Minimum engine version needed:\r\n- TitanEngine %i.%i.%i by RevLabs\r\n\r\nUnpacker coded by %s";
-    typedef void(TITCALL *fStartUnpacking)(char* szInputFile, bool RealignFile, bool CopyOverlay);
+    typedef void(TITCALL * fStartUnpacking)(char* szInputFile, bool RealignFile, bool CopyOverlay);
     fStartUnpacking myStartUnpacking = (fStartUnpacking)EngineStartUnpackingCallBack;
     char GlobalBuffer[1024] = {};
     char AboutBuffer[1024] = {};

@@ -250,7 +250,7 @@ typedef struct _PROCESS_BASIC_INFORMATION
     ULONG_PTR UniqueProcessId;
     PVOID Reserved3;
 } PROCESS_BASIC_INFORMATION;
-typedef PROCESS_BASIC_INFORMATION *PPROCESS_BASIC_INFORMATION;
+typedef PROCESS_BASIC_INFORMATION* PPROCESS_BASIC_INFORMATION;
 
 typedef struct _THREAD_BASIC_INFORMATION
 {
@@ -264,7 +264,7 @@ typedef struct _THREAD_BASIC_INFORMATION
 
 typedef
 VOID
-(*PPS_APC_ROUTINE) (
+(*PPS_APC_ROUTINE)(
     __in_opt PVOID ApcArgument1,
     __in_opt PVOID ApcArgument2,
     __in_opt PVOID ApcArgument3
@@ -445,7 +445,7 @@ extern "C" {
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtSetInformationProcess (
+NtSetInformationProcess(
     __in HANDLE ProcessHandle,
     __in PROCESSINFOCLASS ProcessInformationClass,
     __in_bcount(ProcessInformationLength) PVOID ProcessInformation,
@@ -455,7 +455,7 @@ NtSetInformationProcess (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtQueryInformationProcess (
+NtQueryInformationProcess(
     __in HANDLE ProcessHandle,
     __in PROCESSINFOCLASS ProcessInformationClass,
     __out_bcount(ProcessInformationLength) PVOID ProcessInformation,
@@ -466,7 +466,7 @@ NtQueryInformationProcess (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtQueryObject (
+NtQueryObject(
     __in HANDLE Handle,
     __in OBJECT_INFORMATION_CLASS ObjectInformationClass,
     __out_bcount_opt(ObjectInformationLength) PVOID ObjectInformation,
@@ -477,7 +477,7 @@ NtQueryObject (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtSetSystemInformation (
+NtSetSystemInformation(
     __in SYSTEM_INFORMATION_CLASS SystemInformationClass,
     __in_bcount_opt(SystemInformationLength) PVOID SystemInformation,
     __in ULONG SystemInformationLength
@@ -486,7 +486,7 @@ NtSetSystemInformation (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtQuerySystemInformation (
+NtQuerySystemInformation(
     __in SYSTEM_INFORMATION_CLASS SystemInformationClass,
     __out_bcount_opt(SystemInformationLength) PVOID SystemInformation,
     __in ULONG SystemInformationLength,
@@ -496,7 +496,7 @@ NtQuerySystemInformation (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtSetInformationThread (
+NtSetInformationThread(
     __in HANDLE ThreadHandle,
     __in THREADINFOCLASS ThreadInformationClass,
     __in_bcount(ThreadInformationLength) PVOID ThreadInformation,
@@ -506,7 +506,7 @@ NtSetInformationThread (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtQueryInformationThread (
+NtQueryInformationThread(
     __in HANDLE ThreadHandle,
     __in THREADINFOCLASS ThreadInformationClass,
     __out_bcount(ThreadInformationLength) PVOID ThreadInformation,
@@ -517,7 +517,7 @@ NtQueryInformationThread (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtUnmapViewOfSection (
+NtUnmapViewOfSection(
     __in HANDLE ProcessHandle,
     __in PVOID BaseAddress
 );
@@ -525,7 +525,7 @@ NtUnmapViewOfSection (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtSuspendThread (
+NtSuspendThread(
     __in HANDLE ThreadHandle,
     __out_opt PULONG PreviousSuspendCount
 );
@@ -533,7 +533,7 @@ NtSuspendThread (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtResumeThread (
+NtResumeThread(
     __in HANDLE ThreadHandle,
     __out_opt PULONG PreviousSuspendCount
 );
@@ -541,21 +541,21 @@ NtResumeThread (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtSuspendProcess (
+NtSuspendProcess(
     __in HANDLE ProcessHandle
 );
 
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtResumeProcess (
+NtResumeProcess(
     __in HANDLE ProcessHandle
 );
 
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-NtQueueApcThread (
+NtQueueApcThread(
     __in HANDLE ThreadHandle,
     __in PPS_APC_ROUTINE ApcRoutine,
     __in_opt PVOID ApcArgument1,
@@ -566,7 +566,7 @@ NtQueueApcThread (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-RtlGetCompressionWorkSpaceSize (
+RtlGetCompressionWorkSpaceSize(
     IN USHORT CompressionFormatAndEngine,
     OUT PULONG CompressBufferWorkSpaceSize,
     OUT PULONG CompressFragmentWorkSpaceSize
@@ -575,7 +575,7 @@ RtlGetCompressionWorkSpaceSize (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-RtlCompressBuffer (
+RtlCompressBuffer(
     IN USHORT CompressionFormatAndEngine,
     IN PUCHAR UncompressedBuffer,
     IN ULONG UncompressedBufferSize,
@@ -589,7 +589,7 @@ RtlCompressBuffer (
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
-RtlDecompressBuffer (
+RtlDecompressBuffer(
     IN USHORT CompressionFormat,
     OUT PUCHAR UncompressedBuffer,
     IN ULONG UncompressedBufferSize,
@@ -601,7 +601,7 @@ RtlDecompressBuffer (
 NTSYSCALLAPI
 ULONG
 NTAPI
-RtlNtStatusToDosError (
+RtlNtStatusToDosError(
     NTSTATUS Status
 );
 

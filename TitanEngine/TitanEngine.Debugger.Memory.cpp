@@ -51,7 +51,7 @@ __declspec(dllexport) bool TITCALL MatchPatternEx(HANDLE hProcess, void* MemoryT
 
     if(memCmp)
     {
-        for(int i=0; i<SizeOfMemoryToCheck && i<SizeOfPatternToMatch; i++)
+        for(int i = 0; i < SizeOfMemoryToCheck && i < SizeOfPatternToMatch; i++)
         {
             if(memCmp->Array.bArrayEntry[i] != memPattern->Array.bArrayEntry[i] && memPattern->Array.bArrayEntry[i] != *WildCard)
             {
@@ -78,7 +78,7 @@ __declspec(dllexport) bool TITCALL MatchPattern(void* MemoryToCheck, int SizeOfM
 
 __declspec(dllexport) ULONG_PTR TITCALL FindEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID SearchPattern, DWORD PatternSize, LPBYTE WildCard)
 {
-    if(!hProcess || !MemoryStart ||!MemorySize || !SearchPattern || !PatternSize)
+    if(!hProcess || !MemoryStart || !MemorySize || !SearchPattern || !PatternSize)
         return 0;
 
     ULONG_PTR Return = NULL;
@@ -128,10 +128,10 @@ __declspec(dllexport) ULONG_PTR TITCALL FindEx(HANDLE hProcess, LPVOID MemorySta
 
     CompareBuffer = (PUCHAR)SearchPattern;
 
-    DWORD i,j;
-    for(i=0; i < MemorySize && Return == NULL; i++)
+    DWORD i, j;
+    for(i = 0; i < MemorySize && Return == NULL; i++)
     {
-        for(j=0; j < PatternSize; j++)
+        for(j = 0; j < PatternSize; j++)
         {
             if(CompareBuffer[j] != *(PUCHAR)WildCard && SearchBuffer[i + j] != CompareBuffer[j])
             {
@@ -205,7 +205,7 @@ __declspec(dllexport) bool TITCALL Fill(LPVOID MemoryStart, DWORD MemorySize, PB
 __declspec(dllexport) bool TITCALL PatchEx(HANDLE hProcess, LPVOID MemoryStart, DWORD MemorySize, LPVOID ReplacePattern, DWORD ReplaceSize, bool AppendNOP, bool PrependNOP)
 {
 
-    unsigned int i,recalcSize;
+    unsigned int i, recalcSize;
     LPVOID lpMemoryStart = MemoryStart;
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead;
@@ -326,20 +326,20 @@ __declspec(dllexport) bool TITCALL Replace(LPVOID MemoryStart, DWORD MemorySize,
 //what should this function do:
 //- do all possible effort to read memory
 //- filter out breakpoints
-__declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesRead)
+__declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesRead)
 {
     SIZE_T ueNumberOfBytesRead = 0;
-    SIZE_T * pNumBytes = 0;
+    SIZE_T* pNumBytes = 0;
     DWORD dwProtect = 0;
     bool retValue = false;
 
     //read memory
-    if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
+    if((hProcess == 0) || (lpBaseAddress == 0) || (lpBuffer == 0) || (nSize == 0))
     {
         return false;
     }
 
-    if (!lpNumberOfBytesRead)
+    if(!lpNumberOfBytesRead)
     {
         pNumBytes = &ueNumberOfBytesRead;
     }
@@ -350,9 +350,9 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
 
     if(!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
     {
-        if (VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
+        if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
         {
-            if (ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+            if(ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
             {
                 retValue = true;
             }
@@ -374,15 +374,15 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
 //what should this function do:
 //- do all possible effort to write memory
 //- re-set breakpoints when overwritten
-__declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T * lpNumberOfBytesWritten)
+__declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten)
 {
     SIZE_T ueNumberOfBytesWritten = 0;
-    SIZE_T * pNumBytes = 0;
+    SIZE_T* pNumBytes = 0;
     DWORD dwProtect = 0;
     bool retValue = false;
 
     //read memory
-    if ( (hProcess == 0) || (lpBaseAddress == 0) ||  (lpBuffer == 0) || (nSize == 0))
+    if((hProcess == 0) || (lpBaseAddress == 0) || (lpBuffer == 0) || (nSize == 0))
     {
         return false;
     }
@@ -391,7 +391,7 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
     //disable breakpoints that interfere with the memory to write
     BreakPointPreWriteFilter((ULONG_PTR)lpBaseAddress, nSize, &lock);
 
-    if (!lpNumberOfBytesWritten)
+    if(!lpNumberOfBytesWritten)
     {
         pNumBytes = &ueNumberOfBytesWritten;
     }
@@ -402,9 +402,9 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
 
     if(!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
     {
-        if (VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
+        if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
         {
-            if (WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+            if(WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
             {
                 retValue = true;
             }

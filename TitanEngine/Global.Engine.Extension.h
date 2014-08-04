@@ -6,10 +6,10 @@
 #define PLUGCALL TITCALL
 
 //typedefs
-typedef void(PLUGCALL *fPluginDebugExec)(LPDEBUG_EVENT debugEvent, int CallReason);
-typedef bool(PLUGCALL *fPluginRegister)(char* szPluginName, LPDWORD titanPluginMajorVersion, LPDWORD titanPluginMinorVersion);
-typedef void(PLUGCALL *fPluginReleaseExec)();
-typedef void(PLUGCALL *fPluginResetExec)();
+typedef void(PLUGCALL* fPluginDebugExec)(LPDEBUG_EVENT debugEvent, int CallReason);
+typedef bool(PLUGCALL* fPluginRegister)(char* szPluginName, LPDWORD titanPluginMajorVersion, LPDWORD titanPluginMinorVersion);
+typedef void(PLUGCALL* fPluginReleaseExec)();
+typedef void(PLUGCALL* fPluginResetExec)();
 
 //structs
 typedef struct

@@ -16,7 +16,7 @@ public:
     ~CriticalSectionLocker();
     void unlock();
     void relock();
-    
+
 private:
     CriticalSectionLock gLock;
 };

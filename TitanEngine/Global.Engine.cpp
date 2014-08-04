@@ -42,7 +42,7 @@ void EngineInit()
             i--;
         if(i)
         {
-            engineSzEngineFolder[i]=L'\0';
+            engineSzEngineFolder[i] = L'\0';
             lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
             lstrcatW(engineSzEngineGarbageFolder, L"\\garbage\\");
             CreateDirectoryW(engineSzEngineGarbageFolder, 0);
@@ -106,24 +106,24 @@ bool EngineFileExists(char* szFileName)
 
 void EngineCreatePathForFile(char* szFileName)
 {
-    int len=lstrlenA(szFileName);
-    while(szFileName[len]!='\\' && len)
+    int len = lstrlenA(szFileName);
+    while(szFileName[len] != '\\' && len)
         len--;
-    char szFolderName[MAX_PATH]="";
+    char szFolderName[MAX_PATH] = "";
     lstrcpyA(szFolderName, szFileName);
     if(len)
-        szFolderName[len+1]='\0';
+        szFolderName[len + 1] = '\0';
     else //just a filename
         return;
     lstrcatA(szFolderName, "\\");
-    len=lstrlenA(szFolderName);
-    char szCreateFolder[MAX_PATH]="";
-    for(int i=3; i<len; i++)
+    len = lstrlenA(szFolderName);
+    char szCreateFolder[MAX_PATH] = "";
+    for(int i = 3; i < len; i++)
     {
-        if(szFolderName[i]=='\\')
+        if(szFolderName[i] == '\\')
         {
             lstrcpyA(szCreateFolder, szFolderName);
-            szCreateFolder[i]='\0';
+            szCreateFolder[i] = '\0';
             CreateDirectoryA(szCreateFolder, 0);
         }
     }
@@ -131,23 +131,23 @@ void EngineCreatePathForFile(char* szFileName)
 
 void EngineCreatePathForFileW(wchar_t* szFileName)
 {
-    int len=lstrlenW(szFileName);
-    while(szFileName[len]!=L'\\' && len)
+    int len = lstrlenW(szFileName);
+    while(szFileName[len] != L'\\' && len)
         len--;
-    wchar_t szFolderName[MAX_PATH]=L"";
+    wchar_t szFolderName[MAX_PATH] = L"";
     lstrcpyW(szFolderName, szFileName);
     if(len)
-        szFolderName[len+1]=L'\0';
+        szFolderName[len + 1] = L'\0';
     else //just a filename
         return;
-    len=lstrlenW(szFolderName);
-    wchar_t szCreateFolder[MAX_PATH]=L"";
-    for(int i=3; i<len; i++)
+    len = lstrlenW(szFolderName);
+    wchar_t szCreateFolder[MAX_PATH] = L"";
+    for(int i = 3; i < len; i++)
     {
-        if(szFolderName[i]=='\\')
+        if(szFolderName[i] == '\\')
         {
             lstrcpyW(szCreateFolder, szFolderName);
-            szCreateFolder[i]='\0';
+            szCreateFolder[i] = '\0';
             CreateDirectoryW(szCreateFolder, 0);
         }
     }
@@ -168,7 +168,7 @@ wchar_t* EngineExtractFileNameW(wchar_t* szFileName)
     }
     if(szFileName[i] == 0x5C)
     {
-        int len=lstrlenW(szFileName);
+        int len = lstrlenW(szFileName);
         for(j = i + 1; j <= len; j++)
         {
             engineExtractedFileNameW[x] = szFileName[j];
@@ -455,14 +455,14 @@ bool EngineExtractResource(char* szResourceName, wchar_t* szExtractedFileName)
 
 bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char* szPresentInFolder)
 {
-    int i,j;
+    int i, j;
     HANDLE hFile;
     char szTryFileName[512] = {0};
 
     if(szPresentInFolder != NULL && szFileName != NULL)
     {
         lstrcpyA(szTryFileName, szPresentInFolder);
-        if(szTryFileName[lstrlenA(szTryFileName)-1] != 0x5C)
+        if(szTryFileName[lstrlenA(szTryFileName) - 1] != 0x5C)
         {
             szTryFileName[lstrlenA(szTryFileName)] = 0x5C;
         }
@@ -532,14 +532,14 @@ bool EngineIsDependencyPresent(char* szFileName, char* szDependencyForFile, char
 bool EngineIsDependencyPresentW(wchar_t* szFileName, wchar_t* szDependencyForFile, wchar_t* szPresentInFolder)
 {
 
-    int i,j;
+    int i, j;
     HANDLE hFile;
     wchar_t szTryFileName[512] = {0};
 
     if(szPresentInFolder != NULL)
     {
         lstrcpyW(szTryFileName, szPresentInFolder);
-        if(szTryFileName[lstrlenW(szTryFileName)-1] != 0x5C)
+        if(szTryFileName[lstrlenW(szTryFileName) - 1] != 0x5C)
         {
             szTryFileName[lstrlenW(szTryFileName)] = 0x5C;
         }
@@ -610,13 +610,13 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
 {
     wchar_t uniFileName[MAX_PATH] = {0};
     wchar_t uniDependencyForFile[MAX_PATH] = {0};
-    wchar_t * uniLocationOfTheFile = (WCHAR *)malloc(sizeof(WCHAR) * MaxStringSize);
+    wchar_t* uniLocationOfTheFile = (WCHAR*)malloc(sizeof(WCHAR) * MaxStringSize);
 
     MultiByteToWideChar(CP_ACP, NULL, szFileName, -1, uniFileName, _countof(uniFileName));
     MultiByteToWideChar(CP_ACP, NULL, szDependencyForFile, -1, uniDependencyForFile, _countof(uniDependencyForFile));
-    if (EngineGetDependencyLocationW(uniFileName, uniDependencyForFile, uniLocationOfTheFile, MaxStringSize))
+    if(EngineGetDependencyLocationW(uniFileName, uniDependencyForFile, uniLocationOfTheFile, MaxStringSize))
     {
-        bool retVal = (WideCharToMultiByte(CP_ACP, NULL, uniLocationOfTheFile, -1, (char *)szLocationOfTheFile, MaxStringSize, NULL, NULL) != 0);
+        bool retVal = (WideCharToMultiByte(CP_ACP, NULL, uniLocationOfTheFile, -1, (char*)szLocationOfTheFile, MaxStringSize, NULL, NULL) != 0);
         free(uniLocationOfTheFile);
         return retVal;
     }
@@ -627,7 +627,7 @@ bool EngineGetDependencyLocation(char* szFileName, char* szDependencyForFile, vo
 bool EngineGetDependencyLocationW(wchar_t* szFileName, wchar_t* szDependencyForFile, void* szLocationOfTheFile, int MaxStringSize)
 {
 
-    int i,j;
+    int i, j;
     HANDLE hFile;
     wchar_t szTryFileName[512] = {0};
 
@@ -796,7 +796,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     DWORD MemorySize = NULL;
     PIMAGE_NT_HEADERS PEHeader;
     IMAGE_NT_HEADERS RemotePEHeader;
-    MEMORY_BASIC_INFORMATION MemoryInfo= {0};
+    MEMORY_BASIC_INFORMATION MemoryInfo = {0};
     ULONG_PTR NumberOfBytesRW = NULL;
 
     if(IsFile)
@@ -966,7 +966,7 @@ ULONG_PTR EngineSimulateDllLoader(HANDLE hProcess, char* szFileName)
 {
     WCHAR uniFileName[MAX_PATH] = {0};
 
-    if (hProcess && szFileName)
+    if(hProcess && szFileName)
     {
         MultiByteToWideChar(CP_ACP, NULL, szFileName, -1, uniFileName, _countof(uniFileName));
         return EngineSimulateDllLoaderW(hProcess, uniFileName);
@@ -992,9 +992,9 @@ ULONG_PTR EngineSimulateDllLoaderW(HANDLE hProcess, wchar_t* szFileName)
     PIMAGE_EXPORT_DIRECTORY PEExports;
     PEXPORTED_DATA ExportedFunctionNames;
     ULONG_PTR ConvertedExport = NULL;
-    WCHAR szFileRemoteProc[1024]= {0};
-    WCHAR szDLLFileLocation[512]= {0};
-    WCHAR* szTranslatedProcName=0;
+    WCHAR szFileRemoteProc[1024] = {0};
+    WCHAR szDLLFileLocation[512] = {0};
+    WCHAR* szTranslatedProcName = 0;
 
     GetProcessImageFileNameW(hProcess, szFileRemoteProc, _countof(szFileRemoteProc));
 
@@ -1271,11 +1271,11 @@ ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
     HANDLE hProcess = NULL;
     ULONG_PTR EnumeratedModules[0x1000] = {0};
     ULONG_PTR LoadedModules[1000][4] = {0};
-    char RemoteDLLName[MAX_PATH]= {0};
-    char FullRemoteDLLName[MAX_PATH]= {0};
-    char szWindowsSideBySide[MAX_PATH]= {0};
-    char szWindowsSideBySideCmp[MAX_PATH]= {0};
-    char szWindowsKernelBase[MAX_PATH]= {0};
+    char RemoteDLLName[MAX_PATH] = {0};
+    char FullRemoteDLLName[MAX_PATH] = {0};
+    char szWindowsSideBySide[MAX_PATH] = {0};
+    char szWindowsSideBySideCmp[MAX_PATH] = {0};
+    char szWindowsKernelBase[MAX_PATH] = {0};
     HANDLE hLoadedModule = NULL;
     HANDLE ModuleHandle = NULL;
     PIMAGE_DOS_HEADER DOSHeader;
@@ -2008,7 +2008,7 @@ ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
         {
             if(ReturnType == UE_OPTION_IMPORTER_RETURN_API_ORDINAL_NUMBER || ReturnType == UE_OPTION_IMPORTER_RETURN_FORWARDER_API_ORDINAL_NUMBER)
             {
-                return((ULONG_PTR)-1);
+                return((ULONG_PTR) - 1);
             }
             else
             {

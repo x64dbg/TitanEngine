@@ -64,7 +64,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                     CurrentInstructionSize = StaticLengthDisassemble((LPVOID)TraceStartAddress);
                     CurrentNumberOfInstructions++;
                     /*
-                    	Long JUMP (0xE9)
+                        Long JUMP (0xE9)
                     */
                     if(HashInstructions == false && CompareMemory->DataByte[0] == 0xE9 && CurrentInstructionSize == 5)
                     {
@@ -95,7 +95,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             }
                         }
                         /*
-                        	Near JUMP (0xFF25)
+                            Near JUMP (0xFF25)
                         */
                     }
                     else if(HashInstructions == false && CompareMemory->DataByte[0] == 0xFF && CompareMemory->DataByte[1] == 0x25 && CurrentInstructionSize == 6)
@@ -130,7 +130,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             }
                         }
                         /*
-                        	PUSH then RET (0x68 ???????? 0xC3)
+                            PUSH then RET (0x68 ???????? 0xC3)
                         */
                     }
                     else if(HashInstructions == false && CompareMemory->DataByte[0] == 0x68 && CompareMemory->DataByte[5] == 0xC3 && CurrentInstructionSize == 5)
@@ -170,7 +170,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             }
                         }
                         /*
-                        	CALL (0xE8)
+                            CALL (0xE8)
                         */
                     }
                     else if(HashInstructions == true && CompareMemory->DataByte[0] == 0xE8 && CurrentInstructionSize == 5)
@@ -178,14 +178,14 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                         SkipHashing = true;
                         InstructionHash = EngineHashMemory((char*)&EmptyCall, CurrentInstructionSize, InstructionHash);
                         /*
-                        	PUSH (0x68)
+                            PUSH (0x68)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0x68 && CurrentInstructionSize == 5)
                     {
                         LastPushValue = (DWORD)(CompareMemory->DataByte[1] + CompareMemory->DataByte[2] * 0x1000 + CompareMemory->DataByte[3] * 0x100000 + CompareMemory->DataByte[4] * 0x10000000);
                         /*
-                        	ADD BYTE PTR[AL],AL (0x00, 0x00) -> End of page!
+                            ADD BYTE PTR[AL],AL (0x00, 0x00) -> End of page!
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0x00 && CurrentInstructionSize == 2)
@@ -193,7 +193,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                         FoundValidAPI = false;
                         break;
                         /*
-                        	RET (0xC3)
+                            RET (0xC3)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xC3 && CurrentInstructionSize == 1)
@@ -201,7 +201,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                         NumberOfInstructions++;
                         break;
                         /*
-                        	RET (0xC2)
+                            RET (0xC2)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xC2 && CurrentInstructionSize == 3)
@@ -209,7 +209,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                         NumberOfInstructions++;
                         break;
                         /*
-                        	Short JUMP (0xEB)
+                            Short JUMP (0xEB)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xEB && CurrentInstructionSize == 2)
@@ -217,48 +217,48 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                         TraceStartAddress = TraceStartAddress + CompareMemory->DataByte[1];
                         SkipThisInstruction = true;
                         /*
-                        	CLC (0xF8)
+                            CLC (0xF8)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xF8 && CurrentInstructionSize == 1)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	STC (0xF9)
+                            STC (0xF9)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xF9 && CurrentInstructionSize == 1)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	NOP (0x90)
+                            NOP (0x90)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0x90 && CurrentInstructionSize == 1)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	FNOP (0xD9 0xD0)
+                            FNOP (0xD9 0xD0)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xD9 && CompareMemory->DataByte[1] == 0xD0 && CurrentInstructionSize == 2)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	Multiple MOV
+                            Multiple MOV
                         */
                     }
                     else if(CompareMemory->DataByte[0] >= 0x8A && CompareMemory->DataByte[0] <= 0x8B)
                     {
                         /*
-                        	MOV EAX,EAX (0x8B 0xC8)
+                            MOV EAX,EAX (0x8B 0xC8)
                         */
                         if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC8 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV EBX,EBX (0x8B 0xC9)
+                                MOV EBX,EBX (0x8B 0xC9)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
                         {
@@ -272,7 +272,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             SkipThisInstruction = true;
                         }
                         /*
-                           	MOV (0x8B 0xED)
+                            MOV (0x8B 0xED)
                            */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
                         {
@@ -280,7 +280,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
 
                         }
                         /*
-                            	MOV (0x8B 0xF6)
+                                MOV (0x8B 0xF6)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
                         {
@@ -301,98 +301,98 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV EDI,EDI (0x8B 0xFF)
+                                MOV EDI,EDI (0x8B 0xFF)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xFF && CurrentNumberOfInstructions != 1 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV AL,AL (0x8A 0xC0)
+                                MOV AL,AL (0x8A 0xC0)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV BL,BL (0x8A 0xDB)
+                                MOV BL,BL (0x8A 0xDB)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV CL,CL (0x8A 0xC9)
+                                MOV CL,CL (0x8A 0xC9)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                           	MOV (0x8A 0xD2)
+                            MOV (0x8A 0xD2)
                            */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xD2 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV (0x8A 0xE4)
+                                MOV (0x8A 0xE4)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xE4 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                           	MOV (0x8A 0xED)
+                            MOV (0x8A 0xED)
                            */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV (0x8A 0xFF)
+                                MOV (0x8A 0xFF)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xFF && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV (0x8A 0xF6)
+                                MOV (0x8A 0xF6)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8A && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                           	MOV AX,AX (0x8B 0xC0)
+                            MOV AX,AX (0x8B 0xC0)
                            */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                           	MOV (0x8B 0xDB)
+                            MOV (0x8B 0xDB)
                            */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xDB && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV (0x8B 0xC9)
+                                MOV (0x8B 0xC9)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xC9 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                            	MOV (0x8B 0xF6)
+                                MOV (0x8B 0xF6)
                             */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xF6 && CurrentInstructionSize == 2)
                         {
                             SkipThisInstruction = true;
                         }
                         /*
-                           	MOV (0x8B 0xED)
+                            MOV (0x8B 0xED)
                            */
                         else if(CompareMemory->DataByte[0] == 0x8B && CompareMemory->DataByte[1] == 0xED && CurrentInstructionSize == 2)
                         {
@@ -400,27 +400,27 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                         }
                     }
                     /*
-                        	RDTSC (0x0F 0x31)
+                            RDTSC (0x0F 0x31)
                         */
                     else if(CompareMemory->DataByte[0] == 0x0F && CompareMemory->DataByte[1] == 0x31 && CurrentInstructionSize == 2)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	CPUID (0x0F 0xA2)
+                            CPUID (0x0F 0xA2)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0x0F && CompareMemory->DataByte[1] == 0xA2 && CurrentInstructionSize == 2)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	XCHG EAX,EAX (0x87 0xC0)
+                            XCHG EAX,EAX (0x87 0xC0)
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0x87 && CompareMemory->DataByte[1] == 0xC0 && CurrentInstructionSize == 2)
                     {
                         SkipThisInstruction = true;
                         /*
-                        	SHL EAX,0 - SHL EDI,0 && SHR EAX,0 - SHR EDI,0
+                            SHL EAX,0 - SHL EDI,0 && SHR EAX,0 - SHR EDI,0
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xC1 && CurrentInstructionSize == 3)
@@ -430,7 +430,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             SkipThisInstruction = true;
                         }
                         /*
-                        	ROR EAX,0 - ROR EDI,0 && ROL EAX,0 - ROL EDI,0
+                            ROR EAX,0 - ROR EDI,0 && ROL EAX,0 - ROL EDI,0
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0xC1 && CurrentInstructionSize == 3)
@@ -440,7 +440,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
                             SkipThisInstruction = true;
                         }
                         /*
-                        	LEA EAX,DWORD PTR[EAX] -> LEA EDI,DWORD PTR[EDI]
+                            LEA EAX,DWORD PTR[EAX] -> LEA EDI,DWORD PTR[EDI]
                         */
                     }
                     else if(CompareMemory->DataByte[0] == 0x8D && CurrentInstructionSize == 2)
@@ -527,7 +527,7 @@ static ULONG_PTR EngineGlobalTracerHandler1(HANDLE hProcess, ULONG_PTR AddressTo
 // TitanEngine.Tracer.functions:
 __declspec(dllexport) void TITCALL TracerInit()
 {
-    return;		// UE 1.5 compatibility mode
+    return;     // UE 1.5 compatibility mode
 }
 
 __declspec(dllexport) ULONG_PTR TITCALL TracerLevel1(HANDLE hProcess, ULONG_PTR AddressToTrace)
@@ -707,7 +707,7 @@ __declspec(dllexport) ULONG_PTR TITCALL HashTracerLevel1(HANDLE hProcess, ULONG_
 __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULONG_PTR AddressToTrace)
 {
 
-    int i,j;
+    int i, j;
     MEMORY_BASIC_INFORMATION MemInfo;
     DWORD KnownRedirectionIndex = NULL;
     ULONG_PTR ueNumberOfBytesRead = NULL;
@@ -744,224 +744,224 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                 cMem = (PMEMORY_CMP_HANDLER)TraceMemory;
                 if(cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x01 && ((cMem->DataByte[3] >= 0x50 && cMem->DataByte[3] <= 0x5F) || cMem->DataByte[3] == 0x6A || cMem->DataByte[3] == 0x68))
                 {
-                    KnownRedirectionIndex = NULL;				// ; PeX 0.99 fail safe!
+                    KnownRedirectionIndex = NULL;               // ; PeX 0.99 fail safe!
                 }
                 else if(cMem->DataByte[0] == 0x68 && cMem->DataByte[5] == 0x81 && cMem->DataByte[12] == 0xC3)
                 {
-                    KnownRedirectionIndex = 1;					//	; RLP 0.7.4 & CryptoPeProtector 0.9.x & ACProtect
-                    /*	;$ ==>    >  68 904B4013     PUSH 13404B90
-                    	;$+5      >  812C24 0A9E589B SUB DWORD PTR SS:[ESP],9B589E0A
-                    	;$+C      >  C3              RET
-                    	;$+D      >  68 E21554DF     PUSH DF5415E2
-                    	;$+12     >  813424 B6DCB2A8 XOR DWORD PTR SS:[ESP],A8B2DCB6
-                    	;$+19     >  C3              RET
-                    	;$+1A     >  68 34B2C6B1     PUSH B1C6B234
-                    	;$+1F     >  810424 4A2C21C6 ADD DWORD PTR SS:[ESP],C6212C4A
-                    	;$+26     >  C3              RET */
+                    KnownRedirectionIndex = 1;                  //  ; RLP 0.7.4 & CryptoPeProtector 0.9.x & ACProtect
+                    /*  ;$ ==>    >  68 904B4013     PUSH 13404B90
+                        ;$+5      >  812C24 0A9E589B SUB DWORD PTR SS:[ESP],9B589E0A
+                        ;$+C      >  C3              RET
+                        ;$+D      >  68 E21554DF     PUSH DF5415E2
+                        ;$+12     >  813424 B6DCB2A8 XOR DWORD PTR SS:[ESP],A8B2DCB6
+                        ;$+19     >  C3              RET
+                        ;$+1A     >  68 34B2C6B1     PUSH B1C6B234
+                        ;$+1F     >  810424 4A2C21C6 ADD DWORD PTR SS:[ESP],C6212C4A
+                        ;$+26     >  C3              RET */
                 }
                 else if(cMem->DataByte[0] == 0xFF && cMem->DataByte[1] == 0x25)
                 {
-                    KnownRedirectionIndex = 2;					//	; tELock 0.80 - 0.85
-                    //	;$ ==>    >- FF25 48018E00   JMP NEAR DWORD PTR DS:[8E0148]
+                    KnownRedirectionIndex = 2;                  //  ; tELock 0.80 - 0.85
+                    //  ;$ ==>    >- FF25 48018E00   JMP NEAR DWORD PTR DS:[8E0148]
                 }
                 else if((cMem->DataByte[0] == 0xFF && cMem->DataByte[1] == 0x35) || (cMem->DataByte[1] == 0xFF && cMem->DataByte[2] == 0x35) && (cMem->DataByte[8] == 0xC3 || cMem->DataByte[9] == 0xC3))
                 {
-                    KnownRedirectionIndex = 3;					//	; tELock 0.90 - 0.95
-                    /*	;$ ==>    >  FF35 AE018E00   PUSH DWORD PTR DS:[8E01AE]               ; kernel32.InitializeCriticalSection
-                    	;$+6      >  A8 C3           TEST AL,0C3
-                    	;$+8      >  C3              RET
-                    	;$+9      >  F9              STC
-                    	;$+A      >  FF35 B2018E00   PUSH DWORD PTR DS:[8E01B2]               ; kernel32.VirtualFree
-                    	;$+10     >  80FA C3         CMP DL,0C3
-                    	;$+13     >  C3              RET */
+                    KnownRedirectionIndex = 3;                  //  ; tELock 0.90 - 0.95
+                    /*  ;$ ==>    >  FF35 AE018E00   PUSH DWORD PTR DS:[8E01AE]               ; kernel32.InitializeCriticalSection
+                        ;$+6      >  A8 C3           TEST AL,0C3
+                        ;$+8      >  C3              RET
+                        ;$+9      >  F9              STC
+                        ;$+A      >  FF35 B2018E00   PUSH DWORD PTR DS:[8E01B2]               ; kernel32.VirtualFree
+                        ;$+10     >  80FA C3         CMP DL,0C3
+                        ;$+13     >  C3              RET */
                 }
                 else if(cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x01 && cMem->DataByte[2] == 0xC9 && cMem->DataByte[3] == 0x60 && cMem->DataByte[4] == 0x0F && cMem->DataByte[5] == 0x31)
                 {
-                    KnownRedirectionIndex = 8;					//	; AlexProtector 1.x
-                    /*	;$ ==>    > /EB 01           JMP SHORT 008413F9
-                    	;$+2      > |C9              LEAVE
-                    	;$+3      > \60              PUSHAD
-                    	;$+4      >  0F31            RDTSC
-                    	;$+6      >  EB 01           JMP SHORT 008413FF
-                    	;$+8      >  C9              LEAVE
-                    	;$+9      >  8BD8            MOV EBX,EAX
-                    	;$+B      >  EB 01           JMP SHORT 00841404
-                    	;...
-                    	;$+33     >  68 E9B9D477     PUSH USER32.PostQuitMessage
-                    	;$+38     >  EB 01           JMP SHORT 00841431
-                    	;$+3A     >- E9 C3EB01E9     JMP E985FFF8 */
+                    KnownRedirectionIndex = 8;                  //  ; AlexProtector 1.x
+                    /*  ;$ ==>    > /EB 01           JMP SHORT 008413F9
+                        ;$+2      > |C9              LEAVE
+                        ;$+3      > \60              PUSHAD
+                        ;$+4      >  0F31            RDTSC
+                        ;$+6      >  EB 01           JMP SHORT 008413FF
+                        ;$+8      >  C9              LEAVE
+                        ;$+9      >  8BD8            MOV EBX,EAX
+                        ;$+B      >  EB 01           JMP SHORT 00841404
+                        ;...
+                        ;$+33     >  68 E9B9D477     PUSH USER32.PostQuitMessage
+                        ;$+38     >  EB 01           JMP SHORT 00841431
+                        ;$+3A     >- E9 C3EB01E9     JMP E985FFF8 */
                 }
                 else if((cMem->DataByte[0] == 0x0B && cMem->DataByte[1] == 0xC5) || (cMem->DataByte[0] == 0x05 && cMem->DataByte[5] == 0xB8 && cMem->DataByte[10] == 0xEB && cMem->DataByte[11] == 0x02))
                 {
-                    KnownRedirectionIndex = 5;					//	; tELock 0.99 - 1.0 Private!
-                    /*	;008E0122    05 F9DEBE71     ADD EAX,71BEDEF9
-                    	;008E0127    B8 28018E00     MOV EAX,8E0128
-                    	;008E012C    EB 02           JMP SHORT 008E0130
-                    	;008E012E    CD 20           INT 20
-                    	;008E0130    05 18000000     ADD EAX,18
-                    	;008E0135    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;008E0137    35 22018E00     XOR EAX,8E0122
-                    	;008E013C    90              NOP
-                    	;008E013D    90              NOP
-                    	;008E013E    50              PUSH EAX
-                    	;008E013F    C3              RET
-                    	;
-                    	;00850036    13C4            ADC EAX,ESP
-                    	;00850038    E8 0A000000     CALL 00850047
-                    	;0085003D    90              NOP
-                    	;0085003E    1BC2            SBB EAX,EDX
-                    	;00850040    E9 09000000     JMP 0085004E
-                    	;00850045    1BC3            SBB EAX,EBX
-                    	;00850047    83F8 74         CMP EAX,74
-                    	;0085004A    C3              RET
-                    	;0085004B    98              CWDE
-                    	;0085004C    33C7            XOR EAX,EDI
-                    	;0085004E    D6              SALC
-                    	;0085004F    B8 50008500     MOV EAX,850050
-                    	;00850054    EB 02           JMP SHORT 00850058
-                    	;00850056    CD 20           INT 20
-                    	;00850058    05 18000000     ADD EAX,18
-                    	;0085005D    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;0085005F    35 36008500     XOR EAX,850036
-                    	;00850064    90              NOP
-                    	;00850065    90              NOP
-                    	;00850066    50              PUSH EAX
-                    	;00850067    C3              RET */
+                    KnownRedirectionIndex = 5;                  //  ; tELock 0.99 - 1.0 Private!
+                    /*  ;008E0122    05 F9DEBE71     ADD EAX,71BEDEF9
+                        ;008E0127    B8 28018E00     MOV EAX,8E0128
+                        ;008E012C    EB 02           JMP SHORT 008E0130
+                        ;008E012E    CD 20           INT 20
+                        ;008E0130    05 18000000     ADD EAX,18
+                        ;008E0135    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;008E0137    35 22018E00     XOR EAX,8E0122
+                        ;008E013C    90              NOP
+                        ;008E013D    90              NOP
+                        ;008E013E    50              PUSH EAX
+                        ;008E013F    C3              RET
+                        ;
+                        ;00850036    13C4            ADC EAX,ESP
+                        ;00850038    E8 0A000000     CALL 00850047
+                        ;0085003D    90              NOP
+                        ;0085003E    1BC2            SBB EAX,EDX
+                        ;00850040    E9 09000000     JMP 0085004E
+                        ;00850045    1BC3            SBB EAX,EBX
+                        ;00850047    83F8 74         CMP EAX,74
+                        ;0085004A    C3              RET
+                        ;0085004B    98              CWDE
+                        ;0085004C    33C7            XOR EAX,EDI
+                        ;0085004E    D6              SALC
+                        ;0085004F    B8 50008500     MOV EAX,850050
+                        ;00850054    EB 02           JMP SHORT 00850058
+                        ;00850056    CD 20           INT 20
+                        ;00850058    05 18000000     ADD EAX,18
+                        ;0085005D    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;0085005F    35 36008500     XOR EAX,850036
+                        ;00850064    90              NOP
+                        ;00850065    90              NOP
+                        ;00850066    50              PUSH EAX
+                        ;00850067    C3              RET */
                 }
                 else if((cMem->DataByte[0] == 0x13 && cMem->DataByte[1] == 0xC4 && cMem->DataByte[2] == 0xE8) || (cMem->DataByte[0] == 0x83 && cMem->DataByte[3] == 0xE8))
                 {
-                    KnownRedirectionIndex = 5;					//	; tELock 0.99 - 1.0 Private!
+                    KnownRedirectionIndex = 5;                  //  ; tELock 0.99 - 1.0 Private!
                 }
                 else if((cMem->DataByte[0] == 0xB8 || cMem->DataByte[0] == 0x1D || cMem->DataByte[0] == 0x0D || cMem->DataByte[0] == 0x2D) && cMem->DataByte[5] == 0xB8 && cMem->DataByte[10] == 0xEB && cMem->DataByte[11] == 0x02)
                 {
-                    KnownRedirectionIndex = 5;					//	; tELock 0.99 - 1.0 Private!
-                    /*	;011F0000    B8 2107F205     MOV EAX,5F20721
-                    	;011F0005    B8 06008D00     MOV EAX,8D0006
-                    	;011F000A    EB 02           JMP SHORT 011F000E
-                    	;011F000C    CD 20           INT 20
-                    	;011F000E    05 18000000     ADD EAX,18
-                    	;011F0013    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;011F0015    35 00008D00     XOR EAX,8D0000
-                    	;011F001A    90              NOP
-                    	;011F001B    90              NOP
-                    	;011F001C    50              PUSH EAX
-                    	;011F001D    C3              RET
-                    	;
-                    	;01360000    1D A508F205     SBB EAX,5F208A5
-                    	;01360005    B8 28008D00     MOV EAX,8D0028
-                    	;0136000A    EB 02           JMP SHORT 0136000E
-                    	;0136000C    CD 20           INT 20
-                    	;0136000E    05 18000000     ADD EAX,18
-                    	;01360013    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;01360015    35 22008D00     XOR EAX,8D0022
-                    	;0136001A    90              NOP
-                    	;0136001B    90              NOP
-                    	;0136001C    50              PUSH EAX
-                    	;0136001D    C3              RET
-                    	;
-                    	;014B0000    0D F918F205     OR EAX,5F218F9
-                    	;014B0005    B8 4A008D00     MOV EAX,8D004A
-                    	;014B000A    EB 02           JMP SHORT 014B000E
-                    	;014B000C    CD 20           INT 20
-                    	;014B000E    05 18000000     ADD EAX,18
-                    	;014B0013    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;014B0015    35 44008D00     XOR EAX,8D0044
-                    	;014B001A    90              NOP
-                    	;014B001B    90              NOP
-                    	;014B001C    50              PUSH EAX
-                    	;014B001D    C3              RET
-                    	;
-                    	;01750000    2D 0B37F205     SUB EAX,5F2370B
-                    	;01750005    B8 8E008D00     MOV EAX,8D008E
-                    	;0175000A    EB 02           JMP SHORT 0175000E
-                    	;0175000C    CD 20           INT 20
-                    	;0175000E    05 18000000     ADD EAX,18
-                    	;01750013    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;01750015    35 88008D00     XOR EAX,8D0088
-                    	;0175001A    90              NOP
-                    	;0175001B    90              NOP
-                    	;0175001C    50              PUSH EAX
-                    	;0175001D    C3              RET
-                    	;
-                    	;019F0000    0BC4            OR EAX,ESP
-                    	;019F0002    F9              STC
-                    	;019F0003    E8 0B000000     CALL 019F0013
-                    	;019F0008    90              NOP
-                    	;019F0009    13C4            ADC EAX,ESP
-                    	;019F000B    E9 0A000000     JMP 019F001A
-                    	;019F0010    F9              STC
-                    	;019F0011    13C3            ADC EAX,EBX
-                    	;019F0013    98              CWDE
-                    	;019F0014    03C2            ADD EAX,EDX
-                    	;019F0016    C3              RET
-                    	;
-                    	;01B40000    48              DEC EAX
-                    	;01B40001    E8 0D000000     CALL 01B40013
-                    	;01B40006    03C5            ADD EAX,EBP
-                    	;01B40008    FC              CLD
-                    	;01B40009    E9 0A000000     JMP 01B40018
-                    	;01B4000E    35 D82FF205     XOR EAX,5F22FD8
-                    	;01B40013    C1C8 9A         ROR EAX,9A
-                    	;01B40016    C3              RET */
+                    KnownRedirectionIndex = 5;                  //  ; tELock 0.99 - 1.0 Private!
+                    /*  ;011F0000    B8 2107F205     MOV EAX,5F20721
+                        ;011F0005    B8 06008D00     MOV EAX,8D0006
+                        ;011F000A    EB 02           JMP SHORT 011F000E
+                        ;011F000C    CD 20           INT 20
+                        ;011F000E    05 18000000     ADD EAX,18
+                        ;011F0013    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;011F0015    35 00008D00     XOR EAX,8D0000
+                        ;011F001A    90              NOP
+                        ;011F001B    90              NOP
+                        ;011F001C    50              PUSH EAX
+                        ;011F001D    C3              RET
+                        ;
+                        ;01360000    1D A508F205     SBB EAX,5F208A5
+                        ;01360005    B8 28008D00     MOV EAX,8D0028
+                        ;0136000A    EB 02           JMP SHORT 0136000E
+                        ;0136000C    CD 20           INT 20
+                        ;0136000E    05 18000000     ADD EAX,18
+                        ;01360013    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;01360015    35 22008D00     XOR EAX,8D0022
+                        ;0136001A    90              NOP
+                        ;0136001B    90              NOP
+                        ;0136001C    50              PUSH EAX
+                        ;0136001D    C3              RET
+                        ;
+                        ;014B0000    0D F918F205     OR EAX,5F218F9
+                        ;014B0005    B8 4A008D00     MOV EAX,8D004A
+                        ;014B000A    EB 02           JMP SHORT 014B000E
+                        ;014B000C    CD 20           INT 20
+                        ;014B000E    05 18000000     ADD EAX,18
+                        ;014B0013    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;014B0015    35 44008D00     XOR EAX,8D0044
+                        ;014B001A    90              NOP
+                        ;014B001B    90              NOP
+                        ;014B001C    50              PUSH EAX
+                        ;014B001D    C3              RET
+                        ;
+                        ;01750000    2D 0B37F205     SUB EAX,5F2370B
+                        ;01750005    B8 8E008D00     MOV EAX,8D008E
+                        ;0175000A    EB 02           JMP SHORT 0175000E
+                        ;0175000C    CD 20           INT 20
+                        ;0175000E    05 18000000     ADD EAX,18
+                        ;01750013    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;01750015    35 88008D00     XOR EAX,8D0088
+                        ;0175001A    90              NOP
+                        ;0175001B    90              NOP
+                        ;0175001C    50              PUSH EAX
+                        ;0175001D    C3              RET
+                        ;
+                        ;019F0000    0BC4            OR EAX,ESP
+                        ;019F0002    F9              STC
+                        ;019F0003    E8 0B000000     CALL 019F0013
+                        ;019F0008    90              NOP
+                        ;019F0009    13C4            ADC EAX,ESP
+                        ;019F000B    E9 0A000000     JMP 019F001A
+                        ;019F0010    F9              STC
+                        ;019F0011    13C3            ADC EAX,EBX
+                        ;019F0013    98              CWDE
+                        ;019F0014    03C2            ADD EAX,EDX
+                        ;019F0016    C3              RET
+                        ;
+                        ;01B40000    48              DEC EAX
+                        ;01B40001    E8 0D000000     CALL 01B40013
+                        ;01B40006    03C5            ADD EAX,EBP
+                        ;01B40008    FC              CLD
+                        ;01B40009    E9 0A000000     JMP 01B40018
+                        ;01B4000E    35 D82FF205     XOR EAX,5F22FD8
+                        ;01B40013    C1C8 9A         ROR EAX,9A
+                        ;01B40016    C3              RET */
                 }
                 else if((cMem->DataByte[0] == 0x0B && cMem->DataByte[1] == 0xC4 && cMem->DataByte[2] == 0xF9 && cMem->DataByte[3] == 0xE8) || (cMem->DataByte[0] == 0x48 && cMem->DataByte[1] == 0xE8))
                 {
-                    KnownRedirectionIndex = 5;					//	; tELock 0.99 - 1.0 Private!
+                    KnownRedirectionIndex = 5;                  //  ; tELock 0.99 - 1.0 Private!
                 }
                 else if((cMem->DataByte[0] == 0xB8 && cMem->DataByte[5] == 0xE8 && cMem->DataByte[10] == 0xF9 && cMem->DataByte[11] == 0xE9) && (cMem->DataByte[0] == 0xE8 && cMem->DataByte[1] == 0x0B && cMem->DataByte[10] == 0xE9 && cMem->DataByte[11] == 0x05 && cMem->DataByte[15] == 0x90 && cMem->DataByte[16] == 0xC3))
                 {
-                    KnownRedirectionIndex = 5;					//	; tELock 0.99 - 1.0 Private!
-                    /*	;01C90000    B8 B853F205     MOV EAX,5F253B8
-                    	;01C90005    E8 07000000     CALL 01C90011
-                    	;01C9000A    F9              STC
-                    	;01C9000B    E9 07000000     JMP 01C90017
-                    	;01C90010    90              NOP
-                    	;01C90011    23C3            AND EAX,EBX
-                    	;01C90013    C3              RET
-                    	;
-                    	;00A40022    1BC2            SBB EAX,EDX
-                    	;00A40024    E8 08000000     CALL 00A40031
-                    	;00A40029    40              INC EAX
-                    	;00A4002A    E9 09000000     JMP 00A40038
-                    	;00A4002F    33C7            XOR EAX,EDI
-                    	;00A40031    C1E8 92         SHR EAX,92
-                    	;00A40034    C3              RET
-                    	;00A40035    83E0 25         AND EAX,25
-                    	;00A40038    25 E5AE65DD     AND EAX,DD65AEE5
-                    	;00A4003D    B8 3E00A400     MOV EAX,0A4003E
-                    	;00A40042    EB 02           JMP SHORT 00A40046
-                    	;00A40044    CD 20           INT 20
-                    	;00A40046    05 18000000     ADD EAX,18
-                    	;00A4004B    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;00A4004D    35 2200A400     XOR EAX,0A40022
-                    	;00A40052    90              NOP
-                    	;00A40053    90              NOP
-                    	;00A40054    50              PUSH EAX
-                    	;00A40055    C3              RET
-                    	;
-                    	;00A4005A    E8 0B000000     CALL 00A4006A
-                    	;00A4005F    15 06F265DD     ADC EAX,DD65F206
-                    	;00A40064    E9 05000000     JMP 00A4006E
-                    	;00A40069    90              NOP
-                    	;00A4006A    C3              RET
-                    	;00A4006B    1BC5            SBB EAX,EBP
-                    	;00A4006D    40              INC EAX
-                    	;00A4006E    1BC0            SBB EAX,EAX
-                    	;00A40070    F9              STC
-                    	;00A40071    B8 7200A400     MOV EAX,0A40072
-                    	;00A40076    EB 02           JMP SHORT 00A4007A
-                    	;00A40078    CD 20           INT 20
-                    	;00A4007A    05 18000000     ADD EAX,18
-                    	;00A4007F    8B00            MOV EAX,DWORD PTR DS:[EAX]
-                    	;00A40081    35 5A00A400     XOR EAX,0A4005A
-                    	;00A40086    90              NOP
-                    	;00A40087    90              NOP
-                    	;00A40088    50              PUSH EAX
-                    	;00A40089    C3              RET */
+                    KnownRedirectionIndex = 5;                  //  ; tELock 0.99 - 1.0 Private!
+                    /*  ;01C90000    B8 B853F205     MOV EAX,5F253B8
+                        ;01C90005    E8 07000000     CALL 01C90011
+                        ;01C9000A    F9              STC
+                        ;01C9000B    E9 07000000     JMP 01C90017
+                        ;01C90010    90              NOP
+                        ;01C90011    23C3            AND EAX,EBX
+                        ;01C90013    C3              RET
+                        ;
+                        ;00A40022    1BC2            SBB EAX,EDX
+                        ;00A40024    E8 08000000     CALL 00A40031
+                        ;00A40029    40              INC EAX
+                        ;00A4002A    E9 09000000     JMP 00A40038
+                        ;00A4002F    33C7            XOR EAX,EDI
+                        ;00A40031    C1E8 92         SHR EAX,92
+                        ;00A40034    C3              RET
+                        ;00A40035    83E0 25         AND EAX,25
+                        ;00A40038    25 E5AE65DD     AND EAX,DD65AEE5
+                        ;00A4003D    B8 3E00A400     MOV EAX,0A4003E
+                        ;00A40042    EB 02           JMP SHORT 00A40046
+                        ;00A40044    CD 20           INT 20
+                        ;00A40046    05 18000000     ADD EAX,18
+                        ;00A4004B    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;00A4004D    35 2200A400     XOR EAX,0A40022
+                        ;00A40052    90              NOP
+                        ;00A40053    90              NOP
+                        ;00A40054    50              PUSH EAX
+                        ;00A40055    C3              RET
+                        ;
+                        ;00A4005A    E8 0B000000     CALL 00A4006A
+                        ;00A4005F    15 06F265DD     ADC EAX,DD65F206
+                        ;00A40064    E9 05000000     JMP 00A4006E
+                        ;00A40069    90              NOP
+                        ;00A4006A    C3              RET
+                        ;00A4006B    1BC5            SBB EAX,EBP
+                        ;00A4006D    40              INC EAX
+                        ;00A4006E    1BC0            SBB EAX,EAX
+                        ;00A40070    F9              STC
+                        ;00A40071    B8 7200A400     MOV EAX,0A40072
+                        ;00A40076    EB 02           JMP SHORT 00A4007A
+                        ;00A40078    CD 20           INT 20
+                        ;00A4007A    05 18000000     ADD EAX,18
+                        ;00A4007F    8B00            MOV EAX,DWORD PTR DS:[EAX]
+                        ;00A40081    35 5A00A400     XOR EAX,0A4005A
+                        ;00A40086    90              NOP
+                        ;00A40087    90              NOP
+                        ;00A40088    50              PUSH EAX
+                        ;00A40089    C3              RET */
                 }
                 else if(cMem->DataByte[0] == 0x1B && cMem->DataByte[1] == 0xC2 && cMem->DataByte[2] == 0xE8 && cMem->DataByte[3] == 0x08 && cMem->DataByte[7] == 0x40 && cMem->DataByte[8] == 0xE9 && cMem->DataByte[9] == 0x09 && cMem->DataByte[10] == 0x00)
                 {
-                    KnownRedirectionIndex = 5;					//	; tELock 0.99 - 1.0 Private!
+                    KnownRedirectionIndex = 5;                  //  ; tELock 0.99 - 1.0 Private!
                 }
                 else if(cMem->DataByte[0] == 0x68 && cMem->DataByte[5] == 0xE9)
                 {
@@ -970,15 +970,15 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                     {
                         if(ImporterGetAPIName((ULONG_PTR)TestAddressX86) != NULL)
                         {
-                            KnownRedirectionIndex = 6;			//	; ReCrypt 0.74
-                            /*	;001739F1    68 E9D9D477     PUSH User32.EndDialog
-                            	;001739F6  ^ E9 FDFEFFFF     JMP 001738F8 */
+                            KnownRedirectionIndex = 6;          //  ; ReCrypt 0.74
+                            /*  ;001739F1    68 E9D9D477     PUSH User32.EndDialog
+                                ;001739F6  ^ E9 FDFEFFFF     JMP 001738F8 */
                         }
                     }
                 }
                 else if((cMem->DataByte[0] == 0xE8 && cMem->DataByte[5] == 0x58 && cMem->DataByte[6] == 0xEB && cMem->DataByte[7] == 0x01) || (cMem->DataByte[0] == 0xC8 && cMem->DataByte[4] == 0xE8 && cMem->DataByte[9] == 0x5B))
                 {
-                    KnownRedirectionIndex = 7;					//	; Orien 2.1x
+                    KnownRedirectionIndex = 7;                  //  ; Orien 2.1x
                     /* ;GetCommandLineA
                     ;$ ==>    >/$  E8 00000000     CALL crackme_.0040DF8F
                     ;$+5      >|$  58              POP EAX
@@ -1044,7 +1044,7 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                 }
                 else if((cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x01 && cMem->DataByte[2] == 0x66 && cMem->DataByte[3] == 0x1B) || (cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x02 && cMem->DataByte[2] == 0xCD && cMem->DataByte[3] == 0x20) || (cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x01 && cMem->DataByte[2] == 0xB8 && cMem->DataByte[3] == 0xEB))
                 {
-                    KnownRedirectionIndex = 4;					// ; tELock 0.96 - 0.98
+                    KnownRedirectionIndex = 4;                  // ; tELock 0.96 - 0.98
                     /* ;(BYTE PTR[ESI] == 0EBh && (BYTE PTR[ESI+3] == 0EBh || BYTE PTR[ESI+2] == 0EBh))
                     ;017B0000    0BE4            OR ESP,ESP
                     ;017B0002    75 01           JNZ SHORT 017B0005
@@ -1067,11 +1067,11 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                 }
                 else if((cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x03 && cMem->DataByte[2] == 0xFF && cMem->DataByte[3] == 0xEB) || (cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x01 && cMem->DataByte[2] == 0xB8 && cMem->DataByte[3] == 0x05) || (cMem->DataByte[0] == 0xEB && cMem->DataByte[1] == 0x02 && cMem->DataByte[2] == 0xFF && cMem->DataByte[3] == 0x20))
                 {
-                    KnownRedirectionIndex = 4;					// ; tELock 0.96 - 0.98
+                    KnownRedirectionIndex = 4;                  // ; tELock 0.96 - 0.98
                 }
                 else if((cMem->DataByte[0] == 0xF9 || cMem->DataByte[0] == 0xF8) || (cMem->DataByte[0] == 0x0B && cMem->DataByte[1] == 0xE4) || (cMem->DataByte[0] == 0x85 && cMem->DataByte[1] == 0xE4))
                 {
-                    KnownRedirectionIndex = 4;					// ; tELock 0.96 - 0.98
+                    KnownRedirectionIndex = 4;                  // ; tELock 0.96 - 0.98
                 }
                 else if(cMem->DataByte[0] == 0xEB && (cMem->DataByte[1] > NULL && cMem->DataByte[1] < 4))
                 {
@@ -1079,9 +1079,9 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                     j = 30;
                     while(j > NULL)
                     {
-                        if(cMem->DataByte[i] == 0xB8 && (cMem->DataByte[i+5] == 0x40 || cMem->DataByte[i+5] == 0x90) && cMem->DataByte[i+6] == 0xFF && cMem->DataByte[i+7] == 0x30 && cMem->DataByte[i+8] == 0xC3)
+                        if(cMem->DataByte[i] == 0xB8 && (cMem->DataByte[i + 5] == 0x40 || cMem->DataByte[i + 5] == 0x90) && cMem->DataByte[i + 6] == 0xFF && cMem->DataByte[i + 7] == 0x30 && cMem->DataByte[i + 8] == 0xC3)
                         {
-                            KnownRedirectionIndex = 4;			// ; tELock 0.96 - 0.98
+                            KnownRedirectionIndex = 4;          // ; tELock 0.96 - 0.98
                             j = 1;
                         }
                         i++;
@@ -1095,11 +1095,11 @@ __declspec(dllexport) long TITCALL TracerDetectRedirection(HANDLE hProcess, ULON
                         MemoryHash = EngineHashMemory((char*)TraceMemory, 192, MemoryHash);
                         if(MemoryHash == 0x5AF7E209 || MemoryHash == 0xEB480CAC || MemoryHash == 0x86218561 || MemoryHash == 0xCA9ABD85)
                         {
-                            KnownRedirectionIndex = 9;			// ; SVKP 1.x
+                            KnownRedirectionIndex = 9;          // ; SVKP 1.x
                         }
                         else if(MemoryHash == 0xF1F84A98 || MemoryHash == 0x91823290 || MemoryHash == 0xBEE6BAA0 || MemoryHash == 0x79603232)
                         {
-                            KnownRedirectionIndex = 9;			// ; SVKP 1.x
+                            KnownRedirectionIndex = 9;          // ; SVKP 1.x
                         }
                     }
                 }
@@ -1123,7 +1123,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR ueNumberOfBytesRead = NULL;
     char TracerReadMemory[0x1000] = {0};
-    DWORD MaximumReadSize=0x1000;
+    DWORD MaximumReadSize = 0x1000;
     cMem = (PMEMORY_CMP_HANDLER)TracerReadMemory;
 
     VirtualQueryEx(hProcess, (LPVOID)AddressToTrace, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -1139,7 +1139,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
     {
         RedirectionId = (DWORD)TracerDetectRedirection(hProcess, AddressToTrace);
     }
-    if(RedirectionId == 1) 												//	TracerFix_ACProtect
+    if(RedirectionId == 1)                                              //  TracerFix_ACProtect
     {
         __try
         {
@@ -1169,7 +1169,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 2) 										//	TracerFix_tELock_varA
+    else if(RedirectionId == 2)                                         //  TracerFix_tELock_varA
     {
         __try
         {
@@ -1187,7 +1187,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 3) 										//	TracerFix_tELock_varB
+    else if(RedirectionId == 3)                                         //  TracerFix_tELock_varB
     {
         __try
         {
@@ -1212,7 +1212,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 4) 										//	TracerFix_tELock_varC
+    else if(RedirectionId == 4)                                         //  TracerFix_tELock_varC
     {
         __try
         {
@@ -1276,7 +1276,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 5) 										//	TracerFix_tELock_varD
+    else if(RedirectionId == 5)                                         //  TracerFix_tELock_varD
     {
         __try
         {
@@ -1307,7 +1307,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 6) 										//	TracerFix_ReCrypt
+    else if(RedirectionId == 6)                                         //  TracerFix_ReCrypt
     {
         __try
         {
@@ -1322,7 +1322,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 7) 										//	TracerFix_Orien
+    else if(RedirectionId == 7)                                         //  TracerFix_Orien
     {
         __try
         {
@@ -1353,7 +1353,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 8) 										//	TracerFix_AlexProtector
+    else if(RedirectionId == 8)                                         //  TracerFix_AlexProtector
     {
         __try
         {
@@ -1369,7 +1369,7 @@ __declspec(dllexport) ULONG_PTR TITCALL TracerFixKnownRedirection(HANDLE hProces
             return(NULL);
         }
     }
-    else if(RedirectionId == 9 && MaximumReadSize > 192) 				//	TracerFix_SVKP
+    else if(RedirectionId == 9 && MaximumReadSize > 192)                //  TracerFix_SVKP
     {
         __try
         {
@@ -1448,7 +1448,7 @@ __declspec(dllexport) long TITCALL TracerFixRedirectionViaImpRecPlugin(HANDLE hP
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
 
-    if(GetModuleFileNameA(engineHandle, (LPCH)szModuleName, sizeof(szModuleName)-0x100) > NULL)
+    if(GetModuleFileNameA(engineHandle, (LPCH)szModuleName, sizeof(szModuleName) - 0x100) > NULL)
     {
         cModuleName = (LPVOID)((ULONG_PTR)cModuleName + lstrlenA((LPCSTR)szModuleName));
         cmpModuleName = (PMEMORY_CMP_HANDLER)(cModuleName);

@@ -37,13 +37,13 @@ unsigned long EngineCrc32Reflect(unsigned long ulReflect, const char cChar)
     return ulValue;
 }
 
-void EngineCrc32PartialCRC(unsigned long *ulCRC, const unsigned char *sData, unsigned long ulDataLength)
+void EngineCrc32PartialCRC(unsigned long* ulCRC, const unsigned char* sData, unsigned long ulDataLength)
 {
 
     while(ulDataLength--)
     {
         //If your compiler complains about the following line, try changing each
-        //	occurrence of *ulCRC with "((unsigned long)*ulCRC)" or "*(unsigned long *)ulCRC".
-        *(unsigned long *)ulCRC = ((*(unsigned long *)ulCRC) >> 8) ^ Crc32Table[((*(unsigned long *)ulCRC) & 0xFF) ^ *sData++];
+        //  occurrence of *ulCRC with "((unsigned long)*ulCRC)" or "*(unsigned long *)ulCRC".
+        *(unsigned long*)ulCRC = ((*(unsigned long*)ulCRC) >> 8) ^ Crc32Table[((*(unsigned long*)ulCRC) & 0xFF) ^ *sData++];
     }
 }

@@ -14,7 +14,7 @@ __declspec(dllexport) bool TITCALL FindOverlay(char* szFileName, LPDWORD Overlay
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(FindOverlayW(uniFileName, OverlayStart, OverlaySize));
     }
     else
@@ -156,8 +156,8 @@ __declspec(dllexport) bool TITCALL ExtractOverlay(char* szFileName, char* szExta
 
     if(szFileName != NULL && szExtactedFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szExtactedFileName, lstrlenA(szExtactedFileName)+1, uniExtactedFileName, sizeof(uniExtactedFileName)/(sizeof(uniExtactedFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szExtactedFileName, lstrlenA(szExtactedFileName) + 1, uniExtactedFileName, sizeof(uniExtactedFileName) / (sizeof(uniExtactedFileName[0])));
         return(ExtractOverlayW(uniFileName, uniExtactedFileName));
     }
     else
@@ -241,8 +241,8 @@ __declspec(dllexport) bool TITCALL AddOverlay(char* szFileName, char* szOverlayF
 
     if(szFileName != NULL && szOverlayFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szOverlayFileName, lstrlenA(szOverlayFileName)+1, uniOverlayFileName, sizeof(uniOverlayFileName)/(sizeof(uniOverlayFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szOverlayFileName, lstrlenA(szOverlayFileName) + 1, uniOverlayFileName, sizeof(uniOverlayFileName) / (sizeof(uniOverlayFileName[0])));
         return(AddOverlayW(uniFileName, uniOverlayFileName));
     }
     else
@@ -261,7 +261,7 @@ __declspec(dllexport) bool TITCALL AddOverlayW(wchar_t* szFileName, wchar_t* szO
     DWORD uedNumberOfBytesRead = 0;
     char ueReadBuffer[0x2000] = {0};
 
-    hFile = CreateFileW(szFileName, GENERIC_READ+GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    hFile = CreateFileW(szFileName, GENERIC_READ + GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(hFile != INVALID_HANDLE_VALUE)
     {
         hFileRead = CreateFileW(szOverlayFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -323,8 +323,8 @@ __declspec(dllexport) bool TITCALL CopyOverlay(char* szInFileName, char* szOutFi
 
     if(szInFileName != NULL && szOutFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szInFileName, lstrlenA(szInFileName)+1, uniInFileName, sizeof(uniInFileName)/(sizeof(uniInFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szOutFileName, lstrlenA(szOutFileName)+1, uniOutFileName, sizeof(uniOutFileName)/(sizeof(uniOutFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szInFileName, lstrlenA(szInFileName) + 1, uniInFileName, sizeof(uniInFileName) / (sizeof(uniInFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szOutFileName, lstrlenA(szOutFileName) + 1, uniOutFileName, sizeof(uniOutFileName) / (sizeof(uniOutFileName[0])));
         return(CopyOverlayW(uniInFileName, uniOutFileName));
     }
     else
@@ -359,7 +359,7 @@ __declspec(dllexport) bool TITCALL RemoveOverlay(char* szFileName)
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(RemoveOverlayW(uniFileName));
     }
     else

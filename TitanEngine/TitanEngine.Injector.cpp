@@ -10,7 +10,7 @@ __declspec(dllexport) bool TITCALL RemoteLoadLibrary(HANDLE hProcess, char* szLi
 
     if(szLibraryFile != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szLibraryFile, lstrlenA(szLibraryFile)+1, uniLibraryFile, sizeof(uniLibraryFile)/(sizeof(uniLibraryFile[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szLibraryFile, lstrlenA(szLibraryFile) + 1, uniLibraryFile, sizeof(uniLibraryFile) / (sizeof(uniLibraryFile[0])));
         return(RemoteLoadLibraryW(hProcess, uniLibraryFile, WaitForThreadExit));
     }
     else
@@ -96,7 +96,7 @@ __declspec(dllexport) bool TITCALL RemoteFreeLibrary(HANDLE hProcess, HMODULE hM
 
     if(szLibraryFile != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szLibraryFile, lstrlenA(szLibraryFile)+1, uniLibraryFile, sizeof(uniLibraryFile)/(sizeof(uniLibraryFile[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szLibraryFile, lstrlenA(szLibraryFile) + 1, uniLibraryFile, sizeof(uniLibraryFile) / (sizeof(uniLibraryFile[0])));
         return(RemoteFreeLibraryW(hProcess, hModule, uniLibraryFile, WaitForThreadExit));
     }
     else

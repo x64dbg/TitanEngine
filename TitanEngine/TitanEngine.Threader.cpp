@@ -5,14 +5,14 @@
 #include "Global.Threader.h"
 #include "Global.Debugger.h"
 
-void updateThreadList( THREAD_ITEM_DATA* NewThreadData )
+void updateThreadList(THREAD_ITEM_DATA* NewThreadData)
 {
     bool notInList = true;
     int count = (int)hListThread.size();
 
-    for (int i = 0; i < count; i++)
+    for(int i = 0; i < count; i++)
     {
-        if (hListThread.at(i).dwThreadId == NewThreadData->dwThreadId)
+        if(hListThread.at(i).dwThreadId == NewThreadData->dwThreadId)
         {
             notInList = false;
             CloseHandle(NewThreadData->hThread); //handle not needed
@@ -28,7 +28,7 @@ void updateThreadList( THREAD_ITEM_DATA* NewThreadData )
         }
     }
 
-    if (notInList)
+    if(notInList)
     {
         hListThread.push_back(*NewThreadData);
     }
@@ -40,27 +40,27 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
     bool updateList = false;
     DWORD dwProcessId = 0;
 
-    if (ProcessId == NULL && dbgProcessInformation.hProcess != NULL)
+    if(ProcessId == NULL && dbgProcessInformation.hProcess != NULL)
     {
         updateList = true;
         dwProcessId = GetProcessId(dbgProcessInformation.hProcess);
     }
-    else if (ProcessId != NULL && dbgProcessInformation.hProcess != NULL)
+    else if(ProcessId != NULL && dbgProcessInformation.hProcess != NULL)
     {
         updateList = true;
         dwProcessId = ProcessId;
     }
-    else if (ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
+    else if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
         updateList = false;
         dwProcessId = ProcessId;
     }
-    else if (ProcessId == NULL && dbgProcessInformation.hProcess == NULL)
+    else if(ProcessId == NULL && dbgProcessInformation.hProcess == NULL)
     {
         return false;
     }
 
-    if (updateList == false)
+    if(updateList == false)
     {
         std::vector<THREAD_ITEM_DATA>().swap(hListThread); //clear thread list
     }
@@ -73,15 +73,15 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
     PSYSTEM_PROCESS_INFORMATION pIter;
     PSYSTEM_THREAD_INFORMATION pIterThread;
 
-    if (NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) == STATUS_INFO_LENGTH_MISMATCH)
+    if(NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) == STATUS_INFO_LENGTH_MISMATCH)
     {
         free(pBuffer);
         bufferLength = retLength + sizeof(SYSTEM_PROCESS_INFORMATION);
         pBuffer = (PSYSTEM_PROCESS_INFORMATION)malloc(bufferLength);
-        if (!pBuffer)
+        if(!pBuffer)
             return false;
 
-        if (NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) != STATUS_SUCCESS)
+        if(NtQuerySystemInformation(SystemProcessInformation, pBuffer, bufferLength, &retLength) != STATUS_SUCCESS)
         {
             return false;
         }
@@ -95,10 +95,10 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
 
     while(TRUE)
     {
-        if (pIter->UniqueProcessId == (HANDLE)dwProcessId)
+        if(pIter->UniqueProcessId == (HANDLE)dwProcessId)
         {
             pIterThread = &pIter->Threads[0];
-            for (ULONG i = 0; i < pIter->NumberOfThreads; i++)
+            for(ULONG i = 0; i < pIter->NumberOfThreads; i++)
             {
                 ZeroMemory(&NewThreadData, sizeof(THREAD_ITEM_DATA));
 
@@ -113,18 +113,18 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                 NewThreadData.dwThreadId = (DWORD)pIterThread->ClientId.UniqueThread;
 
                 NewThreadData.hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, NewThreadData.dwThreadId);
-                if (NewThreadData.hThread)
+                if(NewThreadData.hThread)
                 {
                     NewThreadData.TebAddress = GetTEBLocation(NewThreadData.hThread);
 
                     PVOID startAddress = 0;
-                    if (NtQueryInformationThread(NewThreadData.hThread, ThreadQuerySetWin32StartAddress, &startAddress, sizeof(PVOID), NULL) == STATUS_SUCCESS)
+                    if(NtQueryInformationThread(NewThreadData.hThread, ThreadQuerySetWin32StartAddress, &startAddress, sizeof(PVOID), NULL) == STATUS_SUCCESS)
                     {
                         NewThreadData.ThreadStartAddress = startAddress;
                     }
                 }
 
-                if (updateList == false)
+                if(updateList == false)
                 {
                     hListThread.push_back(NewThreadData);
                 }
@@ -139,7 +139,7 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
             break;
         }
 
-        if (pIter->NextEntryOffset == 0)
+        if(pIter->NextEntryOffset == 0)
         {
             break;
         }
@@ -159,8 +159,8 @@ __declspec(dllexport) void* TITCALL ThreaderGetThreadInfo(HANDLE hThread, DWORD 
         return NULL;
     static THREAD_ITEM_DATA ThreadData;
     memset(&ThreadData, 0, sizeof(THREAD_ITEM_DATA));
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         if(hListThread.at(i).hThread == hThread || hListThread.at(i).dwThreadId == ThreadId)
         {
             memcpy(&ThreadData, &hListThread.at(i), sizeof(THREAD_ITEM_DATA));
@@ -171,10 +171,10 @@ __declspec(dllexport) void* TITCALL ThreaderGetThreadInfo(HANDLE hThread, DWORD 
 
 __declspec(dllexport) void TITCALL ThreaderEnumThreadInfo(void* EnumCallBack)
 {
-    typedef void(TITCALL *fEnumCallBack)(LPVOID fThreadDetail);
+    typedef void(TITCALL * fEnumCallBack)(LPVOID fThreadDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
     {
         __try
         {
@@ -189,8 +189,8 @@ __declspec(dllexport) void TITCALL ThreaderEnumThreadInfo(void* EnumCallBack)
 
 __declspec(dllexport) bool TITCALL ThreaderPauseThread(HANDLE hThread)
 {
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         if(hListThread.at(i).hThread == hThread && SuspendThread(hThread) != -1)
             return true;
     return false;
@@ -198,8 +198,8 @@ __declspec(dllexport) bool TITCALL ThreaderPauseThread(HANDLE hThread)
 
 __declspec(dllexport) bool TITCALL ThreaderResumeThread(HANDLE hThread)
 {
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         if(hListThread.at(i).hThread == hThread && ResumeThread(hThread) != -1)
             return true;
     return false;
@@ -207,11 +207,11 @@ __declspec(dllexport) bool TITCALL ThreaderResumeThread(HANDLE hThread)
 
 __declspec(dllexport) bool TITCALL ThreaderTerminateThread(HANDLE hThread, DWORD ThreadExitCode)
 {
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         if(hListThread.at(i).hThread == hThread && TerminateThread(hThread, ThreadExitCode) != NULL)
         {
-            hListThread.erase(hListThread.begin()+i);
+            hListThread.erase(hListThread.begin() + i);
             return true;
         }
     return false;
@@ -219,34 +219,34 @@ __declspec(dllexport) bool TITCALL ThreaderTerminateThread(HANDLE hThread, DWORD
 
 __declspec(dllexport) bool TITCALL ThreaderPauseAllThreads(bool LeaveMainRunning)
 {
-    bool ret=true;
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    bool ret = true;
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
     {
         DWORD suspended;
         if(LeaveMainRunning && hListThread.at(i).hThread != dbgProcessInformation.hThread)
-            suspended=SuspendThread(hListThread.at(i).hThread);
+            suspended = SuspendThread(hListThread.at(i).hThread);
         else
-            suspended=SuspendThread(hListThread.at(i).hThread);
-        if(suspended==-1)
-            ret=false;
+            suspended = SuspendThread(hListThread.at(i).hThread);
+        if(suspended == -1)
+            ret = false;
     }
     return ret;
 }
 
 __declspec(dllexport) bool TITCALL ThreaderResumeAllThreads(bool LeaveMainPaused)
 {
-    bool ret=true;
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    bool ret = true;
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
     {
         DWORD resumed;
         if(LeaveMainPaused && hListThread.at(i).hThread != dbgProcessInformation.hThread)
-            resumed=ResumeThread(hListThread.at(i).hThread);
+            resumed = ResumeThread(hListThread.at(i).hThread);
         else
-            resumed=ResumeThread(hListThread.at(i).hThread);
-        if(resumed==-1)
-            ret=false;
+            resumed = ResumeThread(hListThread.at(i).hThread);
+        if(resumed == -1)
+            ret = false;
     }
     return ret;
 }
@@ -332,8 +332,8 @@ __declspec(dllexport) bool TITCALL ThreaderIsThreadActive(HANDLE hThread)
 
 __declspec(dllexport) bool TITCALL ThreaderIsAnyThreadActive()
 {
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         if(ThreaderIsThreadActive(hListThread.at(i).hThread))
             return true;
     return false;
@@ -351,8 +351,8 @@ __declspec(dllexport) bool TITCALL ThreaderExecuteOnlyInjectedThreads()
 
 __declspec(dllexport) ULONG_PTR TITCALL ThreaderGetOpenHandleForThread(DWORD ThreadId)
 {
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         if(hListThread.at(i).dwThreadId == ThreadId)
             return (ULONG_PTR)hListThread.at(i).hThread;
     return 0;

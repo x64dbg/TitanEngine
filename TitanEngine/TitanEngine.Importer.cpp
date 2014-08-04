@@ -12,7 +12,7 @@ __declspec(dllexport) void TITCALL ImporterAddNewDll(char* szDLLName, ULONG_PTR 
 {
     wchar_t uniDLLName[MAX_PATH] = {};
 
-    MultiByteToWideChar(CP_ACP, NULL, szDLLName, lstrlenA(szDLLName)+1, uniDLLName, sizeof(uniDLLName)/(sizeof(uniDLLName[0])));
+    MultiByteToWideChar(CP_ACP, NULL, szDLLName, lstrlenA(szDLLName) + 1, uniDLLName, sizeof(uniDLLName) / (sizeof(uniDLLName[0])));
 
     scylla_addModule(uniDLLName, FirstThunk);
 }
@@ -21,14 +21,14 @@ __declspec(dllexport) void TITCALL ImporterAddNewAPI(char* szAPIName, ULONG_PTR 
 {
     wchar_t uniAPIName[MAX_PATH] = {};
 
-    MultiByteToWideChar(CP_ACP, NULL, szAPIName, lstrlenA(szAPIName)+1, uniAPIName, sizeof(uniAPIName)/(sizeof(uniAPIName[0])));
+    MultiByteToWideChar(CP_ACP, NULL, szAPIName, lstrlenA(szAPIName) + 1, uniAPIName, sizeof(uniAPIName) / (sizeof(uniAPIName[0])));
 
     scylla_addImport(uniAPIName, ThunkValue);
 }
 
 __declspec(dllexport) void TITCALL ImporterAddNewOrdinalAPI(ULONG_PTR OrdinalNumber, ULONG_PTR ThunkValue)
 {
-    ImporterAddNewAPI((char*)(OrdinalNumber&~IMAGE_ORDINAL_FLAG), ThunkValue);
+    ImporterAddNewAPI((char*)(OrdinalNumber & ~IMAGE_ORDINAL_FLAG), ThunkValue);
 }
 
 __declspec(dllexport) long TITCALL ImporterGetAddedDllCount()
@@ -58,9 +58,9 @@ __declspec(dllexport) bool TITCALL ImporterExportIATEx(char* szDumpFileName, cha
     wchar_t uniSectionName[MAX_PATH] = {};
     if(szExportFileName != NULL && szDumpFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName)+1, uniExportFileName, sizeof(uniExportFileName)/(sizeof(uniExportFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName)+1, uniDumpFileName, sizeof(uniDumpFileName)/(sizeof(uniDumpFileName[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName)+1, uniSectionName, sizeof(uniSectionName)/(sizeof(uniSectionName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szExportFileName, lstrlenA(szExportFileName) + 1, uniExportFileName, sizeof(uniExportFileName) / (sizeof(uniExportFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFileName, lstrlenA(szDumpFileName) + 1, uniDumpFileName, sizeof(uniDumpFileName) / (sizeof(uniDumpFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName) + 1, uniSectionName, sizeof(uniSectionName) / (sizeof(uniSectionName[0])));
         return ImporterExportIATExW(uniDumpFileName, uniExportFileName, uniSectionName);
     }
     return false;
@@ -118,10 +118,10 @@ __declspec(dllexport) ULONG_PTR TITCALL ImporterGetLocalAPIAddress(HANDLE hProce
 
 __declspec(dllexport) void* TITCALL ImporterGetDLLNameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    ULONG_PTR moduleBase=EngineGetModuleBaseRemote(hProcess, APIAddress);
+    ULONG_PTR moduleBase = EngineGetModuleBaseRemote(hProcess, APIAddress);
     if(moduleBase)
     {
-        static char szModuleName[MAX_PATH]="";
+        static char szModuleName[MAX_PATH] = "";
         if(GetModuleFileNameExA(hProcess, (HMODULE)moduleBase, szModuleName, _countof(szModuleName)))
             return szModuleName;
     }
@@ -130,17 +130,17 @@ __declspec(dllexport) void* TITCALL ImporterGetDLLNameFromDebugee(HANDLE hProces
 
 __declspec(dllexport) void* TITCALL ImporterGetDLLNameFromDebugeeW(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    ULONG_PTR moduleBase=EngineGetModuleBaseRemote(hProcess, APIAddress);
+    ULONG_PTR moduleBase = EngineGetModuleBaseRemote(hProcess, APIAddress);
     if(moduleBase)
     {
-        static wchar_t szModuleName[MAX_PATH]=L"";
+        static wchar_t szModuleName[MAX_PATH] = L"";
         if(GetModuleFileNameExW(hProcess, (HMODULE)moduleBase, szModuleName, _countof(szModuleName)))
             return szModuleName;
     }
     return 0;
 }
 
-__declspec(dllexport) void* TITCALL ImporterGetRemoteDLLBaseExW(HANDLE hProcess, WCHAR * szModuleName)
+__declspec(dllexport) void* TITCALL ImporterGetRemoteDLLBaseExW(HANDLE hProcess, WCHAR* szModuleName)
 {
     return (void*)EngineGetModuleBaseRemote(hProcess, szModuleName);
 }
@@ -173,7 +173,7 @@ __declspec(dllexport) void* TITCALL ImporterGetAPINameEx(ULONG_PTR APIAddress, U
 
 __declspec(dllexport) void* TITCALL ImporterGetAPINameFromDebugee(HANDLE hProcess, ULONG_PTR APIAddress)
 {
-    static char APIName[5000]="";
+    static char APIName[5000] = "";
     if(EngineGetAPINameRemote(hProcess, APIAddress, APIName, _countof(APIName), 0))
         return APIName;
     return 0;
@@ -240,8 +240,8 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIAT(char* szOriginalFile,
 
     if(szOriginalFile != NULL && szDumpFile != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFile, lstrlenA(szDumpFile)+1, uniDumpFile, sizeof(uniDumpFile)/(sizeof(uniDumpFile[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szOriginalFile, lstrlenA(szOriginalFile)+1, uniOriginalFile, sizeof(uniOriginalFile)/(sizeof(uniOriginalFile[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFile, lstrlenA(szDumpFile) + 1, uniDumpFile, sizeof(uniDumpFile) / (sizeof(uniDumpFile[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szOriginalFile, lstrlenA(szOriginalFile) + 1, uniOriginalFile, sizeof(uniOriginalFile) / (sizeof(uniOriginalFile[0])));
         return(ImporterCopyOriginalIATW(uniOriginalFile, uniDumpFile));
     }
     else
@@ -256,13 +256,13 @@ __declspec(dllexport) bool TITCALL ImporterCopyOriginalIATW(wchar_t* szOriginalF
     PIMAGE_NT_HEADERS32 PEHeader32;
     PIMAGE_NT_HEADERS64 PEHeader64;
     BOOL FileIs64;
-    HANDLE FileHandle=0;
+    HANDLE FileHandle = 0;
     DWORD FileSize;
-    HANDLE FileMap=0;
+    HANDLE FileMap = 0;
     ULONG_PTR FileMapVA;
-    HANDLE FileHandle1=0;
+    HANDLE FileHandle1 = 0;
     DWORD FileSize1;
-    HANDLE FileMap1=0;
+    HANDLE FileMap1 = 0;
     ULONG_PTR FileMapVA1;
     ULONG_PTR IATPointer;
     ULONG_PTR IATWritePointer;
@@ -342,7 +342,7 @@ __declspec(dllexport) bool TITCALL ImporterLoadImportTable(char* szFileName)
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(ImporterLoadImportTableW(uniFileName));
     }
     else
@@ -522,7 +522,7 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIAT(DWORD ProcessId, char* 
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(ImporterAutoSearchIATW(ProcessId, uniFileName, SearchStart, pIATStart, pIATSize));
     }
 }
@@ -556,7 +556,7 @@ __declspec(dllexport) void TITCALL ImporterAutoSearchIATEx(DWORD ProcessId, ULON
     {
         if(GetTempFileNameW(szTempFolder, L"DumpTemp", GetTickCount() + 102, szTempName))
         {
-            HANDLE hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+            HANDLE hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
 
             DumpProcessW(hProcess, (LPVOID)ImageBase, szTempName, NULL);
             ImporterAutoSearchIATW(ProcessId, szTempName, SearchStart, pIATStart, pIATSize);
@@ -576,13 +576,13 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATEx(DWORD ProcessId, char* s
 
     if(szDumpedFile != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpedFile, lstrlenA(szDumpedFile)+1, uniDumpedFile, sizeof(uniDumpedFile)/(sizeof(uniDumpedFile[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName)+1, uniSectionName, sizeof(uniSectionName)/(sizeof(uniSectionName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpedFile, lstrlenA(szDumpedFile) + 1, uniDumpedFile, sizeof(uniDumpedFile) / (sizeof(uniDumpedFile[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szSectionName, lstrlenA(szSectionName) + 1, uniSectionName, sizeof(uniSectionName) / (sizeof(uniSectionName[0])));
         return(ImporterAutoFixIATExW(ProcessId, uniDumpedFile, uniSectionName, DumpRunningProcess, RealignFile, EntryPointAddress, ImageBase, SearchStart, TryAutoFix, FixEliminations, UnknownPointerFixCallback));
     }
     else
     {
-        return(NULL);	// Critical error! *just to be safe, but it should never happen!
+        return(NULL);   // Critical error! *just to be safe, but it should never happen!
     }
 }
 __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_t* szDumpedFile, wchar_t* szSectionName, bool DumpRunningProcess, bool RealignFile, ULONG_PTR EntryPointAddress, ULONG_PTR ImageBase, ULONG_PTR SearchStart,  bool TryAutoFix, bool FixEliminations, LPVOID UnknownPointerFixCallback)
@@ -610,11 +610,11 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
     //do we need to dump first?
     if(DumpRunningProcess)
     {
-        HANDLE hProcess = EngineOpenProcess(PROCESS_VM_READ|PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
+        HANDLE hProcess = EngineOpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, ProcessId);
 
         if(!DumpProcessW(hProcess, (LPVOID)ImageBase, szDumpedFile, EntryPointAddress))
         {
-            return(NULL);	// Critical error! *just to be safe, but it should never happen!
+            return(NULL);   // Critical error! *just to be safe, but it should never happen!
         }
     }
 
@@ -657,10 +657,10 @@ __declspec(dllexport) long TITCALL ImporterAutoFixIATExW(DWORD ProcessId, wchar_
         }
         else
         {
-            return(0x406);	// Success, but realign failed!
+            return(0x406);  // Success, but realign failed!
         }
     }
-    return(0x400);	// Success!
+    return(0x400);  // Success!
 }
 __declspec(dllexport) long TITCALL ImporterAutoFixIAT(DWORD ProcessId, char* szDumpedFile, ULONG_PTR SearchStart)
 {

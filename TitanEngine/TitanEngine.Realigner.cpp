@@ -220,7 +220,7 @@ __declspec(dllexport) long TITCALL RealignPEEx(char* szFileName, DWORD RealingFi
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(RealignPEExW(uniFileName, RealingFileSize, ForcedFileAlignment));
     }
     else

@@ -8,23 +8,23 @@
 __declspec(dllexport) void TITCALL ForceClose()
 {
     //manage process list
-    int processcount=(int)hListProcess.size();
-    for(int i=0; i<processcount; i++)
+    int processcount = (int)hListProcess.size();
+    for(int i = 0; i < processcount; i++)
     {
         EngineCloseHandle(hListProcess.at(i).hFile);
         EngineCloseHandle(hListProcess.at(i).hProcess);
     }
     ClearProcessList();
     //manage thread list
-    int threadcount=(int)hListThread.size();
-    for(int i=0; i<threadcount; i++)
+    int threadcount = (int)hListThread.size();
+    for(int i = 0; i < threadcount; i++)
         EngineCloseHandle(hListThread.at(i).hThread);
     ClearThreadList();
     //manage library list
-    int libcount=(int)hListLibrary.size();
-    for(int i=0; i<libcount; i++)
+    int libcount = (int)hListLibrary.size();
+    for(int i = 0; i < libcount; i++)
     {
-        if(hListLibrary.at(i).hFile != (HANDLE)-1)
+        if(hListLibrary.at(i).hFile != (HANDLE) - 1)
         {
             if(hListLibrary.at(i).hFileMappingView != NULL)
             {
@@ -52,7 +52,7 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
     unsigned char instr[16];
     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-    char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
     if(strstr(DisassembledString, "PUSHF"))
         StepOver(StepCallBack);
     else
@@ -72,11 +72,11 @@ __declspec(dllexport) void TITCALL StepOver(LPVOID StepCallBack)
     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
     unsigned char instr[16];
     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-    char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
     if(strstr(DisassembledString, "CALL") || strstr(DisassembledString, "REP") || strstr(DisassembledString, "PUSHF"))
     {
-        ueCurrentPosition+=StaticLengthDisassemble((void*)instr);
-        SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3+UE_SINGLESHOOT, StepCallBack);
+        ueCurrentPosition += StaticLengthDisassemble((void*)instr);
+        SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
     }
     else
         StepInto(StepCallBack);

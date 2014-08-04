@@ -115,10 +115,10 @@ __declspec(dllexport) bool TITCALL ResourcerFindResource(char* szFileName, char*
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         if(szResourceName != NULL)
         {
-            MultiByteToWideChar(CP_ACP, NULL, szResourceName, lstrlenA(szResourceName)+1, uniResourceName, sizeof(uniResourceName)/(sizeof(uniResourceName[0])));
+            MultiByteToWideChar(CP_ACP, NULL, szResourceName, lstrlenA(szResourceName) + 1, uniResourceName, sizeof(uniResourceName) / (sizeof(uniResourceName[0])));
         }
         else
         {
@@ -126,7 +126,7 @@ __declspec(dllexport) bool TITCALL ResourcerFindResource(char* szFileName, char*
         }
         if(szResourceType != NULL)
         {
-            MultiByteToWideChar(CP_ACP, NULL, szResourceType, lstrlenA(szResourceType)+1, uniResourceType, sizeof(uniResourceType)/(sizeof(uniResourceType[0])));
+            MultiByteToWideChar(CP_ACP, NULL, szResourceType, lstrlenA(szResourceType) + 1, uniResourceType, sizeof(uniResourceType) / (sizeof(uniResourceType[0])));
         }
         else
         {
@@ -168,7 +168,7 @@ __declspec(dllexport) bool TITCALL ResourcerFindResourceW(wchar_t* szFileName, w
 __declspec(dllexport) bool TITCALL ResourcerFindResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize)
 {
 
-    int i,j,n;
+    int i, j, n;
     wchar_t* uniResourceName;
     wchar_t* uniResourceType;
     PIMAGE_RESOURCE_DIRECTORY PEResource;
@@ -255,7 +255,7 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResource(char* szFileName, 
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         ResourcerEnumerateResourceW(uniFileName, CallBack);
     }
 }
@@ -278,7 +278,7 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceW(wchar_t* szFileNa
 __declspec(dllexport) void TITCALL ResourcerEnumerateResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, void* CallBack)
 {
 
-    int i,j,n;
+    int i, j, n;
     wchar_t* uniResourceName;
     wchar_t* uniResourceType;
     PIMAGE_RESOURCE_DIRECTORY PEResource;
@@ -289,7 +289,7 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceEx(ULONG_PTR FileMa
     PIMAGE_RESOURCE_DIRECTORY PESubResourcePtr2;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY PEResourceDir2;
     PIMAGE_RESOURCE_DATA_ENTRY PEResourceItem;
-    typedef bool(TITCALL *fResourceEnumerator)(wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, DWORD ResourceData, DWORD ResourceSize);
+    typedef bool(TITCALL * fResourceEnumerator)(wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, DWORD ResourceData, DWORD ResourceSize);
     fResourceEnumerator myResourceEnumerator = (fResourceEnumerator)CallBack;
 
     __try

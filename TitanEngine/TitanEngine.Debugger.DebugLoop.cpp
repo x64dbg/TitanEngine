@@ -31,9 +31,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
     DebugRemoveDebugPrivilege = false; //reset this flag
     PLIBRARY_ITEM_DATAW hLoadedLibData = NULL;
     PLIBRARY_BREAK_DATA ptrLibrarianData = NULL;
-    typedef void(TITCALL *fCustomBreakPoint)(void);
-    typedef void(TITCALL *fCustomHandler)(void* SpecialDBG);
-    typedef void(TITCALL *fFindOEPHandler)(LPPROCESS_INFORMATION fProcessInfo, LPVOID fCallBack);
+    typedef void(TITCALL * fCustomBreakPoint)(void);
+    typedef void(TITCALL * fCustomHandler)(void* SpecialDBG);
+    typedef void(TITCALL * fFindOEPHandler)(LPPROCESS_INFORMATION fProcessInfo, LPVOID fCallBack);
     fCustomHandler myCustomHandler;
     fCustomBreakPoint myCustomBreakPoint;
     ULONG_PTR MemoryBpxCallBack = 0;
@@ -230,7 +230,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             if(ResetHwBPX)
             {
                 SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (void*)DebugRegisterX.DrxCallBack);
-                ResetHwBPX=false;
+                ResetHwBPX = false;
             }
 
             //custom handler
@@ -311,14 +311,14 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 {
                     NewLibraryData.hFileMapping = hFileMapping;
                     NewLibraryData.hFileMappingView = hFileMappingView;
-                    if(GetMappedFileNameW(GetCurrentProcess(), hFileMappingView, DLLDebugFileName, sizeof(DLLDebugFileName)/sizeof(DLLDebugFileName[0])) > NULL)
+                    if(GetMappedFileNameW(GetCurrentProcess(), hFileMappingView, DLLDebugFileName, sizeof(DLLDebugFileName) / sizeof(DLLDebugFileName[0])) > NULL)
                     {
                         int i = lstrlenW(DLLDebugFileName);
-                        while(DLLDebugFileName[i]!='\\' && i)
+                        while(DLLDebugFileName[i] != '\\' && i)
                             i--;
                         if(DebugDebuggingDLL)
                         {
-                            if(lstrcmpiW(&DLLDebugFileName[i+1], DebugDebuggingDLLFileName) == NULL)
+                            if(lstrcmpiW(&DLLDebugFileName[i + 1], DebugDebuggingDLLFileName) == NULL)
                             {
                                 CloseHandle(DebugDLLFileMapping); //close file mapping handle
                                 SetBPX(DebugModuleEntryPoint + (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll, UE_SINGLESHOOT, DebugModuleEntryPointCallBack);
@@ -334,12 +334,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         if(engineFakeDLLHandle == NULL)
                         {
-                            if(_wcsicmp(&DLLDebugFileName[i+1], L"kernel32.dll") == NULL)
+                            if(_wcsicmp(&DLLDebugFileName[i + 1], L"kernel32.dll") == NULL)
                             {
                                 engineFakeDLLHandle = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
                             }
                         }
-                        lstrcpyW(NewLibraryData.szLibraryName, &DLLDebugFileName[i+1]);
+                        lstrcpyW(NewLibraryData.szLibraryName, &DLLDebugFileName[i + 1]);
                         szTranslatedNativeName = (wchar_t*)TranslateNativeNameW(DLLDebugFileName);
                         lstrcpyW(NewLibraryData.szLibraryPath, szTranslatedNativeName);
                         VirtualFree((void*)szTranslatedNativeName, NULL, MEM_RELEASE);
@@ -349,7 +349,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         //library breakpoint
                         for(int i = (int)LibrarianData.size() - 1; i >= 0; i--)
                         {
-                            ptrLibrarianData=&LibrarianData.at(i);
+                            ptrLibrarianData = &LibrarianData.at(i);
                             if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
                             {
                                 if(ptrLibrarianData->bpxType == UE_ON_LIB_LOAD || ptrLibrarianData->bpxType == UE_ON_LIB_ALL)
@@ -416,7 +416,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 RtlZeroMemory(szAnsiLibraryName, sizeof(szAnsiLibraryName));
                 WideCharToMultiByte(CP_ACP, NULL, hLoadedLibData->szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
 
-                for(int i= (int)LibrarianData.size() - 1; i >= 0; i--)
+                for(int i = (int)LibrarianData.size() - 1; i >= 0; i--)
                 {
                     ptrLibrarianData = &LibrarianData.at(i);
                     if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
@@ -453,7 +453,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         EngineCloseHandle(hListLibrary.at(i).hFileMapping);
                     }
                     EngineCloseHandle(hListLibrary.at(i).hFile);
-                    hListLibrary.erase(hListLibrary.begin()+i);
+                    hListLibrary.erase(hListLibrary.begin() + i);
                     break;
                 }
             }
@@ -519,17 +519,17 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
             case STATUS_BREAKPOINT:
             {
-                bool bFoundBreakPoint=false;
+                bool bFoundBreakPoint = false;
                 BreakPointDetail FoundBreakPoint;
-                int bpcount=(int)BreakPointBuffer.size();
-                for(int i=0; i<bpcount; i++)
+                int bpcount = (int)BreakPointBuffer.size();
+                for(int i = 0; i < bpcount; i++)
                 {
                     if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress - (BreakPointBuffer.at(i).BreakPointSize - 1) &&
                             (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) &&
                             BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
-                        FoundBreakPoint=BreakPointBuffer.at(i);
-                        bFoundBreakPoint=true;
+                        FoundBreakPoint = BreakPointBuffer.at(i);
+                        bFoundBreakPoint = true;
                         break;
                     }
                 }
@@ -539,7 +539,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, &FoundBreakPoint.OriginalByte[0], FoundBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
                     {
                         DBGCode = DBG_CONTINUE;
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
@@ -555,7 +555,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
                         unsigned char instr[16];
                         MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                        char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                        char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
                         if(strstr(DisassembledString, "PUSHF"))
                             PushfBPX = true;
                         myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
@@ -630,7 +630,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         if(engineTLSBreakOnCallBack) //set TLS callback breakpoints
                         {
-                            for(unsigned int i=0; i<tlsCallBackList.size(); i++)
+                            for(unsigned int i = 0; i < tlsCallBackList.size(); i++)
                                 SetBPX(tlsCallBackList.at(i), UE_SINGLESHOOT, (LPVOID)engineTLSBreakOnCallBackAddress);
                             ClearTlsCallBackList();
                             engineTLSBreakOnCallBackAddress = NULL;
@@ -663,8 +663,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(PushfBPX) //remove trap flag from stack
                     {
                         PushfBPX = false;
-                        void* csp=(void*)GetContextData(UE_CSP);
-                        ULONG_PTR data=0;
+                        void* csp = (void*)GetContextData(UE_CSP);
+                        ULONG_PTR data = 0;
                         ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
                         data &= ~UE_TRAP_FLAG;
                         WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
@@ -700,7 +700,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else
                         {
-                            hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                            hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                             myDBGContext.ContextFlags = CONTEXT_CONTROL;
                             GetThreadContext(hActiveThread, &myDBGContext);
                             myDBGContext.EFlags |= UE_TRAP_FLAG;
@@ -767,7 +767,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 else //no resetting needed (debugger reached hardware breakpoint or the user stepped)
                 {
                     //handle hardware breakpoints
-                    hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                    hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
                     myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
                     GetThreadContext(hActiveThread, &myDBGContext);
                     if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
@@ -888,7 +888,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
                         unsigned char instr[16];
                         MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                        char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                        char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
                         if(strstr(DisassembledString, "PUSHF"))
                             PushfBPX = true;
                     }
@@ -915,7 +915,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                     }
                 }
-                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED) //NOTE: only call the chSingleStep callback when the debuggee generated the exception
+                if(DBGCode == DBG_EXCEPTION_NOT_HANDLED) //NOTE: only call the chSingleStep callback when the debuggee generated the exception
                 {
                     if(DBGCustomHandler->chSingleStep != NULL)
                     {
@@ -936,28 +936,28 @@ __declspec(dllexport) void TITCALL DebugLoop()
             case STATUS_GUARD_PAGE_VIOLATION:
             {
                 ULONG_PTR bpaddr;
-                bool bFoundBreakPoint=false;
+                bool bFoundBreakPoint = false;
                 BreakPointDetail FoundBreakPoint;
-                int bpcount=(int)BreakPointBuffer.size();
-                for(int i=0; i<bpcount; i++)
+                int bpcount = (int)BreakPointBuffer.size();
+                for(int i = 0; i < bpcount; i++)
                 {
-                    ULONG_PTR addr=BreakPointBuffer.at(i).BreakPointAddress;
-                    bpaddr=(ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
-                    if(bpaddr>=addr && bpaddr<(addr+BreakPointBuffer.at(i).BreakPointSize) &&
+                    ULONG_PTR addr = BreakPointBuffer.at(i).BreakPointAddress;
+                    bpaddr = (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
+                    if(bpaddr >= addr && bpaddr < (addr + BreakPointBuffer.at(i).BreakPointSize) &&
                             (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
                              BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
                              BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
                              BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE) &&
                             BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
-                        FoundBreakPoint=BreakPointBuffer.at(i);
-                        bFoundBreakPoint=true;
+                        FoundBreakPoint = BreakPointBuffer.at(i);
+                        bFoundBreakPoint = true;
                         break;
                     }
                 }
                 if(bFoundBreakPoint) //found memory breakpoint
                 {
-                    hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                    hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
                     myDBGContext.ContextFlags = CONTEXT_CONTROL;
                     GetThreadContext(hActiveThread, &myDBGContext);
                     DBGCode = DBG_CONTINUE; //debugger handled the exception
@@ -1107,13 +1107,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
                     unsigned char instr[16];
                     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                    char* DisassembledString=(char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
                     if(strstr(DisassembledString, "PUSHF"))
                         PushfBPX = true;
                 }
 
                 //debuggee generated GUARD_PAGE exception
-                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
+                if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
                 {
                     //TODO: restore memory breakpoint?
                     if(DBGCustomHandler->chPageGuard != NULL)
@@ -1152,17 +1152,17 @@ __declspec(dllexport) void TITCALL DebugLoop()
             case STATUS_ILLEGAL_INSTRUCTION:
             {
                 //UD2 breakpoint
-                bool bFoundBreakPoint=false;
+                bool bFoundBreakPoint = false;
                 BreakPointDetail FoundBreakPoint;
-                int bpcount=(int)BreakPointBuffer.size();
-                for(int i=0; i<bpcount; i++)
+                int bpcount = (int)BreakPointBuffer.size();
+                for(int i = 0; i < bpcount; i++)
                 {
                     if(BreakPointBuffer.at(i).BreakPointAddress == (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress &&
                             (BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) &&
                             BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
                     {
-                        FoundBreakPoint=BreakPointBuffer.at(i);
-                        bFoundBreakPoint=true;
+                        FoundBreakPoint = BreakPointBuffer.at(i);
+                        bFoundBreakPoint = true;
                         break;
                     }
                 }
@@ -1172,7 +1172,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, &FoundBreakPoint.OriginalByte[0], FoundBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
                     {
                         DBGCode = DBG_CONTINUE;
-                        hActiveThread = OpenThread(THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
@@ -1209,10 +1209,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
                 }
                 else
-                    DBGCode=DBG_EXCEPTION_NOT_HANDLED;
+                    DBGCode = DBG_EXCEPTION_NOT_HANDLED;
 
                 //application-generated exception
-                if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
+                if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
                 {
                     if(DBGCustomHandler->chIllegalInstruction != NULL)
                     {
@@ -1351,7 +1351,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
 
             //general unhandled exception callback
-            if(DBGCode==DBG_EXCEPTION_NOT_HANDLED)
+            if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
             {
                 if(engineExecutePluginCallBack)
                 {
@@ -1423,7 +1423,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             break;
         }
         if(!ThreaderGetThreadInfo(0, DBGEvent.dwThreadId)) //switch thread
-            DBGEvent.dwThreadId=dbgProcessInformation.dwThreadId;
+            DBGEvent.dwThreadId = dbgProcessInformation.dwThreadId;
     }
 
     if(!SecondChance) //debugger didn't close with a second chance exception (normal exit)

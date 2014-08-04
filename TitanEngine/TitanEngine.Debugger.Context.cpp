@@ -13,7 +13,7 @@ __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, voi
         memset(&DBGContext, 0, sizeof(CONTEXT));
         DBGContext.ContextFlags = CONTEXT_ALL;
 
-        if(SuspendThread(hActiveThread) == (DWORD)-1)
+        if(SuspendThread(hActiveThread) == (DWORD) - 1)
             return false;
 
         if(!GetThreadContext(hActiveThread, &DBGContext))
@@ -39,7 +39,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
     memset(&DBGContext, 0, sizeof(CONTEXT));
     DBGContext.ContextFlags = CONTEXT_ALL;
 
-    if(SuspendThread(hActiveThread) == (DWORD)-1)
+    if(SuspendThread(hActiveThread) == (DWORD) - 1)
         return retValue;
 
     if(!GetThreadContext(hActiveThread, &DBGContext))
@@ -52,43 +52,43 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
 #ifdef _WIN64 //x64
     if(IndexOfRegister == UE_EAX)
     {
-        retValue = DBGContext.Rax&0xFFFFFFFF;
+        retValue = DBGContext.Rax & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EBX)
     {
-        retValue = DBGContext.Rbx&0xFFFFFFFF;
+        retValue = DBGContext.Rbx & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_ECX)
     {
-        retValue = DBGContext.Rcx&0xFFFFFFFF;
+        retValue = DBGContext.Rcx & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EDX)
     {
-        retValue = DBGContext.Rdx&0xFFFFFFFF;
+        retValue = DBGContext.Rdx & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EDI)
     {
-        retValue = DBGContext.Rdi&0xFFFFFFFF;
+        retValue = DBGContext.Rdi & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_ESI)
     {
-        retValue = DBGContext.Rsi&0xFFFFFFFF;
+        retValue = DBGContext.Rsi & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EBP)
     {
-        retValue = DBGContext.Rbp&0xFFFFFFFF;
+        retValue = DBGContext.Rbp & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_ESP)
     {
-        retValue = DBGContext.Rsp&0xFFFFFFFF;
+        retValue = DBGContext.Rsp & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EIP)
     {
-        retValue = DBGContext.Rip&0xFFFFFFFF;
+        retValue = DBGContext.Rip & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_EFLAGS)
     {
-        retValue = DBGContext.EFlags&0xFFFFFFFF;
+        retValue = DBGContext.EFlags & 0xFFFFFFFF;
     }
     else if(IndexOfRegister == UE_RAX)
     {
@@ -273,7 +273,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
 
 __declspec(dllexport) ULONG_PTR TITCALL GetContextData(DWORD IndexOfRegister)
 {
-    HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME|THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
+    HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
     ULONG_PTR ContextReturn = GetContextDataEx(hActiveThread, IndexOfRegister);
     EngineCloseHandle(hActiveThread);
     return ContextReturn;
@@ -287,7 +287,7 @@ __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, voi
         memset(&DBGContext, 0, sizeof(CONTEXT));
         DBGContext.ContextFlags = CONTEXT_ALL;
 
-        if(SuspendThread(hActiveThread) == (DWORD)-1)
+        if(SuspendThread(hActiveThread) == (DWORD) - 1)
             return false;
 
         if(!GetThreadContext(hActiveThread, &DBGContext))
@@ -316,7 +316,7 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     memset(&DBGContext, 0, sizeof(CONTEXT));
     DBGContext.ContextFlags = CONTEXT_ALL;
 
-    if(SuspendThread(hActiveThread) == (DWORD)-1)
+    if(SuspendThread(hActiveThread) == (DWORD) - 1)
         return false;
 
     if(!GetThreadContext(hActiveThread, &DBGContext))
@@ -324,7 +324,7 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
         ResumeThread(hActiveThread);
         return false;
     }
-    
+
 #ifdef _WIN64 //x64
     if(IndexOfRegister == UE_EAX)
     {
@@ -571,7 +571,7 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
 
 __declspec(dllexport) bool TITCALL SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-    HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME|THREAD_SET_CONTEXT|THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
+    HANDLE hActiveThread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_SET_CONTEXT | THREAD_GET_CONTEXT, false, DBGEvent.dwThreadId);
     bool ContextReturn = SetContextDataEx(hActiveThread, IndexOfRegister, NewRegisterValue);
     EngineCloseHandle(hActiveThread);
     return ContextReturn;

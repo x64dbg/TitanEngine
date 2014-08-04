@@ -29,10 +29,10 @@ __declspec(dllexport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray
     {
         if(!TransitionStart || ThreaderImportRunningThreadData(GetCurrentProcessId()))
         {
-            int threadcount=(int)hListThread.size();
-            for(int i=0; i<threadcount; i++)
+            int threadcount = (int)hListThread.size();
+            for(int i = 0; i < threadcount; i++)
             {
-                PTHREAD_ITEM_DATA hListThreadPtr=&hListThread.at(i);
+                PTHREAD_ITEM_DATA hListThreadPtr = &hListThread.at(i);
                 if(hListThreadPtr->hThread != INVALID_HANDLE_VALUE)
                 {
                     if(TransitionStart)
@@ -42,7 +42,7 @@ __declspec(dllexport) bool TITCALL HooksSafeTransitionEx(LPVOID HookAddressArray
                             SuspendThread(hListThreadPtr->hThread);
                             ULONG_PTR CurrentIP = (ULONG_PTR)GetContextDataEx(hListThreadPtr->hThread, UE_CIP);
                             PMEMORY_COMPARE_HANDLER myHookAddressArray = (PMEMORY_COMPARE_HANDLER)HookAddressArray;
-                            for(int j=0; j<NumberOfHooks; j++)
+                            for(int j = 0; j < NumberOfHooks; j++)
                             {
 #if defined (_WIN64)
                                 ULONG_PTR HookAddress = (ULONG_PTR)myHookAddressArray->Array.qwArrayEntry[0];
@@ -902,7 +902,7 @@ __declspec(dllexport) void TITCALL HooksScanModuleMemory(HMODULE ModuleBase, LPV
     HANDLE hProcess = GetCurrentProcess();
     LIBRARY_ITEM_DATA RemoteLibInfo = {};
     PLIBRARY_ITEM_DATA pRemoteLibInfo = (PLIBRARY_ITEM_DATA)LibrarianGetLibraryInfoEx((void*)ModuleBase);
-    typedef bool(TITCALL *fEnumCallBack)(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATA ModuleInformation, DWORD SizeOfImage);
+    typedef bool(TITCALL * fEnumCallBack)(PHOOK_ENTRY HookDetails, void* ptrOriginalInstructions, PLIBRARY_ITEM_DATA ModuleInformation, DWORD SizeOfImage);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)CallBack;
     BYTE CheckHookMemory[TEE_MAXIMUM_HOOK_SIZE];
     PMEMORY_COMPARE_HANDLER ExportedFunctions;

@@ -10,11 +10,11 @@ long injectedRemoteLoadLibrary(LPVOID Parameter)
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
     Parameter = (LPVOID)((ULONG_PTR)Parameter + sizeof InjectCodeData);
 #if !defined(_WIN64)
-    typedef ULONG_PTR(WINAPI *fLoadLibraryW)(LPCWSTR fLibraryName);
-    typedef ULONG_PTR(WINAPI *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(WINAPI * fLoadLibraryW)(LPCWSTR fLibraryName);
+    typedef ULONG_PTR(WINAPI * fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #else
-    typedef ULONG_PTR(__fastcall *fLoadLibraryW)(LPCWSTR fLibraryName);
-    typedef ULONG_PTR(__fastcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(__fastcall * fLoadLibraryW)(LPCWSTR fLibraryName);
+    typedef ULONG_PTR(__fastcall * fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #endif
     fLoadLibraryW cLoadLibraryW = (fLoadLibraryW)(APIData->fLoadLibrary);
     fVirtualFree cVirtualFree = (fVirtualFree)(APIData->fVirtualFree);
@@ -33,11 +33,11 @@ long injectedRemoteFreeLibrary(LPVOID Parameter)
 
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
 #if !defined(_WIN64)
-    typedef ULONG_PTR(WINAPI *fFreeLibrary)(HMODULE fLibBase);
-    typedef ULONG_PTR(WINAPI *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(WINAPI * fFreeLibrary)(HMODULE fLibBase);
+    typedef ULONG_PTR(WINAPI * fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #else
-    typedef ULONG_PTR(__fastcall *fFreeLibrary)(HMODULE fLibBase);
-    typedef ULONG_PTR(__fastcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(__fastcall * fFreeLibrary)(HMODULE fLibBase);
+    typedef ULONG_PTR(__fastcall * fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #endif
     fFreeLibrary cFreeLibrary = (fFreeLibrary)(APIData->fFreeLibrary);
     fVirtualFree cVirtualFree = (fVirtualFree)(APIData->fVirtualFree);
@@ -58,13 +58,13 @@ long injectedRemoteFreeLibrarySimple(LPVOID Parameter)
     LPVOID orgParameter = Parameter;
     Parameter = (LPVOID)((ULONG_PTR)Parameter + sizeof InjectCodeData);
 #if !defined(_WIN64)
-    typedef ULONG_PTR(WINAPI *fFreeLibrary)(HMODULE fLibBase);
-    typedef HMODULE(WINAPI *fGetModuleHandleW)(LPCWSTR fLibraryName);
-    typedef ULONG_PTR(WINAPI *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(WINAPI * fFreeLibrary)(HMODULE fLibBase);
+    typedef HMODULE(WINAPI * fGetModuleHandleW)(LPCWSTR fLibraryName);
+    typedef ULONG_PTR(WINAPI * fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #else
-    typedef ULONG_PTR(__fastcall *fFreeLibrary)(HMODULE fLibBase);
-    typedef HMODULE(__fastcall *fGetModuleHandleW)(LPCWSTR fLibraryName);
-    typedef ULONG_PTR(__fastcall *fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
+    typedef ULONG_PTR(__fastcall * fFreeLibrary)(HMODULE fLibBase);
+    typedef HMODULE(__fastcall * fGetModuleHandleW)(LPCWSTR fLibraryName);
+    typedef ULONG_PTR(__fastcall * fVirtualFree)(LPVOID fMemBase, SIZE_T fMemSize, DWORD fFreeType);
 #endif
     fGetModuleHandleW cGetModuleHandleW = (fGetModuleHandleW)(APIData->fGetModuleHandle);
     fFreeLibrary cFreeLibrary = (fFreeLibrary)(APIData->fFreeLibrary);
@@ -93,9 +93,9 @@ long injectedExitProcess(LPVOID Parameter)
 
     PInjectCodeData APIData = (PInjectCodeData)Parameter;
 #if !defined(_WIN64)
-    typedef ULONG_PTR(WINAPI *fExitProcess)(DWORD fExitCode);
+    typedef ULONG_PTR(WINAPI * fExitProcess)(DWORD fExitCode);
 #else
-    typedef ULONG_PTR(__fastcall *fExitProcess)(DWORD fExitCode);
+    typedef ULONG_PTR(__fastcall * fExitProcess)(DWORD fExitCode);
 #endif
     fExitProcess cExitProcess = (fExitProcess)(APIData->fExitProcess);
     long retValue = NULL;
@@ -126,16 +126,16 @@ long injectedImpRec(LPVOID Parameter)
     HANDLE hFileMap;
     PInjectImpRecCodeData APIData = (PInjectImpRecCodeData)Parameter;
     LPVOID szFileName = (LPVOID)((ULONG_PTR)Parameter + sizeof InjectImpRecCodeData);
-    typedef ULONG_PTR(__cdecl *fTrace)(DWORD hFileMap, DWORD dwSizeMap, DWORD dwTimeOut, DWORD dwToTrace, DWORD dwExactCall);
-    typedef HANDLE(WINAPI *fCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
-    typedef HANDLE(WINAPI *fCreateFileMappingA)(HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName);
-    typedef BOOL(__cdecl *fCloseHandle)(HANDLE hHandle);
+    typedef ULONG_PTR(__cdecl * fTrace)(DWORD hFileMap, DWORD dwSizeMap, DWORD dwTimeOut, DWORD dwToTrace, DWORD dwExactCall);
+    typedef HANDLE(WINAPI * fCreateFileW)(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+    typedef HANDLE(WINAPI * fCreateFileMappingA)(HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName);
+    typedef BOOL(__cdecl * fCloseHandle)(HANDLE hHandle);
     fTrace cTrace = (fTrace)(APIData->fTrace);
     fCreateFileW cCreateFileW = (fCreateFileW)(APIData->fCreateFileA);
     fCloseHandle cCloseHandle = (fCloseHandle)(APIData->fCloseHandle);
     fCreateFileMappingA cCreateFileMappingA = (fCreateFileMappingA)(APIData->fCreateFileMappingA);
 
-    hFile = cCreateFileW((LPCWSTR)szFileName, GENERIC_READ+GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    hFile = cCreateFileW((LPCWSTR)szFileName, GENERIC_READ + GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if(hFile != INVALID_HANDLE_VALUE)
     {
         hFileMap = cCreateFileMappingA(hFile, NULL, 4, NULL, 0x100, NULL);

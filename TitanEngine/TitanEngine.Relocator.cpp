@@ -185,7 +185,7 @@ __declspec(dllexport) bool TITCALL RelocaterExportRelocationEx(char* szFileName,
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(RelocaterExportRelocationExW(uniFileName, szSectionName));
     }
     else
@@ -319,8 +319,8 @@ __declspec(dllexport) bool TITCALL RelocaterCompareTwoSnapshots(HANDLE hProcess,
 
     if(szDumpFile1 != NULL && szDumpFile2 != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFile1, lstrlenA(szDumpFile1)+1, uniDumpFile1, sizeof(uniDumpFile1)/(sizeof(uniDumpFile1[0])));
-        MultiByteToWideChar(CP_ACP, NULL, szDumpFile2, lstrlenA(szDumpFile2)+1, uniDumpFile2, sizeof(uniDumpFile2)/(sizeof(uniDumpFile2[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFile1, lstrlenA(szDumpFile1) + 1, uniDumpFile1, sizeof(uniDumpFile1) / (sizeof(uniDumpFile1[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szDumpFile2, lstrlenA(szDumpFile2) + 1, uniDumpFile2, sizeof(uniDumpFile2) / (sizeof(uniDumpFile2[0])));
         return(RelocaterCompareTwoSnapshotsW(hProcess, LoadedImageBase, NtSizeOfImage, uniDumpFile1, uniDumpFile2, MemStart));
     }
     else
@@ -450,7 +450,7 @@ __declspec(dllexport) bool TITCALL RelocaterChangeFileBase(char* szFileName, ULO
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(RelocaterChangeFileBaseW(uniFileName, NewImageBase));
     }
     else
@@ -733,7 +733,7 @@ __declspec(dllexport) bool TITCALL RelocaterWipeRelocationTable(char* szFileName
 
     if(szFileName != NULL)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return(RelocaterWipeRelocationTableW(uniFileName));
     }
     else

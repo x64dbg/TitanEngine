@@ -28,42 +28,42 @@ extern "C" {
 # define APLIB_ERROR ((unsigned int) (-1))
 #endif
 
-unsigned int APLIB_CONVENTION aP_pack(const void *source,
-                                      void *destination,
+unsigned int APLIB_CONVENTION aP_pack(const void* source,
+                                      void* destination,
                                       unsigned int length,
-                                      void *workmem,
-                                      int (__cdecl *callback)(unsigned int, unsigned int, unsigned int, void *),
-                                      void *cbparam);
+                                      void* workmem,
+                                      int (__cdecl* callback)(unsigned int, unsigned int, unsigned int, void*),
+                                      void* cbparam);
 
 unsigned int APLIB_CONVENTION aP_workmem_size(unsigned int inputsize);
 
 unsigned int APLIB_CONVENTION aP_max_packed_size(unsigned int inputsize);
 
-unsigned int APLIB_CONVENTION aP_depack_asm(const void *source, void *destination);
+unsigned int APLIB_CONVENTION aP_depack_asm(const void* source, void* destination);
 
-unsigned int APLIB_CONVENTION aP_depack_asm_fast(const void *source, void *destination);
+unsigned int APLIB_CONVENTION aP_depack_asm_fast(const void* source, void* destination);
 
-unsigned int APLIB_CONVENTION aP_depack_asm_safe(const void *source,
+unsigned int APLIB_CONVENTION aP_depack_asm_safe(const void* source,
         unsigned int srclen,
-        void *destination,
+        void* destination,
         unsigned int dstlen);
 
-unsigned int APLIB_CONVENTION aP_crc32(const void *source, unsigned int length);
+unsigned int APLIB_CONVENTION aP_crc32(const void* source, unsigned int length);
 
-unsigned int APLIB_CONVENTION aPsafe_pack(const void *source,
-        void *destination,
+unsigned int APLIB_CONVENTION aPsafe_pack(const void* source,
+        void* destination,
         unsigned int length,
-        void *workmem,
-        int (__cdecl *callback)(unsigned int, unsigned int, unsigned int, void *),
-        void *cbparam);
+        void* workmem,
+        int (__cdecl* callback)(unsigned int, unsigned int, unsigned int, void*),
+        void* cbparam);
 
-unsigned int APLIB_CONVENTION aPsafe_check(const void *source);
+unsigned int APLIB_CONVENTION aPsafe_check(const void* source);
 
-unsigned int APLIB_CONVENTION aPsafe_get_orig_size(const void *source);
+unsigned int APLIB_CONVENTION aPsafe_get_orig_size(const void* source);
 
-unsigned int APLIB_CONVENTION aPsafe_depack(const void *source,
+unsigned int APLIB_CONVENTION aPsafe_depack(const void* source,
         unsigned int srclen,
-        void *destination,
+        void* destination,
         unsigned int dstlen);
 
 #ifdef __cplusplus

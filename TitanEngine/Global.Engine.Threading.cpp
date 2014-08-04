@@ -9,24 +9,24 @@ static void CriticalSectionInitializeLocks()
 {
     if(bInitDone)
         return;
-    for(int i=0; i<LockLast; i++)
+    for(int i = 0; i < LockLast; i++)
         InitializeCriticalSection(&locks[i]);
-    bInitDone=true;
+    bInitDone = true;
 }
 
 void CriticalSectionDeleteLocks()
 {
     if(!bInitDone)
         return;
-    for(int i=0; i<LockLast; i++)
+    for(int i = 0; i < LockLast; i++)
         DeleteCriticalSection(&locks[i]);
-    bInitDone=false;
+    bInitDone = false;
 }
 
 CriticalSectionLocker::CriticalSectionLocker(CriticalSectionLock lock)
 {
     CriticalSectionInitializeLocks(); //initialize critical sections
-    gLock=lock;
+    gLock = lock;
     EnterCriticalSection(&locks[gLock]);
 }
 

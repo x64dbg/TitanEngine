@@ -20,7 +20,7 @@ __declspec(dllexport) bool TITCALL TLSBreakOnCallBack(LPVOID ArrayOfCallBacks, D
     if(NumberOfCallBacks && EngineIsValidReadPtrEx(ReadArrayOfCallBacks, sizeof(ULONG_PTR)*NumberOfCallBacks) && bpxCallBack)
     {
         ClearTlsCallBackList(); //clear TLS cb list
-        for(unsigned int i=0; i<NumberOfCallBacks; i++)
+        for(unsigned int i = 0; i < NumberOfCallBacks; i++)
             tlsCallBackList.push_back(ReadArrayOfCallBacks[i]);
         engineTLSBreakOnCallBackAddress = (ULONG_PTR)bpxCallBack;
         engineTLSBreakOnCallBack = true;
@@ -34,7 +34,7 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackData(char* szFileName, LPVOID 
     wchar_t uniFileName[MAX_PATH] = {};
     if(szFileName)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return TLSGrabCallBackDataW(uniFileName, ArrayOfCallBacks, NumberOfCallBacks);
     }
     return false;
@@ -45,7 +45,7 @@ __declspec(dllexport) bool TITCALL TLSGrabCallBackDataW(wchar_t* szFileName, LPV
     DWORD FileSize;
     HANDLE FileMap;
     ULONG_PTR FileMapVA;
-    
+
     if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
         PIMAGE_DOS_HEADER DOSHeader = (PIMAGE_DOS_HEADER)FileMapVA;
@@ -187,7 +187,7 @@ __declspec(dllexport) bool TITCALL TLSBreakOnCallBackEx(char* szFileName, LPVOID
     wchar_t uniFileName[MAX_PATH] = {};
     if(szFileName)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return TLSBreakOnCallBackExW(uniFileName, bpxCallBack);
     }
     return false;
@@ -198,7 +198,7 @@ __declspec(dllexport) bool TITCALL TLSBreakOnCallBackExW(wchar_t* szFileName, LP
     DWORD NumberOfCallBacks;
     if(TLSGrabCallBackDataW(szFileName, NULL, &NumberOfCallBacks))
     {
-        DynBuf TlsArrayOfCallBacks(NumberOfCallBacks*sizeof(ULONG_PTR));
+        DynBuf TlsArrayOfCallBacks(NumberOfCallBacks * sizeof(ULONG_PTR));
         if(TLSGrabCallBackDataW(szFileName, TlsArrayOfCallBacks.GetPtr(), &NumberOfCallBacks))
         {
             return TLSBreakOnCallBack(TlsArrayOfCallBacks.GetPtr(), NumberOfCallBacks, bpxCallBack);
@@ -212,7 +212,7 @@ __declspec(dllexport) bool TITCALL TLSRemoveCallback(char* szFileName)
     wchar_t uniFileName[MAX_PATH] = {};
     if(szFileName)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return TLSRemoveCallbackW(uniFileName);
     }
     return false;
@@ -324,7 +324,7 @@ __declspec(dllexport) bool TITCALL TLSRemoveTable(char* szFileName)
     wchar_t uniFileName[MAX_PATH] = {};
     if(szFileName)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return TLSRemoveTableW(uniFileName);
     }
     return false;
@@ -424,7 +424,7 @@ __declspec(dllexport) bool TITCALL TLSBackupData(char* szFileName)
     wchar_t uniFileName[MAX_PATH] = {};
     if(szFileName)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return TLSBackupDataW(uniFileName);
     }
     return false;
@@ -580,9 +580,9 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
                 if(engineBackupTLSDataX64.AddressOfCallBacks != NULL && engineBackupNumberOfCallBacks != NULL)
                 {
                     DynBuf BackupData(sizeof(ULONG_PTR)*engineBackupArrayOfCallBacks.size());
-                    ULONG_PTR* Backup=(ULONG_PTR*)BackupData.GetPtr();
-                    for(unsigned int i=0; i<engineBackupArrayOfCallBacks.size(); i++)
-                        Backup[i]=engineBackupArrayOfCallBacks.at(i);
+                    ULONG_PTR* Backup = (ULONG_PTR*)BackupData.GetPtr();
+                    for(unsigned int i = 0; i < engineBackupArrayOfCallBacks.size(); i++)
+                        Backup[i] = engineBackupArrayOfCallBacks.at(i);
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX64.AddressOfCallBacks + GetDebuggedFileBaseAddress()), Backup, BackupData.Size(), &ueNumberOfBytesRead))
                     {
                         engineBackupTLSAddress = NULL;
@@ -603,9 +603,9 @@ __declspec(dllexport) bool TITCALL TLSRestoreData()
                 if(engineBackupTLSDataX86.AddressOfCallBacks != NULL && engineBackupNumberOfCallBacks != NULL)
                 {
                     DynBuf BackupData(sizeof(ULONG_PTR)*engineBackupArrayOfCallBacks.size());
-                    ULONG_PTR* Backup=(ULONG_PTR*)BackupData.GetPtr();
-                    for(unsigned int i=0; i<engineBackupArrayOfCallBacks.size(); i++)
-                        Backup[i]=engineBackupArrayOfCallBacks.at(i);
+                    ULONG_PTR* Backup = (ULONG_PTR*)BackupData.GetPtr();
+                    for(unsigned int i = 0; i < engineBackupArrayOfCallBacks.size(); i++)
+                        Backup[i] = engineBackupArrayOfCallBacks.at(i);
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)(engineBackupTLSDataX86.AddressOfCallBacks + GetDebuggedFileBaseAddress()), Backup, BackupData.Size(), &ueNumberOfBytesRead))
                     {
                         engineBackupTLSAddress = NULL;
@@ -698,7 +698,7 @@ __declspec(dllexport) bool TITCALL TLSBuildNewTableEx(char* szFileName, char* sz
     wchar_t uniFileName[MAX_PATH] = {};
     if(szFileName)
     {
-        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName)+1, uniFileName, sizeof(uniFileName)/(sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
         return TLSBuildNewTableExW(uniFileName, szSectionName, ArrayOfCallBacks, NumberOfCallBacks);
     }
     return false;

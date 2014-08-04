@@ -38,7 +38,7 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfo(char* szLibraryName)
 
     wchar_t uniLibraryName[MAX_PATH] = {};
     PLIBRARY_ITEM_DATAW LibInfo;
-    MultiByteToWideChar(CP_ACP, NULL, szLibraryName, lstrlenA(szLibraryName)+1, uniLibraryName, sizeof(uniLibraryName)/(sizeof(uniLibraryName[0])));
+    MultiByteToWideChar(CP_ACP, NULL, szLibraryName, lstrlenA(szLibraryName) + 1, uniLibraryName, sizeof(uniLibraryName) / (sizeof(uniLibraryName[0])));
     LibInfo = (PLIBRARY_ITEM_DATAW)LibrarianGetLibraryInfoW(uniLibraryName);
     if(LibInfo)
     {
@@ -60,7 +60,7 @@ __declspec(dllexport) void* TITCALL LibrarianGetLibraryInfoW(wchar_t* szLibraryN
 {
     static LIBRARY_ITEM_DATAW LibraryInfo;
     memset(&LibraryInfo, 0, sizeof(LIBRARY_ITEM_DATAW));
-    
+
     for(unsigned int i = 0; i < hListLibrary.size(); i++)
     {
         if(hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE && !lstrcmpiW(hListLibrary.at(i).szLibraryName, szLibraryName))
@@ -116,7 +116,7 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfo(void* EnumCallBack)
     if(!EnumCallBack)
         return;
 
-    typedef void(TITCALL *fEnumCallBack)(LPVOID fLibraryDetail);
+    typedef void(TITCALL * fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
 
     for(unsigned int i = 0; i < hListLibrary.size(); i++)
@@ -148,7 +148,7 @@ __declspec(dllexport) void TITCALL LibrarianEnumLibraryInfoW(void* EnumCallBack)
     if(!EnumCallBack)
         return;
 
-    typedef void(TITCALL *fEnumCallBack)(LPVOID fLibraryDetail);
+    typedef void(TITCALL * fEnumCallBack)(LPVOID fLibraryDetail);
     fEnumCallBack myEnumCallBack = (fEnumCallBack)EnumCallBack;
 
     for(unsigned int i = 0; i < hListLibrary.size(); i++)

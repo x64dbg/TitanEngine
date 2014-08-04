@@ -5,12 +5,12 @@ wchar_t szLibraryPath[512];
 int main()
 {
     memset(szLibraryPath, 0, sizeof(szLibraryPath));
-    wchar_t szName[256]=L"";
+    wchar_t szName[256] = L"";
     wsprintfW(szName, L"Global\\szLibraryName%X", (unsigned int)GetCurrentProcessId());
-    HANDLE hMapFile=OpenFileMappingW(FILE_MAP_READ, false, szName);
+    HANDLE hMapFile = OpenFileMappingW(FILE_MAP_READ, false, szName);
     if(hMapFile)
     {
-        const wchar_t* szLibraryPathMapping=(const wchar_t*)MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, sizeof(szLibraryPath));
+        const wchar_t* szLibraryPathMapping = (const wchar_t*)MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, sizeof(szLibraryPath));
         if(szLibraryPathMapping)
         {
             lstrcpyW(szLibraryPath, szLibraryPathMapping);
@@ -19,6 +19,6 @@ int main()
         CloseHandle(hMapFile);
     }
     if(szLibraryPath[0])
-        return (LoadLibraryW(szLibraryPath)!=NULL);
+        return (LoadLibraryW(szLibraryPath) != NULL);
     return 0;
 }

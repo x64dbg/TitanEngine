@@ -154,24 +154,24 @@ typedef struct
 
 enum HWBP_MODE
 {
-    MODE_DISABLED=0, //00
-    MODE_LOCAL=1, //01
-    MODE_GLOBAL=2 //10
+    MODE_DISABLED = 0, //00
+    MODE_LOCAL = 1, //01
+    MODE_GLOBAL = 2 //10
 };
 
 enum HWBP_TYPE
 {
-    TYPE_EXECUTE=0, //00
-    TYPE_WRITE=1, //01
-    TYPE_READWRITE=3 //11
+    TYPE_EXECUTE = 0, //00
+    TYPE_WRITE = 1, //01
+    TYPE_READWRITE = 3 //11
 };
 
 enum HWBP_SIZE
 {
-    SIZE_1=0, //00
-    SIZE_2=1, //01
-    SIZE_8=2, //10
-    SIZE_4=3 //11
+    SIZE_1 = 0, //00
+    SIZE_2 = 1, //01
+    SIZE_8 = 2, //10
+    SIZE_4 = 3 //11
 };
 
 struct DR7
@@ -759,21 +759,21 @@ typedef struct
 
 
 /*typedef enum _POOL_TYPE {
-	NonPagedPool,
-	PagedPool,
-	NonPagedPoolMustSucceed,
-	DontUseThisType,
-	NonPagedPoolCacheAligned,
-	PagedPoolCacheAligned,
-	NonPagedPoolCacheAlignedMustS,
-	MaxPoolType,
-	NonPagedPoolSession,
-	PagedPoolSession,
-	NonPagedPoolMustSucceedSession,
-	DontUseThisTypeSession,
-	NonPagedPoolCacheAlignedSession,
-	PagedPoolCacheAlignedSession,
-	NonPagedPoolCacheAlignedMustSSession
+    NonPagedPool,
+    PagedPool,
+    NonPagedPoolMustSucceed,
+    DontUseThisType,
+    NonPagedPoolCacheAligned,
+    PagedPoolCacheAligned,
+    NonPagedPoolCacheAlignedMustS,
+    MaxPoolType,
+    NonPagedPoolSession,
+    PagedPoolSession,
+    NonPagedPoolMustSucceedSession,
+    DontUseThisTypeSession,
+    NonPagedPoolCacheAlignedSession,
+    PagedPoolCacheAlignedSession,
+    NonPagedPoolCacheAlignedMustSSession
 } POOL_TYPE;*/
 
 typedef struct
@@ -924,7 +924,7 @@ struct _PEB_T
     DWORD MaximumNumberOfHeaps;
     T ProcessHeaps;
 
-//FULL PEB not needed
+    //FULL PEB not needed
     /*    T GdiSharedHandleTable;
     T ProcessStarterHelper;
     T GdiDCAttributeList;
