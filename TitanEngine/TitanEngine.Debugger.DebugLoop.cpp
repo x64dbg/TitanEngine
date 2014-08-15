@@ -558,8 +558,17 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
                         if(strstr(DisassembledString, "PUSHF"))
                             PushfBPX = true;
-                        myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
+
+                        if(FoundBreakPoint.BreakPointType == UE_SINGLESHOOT)
+                        {
+                            DeleteBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
+                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
+                            ResetBPXAddressTo = NULL;
+                            ResetBPX = false;
+                        }
+
                         //execute callback
+                        myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
                         __try
                         {
                             myCustomBreakPoint();
@@ -568,19 +577,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
 
                         }
+
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
                         {
                             DisableBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
                             ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
                             ResetBPXAddressTo = (ULONG_PTR)FoundBreakPoint.BreakPointAddress;
                             ResetBPX = true;
-                        }
-                        else
-                        {
-                            DeleteBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
-                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
-                            ResetBPXAddressTo = NULL;
-                            ResetBPX = false;
                         }
                     }
                     else
@@ -1180,8 +1183,17 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         SetThreadContext(hActiveThread, &myDBGContext);
                         EngineCloseHandle(hActiveThread);
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
-                        myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
+
+                        if(FoundBreakPoint.BreakPointType == UE_SINGLESHOOT)
+                        {
+                            DeleteBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
+                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
+                            ResetBPXAddressTo = NULL;
+                            ResetBPX = false;
+                        }
+                        
                         //execute callback
+                        myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
                         __try
                         {
                             myCustomBreakPoint();
@@ -1190,19 +1202,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         {
 
                         }
+
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
                         {
                             DisableBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
                             ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
                             ResetBPXAddressTo = (ULONG_PTR)FoundBreakPoint.BreakPointAddress;
                             ResetBPX = true;
-                        }
-                        else
-                        {
-                            DeleteBPX((ULONG_PTR)FoundBreakPoint.BreakPointAddress);
-                            ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
-                            ResetBPXAddressTo = NULL;
-                            ResetBPX = false;
                         }
                     }
                     else
