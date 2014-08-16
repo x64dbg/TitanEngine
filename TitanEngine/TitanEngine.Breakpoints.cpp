@@ -822,7 +822,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     {
         for(int i = bpcount - 1; i > -1; i--)
         {
-            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT)
+            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT)
             {
                 lock.unlock();
                 DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
@@ -848,7 +848,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     {
         for(int i = bpcount - 1; i > -1; i--)
         {
-            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
+            if((BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
                 lock.unlock();
                 DisableBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
@@ -870,7 +870,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     {
         for(int i = bpcount - 1; i > -1; i--)
         {
-            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE)
+            if((BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) && BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE)
             {
                 lock.unlock();
                 DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
@@ -883,7 +883,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
     {
         for(int i = bpcount - 1; i > -1; i--)
         {
-            if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
+            if((BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
                 lock.unlock();
                 DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
