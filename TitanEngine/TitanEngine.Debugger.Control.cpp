@@ -50,20 +50,27 @@ __declspec(dllexport) void TITCALL ForceClose()
 __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 {
     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
-    unsigned char instr[16];
+    unsigned char instr[32]; //two instructions
     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
     char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
     if(strstr(DisassembledString, "PUSHF"))
         StepOver(StepCallBack);
     else
     {
-        ULONG_PTR ueContext = NULL;
-        ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-        ueContext |= UE_TRAP_FLAG;
-        SetContextData(UE_EFLAGS, ueContext);
-        engineStepActive = true;
-        engineStepCallBack = StepCallBack;
-        engineStepCount = NULL;
+        int len = StaticLengthDisassemble((LPVOID)instr);
+        DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition + len, (LPVOID)(instr + len));
+        if(strstr(DisassembledString, "PUSHF")) //we wanna land on PUSHF safely (to prevent 'PUSH SS, POP SS' problems
+            SetBPX(ueCurrentPosition + len, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
+        else
+        {
+            ULONG_PTR ueContext = NULL;
+            ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
+            ueContext |= UE_TRAP_FLAG;
+            SetContextData(UE_EFLAGS, ueContext);
+            engineStepActive = true;
+            engineStepCallBack = StepCallBack;
+            engineStepCount = NULL;
+        }
     }
 }
 

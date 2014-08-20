@@ -1191,7 +1191,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ResetBPXAddressTo = NULL;
                             ResetBPX = false;
                         }
-                        
+
                         //execute callback
                         myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
                         __try
