@@ -19,7 +19,10 @@ void CriticalSectionDeleteLocks()
     if(!bInitDone)
         return;
     for(int i = 0; i < LockLast; i++)
+    {
+        EnterCriticalSection(&locks[i]);
         DeleteCriticalSection(&locks[i]);
+    }
     bInitDone = false;
 }
 

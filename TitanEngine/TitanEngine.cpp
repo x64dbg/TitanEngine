@@ -20,6 +20,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
+        break; //this bug has been here since 2010
     case DLL_PROCESS_DETACH:
         if(lpvReserved)
             ExtensionManagerPluginReleaseCallBack();

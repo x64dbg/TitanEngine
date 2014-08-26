@@ -5,7 +5,7 @@
 #include "Global.Engine.h"
 
 
-wchar_t engineSzEngineGarbageFolder[MAX_PATH];
+wchar_t engineSzEngineGarbageFolder[MAX_PATH] = L"";
 
 // Global.Garbage.functions:
 bool CreateGarbageItem(void* outGargabeItem, int MaxGargabeStringSize)
