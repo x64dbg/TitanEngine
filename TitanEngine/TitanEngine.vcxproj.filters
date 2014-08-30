@@ -342,10 +342,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\TitanEngineLoaders\LibraryLoader\x64\Release\LibraryLoader.exe">
+    <None Include="..\TitanEngineLoaders\LibraryLoader\x64\LibraryLoader.exe">
       <Filter>Resource Files\Binary</Filter>
     </None>
-    <None Include="..\TitanEngineLoaders\LibraryLoader\Release\LibraryLoader.exe">
+    <None Include="..\TitanEngineLoaders\LibraryLoader\x32\LibraryLoader.exe">
       <Filter>Resource Files\Binary</Filter>
     </None>
     <None Include="LOGO.bmp">

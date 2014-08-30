@@ -330,8 +330,8 @@
     <None Include="..\SDK\LUA\TitanEngine.lua" />
     <None Include="..\SDK\MASM\TitanEngine.INC" />
     <None Include="..\SDK\Python\TitanEngine.py" />
-    <None Include="..\TitanEngineLoaders\LibraryLoader\x64\Release\LibraryLoader.exe" />
-    <None Include="..\TitanEngineLoaders\LibraryLoader\Release\LibraryLoader.exe" />
+    <None Include="..\TitanEngineLoaders\LibraryLoader\x32\LibraryLoader.exe" />
+    <None Include="..\TitanEngineLoaders\LibraryLoader\x64\LibraryLoader.exe" />
     <None Include="Global.Engine.Hash.h" />
     <None Include="LOGO.bmp" />
     <None Include="MAINICON.ico" />

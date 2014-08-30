@@ -94,15 +94,15 @@ IDB_BITMAP2             BITMAP                  "LOGO.bmp"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,3,0
- PRODUCTVERSION 2,0,3,0
- FILEFLAGSMASK 0x17L
+ FILEVERSION 3,0,0,0
+ PRODUCTVERSION 3,0,0,0
+ FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
 #else
  FILEFLAGS 0x0L
 #endif
- FILEOS 0x4L
+ FILEOS 0x40004L
  FILETYPE 0x0L
  FILESUBTYPE 0x0L
 BEGIN
@@ -110,14 +110,11 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "ReversingLabs Corporation"
-            VALUE "FileDescription", "TitanEngine2"
-            VALUE "FileVersion", "2, 0, 3, 0"
-            VALUE "InternalName", "TitanEngine"
-            VALUE "LegalCopyright", "Copyright (C) 2009"
-            VALUE "OriginalFilename", "TitanEngine.dll"
+            VALUE "FileDescription", "TitanEngine"
+            VALUE "FileVersion", "3.0.0.0"
+            VALUE "LegalCopyright", "Community"
             VALUE "ProductName", "TitanEngine"
-            VALUE "ProductVersion", "2, 0, 3, 0"
+            VALUE "ProductVersion", "3.0.0.0"
         END
     END
     BLOCK "VarFileInfo"
