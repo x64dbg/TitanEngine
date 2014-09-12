@@ -156,3 +156,5 @@ $RECYCLE.BIN/
 *.layout
 *.orig
 *.cbTemp
+cov-*
+coverity*
