@@ -11,7 +11,7 @@ __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, voi
     {
         CONTEXT DBGContext;
         memset(&DBGContext, 0, sizeof(CONTEXT));
-        DBGContext.ContextFlags = CONTEXT_ALL;
+        DBGContext.ContextFlags = CONTEXT_ALL | CONTEXT_FLOATING_POINT;
 
         if(SuspendThread(hActiveThread) == (DWORD) - 1)
             return false;
@@ -30,6 +30,135 @@ __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, voi
         return true;
     }
     return false;
+}
+
+__declspec(dllexport) bool TITCALL GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
+{
+    ULONG_PTR retValue = 0;
+    CONTEXT DBGContext;
+    memset(&DBGContext, 0, sizeof(CONTEXT));
+    DBGContext.ContextFlags = CONTEXT_ALL | CONTEXT_FLOATING_POINT | CONTEXT_EXTENDED_REGISTERS;
+    int i;
+
+    if(SuspendThread(hActiveThread) == (DWORD) - 1)
+        return false;
+
+    if(!GetThreadContext(hActiveThread, &DBGContext))
+    {
+        ResumeThread(hActiveThread);
+        return false;
+    }
+    ResumeThread(hActiveThread);
+
+    titcontext->eflags = DBGContext.EFlags;
+    titcontext->dr0 = DBGContext.Dr0;
+    titcontext->dr1 = DBGContext.Dr1;
+    titcontext->dr2 = DBGContext.Dr2;
+    titcontext->dr3 = DBGContext.Dr3;
+    titcontext->dr6 = DBGContext.Dr6;
+    titcontext->dr7 = DBGContext.Dr7;
+    titcontext->gs = (unsigned short) DBGContext.SegGs;
+    titcontext->fs = (unsigned short) DBGContext.SegFs;
+    titcontext->es = (unsigned short) DBGContext.SegEs;
+    titcontext->ds = (unsigned short) DBGContext.SegDs;
+    titcontext->cs = (unsigned short) DBGContext.SegCs;
+    titcontext->ss = (unsigned short) DBGContext.SegSs;
+
+#ifdef _WIN64 //x64
+    titcontext->cax = DBGContext.Rax;
+    titcontext->cbx = DBGContext.Rbx;
+    titcontext->ccx = DBGContext.Rcx;
+    titcontext->cdx = DBGContext.Rdx;
+    titcontext->cdi = DBGContext.Rdi;
+    titcontext->csi = DBGContext.Rsi;
+    titcontext->cbp = DBGContext.Rbp;
+    titcontext->csp = DBGContext.Rsp;
+    titcontext->cip = DBGContext.Rip;
+    titcontext->r8 = DBGContext.R8;
+    titcontext->r9 = DBGContext.R9;
+    titcontext->r10 = DBGContext.R10;
+    titcontext->r11 = DBGContext.R11;
+    titcontext->r12 = DBGContext.R12;
+    titcontext->r13 = DBGContext.R13;
+    titcontext->r14 = DBGContext.R14;
+    titcontext->r15 = DBGContext.R15;
+
+    titcontext->x87fpu.ControlWord = DBGContext.FltSave.ControlWord;
+    titcontext->x87fpu.StatusWord = DBGContext.FltSave.StatusWord;
+    titcontext->x87fpu.TagWord = DBGContext.FltSave.TagWord;
+    titcontext->x87fpu.ErrorSelector = DBGContext.FltSave.ErrorSelector;
+    titcontext->x87fpu.ErrorOffset = DBGContext.FltSave.ErrorOffset;
+    titcontext->x87fpu.DataSelector = DBGContext.FltSave.DataSelector;
+    titcontext->x87fpu.DataOffset = DBGContext.FltSave.DataOffset;
+    // Skip titcontext->x87fpu.Cr0NpxState
+    titcontext->MxCsr = DBGContext.FltSave.MxCsr;
+
+    for(i = 0; i < 8; i++)
+        memcpy(&(titcontext->RegisterArea[i * 10]), & DBGContext.FltSave.FloatRegisters[i], 10);
+
+    for(i = 0; i < 16; i++)
+        memcpy(& (titcontext->XmmRegisters[i]), & (DBGContext.FltSave.XmmRegisters[i]), sizeof(*titcontext->XmmRegisters));
+
+#else //x86
+    titcontext->cax = DBGContext.Eax;
+    titcontext->cbx = DBGContext.Ebx;
+    titcontext->ccx = DBGContext.Ecx;
+    titcontext->cdx = DBGContext.Edx;
+    titcontext->cdi = DBGContext.Edi;
+    titcontext->csi = DBGContext.Esi;
+    titcontext->cbp = DBGContext.Ebp;
+    titcontext->csp = DBGContext.Esp;
+    titcontext->cip = DBGContext.Eip;
+
+    titcontext->x87fpu.ControlWord = DBGContext.FloatSave.ControlWord;
+    titcontext->x87fpu.StatusWord = DBGContext.FloatSave.StatusWord;
+    titcontext->x87fpu.TagWord = DBGContext.FloatSave.TagWord;
+    titcontext->x87fpu.ErrorSelector = DBGContext.FloatSave.ErrorSelector;
+    titcontext->x87fpu.ErrorOffset = DBGContext.FloatSave.ErrorOffset;
+    titcontext->x87fpu.DataSelector = DBGContext.FloatSave.DataSelector;
+    titcontext->x87fpu.DataOffset = DBGContext.FloatSave.DataOffset;
+    titcontext->x87fpu.Cr0NpxState = DBGContext.FloatSave.Cr0NpxState;
+
+    memcpy(titcontext->RegisterArea, DBGContext.FloatSave.RegisterArea, 80);
+
+    // MXCSR ExtendedRegisters[24]
+    titcontext->MxCsr = DBGContext.ExtendedRegisters[24];
+
+    // for x86 copy the 8 Xmm Registers from ExtendedRegisters[(10+n)*16]; (n is the index of the xmm register) to the XMM register
+    for(i = 0; i < 8; i++)
+        memcpy(& (titcontext->XmmRegisters[i]),  & DBGContext.ExtendedRegisters[(10 + i) * 16], sizeof(*titcontext->XmmRegisters));
+#endif
+
+#define GetSTInTOPStackFromStatusWord(StatusWord) ((StatusWord & 0x3800) >> 11)
+#define Getx87r0PositionInRegisterArea(STInTopStack) ((8 - STInTopStack) % 8)
+#define Calculatex87registerPositionInRegisterArea(x87r0_position, index) (((x87r0_position + index) % 8))
+#define GetRegisterAreaOf87register(register_area, x87r0_position, index) (((char *) register_area) + 10 * Calculatex87registerPositionInRegisterArea(x87r0_position, i) )
+#define GetSTValueFromIndex(x87r0_position, index) ((x87r0_position + index) % 8)
+
+    int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext->x87fpu.StatusWord);
+    DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+    for(i = 0; i < 8; i++)
+        titcontext->mmx[i] = * ((int64_t*) GetRegisterAreaOf87register(titcontext->RegisterArea, x87r0_position, i));
+
+
+    /*
+    GET Actual TOP register from StatusWord to order the FPUx87registers like in the FPU internal order.
+    The TOP field (bits 13-11) is where the FPU keeps track of which of its 80-bit registers is at the TOP.
+    The register number for the FPU's internal numbering system of the 80-bit registers would be displayed in that field.
+    When the programmer specifies one of the FPU 80-bit registers ST(x) in an instruction, the FPU adds (modulo 8) the ST number
+    supplied to the value in this TOP field to determine in which of its registers the required data is located.
+    */
+    /*
+    int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext->x87fpu.StatusWord);
+    DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+    */
+    for(i = 0; i < 8; i++)
+    {
+        memcpy(titcontext->x87fpu.x87FPURegister[i].data, GetRegisterAreaOf87register(titcontext->RegisterArea, x87r0_position, i), 10);
+        titcontext->x87fpu.x87FPURegister[i].st_value = GetSTValueFromIndex(x87r0_position, i);
+    }
+
+    return true;
 }
 
 __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister)
@@ -285,7 +414,7 @@ __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, voi
     {
         CONTEXT DBGContext;
         memset(&DBGContext, 0, sizeof(CONTEXT));
-        DBGContext.ContextFlags = CONTEXT_ALL;
+        DBGContext.ContextFlags = CONTEXT_ALL | CONTEXT_FLOATING_POINT;
 
         if(SuspendThread(hActiveThread) == (DWORD) - 1)
             return false;
