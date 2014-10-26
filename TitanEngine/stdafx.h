@@ -94,18 +94,18 @@ typedef struct
 {
     BYTE    data[10];
     int     st_value;
+    int     tag;
 } x87FPURegister_t;
 
 typedef struct
 {
-    DWORD   ControlWord;
-    DWORD   StatusWord;
-    DWORD   TagWord;
+    WORD   ControlWord;
+    WORD   StatusWord;
+    WORD   TagWord;
     DWORD   ErrorOffset;
     DWORD   ErrorSelector;
     DWORD   DataOffset;
     DWORD   DataSelector;
-    x87FPURegister_t x87FPURegister[8];
     DWORD   Cr0NpxState;
 } x87FPU_t;
 
@@ -146,7 +146,6 @@ typedef struct
     BYTE RegisterArea[80];
     x87FPU_t x87fpu;
     DWORD MxCsr;
-    uint64_t mmx[8];
 #ifdef _WIN64
     M128A XmmRegisters[16];
 #else // x86
@@ -620,6 +619,15 @@ typedef struct
 #define UE_SEG_DS 40
 #define UE_SEG_CS 41
 #define UE_SEG_SS 42
+
+#define UE_x87_r0 43
+#define UE_x87_r1 44
+#define UE_x87_r2 45
+#define UE_x87_r3 46
+#define UE_x87_r4 47
+#define UE_x87_r5 48
+#define UE_x87_r6 49
+#define UE_x87_r7 50
 
 typedef struct
 {

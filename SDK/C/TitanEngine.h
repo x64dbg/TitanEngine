@@ -262,18 +262,18 @@ typedef struct
 {
     BYTE    data[10];
     int     st_value;
+    int     tag;
 } x87FPURegister_t;
 
 typedef struct
 {
-    DWORD   ControlWord;
-    DWORD   StatusWord;
-    DWORD   TagWord;
+    WORD   ControlWord;
+    WORD   StatusWord;
+    WORD   TagWord;
     DWORD   ErrorOffset;
     DWORD   ErrorSelector;
     DWORD   DataOffset;
     DWORD   DataSelector;
-    x87FPURegister_t x87FPURegister[8];
     DWORD   Cr0NpxState;
 } x87FPU_t;
 
@@ -314,7 +314,6 @@ typedef struct
     BYTE RegisterArea[80];
     x87FPU_t x87fpu;
     DWORD MxCsr;
-    uint64_t mmx[8];
 #ifdef _WIN64
     M128A XmmRegisters[16];
 #else // x86
@@ -765,6 +764,8 @@ __declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T Si
 __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack);
 __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory);
 __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea);
+__declspec(dllexport) void TITCALL Getx87FPURegisters(x87FPURegister_t x87FPURegisters[8], TITAN_ENGINE_CONTEXT_t* titcontext);
+__declspec(dllexport) void TITCALL GetMMXRegisters(uint64_t mmx[8], TITAN_ENGINE_CONTEXT_t* titcontext);
 __declspec(dllexport) bool TITCALL GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext);
 __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, DWORD IndexOfRegister);
 __declspec(dllexport) ULONG_PTR TITCALL GetContextData(DWORD IndexOfRegister);
