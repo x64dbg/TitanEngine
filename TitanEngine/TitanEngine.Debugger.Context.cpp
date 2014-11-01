@@ -910,35 +910,91 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     }
     else if(IndexOfRegister == UE_MMX0)
     {
-        memcpy(&(titcontext.RegisterArea[0 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[0 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX1)
     {
-        memcpy(&(titcontext.RegisterArea[1 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[1 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX2)
     {
-        memcpy(&(titcontext.RegisterArea[2 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[2 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX3)
     {
-        memcpy(&(titcontext.RegisterArea[3 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[3 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX4)
     {
-        memcpy(&(titcontext.RegisterArea[4 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[4 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX5)
     {
-        memcpy(&(titcontext.RegisterArea[5 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[5 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX6)
     {
-        memcpy(&(titcontext.RegisterArea[0 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[0 * 10]), (void*) NewRegisterValue, 8);
     }
     else if(IndexOfRegister == UE_MMX7)
     {
-        memcpy(&(titcontext.RegisterArea[0 * 10]), (void*) NewRegisterValue, 10);
+        memcpy(&(titcontext.RegisterArea[0 * 10]), (void*) NewRegisterValue, 8);
+    }
+    else if(IndexOfRegister == UE_x87_r0)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 0)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r1)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 1)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r2)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 2)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r3)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 3)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r4)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 4)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r5)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 5)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r6)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 6)), (char*) NewRegisterValue, 10);
+    }
+    else if(IndexOfRegister == UE_x87_r7)
+    {
+        int STInTopStack = GetSTInTOPStackFromStatusWord(titcontext.x87fpu.StatusWord);
+        DWORD x87r0_position = Getx87r0PositionInRegisterArea(STInTopStack);
+
+        memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 7)), (char*) NewRegisterValue, 10);
     }
     else
     {
