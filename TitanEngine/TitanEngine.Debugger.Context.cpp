@@ -66,10 +66,11 @@ __declspec(dllexport) bool TITCALL GetContextFPUDataEx(HANDLE hActiveThread, voi
 }
 
 
-__declspec(dllexport) bool TITCALL _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
+__declspec(dllexport) bool TITCALL _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool AVX_PRIORITY)
 {
     CONTEXT DBGContext;
     int i;
+    bool returnf;
 
     memset(&DBGContext, 0, sizeof(DBGContext));
 
@@ -165,7 +166,13 @@ __declspec(dllexport) bool TITCALL _SetFullContextDataEx(HANDLE hActiveThread, T
         memcpy(& DBGContext.ExtendedRegisters[(10 + i) * 16], &(titcontext->XmmRegisters[i]), 16);
 #endif
 
-    return SetThreadContext(hActiveThread, & DBGContext) ? true : false;
+    returnf = SetThreadContext(hActiveThread, & DBGContext) ? true : false;
+
+    if(AVX_PRIORITY)
+        SetAVXContext(hActiveThread, titcontext);
+
+    return returnf;
+
 }
 
 __declspec(dllexport) bool TITCALL SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
@@ -175,7 +182,7 @@ __declspec(dllexport) bool TITCALL SetFullContextDataEx(HANDLE hActiveThread, TI
     if(SuspendThread(hActiveThread) == (DWORD) - 1)
         return false;
 
-    returnf = _SetFullContextDataEx(hActiveThread, titcontext);
+    returnf = _SetFullContextDataEx(hActiveThread, titcontext, false);
 
     ResumeThread(hActiveThread);
 
@@ -590,6 +597,7 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
 {
     TITAN_ENGINE_CONTEXT_t titcontext;
     bool returnf;
+    bool avx_priority = false;
 
     if(SuspendThread(hActiveThread) == (DWORD) - 1)
         return false;
@@ -763,6 +771,46 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     else if(IndexOfRegister == UE_XMM15)
     {
         memcpy(& (titcontext.XmmRegisters[15]), (void*) NewRegisterValue, 16);
+    }
+    else if(IndexOfRegister == UE_YMM8)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 8]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM9)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 9]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM10)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 10]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM11)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 11]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM12)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 12]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM13)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 13]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM14)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 14]), (void*) NewRegisterValue, 32);
+    }
+    else if(IndexOfRegister == UE_YMM15)
+    {
+        avx_priority = true;
+        memcpy(& (titcontext.YmmRegisters[32 * 15]), (void*) NewRegisterValue, 32);
     }
 #else //x86
     if(IndexOfRegister == UE_EAX)
@@ -1023,44 +1071,52 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
         memcpy(((uint64_t*) GetRegisterAreaOf87register(titcontext.RegisterArea, x87r0_position, 7)), (char*) NewRegisterValue, 10);
     }
     else if(IndexOfRegister == UE_YMM0)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 0]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM1)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 1]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM2)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 2]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM3)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 3]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM4)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 4]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM5)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 5]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM6)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 6]), (void*) NewRegisterValue, 32);
+    }
     else if(IndexOfRegister == UE_YMM7)
+    {
+        avx_priority = true;
         memcpy(& (titcontext.YmmRegisters[32 * 7]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM8)
-        memcpy(& (titcontext.YmmRegisters[32 * 8]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM9)
-        memcpy(& (titcontext.YmmRegisters[32 * 9]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM10)
-        memcpy(& (titcontext.YmmRegisters[32 * 10]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM11)
-        memcpy(& (titcontext.YmmRegisters[32 * 11]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM12)
-        memcpy(& (titcontext.YmmRegisters[32 * 12]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM13)
-        memcpy(& (titcontext.YmmRegisters[32 * 13]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM14)
-        memcpy(& (titcontext.YmmRegisters[32 * 14]), (void*) NewRegisterValue, 32);
-    else if(IndexOfRegister == UE_YMM15)
-        memcpy(& (titcontext.YmmRegisters[32 * 15]), (void*) NewRegisterValue, 32);
+    }
     else
     {
         ResumeThread(hActiveThread);
         return false;
     }
 
-    returnf = _SetFullContextDataEx(hActiveThread, &titcontext);
+    returnf = _SetFullContextDataEx(hActiveThread, &titcontext, avx_priority);
 
     ResumeThread(hActiveThread);
 
@@ -1137,6 +1193,90 @@ bool InitXState(void)
     return true;
 }
 
+
+__declspec(dllexport) bool TITCALL SetAVXContext(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
+{
+    PVOID Buffer;
+    PCONTEXT Context;
+    DWORD ContextSize;
+    DWORD FeatureLength;
+    ULONG Index;
+    BOOL Success;
+    PM128A Ymm;
+    PM128A Xmm;
+    DWORD64 FeatureMask;
+    bool returnf = false;
+
+    if(InitXState() == false)
+        return returnf;
+
+    FeatureMask = pfnGetEnabledXStateFeatures();
+    if((FeatureMask & XSTATE_MASK_AVX) == 0)
+        return returnf;
+
+    ContextSize = 0;
+    Success = pfnInitializeContext(NULL,
+                                   CONTEXT_ALL | CONTEXT_XSTATE,
+                                   NULL,
+                                   &ContextSize);
+
+    if((Success == TRUE) || (GetLastError() != ERROR_INSUFFICIENT_BUFFER))
+        return returnf;
+
+    Buffer = calloc(1, ContextSize);
+    if(Buffer == NULL)
+        return returnf;
+
+    Success = pfnInitializeContext(Buffer,
+                                   CONTEXT_ALL | CONTEXT_XSTATE,
+                                   &Context,
+                                   &ContextSize);
+
+    if(Success == FALSE)
+        goto Cleanup;
+
+    Success = pfnSetXStateFeaturesMask(Context, XSTATE_MASK_AVX);
+    if(Success == FALSE)
+        goto Cleanup;
+
+    Success = pfnGetXStateFeaturesMask(Context, &FeatureMask);
+    if(Success == FALSE)
+        goto Cleanup;
+
+    Xmm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
+    Ymm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_AVX, NULL);
+
+    for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+    {
+        memcpy
+        (
+            Xmm++,
+            ((char*) & (titcontext->YmmRegisters[32 * Index])),
+            sizeof(Xmm[Index])
+        );
+
+        memcpy
+        (
+            Ymm++,
+            ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
+            sizeof(Ymm[Index])
+        );
+    }
+
+    Success = SetThreadContext(hActiveThread, Context);
+    if(Success == FALSE)
+        goto Cleanup;
+
+    returnf = true;
+
+Cleanup:
+    free(Buffer);
+
+    return returnf;
+}
+
+
+
 __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
 {
     PVOID Buffer;
@@ -1146,6 +1286,7 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
     ULONG Index;
     BOOL Success;
     PM128A Ymm;
+    PM128A Xmm;
     DWORD64 FeatureMask;
     bool returnf = false;
 
@@ -1190,19 +1331,20 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
         goto Cleanup;
 
     Ymm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_AVX, &FeatureLength);
+    Xmm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
 
     for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
     {
         memcpy
         (
             (char*) & (titcontext->YmmRegisters[32 * Index]),
-            &titcontext->XmmRegisters[Index],
-            sizeof(titcontext->XmmRegisters[Index])
+            Xmm++,
+            sizeof(Xmm[Index])
         );
         memcpy
         (
             ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
-            &Ymm[Index],
+            Ymm++,
             sizeof(Ymm[Index])
         );
     }
