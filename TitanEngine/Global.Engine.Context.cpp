@@ -224,9 +224,9 @@ bool InitXState()
             _SetXStateFeaturesMask = (SETXSTATEFEATURESMASK)GetProcAddress(kernel32, "SetXStateFeaturesMask");
         }
     }
-    return (_GetEnabledXStateFeatures == NULL ||
-            _InitializeContext == NULL ||
-            _GetXStateFeaturesMask == NULL ||
-            _LocateXStateFeature == NULL ||
-            _SetXStateFeaturesMask == NULL);
+    return (_GetEnabledXStateFeatures != NULL &&
+            _InitializeContext != NULL &&
+            _GetXStateFeaturesMask != NULL &&
+            _LocateXStateFeature != NULL &&
+            _SetXStateFeaturesMask != NULL);
 }
