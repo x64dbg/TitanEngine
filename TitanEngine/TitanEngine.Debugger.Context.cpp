@@ -962,32 +962,20 @@ __declspec(dllexport) bool TITCALL SetAVXContext(HANDLE hActiveThread, TITAN_ENG
         return false;
 
     DWORD FeatureLength;
-    PM128A Xmm = (PM128A)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
-    if(Xmm != NULL) //If the feature is unsupported by the processor it will return NULL
+    PM128A Sse = (PM128A)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
+    PM128A Avx = (PM128A)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
+    int NumberOfRegisters = FeatureLength / sizeof(Sse[0]);
+
+    if(Sse != NULL) //If the feature is unsupported by the processor it will return NULL
     {
-        for(DWORD Index = 0; Index < FeatureLength / sizeof(* Xmm); Index += 1)
-        {
-            memcpy
-            (
-                Xmm++,
-                ((char*) & (titcontext->YmmRegisters[32 * Index])),
-                sizeof(Xmm[Index])
-            );
-        }
+        for(int i = 0; i < NumberOfRegisters; i++)
+            Sse[i] = titcontext->YmmRegisters[i].Low;
     }
 
-    PM128A Ymm = (PM128A)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
-    if(Ymm != NULL) //If the feature is unsupported by the processor it will return NULL
+    if(Avx != NULL) //If the feature is unsupported by the processor it will return NULL
     {
-        for(DWORD Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
-        {
-            memcpy
-            (
-                Ymm++,
-                ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
-                sizeof(Ymm[Index])
-            );
-        }
+        for(int i = 0; i < NumberOfRegisters; i++)
+            Avx[i] = titcontext->YmmRegisters[i].High;
     }
 
     return (SetThreadContext(hActiveThread, Context) == TRUE);
@@ -1034,32 +1022,20 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
         return false;
 
     DWORD FeatureLength;
-    PM128A Xmm = (PM128A)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
-    if(Xmm != NULL) //If the feature is unsupported by the processor it will return NULL
+    PM128A Sse = (PM128A)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
+    PM128A Avx = (PM128A)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
+    int NumberOfRegisters = FeatureLength / sizeof(Sse[0]);
+
+    if(Sse != NULL) //If the feature is unsupported by the processor it will return NULL
     {
-        for(DWORD Index = 0; Index < FeatureLength / sizeof(*Xmm); Index++)
-        {
-            memcpy
-            (
-                (char*) & (titcontext->YmmRegisters[32 * Index]),
-                Xmm++,
-                sizeof(Xmm[Index])
-            );
-        }
+        for(int i = 0; i < NumberOfRegisters; i++)
+            titcontext->YmmRegisters[i].Low = Sse[i];
     }
 
-    PM128A Ymm = (PM128A)_LocateXStateFeature(Context, XSTATE_AVX, &FeatureLength);
-    if(Ymm != NULL) //If the feature is unsupported by the processor it will return NULL
+    if(Avx != NULL) //If the feature is unsupported by the processor it will return NULL
     {
-        for(DWORD Index = 0; Index < FeatureLength / sizeof(*Ymm); Index++)
-        {
-            memcpy
-            (
-                ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
-                Ymm++,
-                sizeof(Ymm[Index])
-            );
-        }
+        for(int i = 0; i < NumberOfRegisters; i++)
+            titcontext->YmmRegisters[i].High = Avx[i];
     }
 
     return true;

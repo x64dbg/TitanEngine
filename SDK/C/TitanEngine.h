@@ -596,6 +596,12 @@ typedef struct
 
 typedef struct
 {
+    M128A Low; //XMM/SSE part
+    M128A High; //AVX part
+} YmmRegister_t;
+
+typedef struct
+{
     BYTE    data[10];
     int     st_value;
     int     tag;
@@ -652,10 +658,10 @@ typedef struct
     DWORD MxCsr;
 #ifdef _WIN64
     M128A XmmRegisters[16];
-    BYTE YmmRegisters[32 * 16];
+    YmmRegister_t YmmRegisters[16];
 #else // x86
     M128A XmmRegisters[8];
-    BYTE YmmRegisters[32 * 8];
+    YmmRegister_t YmmRegisters[8];
 #endif
 } TITAN_ENGINE_CONTEXT_t;
 
