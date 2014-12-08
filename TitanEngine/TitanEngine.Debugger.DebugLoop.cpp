@@ -681,7 +681,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ResetBPX = false;
                             if(engineStepActive)
                             {
-                                if(engineStepCount == NULL)
+                                if(engineStepCount == 0)
                                 {
                                     myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
                                     __try
@@ -717,7 +717,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (LPVOID)DebugRegisterX.DrxCallBack);
                         if(engineStepActive)
                         {
-                            if(engineStepCount == NULL)
+                            if(engineStepCount == 0)
                             {
                                 myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
                                 __try
@@ -746,7 +746,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress, ResetMemBPXSize, NewProtect, &OldProtect);
                         if(engineStepActive)
                         {
-                            if(engineStepCount == NULL)
+                            if(engineStepCount == 0)
                             {
                                 myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
                                 __try
@@ -898,7 +898,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(engineStepActive)
                     {
                         DBGCode = DBG_CONTINUE;
-                        if(engineStepCount == NULL)
+                        if(engineStepCount == 0)
                         {
                             myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
                             __try

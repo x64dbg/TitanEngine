@@ -29,7 +29,7 @@ extern DWORD ProcessExitCode;
 extern HANDLE DBGFileHandle;
 extern std::vector<ULONG_PTR> tlsCallBackList;
 extern std::vector<PROCESS_ITEM_DATA> hListProcess;
-extern int engineStepCount;
+extern DWORD engineStepCount;
 extern LPVOID engineStepCallBack;
 extern bool engineStepActive;
 extern bool engineProcessIsNowDetached;

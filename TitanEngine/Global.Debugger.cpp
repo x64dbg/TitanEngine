@@ -30,7 +30,7 @@ DWORD ProcessExitCode = 0;
 HANDLE DBGFileHandle;
 std::vector<ULONG_PTR> tlsCallBackList;
 std::vector<PROCESS_ITEM_DATA> hListProcess;
-int engineStepCount = INFINITE;
+DWORD engineStepCount = 0;
 LPVOID engineStepCallBack = NULL;
 bool engineStepActive = false;
 bool engineProcessIsNowDetached = false;

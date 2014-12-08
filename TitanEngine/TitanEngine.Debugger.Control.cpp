@@ -50,27 +50,20 @@ __declspec(dllexport) void TITCALL ForceClose()
 __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 {
     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
-    unsigned char instr[32]; //two instructions
+    unsigned char instr[16];
     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
     char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
     if(strstr(DisassembledString, "PUSHF"))
         StepOver(StepCallBack);
     else
     {
-        int len = StaticLengthDisassemble((LPVOID)instr);
-        DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition + len, (LPVOID)(instr + len));
-        if(strstr(DisassembledString, "PUSHF")) //we wanna land on PUSHF safely (to prevent 'PUSH SS, POP SS' problems
-            SetBPX(ueCurrentPosition + len, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
-        else
-        {
-            ULONG_PTR ueContext = NULL;
-            ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-            ueContext |= UE_TRAP_FLAG;
-            SetContextData(UE_EFLAGS, ueContext);
-            engineStepActive = true;
-            engineStepCallBack = StepCallBack;
-            engineStepCount = NULL;
-        }
+        ULONG_PTR ueContext = NULL;
+        ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
+        ueContext |= UE_TRAP_FLAG;
+        SetContextData(UE_EFLAGS, ueContext);
+        engineStepActive = true;
+        engineStepCallBack = StepCallBack;
+        engineStepCount = 0;
     }
 }
 
@@ -98,15 +91,8 @@ __declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal)
 
 __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack)
 {
-    ULONG_PTR ueContext = NULL;
-
-    ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-    ueContext |= UE_TRAP_FLAG;
-    SetContextData(UE_EFLAGS, ueContext);
-    engineStepActive = true;
-    engineStepCount = (int)StepCount;
-    engineStepCallBack = StepCallBack;
-    engineStepCount--;
+    StepInto(StepCallBack);
+    engineStepCount = StepCount - 1; //We already stepped once
 }
 
 __declspec(dllexport) void TITCALL SetNextDbgContinueStatus(DWORD SetDbgCode)
