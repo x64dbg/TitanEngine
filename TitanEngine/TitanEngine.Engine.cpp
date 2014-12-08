@@ -350,6 +350,12 @@ __declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureTyp
         return (sizeof(FILE_STATUS_INFO) == StructureSize);
     case UE_STRUCT_FILE_FIX_INFO:
         return (sizeof(FILE_FIX_INFO) == StructureSize);
+    case UE_STRUCT_X87FPUREGISTER:
+        return (sizeof(x87FPURegister_t) == StructureSize);
+    case UE_STRUCT_X87FPU:
+        return (sizeof(x87FPU_t) == StructureSize);
+    case UE_STRUCT_TITAN_ENGINE_CONTEXT:
+        return (sizeof(TITAN_ENGINE_CONTEXT_t) == StructureSize);
     }
     return false;
 }
