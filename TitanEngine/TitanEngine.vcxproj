@@ -226,6 +226,7 @@
   <ItemGroup>
     <ClCompile Include="Global.Breakpoints.cpp" />
     <ClCompile Include="Global.Debugger.cpp" />
+    <ClCompile Include="Global.Engine.Context.cpp" />
     <ClCompile Include="Global.Engine.cpp" />
     <ClCompile Include="Global.Engine.Extension.cpp" />
     <ClCompile Include="Global.Engine.Hash.cpp" />
@@ -296,6 +297,7 @@
     <ClInclude Include="distorm.h" />
     <ClInclude Include="Global.Breakpoints.h" />
     <ClInclude Include="Global.Debugger.h" />
+    <ClInclude Include="Global.Engine.Context.h" />
     <ClInclude Include="Global.Engine.Extension.h" />
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Engine.Hider.h" />
