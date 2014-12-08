@@ -82,7 +82,7 @@ __declspec(dllexport) bool TITCALL _SetFullContextDataEx(HANDLE hActiveThread, T
         return false;
     }
 
-    DBGContext.EFlags = titcontext->eflags;
+    DBGContext.EFlags = (DWORD)titcontext->eflags;
     DBGContext.Dr0 = titcontext->dr0;
     DBGContext.Dr1 = titcontext->dr1;
     DBGContext.Dr2 = titcontext->dr2;
@@ -1244,23 +1244,30 @@ __declspec(dllexport) bool TITCALL SetAVXContext(HANDLE hActiveThread, TITAN_ENG
         goto Cleanup;
 
     Xmm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
-    Ymm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_AVX, NULL);
-
-    for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+    if(Xmm != NULL) //If the feature is unsupported by the processor it will return NULL
     {
-        memcpy
-        (
-            Xmm++,
-            ((char*) & (titcontext->YmmRegisters[32 * Index])),
-            sizeof(Xmm[Index])
-        );
-
-        memcpy
-        (
-            Ymm++,
-            ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
-            sizeof(Ymm[Index])
-        );
+        for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+        {
+            memcpy
+            (
+                Xmm++,
+                ((char*) & (titcontext->YmmRegisters[32 * Index])),
+                sizeof(Xmm[Index])
+            );
+        }
+    }
+    Ymm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_AVX, NULL);
+    if(Ymm != NULL) //If the feature is unsupported by the processor it will return NULL
+    {
+        for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+        {
+            memcpy
+            (
+                Ymm++,
+                ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
+                sizeof(Ymm[Index])
+            );
+        }
     }
 
     Success = SetThreadContext(hActiveThread, Context);
@@ -1330,23 +1337,32 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
     if(Success == FALSE)
         goto Cleanup;
 
-    Ymm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_AVX, &FeatureLength);
     Xmm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
-
-    for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+    if(Xmm != NULL) //If the feature is unsupported by the processor it will return NULL
     {
-        memcpy
-        (
-            (char*) & (titcontext->YmmRegisters[32 * Index]),
-            Xmm++,
-            sizeof(Xmm[Index])
-        );
-        memcpy
-        (
-            ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
-            Ymm++,
-            sizeof(Ymm[Index])
-        );
+        for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+        {
+            memcpy
+            (
+                (char*) & (titcontext->YmmRegisters[32 * Index]),
+                Xmm++,
+                sizeof(Xmm[Index])
+            );
+        }
+    }
+
+    Ymm = (PM128A)pfnLocateXStateFeature(Context, XSTATE_AVX, &FeatureLength);
+    if(Ymm != NULL) //If the feature is unsupported by the processor it will return NULL
+    {
+        for(Index = 0; Index < FeatureLength / sizeof(* Ymm); Index += 1)
+        {
+            memcpy
+            (
+                ((char*) & (titcontext->YmmRegisters[32 * Index])) + sizeof(titcontext->XmmRegisters[Index]),
+                Ymm++,
+                sizeof(Ymm[Index])
+            );
+        }
     }
 
     returnf = true;
