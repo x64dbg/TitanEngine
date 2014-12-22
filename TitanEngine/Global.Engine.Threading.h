@@ -25,6 +25,7 @@ public:
 
 private:
     CriticalSectionLock gLock;
+    bool Locked;
 };
 
 #endif //_GLOBAL_ENGINE_THREADING_H
