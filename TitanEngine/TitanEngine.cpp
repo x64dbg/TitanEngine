@@ -25,7 +25,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         if(lpvReserved)
             ExtensionManagerPluginReleaseCallBack();
         RemoveDirectoryW(engineSzEngineGarbageFolder);
-        CriticalSectionDeleteLocks(); //delete critical sections
+        CriticalSectionLocker::Deinitialize(); //delete critical sections
         break;
     }
     return TRUE;

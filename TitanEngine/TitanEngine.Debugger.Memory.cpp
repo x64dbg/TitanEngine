@@ -389,7 +389,7 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
 
     CriticalSectionLocker lock(LockBreakPointBuffer); //thread-safe
     //disable breakpoints that interfere with the memory to write
-    BreakPointPreWriteFilter((ULONG_PTR)lpBaseAddress, nSize, &lock);
+    BreakPointPreWriteFilter((ULONG_PTR)lpBaseAddress, nSize);
 
     if(!lpNumberOfBytesWritten)
     {
@@ -417,7 +417,7 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
     }
 
     //re-enable breakpoints that interfere with the memory to write
-    BreakPointPostWriteFilter((ULONG_PTR)lpBaseAddress, nSize, &lock);
+    BreakPointPostWriteFilter((ULONG_PTR)lpBaseAddress, nSize);
 
     return retValue;
 }

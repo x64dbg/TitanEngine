@@ -285,7 +285,6 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
     if(found == -1) //not found
         return false;
     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
-    lock.unlock();
     if(IsBPXEnabled(bpxAddress))
     {
         if(!WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer.at(found).OriginalByte[0], BreakPointBuffer.at(found).BreakPointSize, &NumberOfBytesReadWritten))
@@ -294,7 +293,6 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
             return false;
         }
     }
-    lock.relock();
     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
     BreakPointBuffer.erase(BreakPointBuffer.begin() + found);
     return true;
@@ -824,18 +822,14 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
         {
             if(BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT)
             {
-                lock.unlock();
                 DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
-                lock.relock();
             }
             else if(BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
                     BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
                     BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
                     BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
             {
-                lock.unlock();
                 RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress, BreakPointBuffer.at(i).BreakPointSize);
-                lock.relock();
             }
         }
         DeleteHardwareBreakPoint(UE_DR0);
@@ -850,18 +844,14 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
         {
             if((BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
-                lock.unlock();
                 DisableBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
-                lock.relock();
             }
             else if(BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
                     BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
                     BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
                     BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
             {
-                lock.unlock();
                 RemoveMemoryBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress, BreakPointBuffer.at(i).BreakPointSize);
-                lock.relock();
             }
         }
         return true;
@@ -872,9 +862,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
         {
             if((BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) && BreakPointBuffer.at(i).BreakPointActive == UE_BPXINACTIVE)
             {
-                lock.unlock();
                 DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
-                lock.relock();
             }
         }
         return true;
@@ -885,9 +873,7 @@ __declspec(dllexport) bool TITCALL RemoveAllBreakPoints(DWORD RemoveOption)
         {
             if((BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT || BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT) && BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
             {
-                lock.unlock();
                 DeleteBPX((ULONG_PTR)BreakPointBuffer.at(i).BreakPointAddress);
-                lock.relock();
             }
         }
         return true;

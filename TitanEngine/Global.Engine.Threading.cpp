@@ -2,10 +2,10 @@
 #include "definitions.h"
 #include "Global.Engine.Threading.h"
 
-static CRITICAL_SECTION locks[LockLast] = {};
-static bool bInitDone = false;
+CRITICAL_SECTION CriticalSectionLocker::locks[LockLast] = {};
+bool CriticalSectionLocker::bInitDone = false;
 
-static void CriticalSectionInitializeLocks()
+void CriticalSectionLocker::Initialize()
 {
     if(bInitDone)
         return;
@@ -14,13 +14,13 @@ static void CriticalSectionInitializeLocks()
     bInitDone = true;
 }
 
-void CriticalSectionDeleteLocks()
+void CriticalSectionLocker::Deinitialize()
 {
     if(!bInitDone)
         return;
     for(int i = 0; i < LockLast; i++)
     {
-        EnterCriticalSection(&locks[i]);
+        EnterCriticalSection(&locks[i]); //obtain ownership
         DeleteCriticalSection(&locks[i]);
     }
     bInitDone = false;
@@ -28,7 +28,7 @@ void CriticalSectionDeleteLocks()
 
 CriticalSectionLocker::CriticalSectionLocker(CriticalSectionLock lock)
 {
-    CriticalSectionInitializeLocks(); //initialize critical sections
+    Initialize(); //initialize critical sections
     gLock = lock;
 
     EnterCriticalSection(&locks[gLock]);
