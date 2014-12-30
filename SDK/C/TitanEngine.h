@@ -586,11 +586,12 @@ typedef struct
     DWORD OriginalCOMTableSize;
 } FILE_FIX_INFO, *PFILE_FIX_INFO;
 
-typedef struct
+typedef struct DECLSPEC_ALIGN(16)
 {
     ULONGLONG Low;
     LONGLONG High;
-} XmmRegister_t;
+}
+XmmRegister_t;
 
 typedef struct
 {

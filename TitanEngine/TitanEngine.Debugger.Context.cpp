@@ -568,42 +568,42 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     else if(IndexOfRegister == UE_YMM8)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 8]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[8]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM9)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 9]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[9]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM10)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 10]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[10]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM11)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 11]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[11]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM12)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 12]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[12]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM13)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 13]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[13]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM14)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 14]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[14]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM15)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 15]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[15]), (void*) NewRegisterValue, 32);
     }
 #else //x86
     if(IndexOfRegister == UE_EAX)
@@ -866,42 +866,42 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
     else if(IndexOfRegister == UE_YMM0)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 0]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[0]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM1)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 1]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[1]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM2)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 2]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[2]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM3)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 3]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[3]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM4)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 4]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[4]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM5)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 5]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[5]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM6)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 6]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[6]), (void*) NewRegisterValue, 32);
     }
     else if(IndexOfRegister == UE_YMM7)
     {
         avx_priority = true;
-        memcpy(& (titcontext.YmmRegisters[32 * 7]), (void*) NewRegisterValue, 32);
+        memcpy(& (titcontext.YmmRegisters[7]), (void*) NewRegisterValue, 32);
     }
     else
     {
