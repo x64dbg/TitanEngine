@@ -962,8 +962,8 @@ __declspec(dllexport) bool TITCALL SetAVXContext(HANDLE hActiveThread, TITAN_ENG
         return false;
 
     DWORD FeatureLength;
-    PM128A Sse = (PM128A)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
-    PM128A Avx = (PM128A)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
+    XmmRegister_t* Sse = (XmmRegister_t*)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
+    XmmRegister_t* Avx = (XmmRegister_t*)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
     int NumberOfRegisters = FeatureLength / sizeof(Sse[0]);
 
     if(Sse != NULL) //If the feature is unsupported by the processor it will return NULL
@@ -1022,8 +1022,8 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
         return false;
 
     DWORD FeatureLength;
-    PM128A Sse = (PM128A)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
-    PM128A Avx = (PM128A)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
+    XmmRegister_t* Sse = (XmmRegister_t*)_LocateXStateFeature(Context, XSTATE_LEGACY_SSE, &FeatureLength);
+    XmmRegister_t* Avx = (XmmRegister_t*)_LocateXStateFeature(Context, XSTATE_AVX, NULL);
     int NumberOfRegisters = FeatureLength / sizeof(Sse[0]);
 
     if(Sse != NULL) //If the feature is unsupported by the processor it will return NULL
