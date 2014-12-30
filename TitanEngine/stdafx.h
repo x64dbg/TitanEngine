@@ -93,12 +93,11 @@
 #define CONTEXT_EXTENDED_REGISTERS 0
 #endif
 
-typedef struct DECLSPEC_ALIGN(16)
+typedef struct DECLSPEC_ALIGN(16) _XmmRegister_t
 {
     ULONGLONG Low;
     LONGLONG High;
-}
-XmmRegister_t;
+} XmmRegister_t;
 
 typedef struct
 {
