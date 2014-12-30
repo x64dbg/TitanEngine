@@ -958,6 +958,9 @@ __declspec(dllexport) bool TITCALL SetAVXContext(HANDLE hActiveThread, TITAN_ENG
     if(_SetXStateFeaturesMask(Context, XSTATE_MASK_AVX) == FALSE)
         return false;
 
+    if(GetThreadContext(hActiveThread, Context) == FALSE)
+        return false;
+
     if(_GetXStateFeaturesMask(Context, &FeatureMask) == FALSE)
         return false;
 
