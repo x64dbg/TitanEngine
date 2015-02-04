@@ -789,11 +789,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             {
 
                             }
-                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[0], sizeof HARDWARE_DATA);
-                            DeleteHardwareBreakPoint(UE_DR0);
-                            DebugRegisterXId = UE_DR0;
-                            ResetHwBPX = true;
+                            if(DebugRegister[0].DrxEnabled)
+                            {
+                                memcpy(&DebugRegisterX, &DebugRegister[0], sizeof(HARDWARE_DATA));
+                                DebugRegisterXId = UE_DR0;
+                                DeleteHardwareBreakPoint(UE_DR0);
+                                ResetHwBPX = true;
+                            }
                         }
                         else
                         {
@@ -816,11 +818,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             {
 
                             }
-                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[1], sizeof HARDWARE_DATA);
-                            DeleteHardwareBreakPoint(UE_DR1);
-                            DebugRegisterXId = UE_DR1;
-                            ResetHwBPX = true;
+                            if(DebugRegister[1].DrxEnabled)
+                            {
+                                memcpy(&DebugRegisterX, &DebugRegister[1], sizeof(HARDWARE_DATA));
+                                DebugRegisterXId = UE_DR1;
+                                DeleteHardwareBreakPoint(UE_DR1);
+                                ResetHwBPX = true;
+                            }
                         }
                         else
                         {
@@ -843,11 +847,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             {
 
                             }
-                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[2], sizeof HARDWARE_DATA);
-                            DeleteHardwareBreakPoint(UE_DR2);
-                            DebugRegisterXId = UE_DR2;
-                            ResetHwBPX = true;
+                            if(DebugRegister[2].DrxEnabled)
+                            {
+                                memcpy(&DebugRegisterX, &DebugRegister[2], sizeof(HARDWARE_DATA));
+                                DebugRegisterXId = UE_DR2;
+                                DeleteHardwareBreakPoint(UE_DR2);
+                                ResetHwBPX = true;
+                            }
                         }
                         else
                         {
@@ -870,11 +876,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             {
 
                             }
-                            RtlZeroMemory(&DebugRegisterX, sizeof HARDWARE_DATA);
-                            RtlMoveMemory(&DebugRegisterX, &DebugRegister[3], sizeof HARDWARE_DATA);
-                            DeleteHardwareBreakPoint(UE_DR3);
-                            DebugRegisterXId = UE_DR3;
-                            ResetHwBPX = true;
+                            if(DebugRegister[3].DrxEnabled)
+                            {
+                                memcpy(&DebugRegisterX, &DebugRegister[3], sizeof(HARDWARE_DATA));
+                                DebugRegisterXId = UE_DR3;
+                                DeleteHardwareBreakPoint(UE_DR3);
+                                ResetHwBPX = true;
+                            }
                         }
                         else
                         {
