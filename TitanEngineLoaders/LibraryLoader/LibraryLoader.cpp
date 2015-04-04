@@ -6,7 +6,7 @@ int main()
 {
     memset(szLibraryPath, 0, sizeof(szLibraryPath));
     wchar_t szName[256] = L"";
-    wsprintfW(szName, L"Global\\szLibraryName%X", (unsigned int)GetCurrentProcessId());
+    wsprintfW(szName, L"Local\\szLibraryName%X", (unsigned int)GetCurrentProcessId());
     HANDLE hMapFile = OpenFileMappingW(FILE_MAP_READ, false, szName);
     if(hMapFile)
     {

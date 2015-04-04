@@ -188,7 +188,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
             DebugReserveModuleBase = DebugModuleImageBase;
         PPROCESS_INFORMATION ReturnValue = (PPROCESS_INFORMATION)InitDebugW(szDebuggerName, szCommandLine, szCurrentFolder);
         wchar_t szName[256] = L"";
-        swprintf(szName, 256, L"Global\\szLibraryName%X", (unsigned int)ReturnValue->dwProcessId);
+        swprintf(szName, 256, L"Local\\szLibraryName%X", (unsigned int)ReturnValue->dwProcessId);
         DebugDLLFileMapping = CreateFileMappingW(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, 512 * sizeof(wchar_t), szName);
         if(DebugDLLFileMapping)
         {
