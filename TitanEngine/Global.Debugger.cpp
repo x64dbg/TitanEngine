@@ -45,23 +45,16 @@ LPVOID StepOutCallBack = NULL;
 // Global.Debugger.functions:
 long DebugLoopInSecondThread(LPVOID InputParameter)
 {
-    __try
+    if(InputParameter == NULL) //IsFileDll
     {
-        if(InputParameter == NULL) //IsFileDll
-        {
-            InitDebugExW(expertDebug.szFileName, expertDebug.szCommandLine, expertDebug.szCurrentFolder, expertDebug.EntryCallBack);
-        }
-        else
-        {
-            InitDLLDebugW(expertDebug.szFileName, expertDebug.ReserveModuleBase, expertDebug.szCommandLine, expertDebug.szCurrentFolder, expertDebug.EntryCallBack);
-        }
-        DebugLoop();
-        return(NULL);
+        InitDebugExW(expertDebug.szFileName, expertDebug.szCommandLine, expertDebug.szCurrentFolder, expertDebug.EntryCallBack);
     }
-    __except(EXCEPTION_EXECUTE_HANDLER)
+    else
     {
-        return(-1);
+        InitDLLDebugW(expertDebug.szFileName, expertDebug.ReserveModuleBase, expertDebug.szCommandLine, expertDebug.szCurrentFolder, expertDebug.EntryCallBack);
     }
+    DebugLoop();
+    return NULL;
 }
 
 void DebuggerReset()
@@ -94,13 +87,7 @@ void StepOutStepCallBack()
         else
         {
             typedef void(TITCALL * fCustomBreakPoint)();
-            __try
-            {
-                ((fCustomBreakPoint)StepOutCallBack)();
-            }
-            __except(EXCEPTION_EXECUTE_HANDLER)
-            {
-            }
+            ((fCustomBreakPoint)StepOutCallBack)();
         }
     }
     else
