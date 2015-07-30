@@ -83,6 +83,7 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
                     {
                         if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3BreakPoint, 1, &NumberOfBytesReadWritten))
                         {
+                            FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                             testWrite = true;
                         }
                     }
@@ -90,6 +91,7 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
                     {
                         if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &INT3LongBreakPoint, 2, &NumberOfBytesReadWritten))
                         {
+                            FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                             testWrite = true;
                         }
                     }
@@ -97,6 +99,7 @@ __declspec(dllexport) bool TITCALL EnableBPX(ULONG_PTR bpxAddress)
                     {
                         if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &UD2BreakPoint, 2, &NumberOfBytesReadWritten))
                         {
+                            FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                             testWrite = true;
                         }
                     }
@@ -147,6 +150,7 @@ __declspec(dllexport) bool TITCALL DisableBPX(ULONG_PTR bpxAddress)
             {
                 if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer.at(i).OriginalByte[0], BreakPointBuffer.at(i).BreakPointSize, &NumberOfBytesReadWritten))
                 {
+                    FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                     BreakPointBuffer.at(i).BreakPointActive = UE_BPXINACTIVE;
                     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(i).BreakPointSize, OldProtect, &OldProtect);
                     return true;
@@ -247,6 +251,7 @@ __declspec(dllexport) bool TITCALL SetBPX(ULONG_PTR bpxAddress, DWORD bpxType, L
     {
         if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, bpxDataPrt, NewBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
         {
+            FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
             //add new breakpoint to the list
             NewBreakPoint.AdvancedBreakPointType = SelectedBreakPointType & 0xFF;
             NewBreakPoint.BreakPointActive = UE_BPXACTIVE;
@@ -289,6 +294,7 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
     {
         if(!WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer.at(found).OriginalByte[0], BreakPointBuffer.at(found).BreakPointSize, &NumberOfBytesReadWritten))
         {
+            FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
             return false;
         }

@@ -118,6 +118,8 @@ static void FixAntidebugApiInProcess(HANDLE hProcess, bool Hide, bool x64)
             VirtualProtectEx(hProcess, (LPVOID)APIPatchAddress, patchGetTickCountSize, OldProtect, &OldProtect);
         }
     }
+
+    FlushInstructionCache(hProcess, NULL, 0);
 }
 
 //Quote from The Ultimate Anti-Debugging Reference by Peter Ferrie

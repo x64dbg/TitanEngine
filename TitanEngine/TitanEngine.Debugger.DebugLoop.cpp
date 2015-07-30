@@ -454,6 +454,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, &FoundBreakPoint.OriginalByte[0], FoundBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
                     {
+                        FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                         DBGCode = DBG_CONTINUE;
                         hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
@@ -559,6 +560,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
                         data &= ~UE_TRAP_FLAG;
                         WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
+                        FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                     }
                     if(ResetBPX) //restore 'normal' breakpoint
                     {
@@ -965,6 +967,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, PAGE_EXECUTE_READWRITE, &OldProtect);
                     if(WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, &FoundBreakPoint.OriginalByte[0], FoundBreakPoint.BreakPointSize, &NumberOfBytesReadWritten))
                     {
+                        FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                         DBGCode = DBG_CONTINUE;
                         hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
