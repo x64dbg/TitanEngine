@@ -594,7 +594,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             EngineCloseHandle(hActiveThread);
                         }
                     }
-                    else if(ResetHwBPX) //restore hardware breakpoint
+                    if(ResetHwBPX) //restore hardware breakpoint
                     {
                         ResetHwBPX = false;
                         SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (LPVOID)DebugRegisterX.DrxCallBack);
@@ -613,7 +613,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             }
                         }
                     }
-                    else if(ResetMemBPX) //restore memory breakpoint
+                    if(ResetMemBPX) //restore memory breakpoint
                     {
                         ResetMemBPX = false;
                         VirtualQueryEx(dbgProcessInformation.hProcess, (LPCVOID)ResetMemBPXAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
@@ -658,6 +658,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                 DeleteHardwareBreakPoint(UE_DR0);
                                 ResetHwBPX = true;
                             }
+							else
+							{
+								GetThreadContext(hActiveThread, &myDBGContext);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
+								SetThreadContext(hActiveThread, &myDBGContext);
+							}
                         }
                         else
                         {
@@ -680,6 +686,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                 DeleteHardwareBreakPoint(UE_DR1);
                                 ResetHwBPX = true;
                             }
+							else
+							{
+								GetThreadContext(hActiveThread, &myDBGContext);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
+								SetThreadContext(hActiveThread, &myDBGContext);
+							}
                         }
                         else
                         {
@@ -702,6 +714,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                 DeleteHardwareBreakPoint(UE_DR2);
                                 ResetHwBPX = true;
                             }
+							else
+							{
+								GetThreadContext(hActiveThread, &myDBGContext);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
+								SetThreadContext(hActiveThread, &myDBGContext);
+							}
                         }
                         else
                         {
@@ -724,6 +742,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
                                 DeleteHardwareBreakPoint(UE_DR3);
                                 ResetHwBPX = true;
                             }
+							else
+							{
+								GetThreadContext(hActiveThread, &myDBGContext);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
+								SetThreadContext(hActiveThread, &myDBGContext);
+							}
                         }
                         else
                         {
