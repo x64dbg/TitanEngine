@@ -661,7 +661,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 							else
 							{
 								GetThreadContext(hActiveThread, &myDBGContext);
-								myDBGContext.EFlags &= ~(1 << 8);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
 								SetThreadContext(hActiveThread, &myDBGContext);
 							}
                         }
@@ -689,7 +689,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 							else
 							{
 								GetThreadContext(hActiveThread, &myDBGContext);
-								myDBGContext.EFlags &= ~(1 << 8);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
 								SetThreadContext(hActiveThread, &myDBGContext);
 							}
                         }
@@ -717,7 +717,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 							else
 							{
 								GetThreadContext(hActiveThread, &myDBGContext);
-								myDBGContext.EFlags &= ~(1 << 8);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
 								SetThreadContext(hActiveThread, &myDBGContext);
 							}
                         }
@@ -745,7 +745,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 							else
 							{
 								GetThreadContext(hActiveThread, &myDBGContext);
-								myDBGContext.EFlags &= ~(1 << 8);
+								myDBGContext.EFlags &= ~UE_TRAP_FLAG;
 								SetThreadContext(hActiveThread, &myDBGContext);
 							}
                         }
