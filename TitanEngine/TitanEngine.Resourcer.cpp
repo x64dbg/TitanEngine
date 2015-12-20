@@ -262,7 +262,7 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceW(wchar_t* szFileNa
     HANDLE FileMap;
     DWORD FileSize;
 
-    if(MapFileExW(szFileName, UE_ACCESS_ALL, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
+    if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
     {
         ResourcerEnumerateResourceEx(FileMapVA, FileSize, CallBack);
         UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
