@@ -273,8 +273,8 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceEx(ULONG_PTR FileMa
 {
 
     int i, j, n;
-    wchar_t* uniResourceName;
-    wchar_t* uniResourceType;
+    wchar_t* pUniResourceName;
+    wchar_t* pUniResourceType;
     PIMAGE_RESOURCE_DIRECTORY PEResource;
     PIMAGE_RESOURCE_DIRECTORY PEResourcePtr;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY PEResourceDir;
@@ -310,24 +310,30 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceEx(ULONG_PTR FileMa
                             n = PESubResourcePtr2->NumberOfIdEntries + PESubResourcePtr2->NumberOfNamedEntries;
                             while(n > NULL)
                             {
+                                wchar_t uniResourceName[MAX_PATH] = {};
+                                wchar_t uniResourceType[MAX_PATH] = {};
                                 PEResourceItem = (PIMAGE_RESOURCE_DATA_ENTRY)((ULONG_PTR)PEResourcePtr + PEResourceDir2->OffsetToData);
                                 if(PEResourceDir->NameIsString)
                                 {
-                                    uniResourceType = (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset);
+                                    WORD resourceTypeLen = *(WORD*) ((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset);
+                                    wcsncpy(uniResourceType, (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset)+1, resourceTypeLen);
+                                    pUniResourceType = uniResourceType;
                                 }
                                 else
                                 {
-                                    uniResourceType = NULL;
+                                    pUniResourceType = NULL;
                                 }
                                 if(PEResourceDir1->NameIsString)
                                 {
-                                    uniResourceName = (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset);
+                                    WORD resourceNameLen = *(WORD*) ((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset);
+                                    wcsncpy(uniResourceName, (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset)+1, resourceNameLen);
+                                    pUniResourceName = uniResourceName;
                                 }
                                 else
                                 {
-                                    uniResourceName = NULL;
+                                    pUniResourceName = NULL;
                                 }
-                                if(!myResourceEnumerator(uniResourceType, PEResourceDir->Id, uniResourceName, PEResourceDir1->Id, PEResourceDir2->Id, PEResourceItem->OffsetToData, PEResourceItem->Size))
+                                if(!myResourceEnumerator(pUniResourceType, PEResourceDir->Id, pUniResourceName, PEResourceDir1->Id, PEResourceDir2->Id, PEResourceItem->OffsetToData, PEResourceItem->Size))
                                 {
                                     return;
                                 }
