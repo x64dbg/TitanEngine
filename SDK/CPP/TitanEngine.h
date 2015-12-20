@@ -635,7 +635,7 @@ __declspec(dllimport) bool TITCALL RelocaterWipeRelocationTableW(wchar_t* szFile
 __declspec(dllimport) ULONG_PTR TITCALL ResourcerLoadFileForResourceUse(char* szFileName);
 __declspec(dllimport) ULONG_PTR TITCALL ResourcerLoadFileForResourceUseW(wchar_t* szFileName);
 __declspec(dllimport) bool TITCALL ResourcerFreeLoadedFile(LPVOID LoadedFileBase);
-__declspec(dllimport) bool TITCALL ResourcerExtractResourceFromFileEx(ULONG_PTR FileMapVA, char* szResourceType, char* szResourceName, char* szExtractedFileName);
+__declspec(dllimport) bool TITCALL ResourcerExtractResourceFromFileEx(HMODULE hFile, char* szResourceType, char* szResourceName, char* szExtractedFileName);
 __declspec(dllimport) bool TITCALL ResourcerExtractResourceFromFile(char* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName);
 __declspec(dllimport) bool TITCALL ResourcerExtractResourceFromFileW(wchar_t* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName);
 __declspec(dllimport) bool TITCALL ResourcerFindResource(char* szFileName, char* szResourceType, DWORD ResourceType, char* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, PULONG_PTR pResourceData, LPDWORD pResourceSize);

@@ -992,9 +992,9 @@ protected:
     {
         return UE::ResourcerFreeLoadedFile(LoadedFileBase);
     }
-    static bool ExtractResourceFromFileEx(ULONG_PTR FileMapVA, char* szResourceType, char* szResourceName, char* szExtractedFileName)
+    static bool ExtractResourceFromFileEx(HMODULE hFile, char* szResourceType, char* szResourceName, char* szExtractedFileName)
     {
-        return UE::ResourcerExtractResourceFromFileEx(FileMapVA, szResourceType, szResourceName, szExtractedFileName);
+        return UE::ResourcerExtractResourceFromFileEx(hFile, szResourceType, szResourceName, szExtractedFileName);
     }
     static bool FindResourceEx(ULONG_PTR FileMapVA, DWORD FileSize, wchar_t* szResourceType, DWORD ResourceType, wchar_t* szResourceName, DWORD ResourceName, DWORD ResourceLanguage, ULONG_PTR* pResourceData, DWORD* pResourceSize)
     {
