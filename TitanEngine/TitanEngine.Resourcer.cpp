@@ -27,7 +27,7 @@ __declspec(dllexport) bool TITCALL ResourcerFreeLoadedFile(LPVOID LoadedFileBase
     }
 }
 
-__declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileEx(ULONG_PTR FileMapVA, char* szResourceType, char* szResourceName, char* szExtractedFileName)
+__declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileEx(HMODULE hFile, char* szResourceType, char* szResourceName, char* szExtractedFileName)
 {
 
     HRSRC hResource;
@@ -35,22 +35,22 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileEx(ULONG_PTR 
     DWORD ResourceSize;
     LPVOID ResourceData;
     DWORD NumberOfBytesWritten;
-    HANDLE hFile;
+    HANDLE hOutFile;
 
-    hResource = FindResourceA((HMODULE)FileMapVA, (LPCSTR)szResourceName, (LPCSTR)szResourceType);
+    hResource = FindResourceA(hFile, (LPCSTR)szResourceName, (LPCSTR)szResourceType);
     if(hResource != NULL)
     {
-        hResourceGlobal = LoadResource((HMODULE)FileMapVA, hResource);
+        hResourceGlobal = LoadResource(hFile, hResource);
         if(hResourceGlobal != NULL)
         {
-            ResourceSize = SizeofResource((HMODULE)FileMapVA, hResource);
+            ResourceSize = SizeofResource(hFile, hResource);
             ResourceData = LockResource(hResourceGlobal);
             EngineCreatePathForFile(szExtractedFileName);
-            hFile = CreateFileA(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-            if(hFile != INVALID_HANDLE_VALUE)
+            hOutFile = CreateFileA(szExtractedFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if(hOutFile != INVALID_HANDLE_VALUE)
             {
-                WriteFile(hFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL);
-                EngineCloseHandle(hFile);
+                WriteFile(hOutFile, ResourceData, ResourceSize, &NumberOfBytesWritten, NULL);
+                EngineCloseHandle(hOutFile);
             }
             else
             {
@@ -64,17 +64,14 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileEx(ULONG_PTR 
 
 __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFile(char* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
 {
-
-    HANDLE FileHandle;
-    DWORD FileSize;
-    HANDLE FileMap;
-    ULONG_PTR FileMapVA;
+    HMODULE hFile = NULL;
     bool bReturn;
 
-    if(MapFileEx(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
+    hFile = LoadLibraryA(szFileName);
+    if(hFile != NULL)
     {
-        bReturn = ResourcerExtractResourceFromFileEx(FileMapVA, szResourceType, szResourceName, szExtractedFileName);
-        UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+        bReturn = ResourcerExtractResourceFromFileEx(hFile, szResourceType, szResourceName, szExtractedFileName);
+        FreeLibrary(hFile);
         if(bReturn)
         {
             return true;
@@ -85,17 +82,14 @@ __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFile(char* szFile
 
 __declspec(dllexport) bool TITCALL ResourcerExtractResourceFromFileW(wchar_t* szFileName, char* szResourceType, char* szResourceName, char* szExtractedFileName)
 {
-
-    HANDLE FileHandle;
-    DWORD FileSize;
-    HANDLE FileMap;
-    ULONG_PTR FileMapVA;
+    HMODULE hFile = NULL;
     bool bReturn;
 
-    if(MapFileExW(szFileName, UE_ACCESS_READ, &FileHandle, &FileSize, &FileMap, &FileMapVA, NULL))
+    hFile = LoadLibraryW(szFileName);
+    if(hFile != NULL)
     {
-        bReturn = ResourcerExtractResourceFromFileEx(FileMapVA, szResourceType, szResourceName, szExtractedFileName);
-        UnMapFileEx(FileHandle, FileSize, FileMap, FileMapVA);
+        bReturn = ResourcerExtractResourceFromFileEx(hFile, szResourceType, szResourceName, szExtractedFileName);
+        FreeLibrary(hFile);
         if(bReturn)
         {
             return true;
