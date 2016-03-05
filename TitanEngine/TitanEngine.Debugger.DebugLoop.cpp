@@ -241,9 +241,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 if(hListThread.at(i).dwThreadId == DBGEvent.dwThreadId) //found the thread to remove
                 {
-                    //TODO: close handle?
-                    EngineCloseHandle(hListThread.at(i).hThread);
-
                     hListThread.erase(hListThread.begin() + i);
                     break;
                 }
