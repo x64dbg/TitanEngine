@@ -30,7 +30,7 @@ __declspec(dllexport) long TITCALL GetPE32SectionNumberFromVA(ULONG_PTR FileMapV
                 DWORD FoundInSection = -1;
                 while(SectionNumber > 0)
                 {
-                    if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                    if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + max(PESections->Misc.VirtualSize, PESections->SizeOfRawData))
                     {
                         FoundInSection = PEHeader32->FileHeader.NumberOfSections - SectionNumber;
                     }
@@ -54,7 +54,7 @@ __declspec(dllexport) long TITCALL GetPE32SectionNumberFromVA(ULONG_PTR FileMapV
                 DWORD FoundInSection = -1;
                 while(SectionNumber > 0)
                 {
-                    if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                    if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + max(PESections->Misc.VirtualSize, PESections->SizeOfRawData))
                     {
                         FoundInSection = PEHeader64->FileHeader.NumberOfSections - SectionNumber;
                     }
@@ -114,7 +114,7 @@ __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
                 {
                     while(SectionNumber > 0)
                     {
-                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress <= PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + max(PESections->Misc.VirtualSize, PESections->SizeOfRawData))
                         {
                             if(ConvertAddress - PESections->VirtualAddress <= PESections->SizeOfRawData)
                             {
@@ -155,7 +155,7 @@ __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffset(ULONG_PTR FileMapV
                 {
                     while(SectionNumber > 0)
                     {
-                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress <= PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + max(PESections->Misc.VirtualSize, PESections->SizeOfRawData))
                         {
                             if(ConvertAddress - PESections->VirtualAddress <= PESections->SizeOfRawData)
                             {
@@ -249,7 +249,7 @@ __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMa
                 {
                     while(SectionNumber > 0)
                     {
-                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress <= PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + max(PESections->Misc.VirtualSize, PESections->SizeOfRawData))
                         {
                             if(ConvertAddress - PESections->VirtualAddress <= PESections->SizeOfRawData)
                             {
@@ -321,7 +321,7 @@ __declspec(dllexport) ULONG_PTR TITCALL ConvertVAtoFileOffsetEx(ULONG_PTR FileMa
                 {
                     while(SectionNumber > 0)
                     {
-                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress <= PESections->VirtualAddress + PESections->Misc.VirtualSize)
+                        if(PESections->VirtualAddress <= ConvertAddress && ConvertAddress < PESections->VirtualAddress + max(PESections->Misc.VirtualSize, PESections->SizeOfRawData))
                         {
                             if(ConvertAddress - PESections->VirtualAddress <= PESections->SizeOfRawData)
                             {
