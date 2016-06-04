@@ -803,9 +803,9 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     {
         if(hFileProc == NULL)
         {
-            VirtualQueryEx(GetCurrentProcess(), (LPVOID)FileMapVA, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
-            VirtualQueryEx(GetCurrentProcess(), MemoryInfo.AllocationBase, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
-            MemorySize = (DWORD)((ULONG_PTR)MemoryInfo.AllocationBase + (ULONG_PTR)MemoryInfo.RegionSize - (ULONG_PTR)FileMapVA);
+            //VirtualQueryEx(GetCurrentProcess(), (LPVOID)FileMapVA, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
+            //VirtualQueryEx(GetCurrentProcess(), MemoryInfo.AllocationBase, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
+            MemorySize = 0x10000; // (DWORD)((ULONG_PTR)MemoryInfo.AllocationBase + (ULONG_PTR)MemoryInfo.RegionSize - (ULONG_PTR)FileMapVA);
         }
         else
         {

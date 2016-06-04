@@ -67,7 +67,7 @@ __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, 
     _DecodedInst engineDecodedInstructions[1];
     unsigned int DecodedInstructionsCount = 0;
 
-    int MaxDisassmSize = (int)IsBadReadPtrRemote(GetCurrentProcess(), DisassmAddress, MAXIMUM_INSTRUCTION_SIZE);
+    int MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE; // (int)IsBadReadPtrRemote(GetCurrentProcess(), DisassmAddress, MAXIMUM_INSTRUCTION_SIZE);
     if(MaxDisassmSize)
     {
         if(distorm_decode((ULONG_PTR)DisassmStart, (const unsigned char*)DisassmAddress, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
@@ -100,7 +100,7 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
 
     if(hProcess != NULL)
     {
-        int MaxDisassmSize = (int)IsBadReadPtrRemote(hProcess, DisassmAddress, sizeof(readBuffer));
+        int MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE; // (int)IsBadReadPtrRemote(hProcess, DisassmAddress, sizeof(readBuffer));
 
         if(MaxDisassmSize)
         {
