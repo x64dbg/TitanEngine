@@ -139,6 +139,10 @@ __declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                     {
                         return(PEHeader32->OptionalHeader.NumberOfRvaAndSizes);
                     }
+                    else if(WhichData == UE_DLLCHARACTERISTICS)
+                    {
+                        return(PEHeader32->OptionalHeader.DllCharacteristics);
+                    }
                     else
                     {
                         return(0);
@@ -288,6 +292,10 @@ __declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR File
                     else if(WhichData == UE_NUMBEROFRVAANDSIZES)
                     {
                         return(PEHeader64->OptionalHeader.NumberOfRvaAndSizes);
+                    }
+                    else if(WhichData == UE_DLLCHARACTERISTICS)
+                    {
+                        return(PEHeader64->OptionalHeader.DllCharacteristics);
                     }
                     else
                     {
@@ -693,6 +701,11 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                             PEHeader32->OptionalHeader.NumberOfRvaAndSizes = (DWORD)NewDataValue;
                             return true;
                         }
+                        else if(WhichData == UE_DLLCHARACTERISTICS)
+                        {
+                            PEHeader32->OptionalHeader.DllCharacteristics = (WORD)NewDataValue;
+                            return true;
+                        }
                         else
                         {
                             return false;
@@ -877,6 +890,11 @@ __declspec(dllexport) bool TITCALL SetPE32DataForMappedFile(ULONG_PTR FileMapVA,
                         else if(WhichData == UE_NUMBEROFRVAANDSIZES)
                         {
                             PEHeader64->OptionalHeader.NumberOfRvaAndSizes = (DWORD)NewDataValue;
+                            return true;
+                        }
+                        else if(WhichData == UE_DLLCHARACTERISTICS)
+                        {
+                            PEHeader64->OptionalHeader.DllCharacteristics = (WORD)NewDataValue;
                             return true;
                         }
                         else

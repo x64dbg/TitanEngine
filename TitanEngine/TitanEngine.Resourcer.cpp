@@ -315,8 +315,8 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceEx(ULONG_PTR FileMa
                                 PEResourceItem = (PIMAGE_RESOURCE_DATA_ENTRY)((ULONG_PTR)PEResourcePtr + PEResourceDir2->OffsetToData);
                                 if(PEResourceDir->NameIsString)
                                 {
-                                    WORD resourceTypeLen = *(WORD*) ((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset);
-                                    wcsncpy(uniResourceType, (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset)+1, resourceTypeLen);
+                                    WORD resourceTypeLen = *(WORD*)((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset);
+                                    wcsncpy(uniResourceType, (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir->NameOffset) + 1, resourceTypeLen);
                                     pUniResourceType = uniResourceType;
                                 }
                                 else
@@ -325,8 +325,8 @@ __declspec(dllexport) void TITCALL ResourcerEnumerateResourceEx(ULONG_PTR FileMa
                                 }
                                 if(PEResourceDir1->NameIsString)
                                 {
-                                    WORD resourceNameLen = *(WORD*) ((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset);
-                                    wcsncpy(uniResourceName, (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset)+1, resourceNameLen);
+                                    WORD resourceNameLen = *(WORD*)((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset);
+                                    wcsncpy(uniResourceName, (wchar_t*)((ULONG_PTR)PEResourcePtr + PEResourceDir1->NameOffset) + 1, resourceNameLen);
                                     pUniResourceName = uniResourceName;
                                 }
                                 else
