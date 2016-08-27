@@ -502,6 +502,7 @@ typedef struct HOOK_ENTRY
 #define UE_NUMBEROFRVAANDSIZES 22
 #define UE_BASEOFCODE 23
 #define UE_BASEOFDATA 24
+#define UE_DLLCHARACTERISTICS 25
 //leaving some enum space here for future additions
 #define UE_SECTIONNAME 40
 #define UE_SECTIONVIRTUALOFFSET 41
@@ -509,7 +510,6 @@ typedef struct HOOK_ENTRY
 #define UE_SECTIONRAWOFFSET 43
 #define UE_SECTIONRAWSIZE 44
 #define UE_SECTIONFLAGS 45
-#define UE_DLLCHARACTERISTICS 46
 
 #define UE_CH_BREAKPOINT 1
 #define UE_CH_SINGLESTEP 2
