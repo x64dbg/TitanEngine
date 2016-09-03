@@ -25,7 +25,7 @@ extern LOCATEXSTATEFEATURE _LocateXStateFeature;
 extern SETXSTATEFEATURESMASK _SetXStateFeaturesMask;
 
 bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool AVX_PRIORITY);
-bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext);
+bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool avx);
 bool InitXState(void);
 
 #endif //_GLOBAL_ENGINE_CONTEXT_H

@@ -113,7 +113,7 @@ bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
     return returnf;
 }
 
-bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
+bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool avx)
 {
     CONTEXT DBGContext;
     memset(&DBGContext, 0, sizeof(CONTEXT));
@@ -203,7 +203,8 @@ bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
         memcpy(&(titcontext->XmmRegisters[i]),  & DBGContext.ExtendedRegisters[(10 + i) * 16], 16);
 #endif
 
-    GetAVXContext(hActiveThread, titcontext);
+    if(avx)
+        GetAVXContext(hActiveThread, titcontext);
 
     return true;
 }

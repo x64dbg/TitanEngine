@@ -85,7 +85,7 @@ __declspec(dllexport) bool TITCALL GetFullContextDataEx(HANDLE hActiveThread, TI
     if(SuspendThread(hActiveThread) == (DWORD) - 1)
         return false;
 
-    returnf = _GetFullContextDataEx(hActiveThread, titcontext);
+    returnf = _GetFullContextDataEx(hActiveThread, titcontext, true);
 
     ResumeThread(hActiveThread);
 
@@ -102,7 +102,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
 
     memset(&titcontext, 0, sizeof(titcontext));
 
-    if(! _GetFullContextDataEx(hActiveThread, & titcontext))
+    if(! _GetFullContextDataEx(hActiveThread, & titcontext, false))
     {
         ResumeThread(hActiveThread);
         return false;
@@ -397,7 +397,7 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
 
     memset(&titcontext, 0, sizeof(titcontext));
 
-    if(! _GetFullContextDataEx(hActiveThread, & titcontext))
+    if(! _GetFullContextDataEx(hActiveThread, & titcontext, IndexOfRegister >= UE_MXCSR))
     {
         ResumeThread(hActiveThread);
         return false;
