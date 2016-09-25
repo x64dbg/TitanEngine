@@ -56,18 +56,13 @@ bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
 
     DBGContext.FltSave.ControlWord = titcontext->x87fpu.ControlWord;
     DBGContext.FltSave.StatusWord = titcontext->x87fpu.StatusWord;
-    memcpy(& (DBGContext.FltSave.TagWord), & (titcontext->x87fpu.TagWord), sizeof(titcontext->x87fpu.TagWord));
-#ifdef _WIN64
-#define WIN64_CASTDWORDTOWORD (WORD)
-#else
-#define WIN64_CASTDWORDTOWORD (DWORD)
-#endif
-    DBGContext.FltSave.ErrorSelector = WIN64_CASTDWORDTOWORD titcontext->x87fpu.ErrorSelector;
+    DBGContext.FltSave.TagWord = (BYTE)titcontext->x87fpu.TagWord;
+    DBGContext.FltSave.ErrorSelector = (WORD)titcontext->x87fpu.ErrorSelector;
     DBGContext.FltSave.ErrorOffset = titcontext->x87fpu.ErrorOffset;
-    DBGContext.FltSave.DataSelector = WIN64_CASTDWORDTOWORD titcontext->x87fpu.DataSelector;
+    DBGContext.FltSave.DataSelector = (WORD)titcontext->x87fpu.DataSelector;
     DBGContext.FltSave.DataOffset = titcontext->x87fpu.DataOffset;
     // Skip titcontext->x87fpu.Cr0NpxState
-    DBGContext.FltSave.MxCsr = titcontext->MxCsr;
+    DBGContext.MxCsr = titcontext->MxCsr;
 
     for(int i = 0; i < 8; i++)
         memcpy(& DBGContext.FltSave.FloatRegisters[i], &(titcontext->RegisterArea[i * 10]), 10);
@@ -159,13 +154,13 @@ bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
 
     titcontext->x87fpu.ControlWord = DBGContext.FltSave.ControlWord;
     titcontext->x87fpu.StatusWord = DBGContext.FltSave.StatusWord;
-    memcpy(& (titcontext->x87fpu.TagWord), & (DBGContext.FltSave.TagWord), sizeof(titcontext->x87fpu.TagWord));
+    titcontext->x87fpu.TagWord = DBGContext.FltSave.TagWord;
     titcontext->x87fpu.ErrorSelector = DBGContext.FltSave.ErrorSelector;
     titcontext->x87fpu.ErrorOffset = DBGContext.FltSave.ErrorOffset;
     titcontext->x87fpu.DataSelector = DBGContext.FltSave.DataSelector;
     titcontext->x87fpu.DataOffset = DBGContext.FltSave.DataOffset;
     // Skip titcontext->x87fpu.Cr0NpxState
-    titcontext->MxCsr = DBGContext.FltSave.MxCsr;
+    titcontext->MxCsr = DBGContext.MxCsr;
 
     for(int i = 0; i < 8; i++)
         memcpy(&(titcontext->RegisterArea[i * 10]), & DBGContext.FltSave.FloatRegisters[i], 10);
