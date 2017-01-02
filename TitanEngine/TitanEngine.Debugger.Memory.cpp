@@ -350,7 +350,7 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
 
     if(!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
     {
-        if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
+        if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READ, &dwProtect))
         {
             if(ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
             {
