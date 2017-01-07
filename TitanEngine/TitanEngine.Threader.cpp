@@ -112,7 +112,7 @@ __declspec(dllexport) bool TITCALL ThreaderImportRunningThreadData(DWORD Process
                 NewThreadData.WaitTime = pIterThread->WaitTime;
                 NewThreadData.dwThreadId = (DWORD)pIterThread->ClientId.UniqueThread;
 
-                NewThreadData.hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, NewThreadData.dwThreadId);
+                NewThreadData.hThread = EngineOpenThread(THREAD_ALL_ACCESS, FALSE, NewThreadData.dwThreadId);
                 if(NewThreadData.hThread)
                 {
                     NewThreadData.TebAddress = GetTEBLocation(NewThreadData.hThread);

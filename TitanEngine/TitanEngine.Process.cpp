@@ -136,3 +136,8 @@ __declspec(dllexport) HANDLE TITCALL TitanOpenProcess(DWORD dwDesiredAccess, boo
 {
     return EngineOpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId);
 }
+
+__declspec(dllexport) HANDLE TITCALL TitanOpenThread(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwThreadId)
+{
+    return EngineOpenThread(dwDesiredAccess, bInheritHandle, dwThreadId);
+}

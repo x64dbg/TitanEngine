@@ -1164,6 +1164,10 @@ public:
     {
         return UE::ThreaderIsExceptionInMainThread();
     }
+    static HANDLE OpenThread(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwThreadId)
+    {
+        return UE::TitanOpenThread(dwDesiredAccess, bInheritHandle, dwThreadId);
+    }
 };
 
 // --

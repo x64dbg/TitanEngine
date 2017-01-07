@@ -54,5 +54,6 @@ bool EngineGetLibraryOrdinalData(ULONG_PTR ModuleBase, LPDWORD ptrOrdinalBase, L
 ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBases, ULONG_PTR APIAddress, const char* szAPIName, DWORD ReturnType);
 DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege);
 HANDLE EngineOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId);
+HANDLE EngineOpenThread(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwThreadId);
 
 #endif //_GLOBAL_ENGINE_H

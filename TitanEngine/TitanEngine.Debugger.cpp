@@ -295,7 +295,7 @@ __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
     int threadcount = (int)hListThread.size();
     for(int i = 0; i < threadcount; i++)
     {
-        HANDLE hActiveThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, hListThread.at(i).dwThreadId);
+        HANDLE hActiveThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, hListThread.at(i).dwThreadId);
         CONTEXT myDBGContext;
         myDBGContext.ContextFlags = CONTEXT_CONTROL;
         GetThreadContext(hActiveThread, &myDBGContext);
