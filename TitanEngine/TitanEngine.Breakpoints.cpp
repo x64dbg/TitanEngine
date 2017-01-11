@@ -294,11 +294,11 @@ __declspec(dllexport) bool TITCALL DeleteBPX(ULONG_PTR bpxAddress)
     {
         if(!WriteProcessMemory(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, &BreakPointBuffer.at(found).OriginalByte[0], BreakPointBuffer.at(found).BreakPointSize, &NumberOfBytesReadWritten))
         {
-            FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
             return false;
         }
     }
+    FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
     VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)bpxAddress, BreakPointBuffer.at(found).BreakPointSize, OldProtect, &OldProtect);
     BreakPointBuffer.erase(BreakPointBuffer.begin() + found);
     return true;
