@@ -142,6 +142,29 @@ __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveM
     }
 }
 
+static bool TryExtractDllLoader(bool failedBefore = false)
+{
+    wchar_t* szPath = wcsrchr(szDebuggerName, L'\\');
+    if(szPath)
+        szPath[1] = '\0';
+    wchar_t DLLLoaderName[64] = L"";
+#ifdef _WIN64
+    wsprintfW(DLLLoaderName, L"DLLLoader64_%.4X.exe", GetTickCount() & 0xFFFF);
+#else
+    wsprintfW(DLLLoaderName, L"DLLLoader32_%.4X.exe", GetTickCount() & 0xFFFF);
+#endif //_WIN64
+    lstrcatW(szDebuggerName, DLLLoaderName);
+#ifdef _WIN64
+    if(EngineExtractResource("LOADERX64", szDebuggerName))
+#else
+    if(EngineExtractResource("LOADERX86", szDebuggerName))
+#endif //_WIN64
+        return true;
+    return !failedBefore &&
+           GetModuleFileNameW(engineHandle, szDebuggerName, _countof(szDebuggerName)) &&
+           TryExtractDllLoader(true);
+}
+
 __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool ReserveModuleBase, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack)
 {
     memset(szDebuggerName, 0, sizeof(szDebuggerName));
@@ -152,25 +175,7 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
         szFileName = &szBackupDebuggedFileName[0];
     }
     lstrcpyW(szDebuggerName, szFileName);
-    int i = lstrlenW(szDebuggerName);
-    while(szDebuggerName[i] != '\\' && i)
-        i--;
-    wchar_t DLLLoaderName[64] = L"";
-#ifdef _WIN64
-    wsprintfW(DLLLoaderName, L"DLLLoader64_%.4X.exe", GetTickCount() & 0xFFFF);
-#else
-    wsprintfW(DLLLoaderName, L"DLLLoader32_%.4X.exe", GetTickCount() & 0xFFFF);
-#endif
-    if(i)
-        lstrcpyW(szDebuggerName + i + 1, DLLLoaderName);
-    else
-        lstrcpyW(szDebuggerName, DLLLoaderName);
-
-#if defined(_WIN64)
-    if(EngineExtractResource("LOADERX64", szDebuggerName))
-#else
-    if(EngineExtractResource("LOADERX86", szDebuggerName))
-#endif
+    if(TryExtractDllLoader())
     {
         DebugDebuggingDLL = true;
         int i = lstrlenW(szFileName);
