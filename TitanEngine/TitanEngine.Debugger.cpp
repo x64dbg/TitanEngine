@@ -61,6 +61,7 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     }
     wchar_t* szFileNameCreateProcess;
     wchar_t* szCommandLineCreateProcess;
+    std::wstring createWithCmdLine;
     if(szCommandLine == NULL || !lstrlenW(szCommandLine))
     {
         szCommandLineCreateProcess = 0;
@@ -68,9 +69,12 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     }
     else
     {
-        wchar_t szCreateWithCmdLine[1024];
-        wsprintfW(szCreateWithCmdLine, L"\"%s\" %s", szFileName, szCommandLine);
-        szCommandLineCreateProcess = szCreateWithCmdLine;
+        createWithCmdLine.push_back('\"');
+        createWithCmdLine.append(szFileName);
+        createWithCmdLine.push_back('\"');
+        createWithCmdLine.push_back(' ');
+        createWithCmdLine.append(szCommandLine);
+        szCommandLineCreateProcess = (wchar_t*)createWithCmdLine.c_str();
         szFileNameCreateProcess = 0;
     }
     if(CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS | DebugConsoleFlag | CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
