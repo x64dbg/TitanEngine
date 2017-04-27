@@ -1114,4 +1114,13 @@ typedef PEB64 PEB_CURRENT;
 typedef PEB32 PEB_CURRENT;
 #endif
 
+//GetThreadContext:
+// - The handle must have THREAD_GET_CONTEXT access to the thread.
+// - WOW64: The handle must also have THREAD_QUERY_INFORMATION access.
+//SetThreadContext:
+// - The handle must have the THREAD_SET_CONTEXT access right to the thread.
+//SuspendThread/ResumeThread:
+// - The handle must have the THREAD_SUSPEND_RESUME access right.
+#define THREAD_GETSETSUSPEND (THREAD_SUSPEND_RESUME | THREAD_SET_CONTEXT | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION)
+
 #pragma pack(pop)

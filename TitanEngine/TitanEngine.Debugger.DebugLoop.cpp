@@ -453,7 +453,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                         DBGCode = DBG_CONTINUE;
-                        hActiveThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                        hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
@@ -583,7 +583,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else
                         {
-                            hActiveThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                            hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
                             myDBGContext.ContextFlags = CONTEXT_CONTROL;
                             GetThreadContext(hActiveThread, &myDBGContext);
                             myDBGContext.EFlags |= UE_TRAP_FLAG;
@@ -636,7 +636,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 else //no resetting needed (debugger reached hardware breakpoint or the user stepped)
                 {
                     //handle hardware breakpoints
-                    hActiveThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                    hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
                     myDBGContext.ContextFlags = CONTEXT_DEBUG_REGISTERS | CONTEXT_CONTROL;
                     GetThreadContext(hActiveThread, &myDBGContext);
                     if((ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == myDBGContext.Dr0 || (myDBGContext.Dr6 & 0x1))
@@ -816,7 +816,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
                 if(bFoundBreakPoint) //found memory breakpoint
                 {
-                    hActiveThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, false, DBGEvent.dwThreadId);
+                    hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
                     myDBGContext.ContextFlags = CONTEXT_CONTROL;
                     GetThreadContext(hActiveThread, &myDBGContext);
                     DBGCode = DBG_CONTINUE; //debugger handled the exception
@@ -990,7 +990,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                         DBGCode = DBG_CONTINUE;
-                        hActiveThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+                        hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
                         myDBGContext.ContextFlags = CONTEXT_CONTROL;
                         GetThreadContext(hActiveThread, &myDBGContext);
                         if(FoundBreakPoint.BreakPointType != UE_SINGLESHOOT)
