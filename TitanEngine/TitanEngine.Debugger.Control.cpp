@@ -4,6 +4,7 @@
 #include "Global.Handle.h"
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
+#include "Global.Engine.h"
 
 __declspec(dllexport) void TITCALL ForceClose()
 {
@@ -62,10 +63,12 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
     }
     else
     {
-        ULONG_PTR ueContext = NULL;
-        ueContext = (ULONG_PTR)GetContextData(UE_EFLAGS);
-        ueContext |= UE_TRAP_FLAG;
-        SetContextData(UE_EFLAGS, ueContext);
+        CONTEXT myDBGContext;
+        HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
+        myDBGContext.ContextFlags = CONTEXT_CONTROL;
+        GetThreadContext(hActiveThread, &myDBGContext);
+        myDBGContext.EFlags |= UE_TRAP_FLAG;
+        SetThreadContext(hActiveThread, &myDBGContext);
         engineStepActive = true;
         engineStepCallBack = StepCallBack;
         engineStepCount = 0;
