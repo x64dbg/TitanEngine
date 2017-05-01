@@ -189,10 +189,13 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
     void* heapForceFlagsAddress = 0;
     DWORD heapForceFlags = 0;
 
-#ifndef _WIN64
-    PEB64 myPEB64 = {0};
-    void* AddressOfPEB64 = GetPEBLocation64(hProcess);
-#endif
+// getting the PEB64 doesnt work anymore since WIN10 creators update as the PEB32+0x1000 offset doesnt seem to be correct anymore
+// maybe earlier as some comments suggested. at least this code causes crashes of debuggee as of that update only
+// in theory, we could get the PEB64 via TEB64 (TitanEngine.Hider GetTEBLocation64) or via ntdll.Wow64QueryInformationProcess64
+//#ifndef _WIN64
+//    PEB64 myPEB64 = {0};
+//    void* AddressOfPEB64 = GetPEBLocation64(hProcess);
+//#endif
 
     void* AddressOfPEB = GetPEBLocation(hProcess);
 
@@ -201,12 +204,12 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
 
     if(ReadProcessMemory(hProcess, AddressOfPEB, (void*)&myPEB, sizeof(PEB_CURRENT), &ueNumberOfBytesRead))
     {
-#ifndef _WIN64
-        if(AddressOfPEB64)
-        {
-            ReadProcessMemory(hProcess, AddressOfPEB64, (void*)&myPEB64, sizeof(PEB64), &ueNumberOfBytesRead);
-        }
-#endif
+//#ifndef _WIN64
+//        if(AddressOfPEB64)
+//        {
+//            ReadProcessMemory(hProcess, AddressOfPEB64, (void*)&myPEB64, sizeof(PEB64), &ueNumberOfBytesRead);
+//        }
+//#endif
 
         if(Hide)
         {
@@ -214,19 +217,22 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
             myPEB.BeingDebugged = FALSE;
             myPEB.NtGlobalFlag &= ~0x70;
 
-#ifndef _WIN64
-            myPEB64.BeingDebugged = FALSE;
-            myPEB64.NtGlobalFlag &= ~0x70;
-#endif
+//#ifndef _WIN64
+//            myPEB64.BeingDebugged = FALSE;
+//            myPEB64.NtGlobalFlag &= ~0x70;
+//#endif
 
             //TODO: backup heap flags
-#ifdef _WIN64
-            heapFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(true));
-            heapForceFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(true));
-#else
+//#ifdef _WIN64
+//            heapFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(true));
+//            heapForceFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(true));
+//#else
+//            heapFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(false));
+//            heapForceFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(false));
+//#endif //_WIN64
             heapFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapFlagsOffset(false));
             heapForceFlagsAddress = (void*)((LONG_PTR)myPEB.ProcessHeap + getHeapForceFlagsOffset(false));
-#endif //_WIN64
+
             ReadProcessMemory(hProcess, heapFlagsAddress, &heapFlags, sizeof(DWORD), 0);
             ReadProcessMemory(hProcess, heapForceFlagsAddress, &heapForceFlags, sizeof(DWORD), 0);
 
@@ -239,19 +245,19 @@ static bool FixPebInProcess(HANDLE hProcess, bool Hide)
         else
         {
             myPEB.BeingDebugged = TRUE;
-#ifndef _WIN64
-            myPEB64.BeingDebugged = TRUE;
-#endif
+//#ifndef _WIN64
+//            myPEB64.BeingDebugged = TRUE;
+//#endif
         }
 
         if(WriteProcessMemory(hProcess, AddressOfPEB, (void*)&myPEB, sizeof(PEB_CURRENT), &ueNumberOfBytesRead))
         {
-#ifndef _WIN64
-            if(AddressOfPEB64)
-            {
-                WriteProcessMemory(hProcess, AddressOfPEB64, (void*)&myPEB64, sizeof(PEB64), &ueNumberOfBytesRead);
-            }
-#endif
+//#ifndef _WIN64
+//            if(AddressOfPEB64)
+//            {
+//                WriteProcessMemory(hProcess, AddressOfPEB64, (void*)&myPEB64, sizeof(PEB64), &ueNumberOfBytesRead);
+//            }
+//#endif
             return true;
         }
     }
