@@ -71,6 +71,7 @@ __declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess)
         DWORD peb32 = (DWORD)GetPEBLocation(hProcess);
         if(peb32)
         {
+			// this offset is WRONG as of Win10 Creators Update.See comment in Global.Engine.Hider.cpp:192
             peb32 += 0x1000; //PEB64 after PEB32
             return (void*)peb32;
         }
