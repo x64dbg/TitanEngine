@@ -47,6 +47,7 @@ __declspec(dllexport) void* TITCALL GetTEBLocation(HANDLE hThread)
 
 __declspec(dllexport) void* TITCALL GetTEBLocation64(HANDLE hThread)
 {
+    //TODO: this might return garbage on Windows 10
 #ifndef _WIN64
     if(IsThisProcessWow64())
     {
@@ -64,20 +65,41 @@ __declspec(dllexport) void* TITCALL GetTEBLocation64(HANDLE hThread)
 
 __declspec(dllexport) void* TITCALL GetPEBLocation64(HANDLE hProcess)
 {
+    void* PebAddress = 0;
 #ifndef _WIN64
     if(IsThisProcessWow64())
     {
-        //Only WOW64 processes have 2 PEBs
-        DWORD peb32 = (DWORD)GetPEBLocation(hProcess);
-        if(peb32)
+        typedef NTSTATUS(WINAPI * t_NtWow64QueryInformationProcess64)(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+        static auto _NtWow64QueryInformationProcess64 = (t_NtWow64QueryInformationProcess64)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtWow64QueryInformationProcess64");
+        if(_NtWow64QueryInformationProcess64)
         {
-			// this offset is WRONG as of Win10 Creators Update.See comment in Global.Engine.Hider.cpp:192
-            peb32 += 0x1000; //PEB64 after PEB32
-            return (void*)peb32;
+            struct PROCESS_BASIC_INFORMATION64
+            {
+                DWORD ExitStatus;
+                DWORD64 PebBaseAddress;
+                DWORD64 AffinityMask;
+                DWORD BasePriority;
+                DWORD64 UniqueProcessId;
+                DWORD64 InheritedFromUniqueProcessId;
+            } myProcessBasicInformation[5];
+
+            ULONG RequiredLen = 0;
+
+            if(_NtWow64QueryInformationProcess64(hProcess, ProcessBasicInformation, myProcessBasicInformation, sizeof(PROCESS_BASIC_INFORMATION64), &RequiredLen) == STATUS_SUCCESS)
+            {
+                PebAddress = (void*)myProcessBasicInformation->PebBaseAddress;
+            }
+            else
+            {
+                if(_NtWow64QueryInformationProcess64(hProcess, ProcessBasicInformation, myProcessBasicInformation, RequiredLen, &RequiredLen) == STATUS_SUCCESS)
+                {
+                    PebAddress = (void*)myProcessBasicInformation->PebBaseAddress;
+                }
+            }
         }
     }
 #endif //_WIN64
-    return 0;
+    return PebAddress;
 }
 
 __declspec(dllexport) bool TITCALL HideDebugger(HANDLE hProcess, DWORD PatchAPILevel)
