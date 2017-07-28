@@ -507,6 +507,7 @@ const
   function LengthDisassembleEx(hProcess:THandle; DisassmAddress:Pointer):LongInt; stdcall;  external 'TitanEngine.dll' name 'LengthDisassembleEx';
   function LengthDisassemble(DisassmAddress:Pointer):LongInt; stdcall;  external 'TitanEngine.dll' name 'LengthDisassemble';
   function InitDebug(szFileName,szCommandLine,szCurrentFolder:PAnsiChar): Pointer; stdcall; external 'TitanEngine.dll' name 'InitDebug';
+  function InitNativeDebug(szFileName,szCommandLine,szCurrentFolder:PAnsiChar): Pointer; stdcall; external 'TitanEngine.dll' name 'InitNonWin32Debug';
   function InitDebugEx(szFileName,szCommandLine,szCurrentFolder:PAnsiChar; EntryCallBack:Pointer): Pointer; stdcall; external 'TitanEngine.dll' name 'InitDebugEx';
   function InitDLLDebug(szFileName:PAnsiChar; ReserveModuleBase:boolean; szCommandLine,szCurrentFolder:PAnsiChar; EntryCallBack:Pointer): Pointer; stdcall; external 'TitanEngine.dll' name 'InitDLLDebug';
   function StopDebug(): Boolean; stdcall; external 'TitanEngine.dll' name 'StopDebug';
