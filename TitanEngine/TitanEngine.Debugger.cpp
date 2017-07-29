@@ -217,7 +217,7 @@ __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_
     // Convert command line and directory to UNICODE_STRING if present
     SIZE_T ArgumentsLength = szCommandLine != NULL ? lstrlenW(szCommandLine) : 0;
     SIZE_T BufferSize = ImagePath.Length + ((ArgumentsLength + 4) * sizeof(wchar_t));
-    CommandLine.Buffer = (PWSTR)RtlAllocateHeap(RtlProcessHeap(), HEAP_ZERO_MEMORY, BufferSize * 10);
+    CommandLine.Buffer = (PWSTR)RtlAllocateHeap(RtlProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
     CommandLine.MaximumLength = (USHORT)BufferSize;
     RtlAppendUnicodeToString(&CommandLine, L"\"");
     RtlAppendUnicodeStringToString(&CommandLine, &ImagePath);

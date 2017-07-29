@@ -33,6 +33,22 @@
 #include <time.h>
 #include <stdint.h>
 
+#ifndef _Out_writes_opt_
+#define _Out_writes_opt_(x)
+#endif
+
+#ifndef _In_reads_
+#define _In_reads_(x)
+#endif
+
+#ifndef _Inout_updates_bytes_
+#define _Inout_updates_bytes_(x)
+#endif
+
+#ifndef _Out_writes_bytes_opt_
+#define _Out_writes_bytes_opt_(X)
+#endif
+
 //#include <winternl.h>
 #include "ntdll.h"
 #include "aplib.h"
