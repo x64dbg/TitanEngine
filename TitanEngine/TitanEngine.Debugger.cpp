@@ -215,15 +215,16 @@ __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_
         goto finished;
 
     // Convert command line and directory to UNICODE_STRING if present
-    SIZE_T ArgumentsLength = lstrlenW(szCommandLine);
-    if(szCommandLine != NULL && ArgumentsLength > 0)
+    SIZE_T ArgumentsLength = szCommandLine != NULL ? lstrlenW(szCommandLine) : 0;
+    SIZE_T BufferSize = ImagePath.Length + ((ArgumentsLength + 4) * sizeof(wchar_t));
+    CommandLine.Buffer = (PWSTR)RtlAllocateHeap(RtlProcessHeap(), HEAP_ZERO_MEMORY, BufferSize * 10);
+    CommandLine.MaximumLength = (USHORT)BufferSize;
+    RtlAppendUnicodeToString(&CommandLine, L"\"");
+    RtlAppendUnicodeStringToString(&CommandLine, &ImagePath);
+    RtlAppendUnicodeToString(&CommandLine, L"\"");
+    if(ArgumentsLength > 0)
     {
-        SIZE_T BufferSize = ImagePath.Length + ((ArgumentsLength + 4) * sizeof(wchar_t));
-        CommandLine.Buffer = (PWSTR)RtlAllocateHeap(RtlProcessHeap(), HEAP_ZERO_MEMORY, BufferSize);
-        CommandLine.MaximumLength = (USHORT)BufferSize;
-        RtlAppendUnicodeToString(&CommandLine, L"\"");
-        RtlAppendUnicodeStringToString(&CommandLine, &ImagePath);
-        RtlAppendUnicodeToString(&CommandLine, L"\" ");
+        RtlAppendUnicodeToString(&CommandLine, L" ");
         RtlAppendUnicodeToString(&CommandLine, szCommandLine);
     }
 
