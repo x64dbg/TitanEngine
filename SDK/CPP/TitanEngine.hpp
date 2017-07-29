@@ -1491,6 +1491,10 @@ public:
     {
         return (const PROCESS_INFORMATION*)UE::InitDebug((char*)szFileName, (char*)szCommandLine, (char*)szCurrentFolder);
     }
+    static const PROCESS_INFORMATION* InitNativeDebug(const char* szFileName, const char* szCommandLine, const char* szCurrentFolder)
+    {
+        return (const PROCESS_INFORMATION*)UE::InitNativeDebug((char*)szFileName, (char*)szCommandLine, (char*)szCurrentFolder);
+    }
     static const PROCESS_INFORMATION* InitDebugEx(const char* szFileName, const char* szCommandLine, const char* szCurrentFolder, DebuggerX::fBreakPointCallback EntryCallBack)
     {
         return (const PROCESS_INFORMATION*)UE::InitDebugEx((char*)szFileName, (char*)szCommandLine, (char*)szCurrentFolder, (void*)EntryCallBack);
@@ -1512,6 +1516,10 @@ public:
     static const PROCESS_INFORMATION* InitDebug(const wchar_t* szFileName, const wchar_t* szCommandLine, const wchar_t* szCurrentFolder)
     {
         return (const PROCESS_INFORMATION*)UE::InitDebugW((wchar_t*)szFileName, (wchar_t*)szCommandLine, (wchar_t*)szCurrentFolder);
+    }
+    static const PROCESS_INFORMATION* InitNativeDebug(const wchar_t* szFileName, const wchar_t* szCommandLine, const wchar_t* szCurrentFolder)
+    {
+        return (const PROCESS_INFORMATION*)UE::InitNativeDebugW((wchar_t*)szFileName, (wchar_t*)szCommandLine, (wchar_t*)szCurrentFolder);
     }
     static const PROCESS_INFORMATION* InitDebugEx(const wchar_t* szFileName, const wchar_t* szCommandLine, const wchar_t* szCurrentFolder, DebuggerX::fBreakPointCallback EntryCallBack)
     {

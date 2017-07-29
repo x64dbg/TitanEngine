@@ -82,6 +82,8 @@ FixHeaderCheckSum
 FixHeaderCheckSumW
 InitDebug
 InitDebugW
+InitNativeDebug
+InitNativeDebugW
 InitDebugEx
 InitDebugExW
 InitDLLDebug

@@ -160,6 +160,8 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
 __declspec(dllexport) long TITCALL LengthDisassemble(LPVOID DisassmAddress);
 __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder);
+__declspec(dllexport) void* TITCALL InitNativeDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);
+__declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder);
 __declspec(dllexport) void* TITCALL InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack);
 __declspec(dllexport) void* TITCALL InitDebugExW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder, LPVOID EntryCallBack);
 __declspec(dllexport) void* TITCALL InitDLLDebug(char* szFileName, bool ReserveModuleBase, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack);

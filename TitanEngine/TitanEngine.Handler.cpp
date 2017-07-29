@@ -189,7 +189,7 @@ __declspec(dllexport) ULONG_PTR TITCALL HandlerGetHandleDetails(HANDLE hProcess,
     OBJECT_BASIC_INFORMATION ObjectBasicInfo;
     char HandleFullData[0x1000] = {0};
     LPVOID HandleNameData = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-    PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
+    POBJECT_TYPE_INFORMATION pObjectTypeInfo = (POBJECT_TYPE_INFORMATION)HandleFullData;
     bool DontFreeStringMemory = false;
     ULONG_PTR ReturnData = NULL;
 
@@ -608,7 +608,7 @@ __declspec(dllexport) long TITCALL HandlerEnumerateOpenMutexes(HANDLE hProcess, 
     char HandleFullData[0x1000] = {0};
     char HandleNameDataB[0x1000] = {0};
     LPVOID HandleNameData = HandleNameDataB;
-    PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
+    POBJECT_TYPE_INFORMATION pObjectTypeInfo = (POBJECT_TYPE_INFORMATION)HandleFullData;
 
     DynBuf hinfo;
     if(!NtQuerySysHandleInfo(hinfo))
@@ -725,7 +725,7 @@ __declspec(dllexport) long TITCALL HandlerGetProcessIdWhichCreatedMutexW(wchar_t
     PNTDLL_QUERY_HANDLE_INFO HandleInfo;
     char HandleFullData[0x1000] = {0};
     char HandleNameData[0x1000] = {0};
-    PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInfo = (PPUBLIC_OBJECT_TYPE_INFORMATION)HandleFullData;
+    POBJECT_TYPE_INFORMATION pObjectTypeInfo = (POBJECT_TYPE_INFORMATION)HandleFullData;
     char ObjectNameInfo[0x2000] = {0};
     POBJECT_NAME_INFORMATION pObjectNameInfo = (POBJECT_NAME_INFORMATION)ObjectNameInfo;
     wchar_t RealMutexName[512] = L"\\BaseNamedObjects\\";

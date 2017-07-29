@@ -783,6 +783,9 @@ PROCESS_INFORMATION = alien.defstruct{
 -- __declspec(dllexport) void* __stdcall InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);
 	TitanEngine.InitDebug:types {"string","string","string",abi="stdcall",ret="pointer"}
 	TE_InitDebug = TitanEngine.InitDebug
+-- __declspec(dllexport) void* __stdcall InitNativeDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);
+	TitanEngine.InitNativeDebug:types {"string","string","string",abi="stdcall",ret="pointer"}
+	InitNativeDebug = TitanEngine.InitNativeDebug
 -- __declspec(dllexport) void* __stdcall InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack);
 	TitanEngine.InitDebugEx:types {"string","string","string","callback",abi="stdcall",ret="pointer"}
 	TE_InitDebugEx = TitanEngine.InitDebugEx

@@ -99,6 +99,307 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     }
 }
 
+__declspec(dllexport) void* TITCALL InitNativeDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder)
+{
+    wchar_t* PtrUniFileName = NULL;
+    wchar_t uniFileName[MAX_PATH] = {};
+    wchar_t* PtrUniCommandLine = NULL;
+    wchar_t uniCommandLine[MAX_PATH] = {};
+    wchar_t* PtrUniCurrentFolder = NULL;
+    wchar_t uniCurrentFolder[MAX_PATH] = {};
+
+    if(szFileName != NULL)
+    {
+        MultiByteToWideChar(CP_ACP, NULL, szFileName, lstrlenA(szFileName) + 1, uniFileName, sizeof(uniFileName) / (sizeof(uniFileName[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCommandLine, lstrlenA(szCommandLine) + 1, uniCommandLine, sizeof(uniCommandLine) / (sizeof(uniCommandLine[0])));
+        MultiByteToWideChar(CP_ACP, NULL, szCurrentFolder, lstrlenA(szCurrentFolder) + 1, uniCurrentFolder, sizeof(uniCurrentFolder) / (sizeof(uniCurrentFolder[0])));
+        if(szFileName != NULL)
+        {
+            PtrUniFileName = &uniFileName[0];
+        }
+        if(szCommandLine != NULL)
+        {
+            PtrUniCommandLine = &uniCommandLine[0];
+        }
+        if(szCurrentFolder != NULL)
+        {
+            PtrUniCurrentFolder = &uniCurrentFolder[0];
+        }
+        return(InitNativeDebugW(PtrUniFileName, PtrUniCommandLine, PtrUniCurrentFolder));
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+__declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
+{
+    typedef
+    NTSTATUS
+    (NTAPI *
+     t_RtlCreateProcessParametersEx)(
+         _Out_ PRTL_USER_PROCESS_PARAMETERS * pProcessParameters,
+         _In_ PUNICODE_STRING ImagePathName,
+         _In_opt_ PUNICODE_STRING DllPath,
+         _In_opt_ PUNICODE_STRING CurrentDirectory,
+         _In_opt_ PUNICODE_STRING CommandLine,
+         _In_opt_ PVOID Environment,
+         _In_opt_ PUNICODE_STRING WindowTitle,
+         _In_opt_ PUNICODE_STRING DesktopInfo,
+         _In_opt_ PUNICODE_STRING ShellInfo,
+         _In_opt_ PUNICODE_STRING RuntimeData,
+         _In_ ULONG Flags
+     );
+
+    typedef
+    NTSTATUS
+    (NTAPI *
+     t_NtCreateUserProcess)(
+         _Out_ PHANDLE ProcessHandle,
+         _Out_ PHANDLE ThreadHandle,
+         _In_ ACCESS_MASK ProcessDesiredAccess,
+         _In_ ACCESS_MASK ThreadDesiredAccess,
+         _In_opt_ POBJECT_ATTRIBUTES ProcessObjectAttributes,
+         _In_opt_ POBJECT_ATTRIBUTES ThreadObjectAttributes,
+         _In_ ULONG ProcessFlags,
+         _In_ ULONG ThreadFlags,
+         _In_ PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+         _Inout_ PPS_CREATE_INFO CreateInfo,
+         _In_ PPS_ATTRIBUTE_LIST AttributeList
+     );
+
+    HMODULE Ntdll = GetModuleHandleW(L"ntdll.dll");
+    t_RtlCreateProcessParametersEx fnRtlCreateProcessParametersEx =
+        (t_RtlCreateProcessParametersEx)GetProcAddress(Ntdll, "RtlCreateProcessParametersEx");
+    t_NtCreateUserProcess fnNtCreateUserProcess =
+        (t_NtCreateUserProcess)GetProcAddress(Ntdll, "NtCreateUserProcess");
+
+    // NtCreateUserProcess requires Vista or higher
+    if(fnRtlCreateProcessParametersEx == NULL || fnNtCreateUserProcess == NULL)
+    {
+        RtlSetLastWin32Error(ERROR_NOT_SUPPORTED);
+        return NULL;
+    }
+
+    RtlZeroMemory(&dbgProcessInformation, sizeof(PROCESS_INFORMATION));
+    HANDLE ProcessHandle = NULL, ThreadHandle = NULL;
+    UNICODE_STRING CommandLine = { 0 };
+    PUNICODE_STRING PtrCurrentDirectory = NULL;
+
+    // Convert the application path to its NT equivalent
+    UNICODE_STRING ImagePath, NtImagePath;
+    RtlInitUnicodeString(&ImagePath, szFileName);
+    if(!RtlDosPathNameToNtPathName_U(ImagePath.Buffer,
+                                     &NtImagePath,
+                                     NULL,
+                                     NULL))
+    {
+        RtlSetLastWin32Error(ERROR_PATH_NOT_FOUND);
+        return NULL;
+    }
+
+    // Enable SE_DEBUG if needed
+    const LONG SE_DEBUG_PRIVILEGE = 20L;
+    BOOLEAN SeDebugWasEnabled = FALSE;
+    NTSTATUS Status = STATUS_SUCCESS;
+    if(engineEnableDebugPrivilege)
+    {
+        Status = RtlAdjustPrivilege(SE_DEBUG_PRIVILEGE,
+                                    TRUE,
+                                    FALSE,
+                                    &SeDebugWasEnabled);
+        DebugRemoveDebugPrivilege = true;
+    }
+    if(!NT_SUCCESS(Status))
+        goto finished;
+
+    // Convert command line and directory to UNICODE_STRING if present
+    SIZE_T ArgumentsLength = szCommandLine != NULL ? lstrlenW(szCommandLine) : 0;
+    SIZE_T BufferSize = ImagePath.Length + ((ArgumentsLength + 4) * sizeof(wchar_t));
+    CommandLine.Buffer = (PWSTR)RtlAllocateHeap(RtlProcessHeap(), HEAP_ZERO_MEMORY, BufferSize * 10);
+    CommandLine.MaximumLength = (USHORT)BufferSize;
+    RtlAppendUnicodeToString(&CommandLine, L"\"");
+    RtlAppendUnicodeStringToString(&CommandLine, &ImagePath);
+    RtlAppendUnicodeToString(&CommandLine, L"\"");
+    if(ArgumentsLength > 0)
+    {
+        RtlAppendUnicodeToString(&CommandLine, L" ");
+        RtlAppendUnicodeToString(&CommandLine, szCommandLine);
+    }
+
+    if(szCurrentFolder != NULL && lstrlenW(szCurrentFolder) > 0)
+    {
+        UNICODE_STRING WorkingDirectory;
+        RtlInitUnicodeString(&WorkingDirectory, szCurrentFolder);
+        PtrCurrentDirectory = &WorkingDirectory;
+    }
+
+    // Create the process parameter block
+    PRTL_USER_PROCESS_PARAMETERS ProcessParameters = NULL;
+    PRTL_USER_PROCESS_PARAMETERS OwnParameters = NtCurrentPeb()->ProcessParameters;
+    Status = fnRtlCreateProcessParametersEx(&ProcessParameters,
+                                            &ImagePath,
+                                            NULL,                        // Create a new DLL path
+                                            PtrCurrentDirectory,
+                                            &CommandLine,
+                                            NULL,                        // If null, a new environment will be created
+                                            &ImagePath,                  // Window title is the exe path - needed for console apps
+                                            &OwnParameters->DesktopInfo, // Copy our desktop name
+                                            NULL,
+                                            NULL,
+                                            RTL_USER_PROCESS_PARAMETERS_NORMALIZED);
+    if(!NT_SUCCESS(Status))
+        goto finished;
+
+    // Clear the current directory because we're not inheriting handles
+    ProcessParameters->CurrentDirectory.Handle = NULL;
+
+    // Default to CREATE_NEW_CONSOLE behaviour
+    ProcessParameters->ConsoleHandle = HANDLE_CREATE_NEW_CONSOLE;
+    ProcessParameters->ShowWindowFlags = STARTF_USESHOWWINDOW | SW_SHOWDEFAULT;
+
+    // Create a debug port object
+    OBJECT_ATTRIBUTES ObjectAttributes;
+    InitializeObjectAttributes(&ObjectAttributes, NULL, 0, NULL, NULL);
+    HANDLE DebugPort = NULL;
+    Status = NtCreateDebugObject(&DebugPort,
+                                 DEBUG_ALL_ACCESS,
+                                 &ObjectAttributes,
+                                 DEBUG_KILL_ON_CLOSE);
+    if(!NT_SUCCESS(Status))
+    {
+        RtlDestroyProcessParameters(ProcessParameters);
+        goto finished;
+    }
+
+    // Store the debug port handle in our TEB. The kernel uses this field
+    NtCurrentTeb()->DbgSsReserved[1] = DebugPort;
+
+    // Initialize the PS_CREATE_INFO structure
+    PS_CREATE_INFO CreateInfo;
+    RtlZeroMemory(&CreateInfo, sizeof(CreateInfo));
+    CreateInfo.Size = sizeof(CreateInfo);
+    CreateInfo.State = PsCreateInitialState;
+    CreateInfo.InitState.u1.s1.WriteOutputOnExit = TRUE;
+    CreateInfo.InitState.u1.s1.DetectManifest = TRUE;
+    CreateInfo.InitState.u1.s1.ProhibitedImageCharacteristics = 0; // Normally: IMAGE_FILE_DLL (disallow executing DLLs)
+    CreateInfo.InitState.AdditionalFileAccess = FILE_READ_ATTRIBUTES | FILE_READ_DATA;
+
+    // Initialize the PS_ATTRIBUTE_LIST that contains the process creation attributes
+    const SIZE_T NumAttributes = 3;
+    const SIZE_T AttributesSize = sizeof(SIZE_T) + NumAttributes * sizeof(PS_ATTRIBUTE);
+    PPS_ATTRIBUTE_LIST AttributeList = reinterpret_cast<PPS_ATTRIBUTE_LIST>(
+                                           RtlAllocateHeap(RtlProcessHeap(),
+                                                   HEAP_ZERO_MEMORY, // Not optional
+                                                   AttributesSize));
+    AttributeList->TotalLength = AttributesSize;
+
+    // In: NT style absolute image path. This is the only required attribute
+    ULONG N = 0;
+    AttributeList->Attributes[N].Attribute = PS_ATTRIBUTE_IMAGE_NAME;
+    AttributeList->Attributes[N].Size = NtImagePath.Length;
+    AttributeList->Attributes[N].Value = reinterpret_cast<ULONG_PTR>(NtImagePath.Buffer);
+
+    // In: debug port
+    N++;
+    AttributeList->Attributes[N].Attribute = PS_ATTRIBUTE_DEBUG_PORT;
+    AttributeList->Attributes[N].Size = sizeof(HANDLE);
+    AttributeList->Attributes[N].Value = reinterpret_cast<ULONG_PTR>(DebugPort);
+
+    // Out: client ID
+    N++;
+    CLIENT_ID Cid;
+    PCLIENT_ID ClientId = &Cid;
+    AttributeList->Attributes[N].Attribute = PS_ATTRIBUTE_CLIENT_ID;
+    AttributeList->Attributes[N].Size = sizeof(CLIENT_ID);
+    AttributeList->Attributes[N].Value = reinterpret_cast<ULONG_PTR>(ClientId);
+
+    // Set process and thread flags
+    ULONG NtProcessFlags = PROCESS_CREATE_FLAGS_NO_DEBUG_INHERIT; // Same as DEBUG_ONLY_THIS_PROCESS. DEBUG_PROCESS is implied by the debug port
+    ULONG NtThreadFlags = THREAD_CREATE_FLAGS_CREATE_SUSPENDED; // Always set this, because we need to do some bookkeeping before resuming
+
+    // Create the process
+    Status = fnNtCreateUserProcess(&ProcessHandle,
+                                   &ThreadHandle,
+                                   MAXIMUM_ALLOWED,
+                                   MAXIMUM_ALLOWED,
+                                   NULL,
+                                   NULL,
+                                   NtProcessFlags,
+                                   NtThreadFlags,
+                                   ProcessParameters,
+                                   &CreateInfo,
+                                   AttributeList);
+
+    RtlFreeHeap(RtlProcessHeap(), 0, AttributeList);
+    RtlDestroyProcessParameters(ProcessParameters);
+
+    if(!NT_SUCCESS(Status))
+        goto finished;
+
+    // Success. Convert what we got back to a PROCESS_INFORMATION structure
+    dbgProcessInformation.hProcess = ProcessHandle;
+    dbgProcessInformation.hThread = ThreadHandle;
+    dbgProcessInformation.dwProcessId = HandleToULong(ClientId->UniqueProcess);
+    dbgProcessInformation.dwThreadId = HandleToULong(ClientId->UniqueThread);
+
+finished:
+    RtlFreeHeap(RtlProcessHeap(), 0, NtImagePath.Buffer);
+
+    if(CommandLine.Buffer != NULL)
+        RtlFreeHeap(RtlProcessHeap(), 0, CommandLine.Buffer);
+
+    if(ProcessHandle != NULL)
+    {
+        // Close the file and section handles we got back from the kernel
+        NtClose(CreateInfo.SuccessState.FileHandle);
+        NtClose(CreateInfo.SuccessState.SectionHandle);
+
+        // If we failed, terminate the process
+        if(!NT_SUCCESS(Status))
+        {
+            BOOLEAN CloseDebugPort = DebugPort != NULL &&
+                                     ((NtThreadFlags & PROCESS_CREATE_FLAGS_NO_DEBUG_INHERIT) != 0);
+
+            if(CloseDebugPort)
+            {
+                NtRemoveProcessDebug(ProcessHandle, DebugPort);
+                NtClose(DebugPort);
+                NtCurrentTeb()->DbgSsReserved[1] = NULL;
+            }
+
+            NtTerminateProcess(ProcessHandle, Status);
+        }
+        else
+        {
+            // Otherwise resume the process now
+            NtResumeThread(ThreadHandle, NULL);
+        }
+    }
+
+    // Release SE_DEBUG if we acquired it previously
+    if(engineEnableDebugPrivilege && !SeDebugWasEnabled)
+        RtlAdjustPrivilege(SE_DEBUG_PRIVILEGE,
+                           FALSE,
+                           FALSE,
+                           &SeDebugWasEnabled);
+
+    if(!NT_SUCCESS(Status))
+    {
+        // Set error status
+        ULONG Win32Error = RtlNtStatusToDosError(Status);
+        RtlSetLastWin32Error(Win32Error);
+        DebugRemoveDebugPrivilege = false;
+        return NULL;
+    }
+
+    DebugAttachedToProcess = false;
+    DebugAttachedProcessCallBack = NULL;
+
+    return &dbgProcessInformation;
+}
+
 __declspec(dllexport) void* TITCALL InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack)
 {
     DebugExeFileEntryPointCallBack = EntryCallBack;

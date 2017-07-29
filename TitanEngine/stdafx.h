@@ -12,6 +12,10 @@
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 
+// Allow including Windows.h without bringing in a redefined and outdated subset of NTSTATUSes.
+// To get NTSTATUS defines, #undef WIN32_NO_STATUS after Windows.h and then #include <ntstatus.h>
+#define WIN32_NO_STATUS
+
 // Windows Header Files:
 #include <windows.h>
 

@@ -560,6 +560,8 @@ LengthDisassembleEx proto stdcall :HANDLE, :LPVOID
 LengthDisassemble proto stdcall :LPVOID
 InitDebug proto stdcall :ptr SBYTE, :ptr SBYTE, :ptr SBYTE
 InitDebugW proto stdcall :ptr WORD, :ptr WORD, :ptr WORD
+InitNativeDebug proto stdcall :ptr SBYTE, :ptr SBYTE, :ptr SBYTE
+InitNativeDebugW proto stdcall :ptr WORD, :ptr WORD, :ptr WORD
 InitDebugEx proto stdcall :ptr SBYTE, :ptr SBYTE, :ptr SBYTE, :LPVOID
 InitDebugExW proto stdcall :ptr WORD, :ptr WORD, :ptr WORD, :LPVOID
 InitDLLDebug proto stdcall :ptr SBYTE, :bool, :ptr SBYTE, :ptr SBYTE, :LPVOID
