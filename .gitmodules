@@ -1,0 +1,3 @@
+[submodule "scylla_wrapper_dll"]
+	path = scylla_wrapper_dll
+	url = https://bitbucket.org/cypherpunk/scylla_wrapper_dll

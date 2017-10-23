@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TitanEngine", "TitanEngine\TitanEngine.vcxproj", "{9C7B8246-FDDA-48C7-9634-044969701E40}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C} = {F874B1B3-8EF7-4DF1-9889-57098E08A51C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scylla_wrapper", "scylla_wrapper_dll\scylla_wrapper\scylla_wrapper.vcxproj", "{F874B1B3-8EF7-4DF1-9889-57098E08A51C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,8 +24,19 @@ Global
 		{9C7B8246-FDDA-48C7-9634-044969701E40}.Release|Win32.Build.0 = Release|Win32
 		{9C7B8246-FDDA-48C7-9634-044969701E40}.Release|x64.ActiveCfg = Release|x64
 		{9C7B8246-FDDA-48C7-9634-044969701E40}.Release|x64.Build.0 = Release|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|Win32.ActiveCfg = Release-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|Win32.Build.0 = Release-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|x64.ActiveCfg = Release-Lib|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Debug|x64.Build.0 = Release-Lib|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|Win32.ActiveCfg = Release-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|Win32.Build.0 = Release-Lib|Win32
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|x64.ActiveCfg = Release-Lib|x64
+		{F874B1B3-8EF7-4DF1-9889-57098E08A51C}.Release|x64.Build.0 = Release-Lib|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6AD826EE-00F0-410E-9586-2B4EC239DC9E}
 	EndGlobalSection
 EndGlobal
