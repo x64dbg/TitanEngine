@@ -165,7 +165,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 myCustomHandler(&DBGEvent.u.CreateProcessInfo);
             }
 
-            EngineCloseHandle(DBGFileHandle); //close file handle
+            if(DBGFileHandle)
+                EngineCloseHandle(DBGFileHandle); //close file handle
         }
         break;
 
@@ -258,7 +259,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             memset(&NewLibraryData, 0, sizeof(LIBRARY_ITEM_DATAW));
             NewLibraryData.hFile = DBGEvent.u.LoadDll.hFile;
             NewLibraryData.BaseOfDll = DBGEvent.u.LoadDll.lpBaseOfDll;
-            hFileMapping = CreateFileMappingA(DBGEvent.u.LoadDll.hFile, NULL, PAGE_READONLY, NULL, GetFileSize(DBGEvent.u.LoadDll.hFile, NULL), NULL);
+            hFileMapping = DBGEvent.u.LoadDll.hFile ? CreateFileMappingA(DBGEvent.u.LoadDll.hFile, NULL, PAGE_READONLY, 0, 0, NULL) : NULL;
             if(hFileMapping != NULL)
             {
                 hFileMappingView = MapViewOfFile(hFileMapping, FILE_MAP_READ, NULL, NULL, NULL);
@@ -331,6 +332,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chLoadDll);
                 myCustomHandler(&DBGEvent.u.LoadDll);
             }
+
+            if(DBGEvent.u.LoadDll.hFile)
+                EngineCloseHandle(DBGEvent.u.LoadDll.hFile); //close file handle
         }
         break;
 
@@ -379,7 +383,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         UnmapViewOfFile(hListLibrary.at(i).hFileMappingView);
                         EngineCloseHandle(hListLibrary.at(i).hFileMapping);
                     }
-                    EngineCloseHandle(hListLibrary.at(i).hFile);
                     hListLibrary.erase(hListLibrary.begin() + i);
                     break;
                 }
