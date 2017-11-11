@@ -257,7 +257,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             hListLibraryFirst = false;
             LIBRARY_ITEM_DATAW NewLibraryData;
             memset(&NewLibraryData, 0, sizeof(LIBRARY_ITEM_DATAW));
-            NewLibraryData.hFile = DBGEvent.u.LoadDll.hFile;
             NewLibraryData.BaseOfDll = DBGEvent.u.LoadDll.lpBaseOfDll;
             hFileMapping = DBGEvent.u.LoadDll.hFile ? CreateFileMappingA(DBGEvent.u.LoadDll.hFile, NULL, PAGE_READONLY, 0, 0, NULL) : NULL;
             if(hFileMapping != NULL)
@@ -375,8 +374,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             //maintain library list
             for(unsigned int i = 0; i < hListLibrary.size(); i++)
             {
-                if(hListLibrary.at(i).BaseOfDll == DBGEvent.u.UnloadDll.lpBaseOfDll &&
-                        hListLibrary.at(i).hFile != INVALID_HANDLE_VALUE)
+                if(hListLibrary.at(i).BaseOfDll == DBGEvent.u.UnloadDll.lpBaseOfDll)
                 {
                     if(hListLibrary.at(i).hFileMappingView != NULL)
                     {

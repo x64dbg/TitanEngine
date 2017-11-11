@@ -25,14 +25,10 @@ __declspec(dllexport) void TITCALL ForceClose()
     int libcount = (int)hListLibrary.size();
     for(int i = 0; i < libcount; i++)
     {
-        if(hListLibrary.at(i).hFile != (HANDLE) - 1)
+        if(hListLibrary.at(i).hFileMappingView != NULL)
         {
-            if(hListLibrary.at(i).hFileMappingView != NULL)
-            {
-                UnmapViewOfFile(hListLibrary.at(i).hFileMappingView);
-                EngineCloseHandle(hListLibrary.at(i).hFileMapping);
-            }
-            EngineCloseHandle(hListLibrary.at(i).hFile);
+            UnmapViewOfFile(hListLibrary.at(i).hFileMappingView);
+            EngineCloseHandle(hListLibrary.at(i).hFileMapping);
         }
     }
     ClearLibraryList();
