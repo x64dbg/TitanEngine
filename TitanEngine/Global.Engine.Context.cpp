@@ -2,6 +2,132 @@
 #include "definitions.h"
 #include "Global.Engine.Context.h"
 
+#ifdef _WIN64
+//https://stackoverflow.com/a/869597/1806760
+template<typename T> struct identity
+{
+    typedef T type;
+};
+
+template<typename Dst> Dst implicit_cast(typename identity<Dst>::type t)
+{
+    return t;
+}
+
+//https://github.com/electron/crashpad/blob/4054e6cba3ba023d9c00260518ec2912607ae17c/snapshot/cpu_context.cc
+enum
+{
+    kX87TagValid = 0,
+    kX87TagZero,
+    kX87TagSpecial,
+    kX87TagEmpty,
+};
+
+typedef uint8_t X87Register[10];
+
+union X87OrMMXRegister
+{
+    struct
+    {
+        X87Register st;
+        uint8_t st_reserved[6];
+    };
+    struct
+    {
+        uint8_t mm_value[8];
+        uint8_t mm_reserved[8];
+    };
+};
+
+static_assert(sizeof(X87OrMMXRegister) == sizeof(M128A), "sizeof(X87OrMMXRegister) != sizeof(M128A)");
+
+static uint16_t FxsaveToFsaveTagWord(
+    uint16_t fsw,
+    uint8_t fxsave_tag,
+    const X87OrMMXRegister* st_mm)
+{
+    // The x87 tag word (in both abridged and full form) identifies physical
+    // registers, but |st_mm| is arranged in logical stack order. In order to map
+    // physical tag word bits to the logical stack registers they correspond to,
+    // the "stack top" value from the x87 status word is necessary.
+    int stack_top = (fsw >> 11) & 0x7;
+
+    uint16_t fsave_tag = 0;
+    for(int physical_index = 0; physical_index < 8; ++physical_index)
+    {
+        bool fxsave_bit = (fxsave_tag & (1 << physical_index)) != 0;
+        uint8_t fsave_bits;
+
+        if(fxsave_bit)
+        {
+            int st_index = (physical_index + 8 - stack_top) % 8;
+            const X87Register & st = st_mm[st_index].st;
+
+            uint32_t exponent = ((st[9] & 0x7f) << 8) | st[8];
+            if(exponent == 0x7fff)
+            {
+                // Infinity, NaN, pseudo-infinity, or pseudo-NaN. If it was important to
+                // distinguish between these, the J bit and the M bit (the most
+                // significant bit of |fraction|) could be consulted.
+                fsave_bits = kX87TagSpecial;
+            }
+            else
+            {
+                // The integer bit the "J bit".
+                bool integer_bit = (st[7] & 0x80) != 0;
+                if(exponent == 0)
+                {
+                    uint64_t fraction = ((implicit_cast<uint64_t>(st[7]) & 0x7f) << 56) |
+                                        (implicit_cast<uint64_t>(st[6]) << 48) |
+                                        (implicit_cast<uint64_t>(st[5]) << 40) |
+                                        (implicit_cast<uint64_t>(st[4]) << 32) |
+                                        (implicit_cast<uint32_t>(st[3]) << 24) |
+                                        (st[2] << 16) | (st[1] << 8) | st[0];
+                    if(!integer_bit && fraction == 0)
+                    {
+                        fsave_bits = kX87TagZero;
+                    }
+                    else
+                    {
+                        // Denormal (if the J bit is clear) or pseudo-denormal.
+                        fsave_bits = kX87TagSpecial;
+                    }
+                }
+                else if(integer_bit)
+                {
+                    fsave_bits = kX87TagValid;
+                }
+                else
+                {
+                    // Unnormal.
+                    fsave_bits = kX87TagSpecial;
+                }
+            }
+        }
+        else
+        {
+            fsave_bits = kX87TagEmpty;
+        }
+
+        fsave_tag |= (fsave_bits << (physical_index * 2));
+    }
+
+    return fsave_tag;
+}
+
+static uint8_t FsaveToFxsaveTagWord(uint16_t fsave_tag)
+{
+    uint8_t fxsave_tag = 0;
+    for(int physical_index = 0; physical_index < 8; ++physical_index)
+    {
+        const uint8_t fsave_bits = (fsave_tag >> (physical_index * 2)) & 0x3;
+        const bool fxsave_bit = fsave_bits != kX87TagEmpty;
+        fxsave_tag |= fxsave_bit << physical_index;
+    }
+    return fxsave_tag;
+}
+#endif //_WIN64
+
 PGETENABLEDXSTATEFEATURES _GetEnabledXStateFeatures = NULL;
 PINITIALIZECONTEXT _InitializeContext = NULL;
 PGETXSTATEFEATURESMASK _GetXStateFeaturesMask = NULL;
@@ -56,7 +182,7 @@ bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
 
     DBGContext.FltSave.ControlWord = titcontext->x87fpu.ControlWord;
     DBGContext.FltSave.StatusWord = titcontext->x87fpu.StatusWord;
-    DBGContext.FltSave.TagWord = (BYTE)titcontext->x87fpu.TagWord;
+    DBGContext.FltSave.TagWord = FsaveToFxsaveTagWord(titcontext->x87fpu.TagWord);
     DBGContext.FltSave.ErrorSelector = (WORD)titcontext->x87fpu.ErrorSelector;
     DBGContext.FltSave.ErrorOffset = titcontext->x87fpu.ErrorOffset;
     DBGContext.FltSave.DataSelector = (WORD)titcontext->x87fpu.DataSelector;
@@ -154,19 +280,19 @@ bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
 
     titcontext->x87fpu.ControlWord = DBGContext.FltSave.ControlWord;
     titcontext->x87fpu.StatusWord = DBGContext.FltSave.StatusWord;
-    titcontext->x87fpu.TagWord = DBGContext.FltSave.TagWord;
+    titcontext->x87fpu.TagWord = FxsaveToFsaveTagWord(DBGContext.FltSave.StatusWord, DBGContext.FltSave.TagWord, (const X87OrMMXRegister*)DBGContext.FltSave.FloatRegisters);
     titcontext->x87fpu.ErrorSelector = DBGContext.FltSave.ErrorSelector;
     titcontext->x87fpu.ErrorOffset = DBGContext.FltSave.ErrorOffset;
     titcontext->x87fpu.DataSelector = DBGContext.FltSave.DataSelector;
     titcontext->x87fpu.DataOffset = DBGContext.FltSave.DataOffset;
-    // Skip titcontext->x87fpu.Cr0NpxState
+    // Skip titcontext->x87fpu.Cr0NpxState (https://github.com/x64dbg/x64dbg/issues/255)
     titcontext->MxCsr = DBGContext.MxCsr;
 
     for(int i = 0; i < 8; i++)
-        memcpy(&(titcontext->RegisterArea[i * 10]), & DBGContext.FltSave.FloatRegisters[i], 10);
+        memcpy(&titcontext->RegisterArea[i * 10], &DBGContext.FltSave.FloatRegisters[i], 10);
 
     for(int i = 0; i < 16; i++)
-        memcpy(& (titcontext->XmmRegisters[i]), & (DBGContext.FltSave.XmmRegisters[i]), 16);
+        memcpy(&titcontext->XmmRegisters[i], &DBGContext.FltSave.XmmRegisters[i], 16);
 
 #else //x86
     titcontext->cax = DBGContext.Eax;
