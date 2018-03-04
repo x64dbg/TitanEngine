@@ -517,14 +517,24 @@ __declspec(dllexport) void* TITCALL InitDLLDebugW(wchar_t* szFileName, bool Rese
 
 __declspec(dllexport) bool TITCALL StopDebug()
 {
-    if(dbgProcessInformation.hProcess != NULL)
+    bool result = false;
+    HANDLE hProcess = TitanOpenProcess(PROCESS_TERMINATE, FALSE, dbgProcessInformation.dwProcessId);
+    if(hProcess)
     {
-        TerminateThread(dbgProcessInformation.hThread, NULL);
-        TerminateProcess(dbgProcessInformation.hProcess, NULL);
-        Sleep(10); //allow thread switching
-        return true;
+        TerminateProcess(hProcess, 0);
+        CloseHandle(hProcess);
+        result = true;
     }
-    return false;
+
+    HANDLE hThread = TitanOpenThread(THREAD_TERMINATE, FALSE, dbgProcessInformation.dwThreadId);
+    if(hThread)
+    {
+        TerminateThread(hThread, 0);
+        CloseHandle(hThread);
+        Sleep(10); //allow thread switching
+        result = true;
+    }
+    return result;
 }
 
 __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)

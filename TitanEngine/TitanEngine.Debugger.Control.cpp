@@ -9,17 +9,8 @@
 __declspec(dllexport) void TITCALL ForceClose()
 {
     //manage process list
-    int processcount = (int)hListProcess.size();
-    for(int i = 0; i < processcount; i++)
-    {
-        EngineCloseHandle(hListProcess.at(i).hFile);
-        EngineCloseHandle(hListProcess.at(i).hProcess);
-    }
     ClearProcessList();
     //manage thread list
-    int threadcount = (int)hListThread.size();
-    for(int i = 0; i < threadcount; i++)
-        EngineCloseHandle(hListThread.at(i).hThread);
     ClearThreadList();
     //manage library list
     int libcount = (int)hListLibrary.size();
