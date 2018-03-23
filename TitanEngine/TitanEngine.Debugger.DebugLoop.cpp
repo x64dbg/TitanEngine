@@ -52,8 +52,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
     wchar_t DLLDebugFileName[512];
     char szAnsiLibraryName[MAX_PATH];
     ULONG_PTR DLLPatchAddress;
-    HANDLE hFileMapping;
-    LPVOID hFileMappingView;
     LPVOID DBGEntryPoint;
 
     wchar_t* szTranslatedNativeName;
@@ -258,64 +256,59 @@ __declspec(dllexport) void TITCALL DebugLoop()
             LIBRARY_ITEM_DATAW NewLibraryData;
             memset(&NewLibraryData, 0, sizeof(LIBRARY_ITEM_DATAW));
             NewLibraryData.BaseOfDll = DBGEvent.u.LoadDll.lpBaseOfDll;
-            hFileMapping = DBGEvent.u.LoadDll.hFile ? CreateFileMappingA(DBGEvent.u.LoadDll.hFile, NULL, PAGE_READONLY, 0, 0, NULL) : NULL;
-            if(hFileMapping != NULL)
-            {
-                hFileMappingView = MapViewOfFile(hFileMapping, FILE_MAP_READ, NULL, NULL, NULL);
-                if(hFileMappingView != NULL)
-                {
-                    NewLibraryData.hFileMapping = hFileMapping;
-                    NewLibraryData.hFileMappingView = hFileMappingView;
-                    if(GetMappedFileNameW(GetCurrentProcess(), hFileMappingView, DLLDebugFileName, sizeof(DLLDebugFileName) / sizeof(DLLDebugFileName[0])) > NULL)
-                    {
-                        int i = lstrlenW(DLLDebugFileName);
-                        while(DLLDebugFileName[i] != '\\' && i)
-                            i--;
-                        if(DebugDebuggingDLL)
-                        {
-                            if(lstrcmpiW(&DLLDebugFileName[i + 1], DebugDebuggingDLLFileName) == NULL)
-                            {
-                                CloseHandle(DebugDLLFileMapping); //close file mapping handle
-                                SetBPX(DebugModuleEntryPoint + (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll, UE_SINGLESHOOT, DebugModuleEntryPointCallBack);
-                                DebugDebuggingDLLBase = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
-                            }
-                            /*else if(lstrcmpiW(&DLLDebugFileName[i+1], DebugDebuggingDLLReserveFileName) == NULL)
-                            {
-                                if((ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll != DebugModuleImageBase)
-                                {
-                                    VirtualAllocEx(dbgProcessInformation.hProcess, (void*)DebugModuleImageBase, 0x1000, MEM_RESERVE, PAGE_READWRITE);
-                                }
-                            }*/
-                        }
-                        if(engineFakeDLLHandle == NULL)
-                        {
-                            if(_wcsicmp(&DLLDebugFileName[i + 1], L"kernel32.dll") == NULL)
-                            {
-                                engineFakeDLLHandle = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
-                            }
-                        }
-                        lstrcpyW(NewLibraryData.szLibraryName, &DLLDebugFileName[i + 1]);
-                        szTranslatedNativeName = (wchar_t*)TranslateNativeNameW(DLLDebugFileName);
-                        lstrcpyW(NewLibraryData.szLibraryPath, szTranslatedNativeName);
-                        VirtualFree((void*)szTranslatedNativeName, NULL, MEM_RELEASE);
-                        RtlZeroMemory(szAnsiLibraryName, sizeof(szAnsiLibraryName));
-                        WideCharToMultiByte(CP_ACP, NULL, NewLibraryData.szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
 
-                        //library breakpoint
-                        for(int i = (int)LibrarianData.size() - 1; i >= 0; i--)
+            // Query remote DLL path
+            if(GetMappedFileNameW(dbgProcessInformation.hProcess, DBGEvent.u.LoadDll.lpBaseOfDll, DLLDebugFileName, sizeof(DLLDebugFileName) / sizeof(wchar_t)))
+            {
+                int i = lstrlenW(DLLDebugFileName);
+                while(DLLDebugFileName[i] != '\\' && i)
+                    i--;
+                if(DebugDebuggingDLL)
+                {
+                    if(lstrcmpiW(&DLLDebugFileName[i + 1], DebugDebuggingDLLFileName) == NULL)
+                    {
+                        CloseHandle(DebugDLLFileMapping); //close file mapping handle
+                        SetBPX(DebugModuleEntryPoint + (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll, UE_SINGLESHOOT, DebugModuleEntryPointCallBack);
+                        DebugDebuggingDLLBase = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
+                    }
+                    /*else if(lstrcmpiW(&DLLDebugFileName[i+1], DebugDebuggingDLLReserveFileName) == NULL)
+                    {
+                        if((ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll != DebugModuleImageBase)
                         {
-                            ptrLibrarianData = &LibrarianData.at(i);
-                            if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
+                            VirtualAllocEx(dbgProcessInformation.hProcess, (void*)DebugModuleImageBase, 0x1000, MEM_RESERVE, PAGE_READWRITE);
+                        }
+                    }*/
+                }
+                if(engineFakeDLLHandle == NULL)
+                {
+                    if(_wcsicmp(&DLLDebugFileName[i + 1], L"kernel32.dll") == NULL)
+                    {
+                        engineFakeDLLHandle = (ULONG_PTR)DBGEvent.u.LoadDll.lpBaseOfDll;
+                    }
+                }
+                lstrcpyW(NewLibraryData.szLibraryName, &DLLDebugFileName[i + 1]);
+                szTranslatedNativeName = (wchar_t*)TranslateNativeNameW(DLLDebugFileName);
+                if(szTranslatedNativeName != nullptr)
+                {
+                    lstrcpyW(NewLibraryData.szLibraryPath, szTranslatedNativeName);
+                    VirtualFree((void*)szTranslatedNativeName, NULL, MEM_RELEASE);
+                }
+                RtlZeroMemory(szAnsiLibraryName, sizeof(szAnsiLibraryName));
+                WideCharToMultiByte(CP_ACP, NULL, NewLibraryData.szLibraryName, -1, szAnsiLibraryName, sizeof szAnsiLibraryName, NULL, NULL);
+
+                //library breakpoint
+                for(int i = (int)LibrarianData.size() - 1; i >= 0; i--)
+                {
+                    ptrLibrarianData = &LibrarianData.at(i);
+                    if(!_stricmp(ptrLibrarianData->szLibraryName, szAnsiLibraryName))
+                    {
+                        if(ptrLibrarianData->bpxType == UE_ON_LIB_LOAD || ptrLibrarianData->bpxType == UE_ON_LIB_ALL)
+                        {
+                            myCustomHandler = (fCustomHandler)(ptrLibrarianData->bpxCallBack);
+                            myCustomHandler(&DBGEvent.u.LoadDll);
+                            if(ptrLibrarianData->bpxSingleShoot)
                             {
-                                if(ptrLibrarianData->bpxType == UE_ON_LIB_LOAD || ptrLibrarianData->bpxType == UE_ON_LIB_ALL)
-                                {
-                                    myCustomHandler = (fCustomHandler)(ptrLibrarianData->bpxCallBack);
-                                    myCustomHandler(&DBGEvent.u.LoadDll);
-                                    if(ptrLibrarianData->bpxSingleShoot)
-                                    {
-                                        LibrarianRemoveBreakPoint(ptrLibrarianData->szLibraryName, ptrLibrarianData->bpxType);
-                                    }
-                                }
+                                LibrarianRemoveBreakPoint(ptrLibrarianData->szLibraryName, ptrLibrarianData->bpxType);
                             }
                         }
                     }
