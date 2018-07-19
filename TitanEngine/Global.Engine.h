@@ -21,6 +21,7 @@ extern bool enginePassAllExceptions;
 extern bool engineExecutePluginCallBack;
 extern bool engineAutoHideFromDebugger;
 extern bool engineEnableDebugPrivilege;
+extern bool engineSafeAttach;
 
 //Global.Engine.Functions
 void EngineInit();

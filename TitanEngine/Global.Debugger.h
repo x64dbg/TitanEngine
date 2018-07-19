@@ -46,5 +46,6 @@ void DebuggerReset();
 void ClearProcessList();
 void ClearTlsCallBackList();
 void StepOutStepCallBack();
+BOOL WINAPI DebugActiveProcess_(IN DWORD dwProcessId);
 
 #endif //_GLOBAL_DEBUGGER_H

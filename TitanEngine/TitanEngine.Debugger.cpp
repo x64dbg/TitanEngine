@@ -550,7 +550,7 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
             EngineSetDebugPrivilege(GetCurrentProcess(), true);
             DebugRemoveDebugPrivilege = true;
         }
-        if(DebugActiveProcess(ProcessId))
+        if((engineSafeAttach ? DebugActiveProcess_ : DebugActiveProcess)(ProcessId))
         {
             if(engineEnableDebugPrivilege)
                 EngineSetDebugPrivilege(GetCurrentProcess(), false);
