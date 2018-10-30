@@ -133,14 +133,74 @@ static HANDLE WINAPI ProcessIdToHandle(IN DWORD dwProcessId)
     return Handle;
 }
 
+#define THREAD_CREATE_FLAGS_CREATE_SUSPENDED 0x00000001
+#define THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH 0x00000002
+#define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER 0x00000004
+#define THREAD_CREATE_FLAGS_HAS_SECURITY_DESCRIPTOR 0x00000010
+#define THREAD_CREATE_FLAGS_ACCESS_CHECK_IN_TARGET 0x00000020
+#define THREAD_CREATE_FLAGS_INITIAL_THREAD 0x00000080
+
+static NTSTATUS CreateThreadSkipAttach(IN HANDLE ProcessHandle, IN PUSER_THREAD_START_ROUTINE StartRoutine, IN PVOID Argument)
+{
+    NTSTATUS Status;
+    HANDLE hThread;
+
+    typedef NTSTATUS(NTAPI *t_NtCreateThreadEx)(
+        PHANDLE /* ThreadHandle */,
+        ACCESS_MASK /* DesiredAccess */,
+        POBJECT_ATTRIBUTES /* ObjectAttributes */,
+        HANDLE /* ProcessHandle */,
+        PUSER_THREAD_START_ROUTINE /* StartRoutine */,
+        PVOID /* Argument */,
+        ULONG /* CreateFlags */,
+        ULONG_PTR /* ZeroBits */,
+        SIZE_T /* StackSize */,
+        SIZE_T /* MaximumStackSize */,
+        PPS_ATTRIBUTE_LIST /* AttributeList */
+        );
+
+    auto p_NtCreateThreadEx = (t_NtCreateThreadEx)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtCreateThreadEx");
+    if(p_NtCreateThreadEx)
+    {
+        // Based on: https://chromium-review.googlesource.com/c/crashpad/crashpad/+/339263/16/client/crashpad_client_win.cc#697
+        Status = p_NtCreateThreadEx(&hThread,
+            STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
+            nullptr,
+            ProcessHandle,
+            StartRoutine,
+            Argument,
+            THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH,
+            0,
+            0x4000 /* PAGE_SIZE * 4 */,
+            0,
+            nullptr);
+    }
+    else
+    {
+        CLIENT_ID ClientId;
+        Status = RtlCreateUserThread(ProcessHandle,
+            NULL,
+            FALSE,
+            0,
+            0,
+            0x4000 /* PAGE_SIZE * 4 */,
+            StartRoutine,
+            Argument,
+            &hThread,
+            &ClientId);
+    }
+
+    if(NT_SUCCESS(Status))
+    {
+        NtClose(hThread);
+    }
+
+    return Status;
+}
+
 static NTSTATUS NTAPI DbgUiIssueRemoteBreakin_(IN HANDLE Process)
 {
-    HANDLE hThread;
-    CLIENT_ID ClientId;
-    NTSTATUS Status;
-
     PUSER_THREAD_START_ROUTINE RemoteBreakFunction = (PUSER_THREAD_START_ROUTINE)DbgUiRemoteBreakin;
-
     LPVOID RemoteMemory = VirtualAllocEx(Process, 0, 0x1000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READ);
     if(RemoteMemory)
     {
@@ -156,31 +216,14 @@ static NTSTATUS NTAPI DbgUiIssueRemoteBreakin_(IN HANDLE Process)
         }
     }
 
-    /* Create the thread that will do the breakin */
-    Status = RtlCreateUserThread(Process,
-        NULL,
-        FALSE,
-        0,
-        0,
-        0x1000 /* PAGE_SIZE */,
-        RemoteBreakFunction,
-        NULL,
-        &hThread,
-        &ClientId);
-
-    /* Close the handle on success */
-    if(NT_SUCCESS(Status)) NtClose(hThread);
-
-    /* Return status */
-    return Status;
+    /* Create the thread that will perform the breakin (on Vista+ it will skip DllMain and TLS callbacks) */
+    return CreateThreadSkipAttach(Process, RemoteBreakFunction, NULL);
 }
 
 static NTSTATUS NTAPI DbgUiDebugActiveProcess_(IN HANDLE Process)
 {
-    NTSTATUS Status;
-
     /* Tell the kernel to start debugging */
-    Status = NtDebugActiveProcess(Process, NtCurrentTeb()->DbgSsReserved[1]);
+    NTSTATUS Status = NtDebugActiveProcess(Process, NtCurrentTeb()->DbgSsReserved[1]);
     if(NT_SUCCESS(Status))
     {
         /* Now break-in the process */
@@ -199,11 +242,8 @@ static NTSTATUS NTAPI DbgUiDebugActiveProcess_(IN HANDLE Process)
 // Source: https://github.com/mirror/reactos/blob/c6d2b35ffc91e09f50dfb214ea58237509329d6b/reactos/dll/win32/kernel32/client/debugger.c#L480
 BOOL WINAPI DebugActiveProcess_(IN DWORD dwProcessId)
 {
-    NTSTATUS Status, Status1;
-    HANDLE Handle;
-
     /* Connect to the debugger */
-    Status = DbgUiConnectToDbg();
+    NTSTATUS Status = DbgUiConnectToDbg();
     if(!NT_SUCCESS(Status))
     {
         BaseSetLastNTError(Status);
@@ -211,14 +251,17 @@ BOOL WINAPI DebugActiveProcess_(IN DWORD dwProcessId)
     }
 
     /* Get the process handle */
-    Handle = ProcessIdToHandle(dwProcessId);
-    if(!Handle) return FALSE;
+    HANDLE Handle = ProcessIdToHandle(dwProcessId);
+    if(!Handle)
+    {
+        return FALSE;
+    }
 
     /* Now debug the process */
     Status = DbgUiDebugActiveProcess_(Handle);
 
     /* Close the handle since we're done */
-    Status1 = NtClose(Handle);
+    NtClose(Handle);
 
     /* Check if debugging worked */
     if(!NT_SUCCESS(Status))
