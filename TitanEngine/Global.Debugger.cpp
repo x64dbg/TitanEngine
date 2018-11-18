@@ -239,11 +239,21 @@ static NTSTATUS NTAPI DbgUiDebugActiveProcess_(IN HANDLE Process)
     return Status;
 }
 
+static NTSTATUS NTAPI DbgUiConnectToDbg_()
+{
+    if(NtCurrentTeb()->DbgSsReserved[1] != NULL)
+        return STATUS_SUCCESS;
+
+    OBJECT_ATTRIBUTES ObjectAttributes;
+    InitializeObjectAttributes(&ObjectAttributes, NULL, 0, NULL, NULL);
+    return NtCreateDebugObject(&NtCurrentTeb()->DbgSsReserved[1], DEBUG_ALL_ACCESS, &ObjectAttributes, 0);
+}
+
 // Source: https://github.com/mirror/reactos/blob/c6d2b35ffc91e09f50dfb214ea58237509329d6b/reactos/dll/win32/kernel32/client/debugger.c#L480
 BOOL WINAPI DebugActiveProcess_(IN DWORD dwProcessId)
 {
     /* Connect to the debugger */
-    NTSTATUS Status = DbgUiConnectToDbg();
+    NTSTATUS Status = DbgUiConnectToDbg_();
     if(!NT_SUCCESS(Status))
     {
         BaseSetLastNTError(Status);
