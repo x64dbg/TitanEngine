@@ -1092,9 +1092,9 @@ struct _PEB_T
     T ProcessHeaps;
 
     //FULL PEB not needed
-    /*    T GdiSharedHandleTable;
+    T GdiSharedHandleTable;
     T ProcessStarterHelper;
-    T GdiDCAttributeList;
+    DWORD GdiDCAttributeList;
     T LoaderLock;
     DWORD OSMajorVersion;
     DWORD OSMinorVersion;
@@ -1123,7 +1123,7 @@ struct _PEB_T
     T ProcessAssemblyStorageMap;
     T SystemDefaultActivationContextData;
     T SystemAssemblyStorageMap;
-    T MinimumStackCommit;*/
+    T MinimumStackCommit;
 };
 
 typedef _PEB_T<DWORD, DWORD64, 34> PEB32;
