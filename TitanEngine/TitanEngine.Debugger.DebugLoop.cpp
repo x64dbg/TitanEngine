@@ -77,7 +77,23 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
     while(!BreakDBG) //actual debug loop
     {
-        WaitForDebugEvent(&DBGEvent, engineWaitForDebugEventTimeOut);
+        // Fix based on work by https://github.com/number201724
+        if(!WaitForDebugEvent(&DBGEvent, engineWaitForDebugEventTimeOut))
+        {
+            if(WaitForSingleObject(dbgProcessInformation.hProcess, 0) == WAIT_OBJECT_0)
+            {
+                DBGEvent.dwDebugEventCode = EXIT_PROCESS_DEBUG_EVENT;
+                DBGEvent.dwProcessId = dbgProcessInformation.dwProcessId;
+                DBGEvent.dwThreadId = dbgProcessInformation.dwThreadId;
+                if(!GetExitCodeProcess(dbgProcessInformation.hProcess, &DBGEvent.u.ExitProcess.dwExitCode))
+                    DBGEvent.u.ExitProcess.dwExitCode = 0xFFFFFFFF;
+            }
+            else
+            {
+                continue;
+            }
+        }
+
         if(engineExecutePluginCallBack)
         {
             ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_EXCEPTION);
