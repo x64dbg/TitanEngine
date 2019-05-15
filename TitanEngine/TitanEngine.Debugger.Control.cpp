@@ -56,6 +56,7 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
         GetThreadContext(hActiveThread, &myDBGContext);
         myDBGContext.EFlags |= UE_TRAP_FLAG;
         SetThreadContext(hActiveThread, &myDBGContext);
+        EngineCloseHandle(hActiveThread);
         engineStepActive = true;
         engineStepCallBack = StepCallBack;
         engineStepCount = 0;
