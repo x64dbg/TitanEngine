@@ -624,7 +624,7 @@ __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
         SetThreadContext(hActiveThread, &myDBGContext);
         EngineCloseHandle(hActiveThread);
     }
-    ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBG_CONTINUE);
+    ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBGCode);
     ThreaderResumeProcess();
     return DetachDebugger(ProcessId);
 }
