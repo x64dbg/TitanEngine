@@ -1195,10 +1195,5 @@ __declspec(dllexport) void TITCALL DebugLoopEx(DWORD TimeOut)
 
 __declspec(dllexport) void TITCALL SetDebugLoopTimeOut(DWORD TimeOut)
 {
-
-    if(TimeOut == NULL)
-    {
-        TimeOut = INFINITE;
-    }
     engineWaitForDebugEventTimeOut = TimeOut;
 }
