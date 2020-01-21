@@ -794,32 +794,34 @@ bool EngineValidateResource(HMODULE hModule, LPCTSTR lpszType, LPTSTR lpszName, 
 bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBase, PIMAGE_DOS_HEADER DOSHeader, bool IsFile)
 {
     MODULEINFO ModuleInfo;
-    DWORD MemorySize = NULL;
+    DWORD PESize, MaxPESize;
     PIMAGE_NT_HEADERS PEHeader;
     IMAGE_NT_HEADERS RemotePEHeader;
-    MEMORY_BASIC_INFORMATION MemoryInfo = {0};
     ULONG_PTR NumberOfBytesRW = NULL;
 
     if(IsFile)
     {
         if(hFileProc == NULL)
         {
-            //VirtualQueryEx(GetCurrentProcess(), (LPVOID)FileMapVA, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
-            //VirtualQueryEx(GetCurrentProcess(), MemoryInfo.AllocationBase, &MemoryInfo, sizeof(MEMORY_BASIC_INFORMATION));
-            MemorySize = 0x10000; // (DWORD)((ULONG_PTR)MemoryInfo.AllocationBase + (ULONG_PTR)MemoryInfo.RegionSize - (ULONG_PTR)FileMapVA);
+            PESize = 0;
+            MaxPESize = ULONG_MAX;
         }
         else
         {
-            MemorySize = GetFileSize(hFileProc, NULL);
+            PESize = GetFileSize(hFileProc, NULL);
+            MaxPESize = PESize;
         }
         __try
         {
-            if(DOSHeader->e_magic == 0x5A4D)
+            if(DOSHeader->e_magic == IMAGE_DOS_SIGNATURE)
             {
-                if(DOSHeader->e_lfanew + sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) < MemorySize)
+                DWORD LfaNew = DOSHeader->e_lfanew;
+                if((PESize == 0 || (LfaNew < PESize && LfaNew + sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER) < PESize)) &&
+                    MaxPESize != 0 &&
+                    LfaNew < (MaxPESize - sizeof(IMAGE_NT_SIGNATURE) - sizeof(IMAGE_FILE_HEADER)))
                 {
-                    PEHeader = (PIMAGE_NT_HEADERS)((ULONG_PTR)DOSHeader + DOSHeader->e_lfanew);
-                    return (PEHeader->Signature == 0x4550);
+                    PEHeader = (PIMAGE_NT_HEADERS)((ULONG_PTR)DOSHeader + LfaNew);
+                    return PEHeader->Signature == IMAGE_NT_SIGNATURE;
                 }
             }
         }
@@ -831,16 +833,19 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
     {
         RtlZeroMemory(&ModuleInfo, sizeof MODULEINFO);
         GetModuleInformation(hFileProc, (HMODULE)ImageBase, &ModuleInfo, sizeof(MODULEINFO));
+        PESize = ModuleInfo.SizeOfImage;
         __try
         {
-            if(DOSHeader->e_magic == 0x5A4D)
+            if(DOSHeader->e_magic == IMAGE_DOS_SIGNATURE)
             {
-                if(DOSHeader->e_lfanew + sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) < ModuleInfo.SizeOfImage)
+                DWORD LfaNew = DOSHeader->e_lfanew;
+                if((LfaNew < PESize && LfaNew + sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER) < PESize) &&
+                    LfaNew < (PESize - sizeof(IMAGE_NT_SIGNATURE) - sizeof(IMAGE_FILE_HEADER)))
                 {
-                    if(ReadProcessMemory(hFileProc, (LPVOID)((ULONG_PTR)ImageBase + DOSHeader->e_lfanew), &RemotePEHeader, sizeof(IMAGE_NT_HEADERS), &NumberOfBytesRW))
+                    if(ReadProcessMemory(hFileProc, (LPVOID)((ULONG_PTR)ImageBase + LfaNew), &RemotePEHeader, sizeof(IMAGE_NT_HEADERS), &NumberOfBytesRW))
                     {
-                        PEHeader = (PIMAGE_NT_HEADERS)(&RemotePEHeader);
-                        return (PEHeader->Signature == 0x4550);
+                        PEHeader = (PIMAGE_NT_HEADERS)&RemotePEHeader;
+                        return PEHeader->Signature == IMAGE_NT_SIGNATURE;
                     }
                 }
             }
