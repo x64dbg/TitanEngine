@@ -172,7 +172,7 @@ static NTSTATUS CreateThreadSkipAttach(IN HANDLE ProcessHandle, IN PUSER_THREAD_
             THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH,
             0,
             0x4000 /* PAGE_SIZE * 4 */,
-            0,
+            0x4000,
             nullptr);
     }
     else
@@ -182,7 +182,7 @@ static NTSTATUS CreateThreadSkipAttach(IN HANDLE ProcessHandle, IN PUSER_THREAD_
             NULL,
             FALSE,
             0,
-            0,
+            0x4000,
             0x4000 /* PAGE_SIZE * 4 */,
             StartRoutine,
             Argument,
