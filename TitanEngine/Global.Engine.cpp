@@ -2031,34 +2031,37 @@ ULONG_PTR EngineGlobalAPIHandler(HANDLE handleProcess, ULONG_PTR EnumedModulesBa
 
 DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege)
 {
-    DWORD dwLastError;
-    HANDLE hToken = 0;
-    if(!OpenProcessToken(hProcess, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
-    {
-        dwLastError = GetLastError();
-        if(hToken)
-            CloseHandle(hToken);
-        return dwLastError;
-    }
-    TOKEN_PRIVILEGES tokenPrivileges;
-    memset(&tokenPrivileges, 0, sizeof(TOKEN_PRIVILEGES));
-    LUID luid;
-    if(!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid))
-    {
-        dwLastError = GetLastError();
-        CloseHandle(hToken);
-        return dwLastError;
-    }
-    tokenPrivileges.PrivilegeCount = 1;
-    tokenPrivileges.Privileges[0].Luid = luid;
-    if(bEnablePrivilege)
-        tokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-    else
-        tokenPrivileges.Privileges[0].Attributes = 0;
-    AdjustTokenPrivileges(hToken, FALSE, &tokenPrivileges, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
-    dwLastError = GetLastError();
-    CloseHandle(hToken);
-    return dwLastError;
+    HANDLE TokenHandle;
+    NTSTATUS Status = NtOpenProcessToken(hProcess,
+                                         TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
+                                         &TokenHandle);
+    if (!NT_SUCCESS(Status))
+        return RtlNtStatusToDosError(Status);
+
+    LUID LuidPrivilege;
+    LuidPrivilege.LowPart = SE_DEBUG_PRIVILEGE;
+    LuidPrivilege.HighPart = 0;
+
+    TOKEN_PRIVILEGES Privileges;
+    Privileges.PrivilegeCount = 1;
+    Privileges.Privileges[0].Luid = LuidPrivilege;
+    Privileges.Privileges[0].Attributes = bEnablePrivilege ? SE_PRIVILEGE_ENABLED : 0;
+
+    ULONG ReturnLength;
+    Status = NtAdjustPrivilegesToken(TokenHandle,
+                                     FALSE,
+                                     &Privileges,
+                                     sizeof(Privileges),
+                                     nullptr,
+                                     &ReturnLength);
+    NtClose(TokenHandle);
+
+    // Map the success code NOT_ALL_ASSIGNED to an appropriate error
+    // since we're only trying to adjust one privilege.
+    if (Status == STATUS_NOT_ALL_ASSIGNED)
+        Status = STATUS_PRIVILEGE_NOT_HELD;
+
+    return NT_SUCCESS(Status) ? ERROR_SUCCESS : RtlNtStatusToDosError(Status);
 }
 
 HANDLE EngineOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId)
