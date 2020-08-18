@@ -200,7 +200,6 @@ __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_
     }
 
     // Enable SE_DEBUG if needed
-    const LONG SE_DEBUG_PRIVILEGE = 20L;
     BOOLEAN SeDebugWasEnabled = FALSE;
     NTSTATUS Status = STATUS_SUCCESS;
     if(engineEnableDebugPrivilege)
