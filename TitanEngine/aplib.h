@@ -12,13 +12,7 @@
 #ifndef APLIB_H_INCLUDED
 #define APLIB_H_INCLUDED
 
-#ifdef _WIN64
-#pragma comment(lib,"aplib_x64.lib")
 #define APLIB_CONVENTION
-#else
-#pragma comment(lib,"aplib_x86.lib")
-#define APLIB_CONVENTION __cdecl
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,10 +37,13 @@ unsigned int APLIB_CONVENTION aP_depack_asm(const void* source, void* destinatio
 
 unsigned int APLIB_CONVENTION aP_depack_asm_fast(const void* source, void* destination);
 
-unsigned int APLIB_CONVENTION aP_depack_asm_safe(const void* source,
+inline unsigned int APLIB_CONVENTION aP_depack_asm_safe(const void* source,
         unsigned int srclen,
         void* destination,
-        unsigned int dstlen);
+    unsigned int dstlen)
+{
+    return 0;
+}
 
 unsigned int APLIB_CONVENTION aP_crc32(const void* source, unsigned int length);
 
@@ -61,10 +58,13 @@ unsigned int APLIB_CONVENTION aPsafe_check(const void* source);
 
 unsigned int APLIB_CONVENTION aPsafe_get_orig_size(const void* source);
 
-unsigned int APLIB_CONVENTION aPsafe_depack(const void* source,
-        unsigned int srclen,
-        void* destination,
-        unsigned int dstlen);
+inline unsigned int APLIB_CONVENTION aPsafe_depack(const void* source,
+    unsigned int srclen,
+    void* destination,
+    unsigned int dstlen)
+{
+    return 0;
+}
 
 #ifdef __cplusplus
 } /* extern "C" */

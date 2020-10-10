@@ -28,21 +28,25 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -105,6 +109,7 @@
       </OmitFramePointers>
       <ExceptionHandling>Sync</ExceptionHandling>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(ProjectDir)ntdll_x86.lib;$(SolutionDir)$(Platform)\Release-Lib\scylla_wrapper_x86.lib;$(ProjectDir)distorm_x86.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -134,6 +139,7 @@
       <OmitFramePointers>
       </OmitFramePointers>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(ProjectDir)ntdll_x86.lib;$(SolutionDir)$(Platform)\Release-Lib\scylla_wrapper_x86.lib;$(ProjectDir)distorm_x86.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -163,6 +169,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>false</ExceptionHandling>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(ProjectDir)ntdll_x64.lib;$(SolutionDir)$(Platform)\Release-Lib\scylla_wrapper_x64.lib;$(ProjectDir)distorm_x64.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -201,6 +208,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <ExceptionHandling>false</ExceptionHandling>
+      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(ProjectDir)ntdll_x64.lib;$(SolutionDir)$(Platform)\Release-Lib\scylla_wrapper_x64.lib;$(ProjectDir)distorm_x64.lib;Imagehlp.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -347,6 +355,11 @@
     <ClCompile Include="TitanEngine.Debugger.DebugLoop.cpp">
       <FileType>Document</FileType>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\scylla_wrapper_dll\scylla_wrapper\scylla_wrapper.vcxproj">
+      <Project>{f874b1b3-8ef7-4df1-9889-57098e08a51c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
