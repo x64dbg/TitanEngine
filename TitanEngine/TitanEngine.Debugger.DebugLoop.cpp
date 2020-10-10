@@ -12,8 +12,6 @@
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;
 
-static DWORD engineWaitForDebugEventTimeOut = INFINITE;
-
 __declspec(dllexport) void TITCALL DebugLoop()
 {
     bool FirstBPX = true;
@@ -78,8 +76,14 @@ __declspec(dllexport) void TITCALL DebugLoop()
     while(!BreakDBG) //actual debug loop
     {
         // Fix based on work by https://github.com/number201724
-        if(!WaitForDebugEvent(&DBGEvent, engineWaitForDebugEventTimeOut))
+        if(!WaitForDebugEvent(&DBGEvent, 100))
         {
+            if (engineProcessIsNowDetached)
+            {
+                DebugActiveProcessStop(dbgProcessInformation.dwProcessId);
+                DebugAttachedToProcess = false;
+                break;
+            }
             if(WaitForSingleObject(dbgProcessInformation.hProcess, 0) == WAIT_OBJECT_0)
             {
                 DBGEvent.dwDebugEventCode = EXIT_PROCESS_DEBUG_EVENT;
@@ -90,6 +94,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
             else
             {
+                // Regular timeout, wait again
                 continue;
             }
         }
@@ -1169,6 +1174,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
             break;
         }
+        if (engineProcessIsNowDetached)
+        {
+            DebugActiveProcessStop(dbgProcessInformation.dwProcessId);
+            DebugAttachedToProcess = false;
+            break;
+        }
         if(!ThreaderGetThreadInfo(0, DBGEvent.dwThreadId)) //switch thread
             DBGEvent.dwThreadId = dbgProcessInformation.dwThreadId;
     }
@@ -1195,5 +1206,5 @@ __declspec(dllexport) void TITCALL DebugLoopEx(DWORD TimeOut)
 
 __declspec(dllexport) void TITCALL SetDebugLoopTimeOut(DWORD TimeOut)
 {
-    engineWaitForDebugEventTimeOut = TimeOut;
+    __debugbreak();
 }

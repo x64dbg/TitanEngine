@@ -575,34 +575,9 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 
 __declspec(dllexport) bool TITCALL DetachDebugger(DWORD ProcessId)
 {
-    typedef bool(WINAPI * fDebugActiveProcessStop)(DWORD dwProcessId);
-    fDebugActiveProcessStop myDebugActiveProcessStop;
-    LPVOID funcDebugActiveProcessStop = NULL;
-    bool FuncReturn = false;
-
     RemoveAllBreakPoints(UE_OPTION_REMOVEALL);
-
-    if(ProcessId != NULL)
-    {
-        funcDebugActiveProcessStop = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugActiveProcessStop");
-        if(funcDebugActiveProcessStop != NULL)
-        {
-            myDebugActiveProcessStop = (fDebugActiveProcessStop)(funcDebugActiveProcessStop);
-            FuncReturn = myDebugActiveProcessStop(ProcessId);
-            engineProcessIsNowDetached = true;
-            Sleep(250);
-        }
-        DebugAttachedToProcess = false;
-        if(FuncReturn)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    return false;
+    engineProcessIsNowDetached = true; // Request detach
+    return true;
 }
 
 __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
@@ -620,7 +595,6 @@ __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
         SetThreadContext(hActiveThread, &myDBGContext);
         EngineCloseHandle(hActiveThread);
     }
-    ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBGCode);
     ThreaderResumeProcess();
     return DetachDebugger(ProcessId);
 }
