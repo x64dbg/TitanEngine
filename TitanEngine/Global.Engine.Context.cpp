@@ -214,7 +214,7 @@ bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
     DBGContext.FloatSave.ErrorOffset = titcontext->x87fpu.ErrorOffset;
     DBGContext.FloatSave.DataSelector = titcontext->x87fpu.DataSelector;
     DBGContext.FloatSave.DataOffset = titcontext->x87fpu.DataOffset;
-    DBGContext.FloatSave.Cr0NpxState = titcontext->x87fpu.Cr0NpxState;
+    DBGContext.FloatSave.Spare0 = titcontext->x87fpu.Cr0NpxState;
 
     memcpy(DBGContext.FloatSave.RegisterArea, titcontext->RegisterArea, 80);
 
@@ -312,7 +312,7 @@ bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcont
     titcontext->x87fpu.ErrorOffset = DBGContext.FloatSave.ErrorOffset;
     titcontext->x87fpu.DataSelector = DBGContext.FloatSave.DataSelector;
     titcontext->x87fpu.DataOffset = DBGContext.FloatSave.DataOffset;
-    titcontext->x87fpu.Cr0NpxState = DBGContext.FloatSave.Cr0NpxState;
+    titcontext->x87fpu.Cr0NpxState = DBGContext.FloatSave.Spare0;
 
     memcpy(titcontext->RegisterArea, DBGContext.FloatSave.RegisterArea, 80);
 
