@@ -78,7 +78,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
         // Fix based on work by https://github.com/number201724
         if(!WaitForDebugEvent(&DBGEvent, 100))
         {
-            if (engineProcessIsNowDetached)
+            if(engineProcessIsNowDetached)
             {
                 DebugActiveProcessStop(dbgProcessInformation.dwProcessId);
                 DebugAttachedToProcess = false;
@@ -116,12 +116,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
         case CREATE_PROCESS_DEBUG_EVENT:
         {
+            bool attachBreakpoint = false;
             if(DBGFileHandle == NULL) //we didn't set the handle yet (initial process)
             {
                 DBGEntryPoint = DBGEvent.u.CreateProcessInfo.lpStartAddress;
                 DBGFileHandle = DBGEvent.u.CreateProcessInfo.hFile;
                 DebugDebuggingMainModuleBase = (ULONG_PTR) DBGEvent.u.CreateProcessInfo.lpBaseOfImage;
-                if(DebugAttachedToProcess) //we attached, set information
+                if(DebugAttachedToProcess)  //we attached, set information
                 {
                     dbgProcessInformation.hProcess = DBGEvent.u.CreateProcessInfo.hProcess;
                     dbgProcessInformation.hThread = DBGEvent.u.CreateProcessInfo.hThread;
@@ -130,6 +131,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         RtlMoveMemory(engineAttachedProcessDebugInfo, &dbgProcessInformation, sizeof PROCESS_INFORMATION);
                     }
+                    attachBreakpoint = true;
                 }
                 if(DebugDebuggingDLL) //the DLL loader just started, set DLL names
                 {
@@ -186,6 +188,13 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             if(DBGFileHandle)
                 EngineCloseHandle(DBGFileHandle); //close file handle
+
+            // Call the attach breakpoint
+            if(attachBreakpoint)
+            {
+                myCustomBreakPoint = (fCustomBreakPoint)(DebugAttachedProcessCallBack);
+                myCustomBreakPoint();
+            }
         }
         break;
 
@@ -526,11 +535,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         FirstBPX = false;
                         DBGCode = DBG_CONTINUE;
-                        if(DebugAttachedToProcess)
-                        {
-                            myCustomBreakPoint = (fCustomBreakPoint)(DebugAttachedProcessCallBack);
-                            myCustomBreakPoint();
-                        }
                         if(engineAutoHideFromDebugger)
                         {
                             HideDebugger(dbgProcessInformation.hProcess, UE_HIDE_PEBONLY);
@@ -1174,7 +1178,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
             break;
         }
-        if (engineProcessIsNowDetached)
+        if(engineProcessIsNowDetached)
         {
             DebugActiveProcessStop(dbgProcessInformation.dwProcessId);
             DebugAttachedToProcess = false;
