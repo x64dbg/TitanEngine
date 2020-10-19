@@ -2066,24 +2066,10 @@ DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege)
 
 HANDLE EngineOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwProcessId)
 {
-    if(engineEnableDebugPrivilege)
-        EngineSetDebugPrivilege(GetCurrentProcess(), true);
-    HANDLE hProcess = OpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId);
-    DWORD dwLastError = GetLastError();
-    if(engineEnableDebugPrivilege)
-        EngineSetDebugPrivilege(GetCurrentProcess(), false);
-    SetLastError(dwLastError);
-    return hProcess;
+    return OpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId);
 }
 
 HANDLE EngineOpenThread(DWORD dwDesiredAccess, bool bInheritHandle, DWORD dwThreadId)
 {
-    if(engineEnableDebugPrivilege)
-        EngineSetDebugPrivilege(GetCurrentProcess(), true);
-    HANDLE hThread = OpenThread(dwDesiredAccess, bInheritHandle, dwThreadId);
-    DWORD dwLastError = GetLastError();
-    if(engineEnableDebugPrivilege)
-        EngineSetDebugPrivilege(GetCurrentProcess(), false);
-    SetLastError(dwLastError);
-    return hThread;
+    return OpenThread(dwDesiredAccess, bInheritHandle, dwThreadId);
 }

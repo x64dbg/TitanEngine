@@ -79,8 +79,6 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     }
     if(CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS | DebugConsoleFlag | CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
     {
-        if(engineEnableDebugPrivilege)
-            EngineSetDebugPrivilege(GetCurrentProcess(), false);
         DebugAttachedToProcess = false;
         DebugAttachedProcessCallBack = NULL;
         return &dbgProcessInformation;
@@ -551,8 +549,6 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
         }
         if((engineSafeAttach ? DebugActiveProcess_ : DebugActiveProcess)(ProcessId))
         {
-            if(engineEnableDebugPrivilege)
-                EngineSetDebugPrivilege(GetCurrentProcess(), false);
             funcDebugSetProcessKillOnExit = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugSetProcessKillOnExit");
             if(funcDebugSetProcessKillOnExit != NULL)
             {
@@ -569,6 +565,11 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
             DebugAttachedProcessCallBack = NULL;
             return true;
         }
+    }
+    if (engineEnableDebugPrivilege)
+    {
+        EngineSetDebugPrivilege(GetCurrentProcess(), false);
+        DebugRemoveDebugPrivilege = false;
     }
     return false;
 }
