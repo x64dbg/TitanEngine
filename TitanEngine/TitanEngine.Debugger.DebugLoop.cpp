@@ -522,7 +522,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
                 else //breakpoint not in list
                 {
-                    if(!FirstBPX) //program generated a breakpoint exception
+                    if(DebugAttachedToProcess || !FirstBPX) //program generated a breakpoint exception
                     {
                         DBGCode = DBG_EXCEPTION_NOT_HANDLED;
                         if(DBGCustomHandler->chBreakPoint != NULL)

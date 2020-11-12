@@ -547,13 +547,13 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
             EngineSetDebugPrivilege(GetCurrentProcess(), true);
             DebugRemoveDebugPrivilege = true;
         }
-        if((engineSafeAttach ? DebugActiveProcess_ : DebugActiveProcess)(ProcessId))
+        if(DebugActiveProcess_(ProcessId))
         {
             funcDebugSetProcessKillOnExit = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugSetProcessKillOnExit");
             if(funcDebugSetProcessKillOnExit != NULL)
             {
                 myDebugSetProcessKillOnExit = (fDebugSetProcessKillOnExit)(funcDebugSetProcessKillOnExit);
-                myDebugSetProcessKillOnExit(KillOnExit && !engineSafeAttach ? true : false);
+                myDebugSetProcessKillOnExit(KillOnExit);
             }
             DebugDebuggingDLL = false;
             DebugAttachedToProcess = true;
