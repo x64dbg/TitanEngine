@@ -111,7 +111,7 @@
       <ModuleDefinitionFile>$(ProjectDir)TitanEngine.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
@@ -140,7 +140,7 @@
       <ModuleDefinitionFile>$(ProjectDir)TitanEngine.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
@@ -178,7 +178,7 @@
       <TargetMachine>MachineX64</TargetMachine>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <Manifest>
@@ -216,7 +216,7 @@
       <TargetMachine>MachineX64</TargetMachine>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalOptions>/ignore:4197 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4197 /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <Manifest>
