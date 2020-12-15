@@ -5,6 +5,7 @@
 #include "Global.Engine.Hook.h"
 #include "Global.Engine.GUI.h"
 #include "Global.Engine.Extension.h"
+#include "Global.Debugger.h"
 
 // TitanEngine.Engine.functions:
 __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool VariableSet)
@@ -41,6 +42,7 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     else if(VariableId == UE_ENGINE_SET_DEBUG_PRIVILEGE)
     {
         engineEnableDebugPrivilege = VariableSet;
+        EngineSetDebugPrivilege(GetCurrentProcess(), VariableSet);
     }
     else if(VariableId == UE_ENGINE_SAFE_ATTACH)
     {

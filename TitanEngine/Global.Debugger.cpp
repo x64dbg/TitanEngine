@@ -20,7 +20,6 @@ ULONG_PTR DebugDebuggingMainModuleBase = NULL;
 ULONG_PTR DebugDebuggingDLLBase = NULL;
 HANDLE DebugDLLFileMapping;
 bool DebugAttachedToProcess = false;
-bool DebugRemoveDebugPrivilege = false;
 bool DebugDebuggingDLL = false;
 wchar_t* DebugDebuggingDLLFullFileName;
 wchar_t* DebugDebuggingDLLFileName;

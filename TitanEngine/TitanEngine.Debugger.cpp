@@ -54,11 +54,6 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         DebugConsoleFlag = CREATE_NO_WINDOW;
     }
 
-    if(engineEnableDebugPrivilege)
-    {
-        EngineSetDebugPrivilege(GetCurrentProcess(), true);
-        DebugRemoveDebugPrivilege = true;
-    }
     wchar_t* szFileNameCreateProcess;
     wchar_t* szCommandLineCreateProcess;
     std::wstring createWithCmdLine;
@@ -77,7 +72,13 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         szCommandLineCreateProcess = (wchar_t*)createWithCmdLine.c_str();
         szFileNameCreateProcess = 0;
     }
-    if(CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS | DebugConsoleFlag | CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation))
+    // Temporarily disable the debug privilege so the child doesn't inherit it (this evades debugger detection)
+    if (engineEnableDebugPrivilege)
+        EngineSetDebugPrivilege(GetCurrentProcess(), false);
+    auto createProcessResult = CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS | DebugConsoleFlag | CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation);
+    if (engineEnableDebugPrivilege)
+        EngineSetDebugPrivilege(GetCurrentProcess(), true);
+    if(createProcessResult)
     {
         DebugAttachedToProcess = false;
         DebugAttachedProcessCallBack = NULL;
@@ -86,11 +87,6 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     else
     {
         DWORD lastError = GetLastError();
-        if(engineEnableDebugPrivilege)
-        {
-            EngineSetDebugPrivilege(GetCurrentProcess(), false);
-            DebugRemoveDebugPrivilege = false;
-        }
         memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
         SetLastError(lastError);
         return 0;
@@ -197,20 +193,6 @@ __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_
         return NULL;
     }
 
-    // Enable SE_DEBUG if needed
-    BOOLEAN SeDebugWasEnabled = FALSE;
-    NTSTATUS Status = STATUS_SUCCESS;
-    if(engineEnableDebugPrivilege)
-    {
-        Status = RtlAdjustPrivilege(SE_DEBUG_PRIVILEGE,
-                                    TRUE,
-                                    FALSE,
-                                    &SeDebugWasEnabled);
-        DebugRemoveDebugPrivilege = true;
-    }
-    if(!NT_SUCCESS(Status))
-        goto finished;
-
     // Convert command line and directory to UNICODE_STRING if present
     SIZE_T ArgumentsLength = szCommandLine != NULL ? lstrlenW(szCommandLine) : 0;
     SIZE_T BufferSize = ImagePath.Length + ((ArgumentsLength + 4) * sizeof(wchar_t));
@@ -235,7 +217,7 @@ __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_
     // Create the process parameter block
     PRTL_USER_PROCESS_PARAMETERS ProcessParameters = NULL;
     PRTL_USER_PROCESS_PARAMETERS OwnParameters = NtCurrentPeb()->ProcessParameters;
-    Status = fnRtlCreateProcessParametersEx(&ProcessParameters,
+    NTSTATUS Status = fnRtlCreateProcessParametersEx(&ProcessParameters,
                                             &ImagePath,
                                             NULL,                        // Create a new DLL path
                                             PtrCurrentDirectory,
@@ -373,22 +355,6 @@ finished:
             // Otherwise resume the process now
             NtResumeThread(ThreadHandle, NULL);
         }
-    }
-
-    // Release SE_DEBUG if we acquired it previously
-    if(engineEnableDebugPrivilege && !SeDebugWasEnabled)
-        RtlAdjustPrivilege(SE_DEBUG_PRIVILEGE,
-                           FALSE,
-                           FALSE,
-                           &SeDebugWasEnabled);
-
-    if(!NT_SUCCESS(Status))
-    {
-        // Set error status
-        ULONG Win32Error = RtlNtStatusToDosError(Status);
-        RtlSetLastWin32Error(Win32Error);
-        DebugRemoveDebugPrivilege = false;
-        return NULL;
     }
 
     DebugAttachedToProcess = false;
@@ -542,11 +508,6 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
 
     if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
-        if(engineEnableDebugPrivilege)
-        {
-            EngineSetDebugPrivilege(GetCurrentProcess(), true);
-            DebugRemoveDebugPrivilege = true;
-        }
         if(DebugActiveProcess_(ProcessId))
         {
             funcDebugSetProcessKillOnExit = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugSetProcessKillOnExit");
@@ -565,11 +526,6 @@ __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnEx
             DebugAttachedProcessCallBack = NULL;
             return true;
         }
-    }
-    if (engineEnableDebugPrivilege)
-    {
-        EngineSetDebugPrivilege(GetCurrentProcess(), false);
-        DebugRemoveDebugPrivilege = false;
     }
     return false;
 }
