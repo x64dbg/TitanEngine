@@ -1639,11 +1639,11 @@ __declspec(dllexport) bool TITCALL FixBrokenPE32FileExW(wchar_t* szFileName, LPV
     bool FileFixed = true;
     bool FeatureFixed = false;
 
-    FILE_STANDARD_INFO filestatusinfo; //for internal use
+    FILE_STATUS_INFO filestatusinfo; //for internal use
 
     if(myFileStatusInfo == NULL) //here check for myfilestrus..ah lol, youre right
     {
-        myFileStatusInfo = (PFILE_STATUS_INFO)&filestatusinfo;
+        myFileStatusInfo = &filestatusinfo;
         IsPE32FileValidExW(szFileName, UE_DEPTH_DEEP, myFileStatusInfo);
     }
     if(myFileFixInfo->FileFixPerformed == false && myFileStatusInfo->OveralEvaluation == UE_RESULT_FILE_INVALID_BUT_FIXABLE)
