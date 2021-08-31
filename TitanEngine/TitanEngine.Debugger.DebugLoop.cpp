@@ -52,6 +52,24 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
     wchar_t* szTranslatedNativeName;
 
+    DWORD ThreadBeingProcessed = 0;
+    std::vector<THREAD_ITEM_DATA> SuspendedThreads;
+    bool IsDbgReplyLaterSupported = false;
+    
+    // Check if DBG_REPLY_LATER is supported based on Windows version (Windows 10, version 1507 or above)
+    OSVERSIONINFOEXA OSInfo;
+    OSInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
+
+    if (GetVersionExA((LPOSVERSIONINFOA)&OSInfo))
+    {
+        if (OSInfo.wProductType == VER_NT_WORKSTATION &&
+            (OSInfo.dwMajorVersion > 10 || 
+            (OSInfo.dwMajorVersion == 10 && OSInfo.dwBuildNumber >= 1507)))
+        {
+            IsDbgReplyLaterSupported = true;
+        }
+    }
+
     DBGFileHandle = NULL;
     DBGCode = DBG_CONTINUE;
     engineFakeDLLHandle = NULL;
@@ -94,6 +112,18 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 // Regular timeout, wait again
                 continue;
+            }
+        }
+
+        if (IsDbgReplyLaterSupported && DBGEvent.dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
+        {
+            // Check if there is a thread processing a single step
+            if (ThreadBeingProcessed != 0 && DBGEvent.dwThreadId != ThreadBeingProcessed)
+            {
+                // Reply to the dbg event later
+                DBGCode = DBG_REPLY_LATER;
+
+                goto continue_dbg_event;
             }
         }
 
@@ -560,6 +590,16 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_SINGLE_STEP:
             {
+                if (IsDbgReplyLaterSupported)
+                {
+                    // Resume the other threads since we are done processing the single step
+                    for (auto& Thread : SuspendedThreads)
+                        ResumeThread(Thread.hThread);
+
+                    SuspendedThreads.clear();
+                    ThreadBeingProcessed = 0;
+                }
+
                 if(ResetBPX == true || ResetHwBPX == true || ResetMemBPX == true) //restore breakpoints (internal step)
                 {
                     DBGCode = DBG_CONTINUE;
@@ -1161,6 +1201,37 @@ __declspec(dllexport) void TITCALL DebugLoop()
         }
         break;
         }
+
+        if (IsDbgReplyLaterSupported)
+        {
+            CONTEXT DbgCtx; 
+            
+            DbgCtx.ContextFlags = CONTEXT_CONTROL;
+
+            hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
+
+            if (hActiveThread != NULL)
+            {
+                // If TF is set (single step), then suspend all the other threads
+                if (GetThreadContext(hActiveThread, &DbgCtx) && (DbgCtx.EFlags & UE_TRAP_FLAG))
+                {
+                    ThreadBeingProcessed = DBGEvent.dwThreadId;
+
+                    for (auto& Thread : hListThread)
+                    {
+                        if (ThreadBeingProcessed == Thread.dwThreadId)
+                            continue;
+
+                        if (SuspendThread(Thread.hThread) != -1)
+                            SuspendedThreads.push_back(Thread);
+                    }
+                }
+
+                EngineCloseHandle(hActiveThread);
+            }
+        }
+
+continue_dbg_event:
 
         if(engineResumeProcessIfNoThreadIsActive)
         {
