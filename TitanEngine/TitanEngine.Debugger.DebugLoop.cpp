@@ -627,10 +627,36 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(ResetMemBPX) //restore memory breakpoint
                     {
                         ResetMemBPX = false;
-                        VirtualQueryEx(dbgProcessInformation.hProcess, (LPCVOID)ResetMemBPXAddress, &MemInfo, sizeof MEMORY_BASIC_INFORMATION);
-                        OldProtect = MemInfo.Protect;
-                        NewProtect = OldProtect | PAGE_GUARD; //guard page protection
-                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress, ResetMemBPXSize, NewProtect, &OldProtect);
+
+                        // Check if the alternative memory breakpoint method should be used
+                        if (engineMembpAlt)
+                        {
+                            // Check if the breakpoint is still enabled/present and has not been removed
+                            for(int i = 0; i < BreakPointBuffer.size(); i++)
+                            {
+                                if (BreakPointBuffer.at(i).BreakPointAddress == ResetMemBPXAddress &&
+                                    (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                                    BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE) &&
+                                    BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
+                                {
+                                    // Restore the breakpoint
+                                    VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress,
+                                        ResetMemBPXSize, PAGE_NOACCESS, &OldProtect);
+
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            VirtualQueryEx(dbgProcessInformation.hProcess, (LPCVOID)ResetMemBPXAddress, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
+                            OldProtect = MemInfo.Protect;
+                            NewProtect = OldProtect | PAGE_GUARD; //guard page protection
+                            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress, ResetMemBPXSize, NewProtect, &OldProtect);
+                        }
+   
                         if(engineStepActive)
                         {
                             if(engineStepCount == 0)
@@ -972,10 +998,182 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
             case STATUS_ACCESS_VIOLATION:
             {
-                if(DBGCustomHandler->chAccessViolation != NULL)
+                ULONG_PTR bpaddr;
+                bool bFoundBreakPoint = false;
+                bool bCallCustomHandler = false;
+                BreakPointDetail FoundBreakPoint;
+                int bpcount = (int)BreakPointBuffer.size();
+
+                for(int i = 0; i < bpcount; i++)
                 {
-                    myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chAccessViolation);
-                    myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
+                    ULONG_PTR addr = BreakPointBuffer.at(i).BreakPointAddress;
+                    bpaddr = (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]; //page accessed
+                    if(bpaddr >= addr && bpaddr < (addr + BreakPointBuffer.at(i).BreakPointSize) &&
+                            (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
+                             BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
+                             BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
+                             BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE) &&
+                            BreakPointBuffer.at(i).BreakPointActive == UE_BPXACTIVE)
+                    {
+                        FoundBreakPoint = BreakPointBuffer.at(i);
+                        bFoundBreakPoint = true;
+                        break;
+                    }
+                }
+
+                // Most of the logic has been copied from the STATUS_GUARD_PAGE_VIOLATION handler
+
+                if(bFoundBreakPoint && engineMembpAlt) //found memory breakpoint
+                {
+                    hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
+                    myDBGContext.ContextFlags = CONTEXT_CONTROL;
+                    GetThreadContext(hActiveThread, &myDBGContext);
+                    DBGCode = DBG_CONTINUE; //debugger handled the exception
+                    MemoryBpxCallBack = FoundBreakPoint.ExecuteCallBack;
+
+                    if(FoundBreakPoint.BreakPointType == UE_MEMORY) //READ|WRITE|EXECUTE
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1)
+                        {
+                            RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        
+                        bCallCustomHandler = true;
+                    }
+                    else if(FoundBreakPoint.BreakPointType == UE_MEMORY_READ) //READ
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1) //do not restore the memory breakpoint
+                        {
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
+                                RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else //restore the memory breakpoint
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) //read operation
+                        {
+                            bCallCustomHandler = true;
+                        }
+                        else //no read operation, restore breakpoint
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                    }
+                    else if(FoundBreakPoint.BreakPointType == UE_MEMORY_WRITE) //WRITE
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1) //remove breakpoint
+                        {
+                            if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
+                                RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else //restore breakpoint after trap flag
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        if(DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 1) //write operation
+                        {
+                            bCallCustomHandler = true;
+                        }
+                        else //no write operation, restore breakpoint
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                    }
+                    else if(FoundBreakPoint.BreakPointType == UE_MEMORY_EXECUTE) //EXECUTE
+                    {
+                        if(FoundBreakPoint.MemoryBpxRestoreOnHit != 1)
+                        {
+                            if((DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 || DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) && //data execution prevention (DEP) violation
+                                    (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
+                                RemoveMemoryBPX(FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize);
+                        }
+                        else
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                        if((DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 8 || DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[0] == 0) && //data execution prevention (DEP) violation
+                                (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress == DBGEvent.u.Exception.ExceptionRecord.ExceptionInformation[1]) //exception address == read address
+                        {
+                            bCallCustomHandler = true;
+                        }
+                        else //no execute operation, restore breakpoint
+                        {
+                            myDBGContext.EFlags |= UE_TRAP_FLAG;
+                            SetThreadContext(hActiveThread, &myDBGContext);
+                            ResetMemBPXAddress = FoundBreakPoint.BreakPointAddress;
+                            ResetMemBPXSize = FoundBreakPoint.BreakPointSize;
+                            ResetMemBPX = true;
+                        }
+                    }
+
+                    // If the breakpoint has to be restored...
+                    if (ResetMemBPX)
+                    {
+                        // ...temporarily revert the PAGE_NOACCESS permission
+                        VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress,
+                            ResetMemBPXSize, FoundBreakPoint.OldProtect, &OldProtect);
+                    }
+
+                    // Call the custom memory breakpoint handler
+                    if (bCallCustomHandler)
+                    {
+                        myCustomHandler = (fCustomHandler)(MemoryBpxCallBack);
+                        myCustomHandler((void*)bpaddr);
+                    }
+                    
+                    EngineCloseHandle(hActiveThread);
+                }
+                else //no memory breakpoint found
+                {
+                    DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                }
+                if(ResetMemBPX) //memory breakpoint hit
+                {
+                    ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+                    unsigned char instr[16];
+                    MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                    if(strstr(DisassembledString, "PUSHF"))
+                        PushfBPX = true;
+                }
+
+                // Debuggee generated access violation exception
+                if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
+                {
+                    if(DBGCustomHandler->chAccessViolation != NULL)
+                    {
+                        myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chAccessViolation);
+                        myCustomHandler(&DBGEvent.u.Exception.ExceptionRecord);
+                    }
                 }
             }
             break;

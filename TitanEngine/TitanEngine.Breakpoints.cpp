@@ -446,6 +446,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
     MEMORY_BASIC_INFORMATION MemInfo;
     ULONG_PTR NumberOfBytesReadWritten = 0;
     int bpcount = (int)BreakPointBuffer.size();
+    DWORD OldProtect = 0;
     //search for breakpoint
     for(int i = 0; i < bpcount; i++)
     {
@@ -461,15 +462,32 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
     }
     //set PAGE_GUARD on all the pages separately
     size_t pages = SizeOfMemory / TITANENGINE_PAGESIZE;
+
     for(size_t i = 0; i < pages; i++)
     {
         const LPVOID curPage = (LPVOID)(MemoryStart + i * TITANENGINE_PAGESIZE);
+
         VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
-        DWORD OldProtect = MemInfo.Protect;
-        if(!(OldProtect & PAGE_GUARD))
+
+        if (OldProtect == 0)
+            OldProtect = MemInfo.Protect;
+
+        // Check if the alternative memory breakpoint method should be used
+        if (engineMembpAlt)
         {
-            DWORD NewProtect = OldProtect ^ PAGE_GUARD;
-            VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, NewProtect, &OldProtect);
+            if(!(MemInfo.Protect & PAGE_NOACCESS))
+            {
+                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, PAGE_NOACCESS, &MemInfo.Protect);
+            }
+        }
+        else
+        {
+            // Default to using PAGE_GUARD memory breakpoint
+            if(!(MemInfo.Protect & PAGE_GUARD))
+            {
+                DWORD NewProtect = MemInfo.Protect ^ PAGE_GUARD;
+                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, NewProtect, &MemInfo.Protect);
+            }
         }
     }
     //add new breakpoint
@@ -479,6 +497,7 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
     NewBreakPoint.BreakPointAddress = MemoryStart;
     NewBreakPoint.BreakPointType = BreakPointType;
     NewBreakPoint.BreakPointSize = SizeOfMemory;
+    NewBreakPoint.OldProtect = OldProtect;
     NewBreakPoint.MemoryBpxRestoreOnHit = (BYTE)RestoreOnHit;
     NewBreakPoint.ExecuteCallBack = (ULONG_PTR)bpxCallBack;
     BreakPointBuffer.push_back(NewBreakPoint);
@@ -508,25 +527,45 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
             break;
         }
     }
+
     if(found == -1) //not found
         return false;
+
     if(!SizeOfMemory)
         SizeOfMemory = BreakPointBuffer.at(found).BreakPointSize;
-    //remove PAGE_GUARD from all the pages in the range
+
+    // Revert to the original permission on all the pages in the range
     size_t pages = SizeOfMemory / TITANENGINE_PAGESIZE;
+
     for(size_t i = 0; i < pages; i++)
     {
         const LPVOID curPage = (LPVOID)(MemoryStart + i * TITANENGINE_PAGESIZE);
+
         VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
-        DWORD OldProtect = MemInfo.Protect;
-        if((OldProtect & PAGE_GUARD))
+
+        // Check if the alternative memory breakpoint method is being used
+        if (engineMembpAlt)
         {
-            DWORD NewProtect = OldProtect ^ PAGE_GUARD;
-            VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, NewProtect, &OldProtect);
+            if(MemInfo.Protect & PAGE_NOACCESS)
+            {
+                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, 
+                    BreakPointBuffer.at(found).OldProtect, &MemInfo.Protect);
+            }
+        }
+        else
+        {
+            if(MemInfo.Protect & PAGE_GUARD)
+            {
+                DWORD NewProtect = MemInfo.Protect ^ PAGE_GUARD;
+
+                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, NewProtect, &MemInfo.Protect);
+            }
         }
     }
+
     //remove breakpoint from list
     BreakPointBuffer.erase(BreakPointBuffer.begin() + found);
+
     return true;
 }
 

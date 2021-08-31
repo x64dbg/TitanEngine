@@ -245,6 +245,7 @@ typedef struct
     int AdvancedBreakPointType;
     int MemoryBpxRestoreOnHit;
     ULONG_PTR ExecuteCallBack;
+    DWORD OldProtect;
 } BreakPointDetail, *PBreakPointDetail;
 
 typedef struct
@@ -470,6 +471,7 @@ typedef struct HOOK_ENTRY
 #define UE_ENGINE_CALL_PLUGIN_DEBUG_CALLBACK 8
 #define UE_ENGINE_SET_DEBUG_PRIVILEGE 9
 #define UE_ENGINE_SAFE_ATTACH 10
+#define UE_ENGINE_MEMBP_ALT 11
 
 #define UE_OPTION_REMOVEALL 1
 #define UE_OPTION_DISABLEALL 2

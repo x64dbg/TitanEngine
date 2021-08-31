@@ -48,6 +48,10 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     {
         engineSafeAttach = VariableSet;
     }
+    else if(VariableId == UE_ENGINE_MEMBP_ALT)
+    {
+        engineMembpAlt = VariableSet;
+    }
 }
 
 __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)
