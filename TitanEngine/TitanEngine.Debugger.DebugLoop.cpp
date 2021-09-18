@@ -57,17 +57,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
     bool IsDbgReplyLaterSupported = false;
     
     // Check if DBG_REPLY_LATER is supported based on Windows version (Windows 10, version 1507 or above)
-    OSVERSIONINFOEXA OSInfo;
-    OSInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
-
-    if (GetVersionExA((LPOSVERSIONINFOA)&OSInfo))
+    // https://www.gaijin.at/en/infos/windows-version-numbers
+    const uint32_t NtBuildNumber = *(uint32_t*)(0x7FFE0000 + 0x260);
+    if (NtBuildNumber != 0 && NtBuildNumber >= 10240)
     {
-        if (OSInfo.wProductType == VER_NT_WORKSTATION &&
-            (OSInfo.dwMajorVersion > 10 || 
-            (OSInfo.dwMajorVersion == 10 && OSInfo.dwBuildNumber >= 1507)))
-        {
-            IsDbgReplyLaterSupported = true;
-        }
+        IsDbgReplyLaterSupported = true;
     }
 
     DBGFileHandle = NULL;
