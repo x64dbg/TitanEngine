@@ -109,15 +109,30 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
         }
 
-        if (IsDbgReplyLaterSupported && DBGEvent.dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
+        if (IsDbgReplyLaterSupported)
         {
-            // Check if there is a thread processing a single step
-            if (ThreadBeingProcessed != 0 && DBGEvent.dwThreadId != ThreadBeingProcessed)
+            if (DBGEvent.dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
             {
-                // Reply to the dbg event later
-                DBGCode = DBG_REPLY_LATER;
+                // Check if there is a thread processing a single step
+                if (ThreadBeingProcessed != 0 && DBGEvent.dwThreadId != ThreadBeingProcessed)
+                {
+                    // Reply to the dbg event later
+                    DBGCode = DBG_REPLY_LATER;
 
-                goto continue_dbg_event;
+                    goto continue_dbg_event;
+                }
+            }
+            else if (DBGEvent.dwDebugEventCode == EXIT_THREAD_DEBUG_EVENT)
+            {
+                if (ThreadBeingProcessed != 0 && DBGEvent.dwThreadId == ThreadBeingProcessed)
+                {
+                    // Resume the other threads since the thread being processed is exiting
+                    for (auto& Thread : SuspendedThreads)
+                        ResumeThread(Thread.hThread);
+
+                    SuspendedThreads.clear();
+                    ThreadBeingProcessed = 0;
+                }
             }
         }
 
@@ -1394,7 +1409,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
         break;
         }
 
-        if (IsDbgReplyLaterSupported)
+        if (IsDbgReplyLaterSupported && DBGEvent.dwDebugEventCode != EXIT_THREAD_DEBUG_EVENT)
         {
             CONTEXT DbgCtx; 
             
@@ -1413,6 +1428,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         if (ThreadBeingProcessed == Thread.dwThreadId)
                             continue;
+
+                        // Check if the thread is already suspended
+                        for (auto& SuspendedThread : SuspendedThreads)
+                            if (SuspendedThread.dwThreadId == Thread.dwThreadId)
+                                continue;
 
                         if (SuspendThread(Thread.hThread) != -1)
                             SuspendedThreads.push_back(Thread);
