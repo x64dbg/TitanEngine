@@ -300,16 +300,16 @@ __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_
     PRTL_USER_PROCESS_PARAMETERS ProcessParameters = NULL;
     PRTL_USER_PROCESS_PARAMETERS OwnParameters = NtCurrentPeb()->ProcessParameters;
     NTSTATUS Status = fnRtlCreateProcessParametersEx(&ProcessParameters,
-                                            &ImagePath,
-                                            NULL,                        // Create a new DLL path
-                                            PtrCurrentDirectory,
-                                            &CommandLine,
-                                            NULL,                        // If null, a new environment will be created
-                                            &ImagePath,                  // Window title is the exe path - needed for console apps
-                                            &OwnParameters->DesktopInfo, // Copy our desktop name
-                                            NULL,
-                                            NULL,
-                                            RTL_USER_PROCESS_PARAMETERS_NORMALIZED);
+                      &ImagePath,
+                      NULL,                        // Create a new DLL path
+                      PtrCurrentDirectory,
+                      &CommandLine,
+                      NULL,                        // If null, a new environment will be created
+                      &ImagePath,                  // Window title is the exe path - needed for console apps
+                      &OwnParameters->DesktopInfo, // Copy our desktop name
+                      NULL,
+                      NULL,
+                      RTL_USER_PROCESS_PARAMETERS_NORMALIZED);
     if(!NT_SUCCESS(Status))
         goto finished;
 

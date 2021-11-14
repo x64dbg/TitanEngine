@@ -819,8 +819,8 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
             {
                 DWORD LfaNew = DOSHeader->e_lfanew;
                 if((PESize == 0 || (LfaNew < PESize && LfaNew + sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER) < PESize)) &&
-                    MaxPESize != 0 &&
-                    LfaNew < (MaxPESize - sizeof(IMAGE_NT_SIGNATURE) - sizeof(IMAGE_FILE_HEADER)))
+                        MaxPESize != 0 &&
+                        LfaNew < (MaxPESize - sizeof(IMAGE_NT_SIGNATURE) - sizeof(IMAGE_FILE_HEADER)))
                 {
                     PEHeader = (PIMAGE_NT_HEADERS)((ULONG_PTR)DOSHeader + LfaNew);
                     return PEHeader->Signature == IMAGE_NT_SIGNATURE;
@@ -842,7 +842,7 @@ bool EngineValidateHeader(ULONG_PTR FileMapVA, HANDLE hFileProc, LPVOID ImageBas
             {
                 DWORD LfaNew = DOSHeader->e_lfanew;
                 if((LfaNew < PESize && LfaNew + sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER) < PESize) &&
-                    LfaNew < (PESize - sizeof(IMAGE_NT_SIGNATURE) - sizeof(IMAGE_FILE_HEADER)))
+                        LfaNew < (PESize - sizeof(IMAGE_NT_SIGNATURE) - sizeof(IMAGE_FILE_HEADER)))
                 {
                     if(ReadProcessMemory(hFileProc, (LPVOID)((ULONG_PTR)ImageBase + LfaNew), &RemotePEHeader, sizeof(IMAGE_NT_HEADERS), &NumberOfBytesRW))
                     {
@@ -2037,7 +2037,7 @@ DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege)
     NTSTATUS Status = NtOpenProcessToken(hProcess,
                                          TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
                                          &TokenHandle);
-    if (!NT_SUCCESS(Status))
+    if(!NT_SUCCESS(Status))
         return RtlNtStatusToDosError(Status);
 
     LUID LuidPrivilege;
@@ -2060,7 +2060,7 @@ DWORD EngineSetDebugPrivilege(HANDLE hProcess, bool bEnablePrivilege)
 
     // Map the success code NOT_ALL_ASSIGNED to an appropriate error
     // since we're only trying to adjust one privilege.
-    if (Status == STATUS_NOT_ALL_ASSIGNED)
+    if(Status == STATUS_NOT_ALL_ASSIGNED)
         Status = STATUS_PRIVILEGE_NOT_HELD;
 
     return NT_SUCCESS(Status) ? ERROR_SUCCESS : RtlNtStatusToDosError(Status);

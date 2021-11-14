@@ -116,11 +116,11 @@ static HANDLE WINAPI ProcessIdToHandle(IN DWORD dwProcessId)
     ClientId.UniqueProcess = UlongToHandle(dwProcessId);
     InitializeObjectAttributes(&ObjectAttributes, NULL, 0, NULL, NULL);
     Status = NtOpenProcess(&Handle,
-        PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
-        PROCESS_VM_WRITE | PROCESS_VM_READ |
-        PROCESS_SUSPEND_RESUME | PROCESS_QUERY_INFORMATION,
-        &ObjectAttributes,
-        &ClientId);
+                           PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
+                           PROCESS_VM_WRITE | PROCESS_VM_READ |
+                           PROCESS_SUSPEND_RESUME | PROCESS_QUERY_INFORMATION,
+                           &ObjectAttributes,
+                           &ClientId);
     if(!NT_SUCCESS(Status))
     {
         /* Fail */
@@ -144,7 +144,7 @@ static NTSTATUS CreateThreadSkipAttach(IN HANDLE ProcessHandle, IN PUSER_THREAD_
     NTSTATUS Status;
     HANDLE hThread;
 
-    typedef NTSTATUS(NTAPI *t_NtCreateThreadEx)(
+    typedef NTSTATUS(NTAPI * t_NtCreateThreadEx)(
         PHANDLE /* ThreadHandle */,
         ACCESS_MASK /* DesiredAccess */,
         POBJECT_ATTRIBUTES /* ObjectAttributes */,
@@ -156,37 +156,37 @@ static NTSTATUS CreateThreadSkipAttach(IN HANDLE ProcessHandle, IN PUSER_THREAD_
         SIZE_T /* StackSize */,
         SIZE_T /* MaximumStackSize */,
         PPS_ATTRIBUTE_LIST /* AttributeList */
-        );
+    );
 
     auto p_NtCreateThreadEx = (t_NtCreateThreadEx)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtCreateThreadEx");
     if(p_NtCreateThreadEx)
     {
         // Based on: https://chromium-review.googlesource.com/c/crashpad/crashpad/+/339263/16/client/crashpad_client_win.cc#697
         Status = p_NtCreateThreadEx(&hThread,
-            STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
-            nullptr,
-            ProcessHandle,
-            StartRoutine,
-            Argument,
-            THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH,
-            0,
-            0x4000 /* PAGE_SIZE * 4 */,
-            0x4000,
-            nullptr);
+                                    STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
+                                    nullptr,
+                                    ProcessHandle,
+                                    StartRoutine,
+                                    Argument,
+                                    THREAD_CREATE_FLAGS_SKIP_THREAD_ATTACH,
+                                    0,
+                                    0x4000 /* PAGE_SIZE * 4 */,
+                                    0x4000,
+                                    nullptr);
     }
     else
     {
         CLIENT_ID ClientId;
         Status = RtlCreateUserThread(ProcessHandle,
-            NULL,
-            FALSE,
-            0,
-            0x4000,
-            0x4000 /* PAGE_SIZE * 4 */,
-            StartRoutine,
-            Argument,
-            &hThread,
-            &ClientId);
+                                     NULL,
+                                     FALSE,
+                                     0,
+                                     0x4000,
+                                     0x4000 /* PAGE_SIZE * 4 */,
+                                     StartRoutine,
+                                     Argument,
+                                     &hThread,
+                                     &ClientId);
     }
 
     if(NT_SUCCESS(Status))

@@ -323,7 +323,7 @@ static int MY_FAST_CALL LzmaDec_DecodeReal(CLzmaDec* p, SizeT limit, const Byte*
                             unsigned i = 1;
                             do
                             {
-                                GET_BIT2(prob + i, i, ; , distance |= mask);
+                                GET_BIT2(prob + i, i, ;, distance |= mask);
                                 mask <<= 1;
                             }
                             while(--numDirectBits != 0);
@@ -358,10 +358,10 @@ static int MY_FAST_CALL LzmaDec_DecodeReal(CLzmaDec* p, SizeT limit, const Byte*
                         distance <<= kNumAlignBits;
                         {
                             unsigned i = 1;
-                            GET_BIT2(prob + i, i, ; , distance |= 1);
-                            GET_BIT2(prob + i, i, ; , distance |= 2);
-                            GET_BIT2(prob + i, i, ; , distance |= 4);
-                            GET_BIT2(prob + i, i, ; , distance |= 8);
+                            GET_BIT2(prob + i, i, ;, distance |= 1);
+                            GET_BIT2(prob + i, i, ;, distance |= 2);
+                            GET_BIT2(prob + i, i, ;, distance |= 4);
+                            GET_BIT2(prob + i, i, ;, distance |= 8);
                         }
                         if(distance == (UInt32)0xFFFFFFFF)
                         {
@@ -537,7 +537,7 @@ static ELzmaDummy LzmaDec_TryDummy(const CLzmaDec* p, const Byte* buf, SizeT inS
             else
             {
                 unsigned matchByte = p->dic[p->dicPos - p->reps[0] +
-                                            ((p->dicPos < p->reps[0]) ? p->dicBufSize : 0)];
+                                                      ((p->dicPos < p->reps[0]) ? p->dicBufSize : 0)];
                 unsigned offs = 0x100;
                 unsigned symbol = 1;
                 do

@@ -469,11 +469,11 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
 
         VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
 
-        if (OldProtect == 0)
+        if(OldProtect == 0)
             OldProtect = MemInfo.Protect;
 
         // Check if the alternative memory breakpoint method should be used
-        if (engineMembpAlt)
+        if(engineMembpAlt)
         {
             if(!(MemInfo.Protect & PAGE_NOACCESS))
             {
@@ -544,12 +544,12 @@ __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T
         VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
 
         // Check if the alternative memory breakpoint method is being used
-        if (engineMembpAlt)
+        if(engineMembpAlt)
         {
             if(MemInfo.Protect & PAGE_NOACCESS)
             {
-                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, 
-                    BreakPointBuffer.at(found).OldProtect, &MemInfo.Protect);
+                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE,
+                                 BreakPointBuffer.at(found).OldProtect, &MemInfo.Protect);
             }
         }
         else
