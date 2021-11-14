@@ -160,3 +160,4 @@ $RECYCLE.BIN/
 *.cbTemp
 cov-*
 coverity*
+*.user

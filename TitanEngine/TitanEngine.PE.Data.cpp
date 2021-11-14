@@ -368,7 +368,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetPE32Data(char* szFileName, DWORD Whic
         return(0);
     }
 }
-__declspec(dllexport) ULONG_PTR TITCALL GetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData)
+__declspec(dllexport) ULONG_PTR TITCALL GetPE32DataW(const wchar_t* szFileName, DWORD WhichSection, DWORD WhichData)
 {
 
     HANDLE FileHandle;

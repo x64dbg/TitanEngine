@@ -58,7 +58,7 @@ __declspec(dllexport) bool TITCALL DeleteLastSectionEx(char* szFileName, DWORD N
 __declspec(dllexport) bool TITCALL DeleteLastSectionExW(wchar_t* szFileName, DWORD NumberOfSections);
 __declspec(dllexport) ULONG_PTR TITCALL GetPE32DataFromMappedFile(ULONG_PTR FileMapVA, DWORD WhichSection, DWORD WhichData);
 __declspec(dllexport) ULONG_PTR TITCALL GetPE32Data(char* szFileName, DWORD WhichSection, DWORD WhichData);
-__declspec(dllexport) ULONG_PTR TITCALL GetPE32DataW(wchar_t* szFileName, DWORD WhichSection, DWORD WhichData);
+__declspec(dllexport) ULONG_PTR TITCALL GetPE32DataW(const wchar_t* szFileName, DWORD WhichSection, DWORD WhichData);
 __declspec(dllexport) bool TITCALL GetPE32DataFromMappedFileEx(ULONG_PTR FileMapVA, LPVOID DataStorage);
 __declspec(dllexport) bool TITCALL GetPE32DataEx(char* szFileName, LPVOID DataStorage);
 __declspec(dllexport) bool TITCALL GetPE32DataExW(wchar_t* szFileName, LPVOID DataStorage);

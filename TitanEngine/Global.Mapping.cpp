@@ -4,7 +4,7 @@
 #include "Global.Handle.h"
 
 // Global.Mapping.functions:
-bool MapFileEx(char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD FileSize, LPHANDLE FileMap, LPVOID FileMapVA, DWORD SizeModifier)
+bool MapFileEx(const char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD FileSize, LPHANDLE FileMap, LPVOID FileMapVA, DWORD SizeModifier)
 {
     DWORD FileAccess = 0;
     DWORD FileMapType = 0;
@@ -65,7 +65,7 @@ bool MapFileEx(char* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD
     return false;
 }
 
-bool MapFileExW(wchar_t* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD FileSize, LPHANDLE FileMap, LPVOID FileMapVA, DWORD SizeModifier)
+bool MapFileExW(const wchar_t* szFileName, DWORD ReadOrWrite, LPHANDLE FileHandle, LPDWORD FileSize, LPHANDLE FileMap, LPVOID FileMapVA, DWORD SizeModifier)
 {
     DWORD FileAccess = 0;
     DWORD FileMapType = 0;

@@ -52,6 +52,10 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     {
         engineMembpAlt = VariableSet;
     }
+    else if(VariableId == UE_ENGINE_DISABLE_ASLR)
+    {
+        engineDisableAslr = VariableSet;
+    }
 }
 
 __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)

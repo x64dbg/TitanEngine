@@ -23,6 +23,7 @@ extern bool engineAutoHideFromDebugger;
 extern bool engineEnableDebugPrivilege;
 extern bool engineSafeAttach;
 extern bool engineMembpAlt;
+extern bool engineDisableAslr;
 
 //Global.Engine.Functions
 void EngineInit();

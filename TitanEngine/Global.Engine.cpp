@@ -20,6 +20,7 @@ bool engineAutoHideFromDebugger = false; // hardcoded
 bool engineEnableDebugPrivilege = false;
 bool engineSafeAttach = false;
 bool engineMembpAlt = false;
+bool engineDisableAslr = false;
 
 char engineFoundDLLName[512] = {0};
 char engineFoundAPIName[512] = {0};

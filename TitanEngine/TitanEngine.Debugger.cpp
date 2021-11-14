@@ -4,6 +4,7 @@
 #include "Global.Engine.h"
 #include "Global.Handle.h"
 #include "Global.Threader.h"
+#include "Global.Engine.Hider.h"
 
 static wchar_t szBackupDebuggedFileName[512];
 
@@ -41,17 +42,91 @@ __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandL
         return NULL;
     }
 }
+
+static bool HollowProcessWithoutASLR(const wchar_t* szFileName, PROCESS_INFORMATION & pi)
+{
+    bool success = false;
+    auto hFile = CreateFileW(szFileName, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    if(hFile != INVALID_HANDLE_VALUE)
+    {
+        // Retrieve image base and entry point
+        DebugModuleImageBase = GetPE32DataW(szFileName, 0, UE_IMAGEBASE);
+        DebugModuleEntryPoint = GetPE32DataW(szFileName, 0, UE_OEP);
+
+        auto hMapping = CreateFileMappingW(hFile, nullptr, SEC_IMAGE | PAGE_READONLY, 0, 0, nullptr);
+        if(hMapping)
+        {
+            CONTEXT ctx;
+            ctx.ContextFlags = CONTEXT_ALL;
+            if(GetThreadContext(pi.hThread, &ctx))
+            {
+                PVOID imageBase;
+#ifdef _WIN64
+                auto & pebRegister = ctx.Rdx;
+                auto & entryPointRegister = ctx.Rcx;
+#else
+                auto & pebRegister = ctx.Ebx;
+                auto & entryPointRegister = ctx.Eax;
+#endif // _WIN64
+                if(ReadProcessMemory(pi.hProcess, (char*)pebRegister + offsetof(PEB, ImageBaseAddress), &imageBase, sizeof(PVOID), nullptr))
+                {
+                    auto status = NtUnmapViewOfSection(pi.hProcess, imageBase);
+                    if(status == STATUS_SUCCESS)
+                    {
+                        SIZE_T viewSize = 0;
+                        imageBase = PVOID(DebugModuleImageBase);
+                        status = NtMapViewOfSection(hMapping, pi.hProcess, &imageBase, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY);
+                        if(!(status != 0 && status != STATUS_IMAGE_NOT_AT_BASE))
+                        {
+                            if(WriteProcessMemory(pi.hProcess, (char*)pebRegister + offsetof(PEB, ImageBaseAddress), &imageBase, sizeof(PVOID), nullptr))
+                            {
+                                entryPointRegister = DebugModuleImageBase + DebugModuleEntryPoint;
+                                if(SetThreadContext(pi.hThread, &ctx))
+                                {
+                                    success = true;
+#ifndef _WIN64
+                                    // For Wow64 processes, also adjust the 64-bit PEB
+                                    if(IsThisProcessWow64() && !WriteProcessMemory(pi.hProcess, (char*)pebRegister - 0x1000 + 0x10, &imageBase, sizeof(PVOID), nullptr))
+                                        success = false;
+#endif // _WIN64
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            CloseHandle(hMapping);
+        }
+
+        CloseHandle(hFile);
+    }
+
+    if(!success)
+    {
+        DebugModuleImageBase = 0;
+        DebugModuleEntryPoint = 0;
+    }
+
+    return success;
+}
+
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
 {
-    int DebugConsoleFlag = NULL;
+    int creationFlags = CREATE_NEW_CONSOLE | DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS;
 
     if(DebugDebuggingDLL)
     {
-        DebugConsoleFlag = CREATE_NO_WINDOW | CREATE_SUSPENDED;
+        creationFlags |= CREATE_NO_WINDOW;
+        creationFlags |= CREATE_SUSPENDED;
     }
     else if(engineRemoveConsoleForDebugee)
     {
-        DebugConsoleFlag = CREATE_NO_WINDOW;
+        creationFlags |= CREATE_NO_WINDOW;
+    }
+    else if(engineDisableAslr)
+    {
+        creationFlags = CREATE_NEW_CONSOLE | CREATE_SUSPENDED;
     }
 
     wchar_t* szFileNameCreateProcess;
@@ -73,13 +148,20 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         szFileNameCreateProcess = 0;
     }
     // Temporarily disable the debug privilege so the child doesn't inherit it (this evades debugger detection)
-    if (engineEnableDebugPrivilege)
+    if(engineEnableDebugPrivilege)
         EngineSetDebugPrivilege(GetCurrentProcess(), false);
-    auto createProcessResult = CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS | DebugConsoleFlag | CREATE_NEW_CONSOLE, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation);
-    if (engineEnableDebugPrivilege)
+    auto createProcessResult = CreateProcessW(szFileNameCreateProcess, szCommandLineCreateProcess, NULL, NULL, false, creationFlags, NULL, szCurrentFolder, &dbgStartupInfo, &dbgProcessInformation);
+    if(engineEnableDebugPrivilege)
         EngineSetDebugPrivilege(GetCurrentProcess(), true);
     if(createProcessResult)
     {
+        if(engineDisableAslr)
+        {
+            HollowProcessWithoutASLR(szFileName, dbgProcessInformation);
+            DebugActiveProcess_(dbgProcessInformation.dwProcessId);
+            DebugSetProcessKillOnExit(TRUE);
+            ResumeThread(dbgProcessInformation.hThread);
+        }
         DebugAttachedToProcess = false;
         DebugAttachedProcessCallBack = NULL;
         return &dbgProcessInformation;
@@ -502,20 +584,13 @@ __declspec(dllexport) bool TITCALL StopDebug()
 
 __declspec(dllexport) bool TITCALL AttachDebugger(DWORD ProcessId, bool KillOnExit, LPVOID DebugInfo, LPVOID CallBack)
 {
-    typedef void(WINAPI * fDebugSetProcessKillOnExit)(bool KillExitingDebugee);
-    fDebugSetProcessKillOnExit myDebugSetProcessKillOnExit;
     LPVOID funcDebugSetProcessKillOnExit = NULL;
 
     if(ProcessId != NULL && dbgProcessInformation.hProcess == NULL)
     {
         if(DebugActiveProcess_(ProcessId))
         {
-            funcDebugSetProcessKillOnExit = GetProcAddress(GetModuleHandleA("kernel32.dll"), "DebugSetProcessKillOnExit");
-            if(funcDebugSetProcessKillOnExit != NULL)
-            {
-                myDebugSetProcessKillOnExit = (fDebugSetProcessKillOnExit)(funcDebugSetProcessKillOnExit);
-                myDebugSetProcessKillOnExit(KillOnExit);
-            }
+            DebugSetProcessKillOnExit(KillOnExit);
             DebugDebuggingDLL = false;
             DebugAttachedToProcess = true;
             DebugAttachedProcessCallBack = (ULONG_PTR)CallBack;

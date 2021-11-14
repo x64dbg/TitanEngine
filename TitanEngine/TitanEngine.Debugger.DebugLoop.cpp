@@ -153,6 +153,19 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
         case CREATE_PROCESS_DEBUG_EVENT:
         {
+            // HACK: when hollowing the process the debug event still delivers the original image base
+            if(engineDisableAslr && !DebugDebuggingDLL && DebugModuleImageBase != 0)
+            {
+                auto startAddress = ULONG_PTR(DBGEvent.u.CreateProcessInfo.lpStartAddress);
+                if(startAddress)
+                {
+                    startAddress -= ULONG_PTR(DBGEvent.u.CreateProcessInfo.lpBaseOfImage);
+                    startAddress += DebugModuleImageBase;
+                    DBGEvent.u.CreateProcessInfo.lpStartAddress = LPTHREAD_START_ROUTINE(startAddress);
+                }
+                DBGEvent.u.CreateProcessInfo.lpBaseOfImage = LPVOID(DebugModuleImageBase);
+            }
+
             bool attachBreakpoint = false;
             if(DBGFileHandle == NULL) //we didn't set the handle yet (initial process)
             {
