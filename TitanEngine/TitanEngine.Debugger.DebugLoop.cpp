@@ -12,6 +12,33 @@
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;
 
+static void engineStep()
+{
+    EnterCriticalSection(&engineStepActiveCr);
+    if (engineStepActive)
+    {
+        DBGCode = DBG_CONTINUE;
+        if (engineStepCount == 0)
+        {
+            typedef void(TITCALL* fCustomBreakPoint)(void);
+            auto cbStep = fCustomBreakPoint(engineStepCallBack);
+            engineStepActive = false;
+            engineStepCallBack = NULL;
+            LeaveCriticalSection(&engineStepActiveCr);
+            cbStep();
+        }
+        else
+        {
+            SingleStep(engineStepCount, engineStepCallBack);
+            LeaveCriticalSection(&engineStepActiveCr);
+        }
+    }
+    else
+    {
+        LeaveCriticalSection(&engineStepActiveCr);
+    }
+}
+
 __declspec(dllexport) void TITCALL DebugLoop()
 {
     bool FirstBPX = true;
@@ -642,20 +669,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             EnableBPX(ResetBPXAddressTo);
                             ResetBPXAddressTo = NULL;
                             ResetBPX = false;
-                            if(engineStepActive)
-                            {
-                                if(engineStepCount == 0)
-                                {
-                                    myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
-                                    engineStepActive = false;
-                                    engineStepCallBack = NULL;
-                                    myCustomBreakPoint();
-                                }
-                                else
-                                {
-                                    SingleStep(engineStepCount, engineStepCallBack);
-                                }
-                            }
+                            engineStep();
                         }
                         else
                         {
@@ -671,20 +685,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         ResetHwBPX = false;
                         SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (LPVOID)DebugRegisterX.DrxCallBack);
-                        if(engineStepActive)
-                        {
-                            if(engineStepCount == 0)
-                            {
-                                myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
-                                engineStepActive = false;
-                                engineStepCallBack = NULL;
-                                myCustomBreakPoint();
-                            }
-                            else
-                            {
-                                SingleStep(engineStepCount, engineStepCallBack);
-                            }
-                        }
+                        engineStep();
                     }
                     if(ResetMemBPX) //restore memory breakpoint
                     {
@@ -719,20 +720,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)ResetMemBPXAddress, ResetMemBPXSize, NewProtect, &OldProtect);
                         }
 
-                        if(engineStepActive)
-                        {
-                            if(engineStepCount == 0)
-                            {
-                                myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
-                                engineStepActive = false;
-                                engineStepCallBack = NULL;
-                                myCustomBreakPoint();
-                            }
-                            else
-                            {
-                                SingleStep(engineStepCount, engineStepCallBack);
-                            }
-                        }
+                        engineStep();
                     }
                 }
                 else //no resetting needed (debugger reached hardware breakpoint or the user stepped)
@@ -867,21 +855,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         if(strstr(DisassembledString, "PUSHF"))
                             PushfBPX = true;
                     }
-                    if(engineStepActive)
-                    {
-                        DBGCode = DBG_CONTINUE;
-                        if(engineStepCount == 0)
-                        {
-                            myCustomBreakPoint = (fCustomBreakPoint)(engineStepCallBack);
-                            engineStepActive = false;
-                            engineStepCallBack = NULL;
-                            myCustomBreakPoint();
-                        }
-                        else
-                        {
-                            SingleStep(engineStepCount, engineStepCallBack);
-                        }
-                    }
+                    engineStep();
                 }
                 if(DBGCode == DBG_EXCEPTION_NOT_HANDLED) //NOTE: only call the chSingleStep callback when the debuggee generated the exception
                 {

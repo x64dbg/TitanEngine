@@ -2,6 +2,7 @@
 #define _GLOBAL_DEBUGGER_H
 
 #include <vector>
+#include <Windows.h>
 
 extern HARDWARE_DATA DebugRegister[4];
 extern PROCESS_INFORMATION dbgProcessInformation;
@@ -39,6 +40,7 @@ extern LPVOID engineAttachedProcessDebugInfo;
 extern wchar_t szDebuggerName[512];
 extern bool DebugStepFinal;
 extern LPVOID StepOutCallBack;
+extern CRITICAL_SECTION engineStepActiveCr;
 
 long DebugLoopInSecondThread(LPVOID InputParameter);
 void DebuggerReset();

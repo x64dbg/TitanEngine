@@ -40,6 +40,7 @@ LPVOID engineAttachedProcessDebugInfo = NULL;
 wchar_t szDebuggerName[512];
 bool DebugStepFinal = false;
 LPVOID StepOutCallBack = NULL;
+CRITICAL_SECTION engineStepActiveCr;
 
 // Global.Debugger.functions:
 long DebugLoopInSecondThread(LPVOID InputParameter)

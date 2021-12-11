@@ -5,6 +5,7 @@
 #include "Global.Injector.h"
 #include "Global.Engine.Extension.h"
 #include "Global.Engine.Threading.h"
+#include "Global.Debugger.h"
 
 // Global.Engine.Entry:
 BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -13,6 +14,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     {
     case DLL_PROCESS_ATTACH:
         engineHandle = hinstDLL;
+        InitializeCriticalSection(&engineStepActiveCr);
         EngineInit();
         EmptyGarbage();
         for(int i = 0; i < UE_MAX_RESERVED_MEMORY_LEFT; i++)

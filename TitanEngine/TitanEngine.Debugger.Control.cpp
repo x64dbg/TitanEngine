@@ -37,30 +37,35 @@ __declspec(dllexport) void TITCALL ForceClose()
 
 __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 {
-    ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
-    unsigned char instr[16];
-    MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
-    if(strstr(DisassembledString, "PUSHF"))
-        StepOver(StepCallBack);
-    else if(strstr(DisassembledString, "POP SS") || strstr(DisassembledString, "MOV SS")) //prevent the 'PUSH SS', 'POP SS' step trick
+    EnterCriticalSection(&engineStepActiveCr);
+    if (!engineStepActive)
     {
-        ueCurrentPosition += StaticLengthDisassemble((void*)instr);
-        SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
+        ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+        unsigned char instr[16];
+        MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+        char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+        if (strstr(DisassembledString, "PUSHF"))
+            StepOver(StepCallBack);
+        else if (strstr(DisassembledString, "POP SS") || strstr(DisassembledString, "MOV SS")) //prevent the 'PUSH SS', 'POP SS' step trick
+        {
+            ueCurrentPosition += StaticLengthDisassemble((void*)instr);
+            SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
+        }
+        else
+        {
+            CONTEXT myDBGContext;
+            HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
+            myDBGContext.ContextFlags = CONTEXT_CONTROL;
+            GetThreadContext(hActiveThread, &myDBGContext);
+            myDBGContext.EFlags |= UE_TRAP_FLAG;
+            SetThreadContext(hActiveThread, &myDBGContext);
+            EngineCloseHandle(hActiveThread);
+            engineStepActive = true;
+            engineStepCallBack = StepCallBack;
+            engineStepCount = 0;
+        }
     }
-    else
-    {
-        CONTEXT myDBGContext;
-        HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
-        myDBGContext.ContextFlags = CONTEXT_CONTROL;
-        GetThreadContext(hActiveThread, &myDBGContext);
-        myDBGContext.EFlags |= UE_TRAP_FLAG;
-        SetThreadContext(hActiveThread, &myDBGContext);
-        EngineCloseHandle(hActiveThread);
-        engineStepActive = true;
-        engineStepCallBack = StepCallBack;
-        engineStepCount = 0;
-    }
+    LeaveCriticalSection(&engineStepActiveCr);
 }
 
 __declspec(dllexport) void TITCALL StepOver(LPVOID StepCallBack)
