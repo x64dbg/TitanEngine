@@ -41,6 +41,7 @@ extern wchar_t szDebuggerName[512];
 extern bool DebugStepFinal;
 extern LPVOID StepOutCallBack;
 extern CRITICAL_SECTION engineStepActiveCr;
+extern DWORD ContextControlFlags;
 
 long DebugLoopInSecondThread(LPVOID InputParameter);
 void DebuggerReset();

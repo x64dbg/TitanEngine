@@ -620,7 +620,7 @@ __declspec(dllexport) bool TITCALL DetachDebuggerEx(DWORD ProcessId)
     {
         HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, hListThread.at(i).dwThreadId);
         CONTEXT myDBGContext;
-        myDBGContext.ContextFlags = CONTEXT_CONTROL;
+        myDBGContext.ContextFlags = ContextControlFlags;
         GetThreadContext(hActiveThread, &myDBGContext);
         myDBGContext.EFlags &= ~UE_TRAP_FLAG;
         myDBGContext.EFlags &= ~UE_RESUME_FLAG;

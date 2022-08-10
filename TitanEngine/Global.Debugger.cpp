@@ -42,6 +42,27 @@ bool DebugStepFinal = false;
 LPVOID StepOutCallBack = NULL;
 CRITICAL_SECTION engineStepActiveCr;
 
+// Workaround for a bug in the kernel with x64 emulation on ARM
+DWORD ContextControlFlags = []
+{
+    DWORD flags = CONTEXT_CONTROL;
+    typedef BOOL(WINAPI *type_IsWow64Process2)(HANDLE, USHORT*, USHORT*);
+    auto p_IsWow64Process2 = (type_IsWow64Process2)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "IsWow64Process2");
+    if (p_IsWow64Process2)
+    {
+        USHORT processMachine = 0;
+        USHORT nativeMachine = 0;
+        if (p_IsWow64Process2(GetCurrentProcess(), &processMachine, &nativeMachine))
+        {
+            if (nativeMachine == IMAGE_FILE_MACHINE_ARM || nativeMachine == IMAGE_FILE_MACHINE_ARM64)
+            {
+                flags = CONTEXT_ALL;
+            }
+        }
+    }
+    return flags;
+}();
+
 // Global.Debugger.functions:
 long DebugLoopInSecondThread(LPVOID InputParameter)
 {
