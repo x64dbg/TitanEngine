@@ -24,6 +24,7 @@ extern bool engineEnableDebugPrivilege;
 extern bool engineSafeAttach;
 extern bool engineMembpAlt;
 extern bool engineDisableAslr;
+extern bool engineSafeStep;
 
 //Global.Engine.Functions
 void EngineInit();

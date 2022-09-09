@@ -88,7 +88,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     const uint32_t NtBuildNumber = *(uint32_t*)(0x7FFE0000 + 0x260);
     if(NtBuildNumber != 0 && NtBuildNumber >= 10240)
     {
-        IsDbgReplyLaterSupported = true;
+        IsDbgReplyLaterSupported = engineSafeStep;
     }
 
     DBGFileHandle = NULL;
