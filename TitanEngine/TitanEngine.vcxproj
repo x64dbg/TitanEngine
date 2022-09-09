@@ -297,8 +297,6 @@
     <ClCompile Include="TitanEngine.TranslateName.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\SDK\CPP\TitanEngine.h" />
-    <ClInclude Include="..\SDK\CPP\TitanEngine.hpp" />
     <ClInclude Include="..\SDK\C\TitanEngine.h" />
     <ClInclude Include="aplib.h" />
     <ClInclude Include="definitions.h" />
@@ -336,10 +334,6 @@
     <ResourceCompile Include="TitanEngine.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\SDK\Delphi\TitanEngine.pas" />
-    <None Include="..\SDK\LUA\TitanEngine.lua" />
-    <None Include="..\SDK\MASM\TitanEngine.INC" />
-    <None Include="..\SDK\Python\TitanEngine.py" />
     <None Include="..\TitanEngineLoaders\LibraryLoader\x32\LibraryLoader.exe" />
     <None Include="..\TitanEngineLoaders\LibraryLoader\x64\LibraryLoader.exe" />
     <None Include="Global.Engine.Hash.h" />
