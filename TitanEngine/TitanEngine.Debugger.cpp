@@ -47,48 +47,65 @@ static bool HollowProcessWithoutASLR(const wchar_t* szFileName, PROCESS_INFORMAT
 {
     bool success = false;
     auto hFile = CreateFileW(szFileName, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-    if(hFile != INVALID_HANDLE_VALUE)
+    if (hFile != INVALID_HANDLE_VALUE)
     {
         // Retrieve image base and entry point
         DebugModuleImageBase = GetPE32DataW(szFileName, 0, UE_IMAGEBASE);
         DebugModuleEntryPoint = GetPE32DataW(szFileName, 0, UE_OEP);
 
         auto hMapping = CreateFileMappingW(hFile, nullptr, SEC_IMAGE | PAGE_READONLY, 0, 0, nullptr);
-        if(hMapping)
+        if (hMapping)
         {
             CONTEXT ctx;
             ctx.ContextFlags = CONTEXT_ALL;
-            if(GetThreadContext(pi.hThread, &ctx))
+            if (GetThreadContext(pi.hThread, &ctx))
             {
                 PVOID imageBase;
+                // TODO: support wow64 processes
 #ifdef _WIN64
-                auto & pebRegister = ctx.Rdx;
-                auto & entryPointRegister = ctx.Rcx;
+                auto& pebRegister = ctx.Rdx;
+                auto& entryPointRegister = ctx.Rcx;
 #else
-                auto & pebRegister = ctx.Ebx;
-                auto & entryPointRegister = ctx.Eax;
+                auto& pebRegister = ctx.Ebx;
+                auto& entryPointRegister = ctx.Eax;
 #endif // _WIN64
-                if(ReadProcessMemory(pi.hProcess, (char*)pebRegister + offsetof(PEB, ImageBaseAddress), &imageBase, sizeof(PVOID), nullptr))
+                if (ReadProcessMemory(pi.hProcess, (char*)pebRegister + offsetof(PEB, ImageBaseAddress), &imageBase, sizeof(PVOID), nullptr))
                 {
-                    auto status = NtUnmapViewOfSection(pi.hProcess, imageBase);
-                    if(status == STATUS_SUCCESS)
+                    if (ULONG_PTR(imageBase) == DebugModuleImageBase)
                     {
-                        SIZE_T viewSize = 0;
-                        imageBase = PVOID(DebugModuleImageBase);
-                        status = NtMapViewOfSection(hMapping, pi.hProcess, &imageBase, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY);
-                        if(!(status != 0 && status != STATUS_IMAGE_NOT_AT_BASE))
+                        // Already at the right base
+                        success = true;
+                    }
+                    else
+                    {
+                        auto status = NtUnmapViewOfSection(pi.hProcess, imageBase);
+                        if (status == STATUS_SUCCESS)
                         {
-                            if(WriteProcessMemory(pi.hProcess, (char*)pebRegister + offsetof(PEB, ImageBaseAddress), &imageBase, sizeof(PVOID), nullptr))
+                            SIZE_T viewSize = 0;
+                            imageBase = PVOID(DebugModuleImageBase);
+                            status = NtMapViewOfSection(hMapping, pi.hProcess, &imageBase, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY);
+                            if (status == STATUS_CONFLICTING_ADDRESSES)
                             {
-                                entryPointRegister = DebugModuleImageBase + DebugModuleEntryPoint;
-                                if(SetThreadContext(pi.hThread, &ctx))
+                                // Remap in a random location (otherwise the process will crash)
+                                imageBase = 0;
+                                status = NtMapViewOfSection(hMapping, pi.hProcess, &imageBase, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY);
+                            }
+                            if (status == STATUS_SUCCESS || status == STATUS_IMAGE_NOT_AT_BASE)
+                            {
+                                if (WriteProcessMemory(pi.hProcess, (char*)pebRegister + offsetof(PEB, ImageBaseAddress), &imageBase, sizeof(PVOID), nullptr))
                                 {
-                                    success = true;
+                                    auto expectedBase = DebugModuleImageBase == ULONG_PTR(imageBase);
+                                    DebugModuleImageBase = ULONG_PTR(imageBase);
+                                    entryPointRegister = DebugModuleImageBase + DebugModuleEntryPoint;
+                                    if (SetThreadContext(pi.hThread, &ctx))
+                                    {
+                                        success = expectedBase;
 #ifndef _WIN64
-                                    // For Wow64 processes, also adjust the 64-bit PEB
-                                    if(IsThisProcessWow64() && !WriteProcessMemory(pi.hProcess, (char*)pebRegister - 0x1000 + 0x10, &imageBase, sizeof(PVOID), nullptr))
-                                        success = false;
+                                        // For Wow64 processes, also adjust the 64-bit PEB
+                                        if (IsThisProcessWow64() && !WriteProcessMemory(pi.hProcess, (char*)pebRegister - 0x1000 + 0x10, &imageBase, sizeof(PVOID), nullptr))
+                                            success = false;
 #endif // _WIN64
+                                    }
                                 }
                             }
                         }
@@ -105,7 +122,6 @@ static bool HollowProcessWithoutASLR(const wchar_t* szFileName, PROCESS_INFORMAT
     if(!success)
     {
         DebugModuleImageBase = 0;
-        DebugModuleEntryPoint = 0;
     }
 
     return success;
@@ -147,6 +163,8 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
         szCommandLineCreateProcess = (wchar_t*)createWithCmdLine.c_str();
         szFileNameCreateProcess = 0;
     }
+    int retries = 0;
+retry_no_aslr:
     // Temporarily disable the debug privilege so the child doesn't inherit it (this evades debugger detection)
     if(engineEnableDebugPrivilege)
         EngineSetDebugPrivilege(GetCurrentProcess(), false);
@@ -157,10 +175,21 @@ __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szC
     {
         if(engineDisableAslr)
         {
-            HollowProcessWithoutASLR(szFileName, dbgProcessInformation);
-            DebugActiveProcess_(dbgProcessInformation.dwProcessId);
-            DebugSetProcessKillOnExit(TRUE);
-            ResumeThread(dbgProcessInformation.hThread);
+            if (!HollowProcessWithoutASLR(szFileName, dbgProcessInformation))
+            {
+                TerminateThread(dbgProcessInformation.hThread, STATUS_CONFLICTING_ADDRESSES);
+                TerminateProcess(dbgProcessInformation.hProcess, STATUS_CONFLICTING_ADDRESSES);
+                if (retries++ < 10)
+                    goto retry_no_aslr;
+                memset(&dbgProcessInformation, 0, sizeof(PROCESS_INFORMATION));
+                return nullptr;
+            }
+            else
+            {
+                DebugActiveProcess_(dbgProcessInformation.dwProcessId);
+                DebugSetProcessKillOnExit(TRUE);
+                ResumeThread(dbgProcessInformation.hThread);
+            }
         }
         DebugAttachedToProcess = false;
         DebugAttachedProcessCallBack = NULL;
