@@ -54,6 +54,9 @@ DWORD ContextControlFlags = []
         USHORT nativeMachine = 0;
         if (p_IsWow64Process2(GetCurrentProcess(), &processMachine, &nativeMachine))
         {
+#ifndef IMAGE_FILE_MACHINE_ARM64
+#define IMAGE_FILE_MACHINE_ARM64 0xAA64
+#endif // IMAGE_FILE_MACHINE_ARM64
             if (nativeMachine == IMAGE_FILE_MACHINE_ARM || nativeMachine == IMAGE_FILE_MACHINE_ARM64)
             {
                 flags = CONTEXT_ALL;
