@@ -3,7 +3,6 @@
 #include "Global.Debugger.h"
 #include "Global.Handle.h"
 #include "Global.Engine.h"
-#include "Global.Engine.Extension.h"
 #include "Global.Breakpoints.h"
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
@@ -103,12 +102,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
     memset(&DBGEvent, 0, sizeof(DEBUG_EVENT));
     memset(&TerminateDBGEvent, 0, sizeof(DEBUG_EVENT));
     memset(&DLLDebugFileName, 0, sizeof(DLLDebugFileName));
-    ExtensionManagerPluginResetCallBack();
     engineFileIsBeingDebugged = true;
-    if(engineExecutePluginCallBack)
-    {
-        ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_PREDEBUG);
-    }
 
     while(!BreakDBG) //actual debug loop
     {
@@ -162,11 +156,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     ThreadBeingProcessed = 0;
                 }
             }
-        }
-
-        if(engineExecutePluginCallBack)
-        {
-            ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_EXCEPTION);
         }
 
         //Debug event custom handler
@@ -490,10 +479,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
         {
             //http://maximumcrack.wordpress.com/2009/06/22/outputdebugstring-awesomeness/ (the final advice is incorrect, but still helpful)
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //pass exception to debuggee
-            if(engineExecutePluginCallBack)
-            {
-                ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
-            }
             //debug string callback
             if(DBGCustomHandler->chOutputDebugString != NULL)
             {
@@ -704,7 +689,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         if(engineMembpAlt)
                         {
                             // Check if the breakpoint is still enabled/present and has not been removed
-                            for(int i = 0; i < BreakPointBuffer.size(); i++)
+                            for(size_t i = 0; i < BreakPointBuffer.size(); i++)
                             {
                                 if(BreakPointBuffer.at(i).BreakPointAddress == ResetMemBPXAddress &&
                                         (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
@@ -1433,10 +1418,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
             //general unhandled exception callback
             if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
             {
-                if(engineExecutePluginCallBack)
-                {
-                    ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
-                }
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chUnhandledException);
@@ -1456,10 +1437,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
         case RIP_EVENT:
         {
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //fix an anti-debug trick
-            if(engineExecutePluginCallBack)
-            {
-                ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_UNHANDLEDEXCEPTION);
-            }
             //rip event callback
             if(DBGCustomHandler->chRipEvent != NULL)
             {
@@ -1528,10 +1505,6 @@ continue_dbg_event:
     }
     ForceClose();
     engineFileIsBeingDebugged = false;
-    if(engineExecutePluginCallBack)
-    {
-        ExtensionManagerPluginDebugCallBack(&DBGEvent, UE_PLUGIN_CALL_REASON_POSTDEBUG);
-    }
     DebuggerReset();
 }
 

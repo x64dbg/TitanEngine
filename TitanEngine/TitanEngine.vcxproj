@@ -237,7 +237,6 @@
     <ClCompile Include="Global.Debugger.cpp" />
     <ClCompile Include="Global.Engine.Context.cpp" />
     <ClCompile Include="Global.Engine.cpp" />
-    <ClCompile Include="Global.Engine.Extension.cpp" />
     <ClCompile Include="Global.Engine.Hash.cpp" />
     <ClCompile Include="Global.Engine.Hider.cpp" />
     <ClCompile Include="Global.Engine.Hook.cpp" />
@@ -305,7 +304,6 @@
     <ClInclude Include="Global.Breakpoints.h" />
     <ClInclude Include="Global.Debugger.h" />
     <ClInclude Include="Global.Engine.Context.h" />
-    <ClInclude Include="Global.Engine.Extension.h" />
     <ClInclude Include="Global.Engine.h" />
     <ClInclude Include="Global.Engine.Hider.h" />
     <ClInclude Include="Global.Engine.Hook.h" />

@@ -3,7 +3,6 @@
 #include "Global.Engine.h"
 #include "Global.Handle.h"
 #include "Global.Mapping.h"
-#include "Global.Engine.Extension.h"
 #include "Global.Engine.Hash.h"
 #include "Global.Debugger.h"
 
@@ -15,7 +14,6 @@ bool engineResumeProcessIfNoThreadIsActive = false;
 bool engineResetCustomHandler = true;
 bool engineRemoveConsoleForDebugee = false;
 bool enginePassAllExceptions = true;
-bool engineExecutePluginCallBack = true;
 bool engineAutoHideFromDebugger = false; // hardcoded
 bool engineEnableDebugPrivilege = false;
 bool engineSafeAttach = false;
@@ -26,8 +24,6 @@ bool engineSafeStep = true;
 char engineFoundDLLName[512] = {0};
 char engineFoundAPIName[512] = {0};
 wchar_t engineExtractedFileNameW[512] = {0};
-wchar_t engineSzEngineFile[MAX_PATH] = {0};
-wchar_t engineSzEngineFolder[MAX_PATH] = {0};
 HMODULE engineHandle;
 LPVOID engineExitThreadOneShootCallBack = NULL;
 LPVOID engineDependencyFiles;
@@ -37,22 +33,6 @@ void* EngineStartUnpackingCallBack;
 // Global.Engine.functions:
 void EngineInit()
 {
-    int i;
-    if(GetModuleFileNameW(engineHandle, engineSzEngineFile, _countof(engineSzEngineFile)) > NULL)
-    {
-        lstrcpyW(engineSzEngineFolder, engineSzEngineFile);
-        i = lstrlenW(engineSzEngineFolder);
-        while(engineSzEngineFolder[i] != L'\\' && i)
-            i--;
-        if(i)
-        {
-            engineSzEngineFolder[i] = L'\0';
-            lstrcpyW(engineSzEngineGarbageFolder, engineSzEngineFolder);
-            lstrcatW(engineSzEngineGarbageFolder, L"\\garbage\\");
-            CreateDirectoryW(engineSzEngineGarbageFolder, 0);
-        }
-        EngineInitPlugins(engineSzEngineFolder);
-    }
     HashInit();
 }
 

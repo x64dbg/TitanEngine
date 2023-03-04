@@ -4,7 +4,6 @@
 #include "Global.Mapping.h"
 #include "Global.Engine.Hook.h"
 #include "Global.Engine.GUI.h"
-#include "Global.Engine.Extension.h"
 #include "Global.Debugger.h"
 
 // TitanEngine.Engine.functions:
@@ -34,10 +33,6 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     else if(VariableId == UE_ENGINE_RESET_CUSTOM_HANDLER)
     {
         engineResetCustomHandler = VariableSet;
-    }
-    else if(VariableId == UE_ENGINE_CALL_PLUGIN_DEBUG_CALLBACK)
-    {
-        engineExecutePluginCallBack = VariableSet;
     }
     else if(VariableId == UE_ENGINE_SET_DEBUG_PRIVILEGE)
     {
@@ -360,8 +355,6 @@ __declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureTyp
         return (sizeof(PROCESS_ITEM_DATA) == StructureSize);
     case UE_STRUCT_HANDLERARRAY:
         return (sizeof(HandlerArray) == StructureSize);
-    case UE_STRUCT_PLUGININFORMATION:
-        return (sizeof(PluginInformation) == StructureSize);
     case UE_STRUCT_HOOK_ENTRY:
         return (sizeof(HOOK_ENTRY) == StructureSize);
     case UE_STRUCT_FILE_STATUS_INFO:

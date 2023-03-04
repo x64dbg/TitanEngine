@@ -1103,16 +1103,6 @@ __declspec(dllexport) bool TITCALL EngineDeleteCreatedDependencies();
 __declspec(dllexport) bool TITCALL EngineCreateUnpackerWindow(const char* WindowUnpackerTitle, const char* WindowUnpackerLongTitle, const char* WindowUnpackerName, const char* WindowUnpackerAuthor, void* StartUnpackingCallBack);
 __declspec(dllexport) void TITCALL EngineAddUnpackerWindowLogMessage(const char* szLogMessage);
 __declspec(dllexport) bool TITCALL EngineCheckStructAlignment(DWORD StructureType, ULONG_PTR StructureSize);
-// Global.Engine.Extension.Functions:
-__declspec(dllexport) bool TITCALL ExtensionManagerIsPluginLoaded(const char* szPluginName);
-__declspec(dllexport) bool TITCALL ExtensionManagerIsPluginEnabled(const char* szPluginName);
-__declspec(dllexport) bool TITCALL ExtensionManagerDisableAllPlugins();
-__declspec(dllexport) bool TITCALL ExtensionManagerDisablePlugin(const char* szPluginName);
-__declspec(dllexport) bool TITCALL ExtensionManagerEnableAllPlugins();
-__declspec(dllexport) bool TITCALL ExtensionManagerEnablePlugin(const char* szPluginName);
-__declspec(dllexport) bool TITCALL ExtensionManagerUnloadAllPlugins();
-__declspec(dllexport) bool TITCALL ExtensionManagerUnloadPlugin(const char* szPluginName);
-__declspec(dllexport) void* TITCALL ExtensionManagerGetPluginInfo(const char* szPluginName);
 
 #ifdef __cplusplus
 }

@@ -5,7 +5,6 @@
 
 //Global.Engine.Variables
 extern HMODULE engineHandle;
-extern wchar_t engineSzEngineGarbageFolder[MAX_PATH];
 extern LPVOID engineExitThreadOneShootCallBack;
 extern LPVOID engineDependencyFiles;
 extern LPVOID engineDependencyFilesCWP;
@@ -18,7 +17,6 @@ extern bool engineResumeProcessIfNoThreadIsActive;
 extern bool engineResetCustomHandler;
 extern bool engineRemoveConsoleForDebugee;
 extern bool enginePassAllExceptions;
-extern bool engineExecutePluginCallBack;
 extern bool engineAutoHideFromDebugger;
 extern bool engineEnableDebugPrivilege;
 extern bool engineSafeAttach;
