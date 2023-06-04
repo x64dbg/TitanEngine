@@ -554,12 +554,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         SetThreadContext(hActiveThread, &myDBGContext);
                         EngineCloseHandle(hActiveThread);
                         VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)FoundBreakPoint.BreakPointAddress, FoundBreakPoint.BreakPointSize, OldProtect, &OldProtect);
-                        ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
-                        unsigned char instr[16];
-                        MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                        char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
-                        if(strstr(DisassembledString, "PUSHF"))
-                            PushfBPX = true;
 
                         if(FoundBreakPoint.BreakPointType == UE_SINGLESHOOT)
                         {
@@ -567,6 +561,16 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ResetBPXSize = FoundBreakPoint.BreakPointSize - 1;
                             ResetBPXAddressTo = NULL;
                             ResetBPX = false;
+                        }
+                        else
+                        {
+                            // if the current instruction pushes the flags, erase the trap flag from the stack after its execution
+                            ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
+                            unsigned char instr[16];
+                            MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                            char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                            if(strstr(DisassembledString, "PUSHF"))
+                                PushfBPX = true;
                         }
 
                         //execute callback
