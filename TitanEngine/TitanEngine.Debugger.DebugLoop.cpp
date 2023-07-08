@@ -1317,6 +1317,16 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ResetBPXAddressTo = NULL;
                             ResetBPX = false;
                         }
+                        else
+                        {
+                            // if the current instruction pushes the flags, erase the trap flag from the stack after its execution
+                            ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
+                            unsigned char instr[16];
+                            MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
+                            char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                            if(strstr(DisassembledString, "PUSHF"))
+                                PushfBPX = true;
+                        }
 
                         //execute callback
                         myCustomBreakPoint = (fCustomBreakPoint)((LPVOID)FoundBreakPoint.ExecuteCallBack);
