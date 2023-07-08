@@ -654,7 +654,6 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
                         data &= ~UE_TRAP_FLAG;
                         WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
-                        FlushInstructionCache(dbgProcessInformation.hProcess, NULL, 0);
                     }
                     if(ResetBPX) //restore 'normal' breakpoint
                     {
