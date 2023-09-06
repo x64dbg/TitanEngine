@@ -1431,6 +1431,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
             //general unhandled exception callback
             if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
             {
+                engineStepActive = false;
+
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {
                     myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chUnhandledException);
