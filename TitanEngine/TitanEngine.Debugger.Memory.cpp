@@ -350,13 +350,33 @@ __declspec(dllexport) bool TITCALL MemoryReadSafe(HANDLE hProcess, LPVOID lpBase
 
     if(!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
     {
+        CriticalSectionLocker memProtectLock(LockMemoryProtection);
+
+        // try to temporarily change the page protections to PAGE_EXECUTE_READ
+        std::vector<MEMORY_BASIC_INFORMATION> memRegions;
+        MEMORY_BASIC_INFORMATION memInfo;
+        ULONG_PTR endAddr = (ULONG_PTR)lpBaseAddress + nSize;
+        for(ULONG_PTR page = ALIGN_DOWN_BY(lpBaseAddress, TITANENGINE_PAGESIZE); page < endAddr; page += memInfo.RegionSize)
+        {
+            if(0 == VirtualQueryEx(hProcess, (LPCVOID)page, &memInfo, sizeof memInfo))
+                break; // failure ('VirtualProtectEx' will fail too)
+            memRegions.push_back(memInfo);
+        }
+
         if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READ, &dwProtect))
         {
             if(ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
             {
                 retValue = true;
             }
-            VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
+
+            for(const auto & info : memRegions)
+            {
+                ULONG_PTR size = info.RegionSize;
+                if(endAddr < (ULONG_PTR)info.BaseAddress + info.RegionSize)
+                    size = endAddr - (ULONG_PTR)info.BaseAddress;
+                VirtualProtectEx(hProcess, info.BaseAddress, size, info.Protect, &dwProtect);
+            }
         }
     }
     else
@@ -402,13 +422,33 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
 
     if(!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
     {
+        CriticalSectionLocker memProtectLock(LockMemoryProtection);
+
+        // try to temporarily change the page protections to PAGE_EXECUTE_READWRITE
+        std::vector<MEMORY_BASIC_INFORMATION> memRegions;
+        MEMORY_BASIC_INFORMATION memInfo;
+        ULONG_PTR endAddr = (ULONG_PTR)lpBaseAddress + nSize;
+        for(ULONG_PTR page = ALIGN_DOWN_BY(lpBaseAddress, TITANENGINE_PAGESIZE); page < endAddr; page += memInfo.RegionSize)
+        {
+            if(0 == VirtualQueryEx(hProcess, (LPCVOID)page, &memInfo, sizeof memInfo))
+                break; // failure
+            memRegions.push_back(memInfo);
+        }
+
         if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
         {
             if(WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
             {
                 retValue = true;
             }
-            VirtualProtectEx(hProcess, lpBaseAddress, nSize, dwProtect, &dwProtect);
+
+            for(const auto & info : memRegions)
+            {
+                ULONG_PTR size = info.RegionSize;
+                if(endAddr < (ULONG_PTR)info.BaseAddress + info.RegionSize)
+                    size = endAddr - (ULONG_PTR)info.BaseAddress;
+                VirtualProtectEx(hProcess, info.BaseAddress, size, info.Protect, &dwProtect);
+            }
         }
     }
     else
