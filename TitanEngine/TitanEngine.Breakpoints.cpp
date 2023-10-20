@@ -33,7 +33,8 @@ __declspec(dllexport) bool TITCALL IsBPXEnabled(ULONG_PTR bpxAddress)
     int bpcount = (int)BreakPointBuffer.size();
     for(int i = 0; i < bpcount; i++)
     {
-        if(BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
+        const bool isSoftwareBpx = BreakPointBuffer.at(i).BreakPointType == UE_SINGLESHOOT || BreakPointBuffer.at(i).BreakPointType == UE_BREAKPOINT;
+        if(isSoftwareBpx && BreakPointBuffer.at(i).BreakPointAddress == bpxAddress)
         {
             if(BreakPointBuffer.at(i).BreakPointActive != UE_BPXINACTIVE)
             {
@@ -440,64 +441,115 @@ __declspec(dllexport) bool TITCALL SetMemoryBPX(ULONG_PTR MemoryStart, SIZE_T Si
 
 __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory, DWORD BreakPointType, bool RestoreOnHit, LPVOID bpxCallBack)
 {
-    if(MemoryStart % TITANENGINE_PAGESIZE || !SizeOfMemory || SizeOfMemory % TITANENGINE_PAGESIZE) //ensure the data is aligned with the page size
-        return false;
+    struct TempMemoryBreakpointDetails
+    {
+        ULONG_PTR addr;
+        DWORD currentPageProtect;
+        MemoryBreakpointPageDetail data;
+    };
+
     CriticalSectionLocker lock(LockBreakPointBuffer);
-    MEMORY_BASIC_INFORMATION MemInfo;
-    ULONG_PTR NumberOfBytesReadWritten = 0;
+    bool isSuccess = true;
+    DWORD oldProtect;
+
+    // Note: memory breakpoints cannot intersect.
+    // Check that there are no other MemBPs in the address range [MemoryStart, MemoryStart+SizeOfMemory)
     int bpcount = (int)BreakPointBuffer.size();
-    DWORD OldProtect = 0;
-    //search for breakpoint
     for(int i = 0; i < bpcount; i++)
     {
-        if(BreakPointBuffer.at(i).BreakPointAddress == MemoryStart &&
-                (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
-                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
-                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
-                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
-          )
+        auto bpAddr = BreakPointBuffer.at(i).BreakPointAddress;
+        auto bpSize = BreakPointBuffer.at(i).BreakPointSize;
+        auto bpType = BreakPointBuffer.at(i).BreakPointType;
+        bool isMem = bpType == UE_MEMORY || bpType == UE_MEMORY_READ || bpType == UE_MEMORY_WRITE || bpType == UE_MEMORY_EXECUTE;
+
+        if (isMem && bpAddr < (MemoryStart + SizeOfMemory) && bpAddr + bpSize > MemoryStart)
         {
-            return false;
+            return false; // the place is taken
         }
     }
-    //set PAGE_GUARD on all the pages separately
-    size_t pages = SizeOfMemory / TITANENGINE_PAGESIZE;
 
-    for(size_t i = 0; i < pages; i++)
+    // Set a proper protection (e.g. PAGE_GUARD) for all pages in the range
+    std::vector<TempMemoryBreakpointDetails> breakpointInfos;
+    MemoryBreakpointPageDetail pageData;
+
+    auto pageStart = ALIGN_DOWN_BY(MemoryStart, TITANENGINE_PAGESIZE);
+    auto pageEnd = ALIGN_UP_BY(MemoryStart + SizeOfMemory, TITANENGINE_PAGESIZE);
+    for(ULONG_PTR page = pageStart; page < pageEnd; page += TITANENGINE_PAGESIZE)
     {
-        const LPVOID curPage = (LPVOID)(MemoryStart + i * TITANENGINE_PAGESIZE);
-
-        VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
-
-        if(OldProtect == 0)
-            OldProtect = MemInfo.Protect;
-
-        // Check if the alternative memory breakpoint method should be used
-        if(engineMembpAlt)
+        // Save the current page protection in case of a failure
+        MEMORY_BASIC_INFORMATION memInfo;
+        if(!VirtualQueryEx(dbgProcessInformation.hProcess, (LPCVOID)page, &memInfo, sizeof(memInfo)))
         {
-            if(!(MemInfo.Protect & PAGE_NOACCESS))
-            {
-                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, PAGE_NOACCESS, &MemInfo.Protect);
-            }
+            isSuccess = false;
+            break;
+        }
+
+        // Update page data and increment a BP counter
+        auto found = MemoryBreakpointPages.find(page);
+        if(found == MemoryBreakpointPages.end())
+        {
+            // It's the first memory BP on this page
+            pageData.origProtect = memInfo.Protect;
+            pageData.accessBps = pageData.readBps = pageData.writeBps = pageData.executeBps = 0;
         }
         else
         {
-            // Default to using PAGE_GUARD memory breakpoint
-            if(!(MemInfo.Protect & PAGE_GUARD))
-            {
-                DWORD NewProtect = MemInfo.Protect ^ PAGE_GUARD;
-                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, NewProtect, &MemInfo.Protect);
-            }
+            // There are other memory BPs on this page
+            pageData = found->second; // original protection stays the same
         }
+
+        switch(BreakPointType)
+        {
+        case UE_MEMORY: // READ + WRITE + EXECUTE
+            pageData.accessBps += 1;
+            break;
+        case UE_MEMORY_READ:
+            pageData.readBps += 1;
+            break;
+        case UE_MEMORY_WRITE:
+            pageData.writeBps += 1;
+            break;
+        case UE_MEMORY_EXECUTE:
+            pageData.executeBps += 1;
+            break;
+        default:    // unreachable
+            break;
+        }
+
+        // Get a proper MemBp page protection option and apply it
+        pageData.newProtect = GetPageProtectionForMemoryBreakpoint(pageData);
+        if(!VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)page, TITANENGINE_PAGESIZE, pageData.newProtect, &oldProtect))
+        {
+            isSuccess = false;
+            break;
+        }
+
+        TempMemoryBreakpointDetails tempInfo;
+        tempInfo.addr = page;
+        tempInfo.currentPageProtect = memInfo.Protect;
+        tempInfo.data = pageData;
+        breakpointInfos.push_back(tempInfo);
     }
-    //add new breakpoint
+
+    // If changing the page protections failed, attempt to revert the applied protections back
+    if(!isSuccess)
+    {
+        for(const auto & page : breakpointInfos)
+            VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)page.addr, TITANENGINE_PAGESIZE, page.currentPageProtect, &oldProtect);
+        return false;
+    }
+
+    // Save the page data
+    for(const auto & page : breakpointInfos)
+        MemoryBreakpointPages[page.addr] = page.data;
+
+    // Add a new breakpoint
     BreakPointDetail NewBreakPoint;
     memset(&NewBreakPoint, 0, sizeof(BreakPointDetail));
     NewBreakPoint.BreakPointActive = UE_BPXACTIVE;
     NewBreakPoint.BreakPointAddress = MemoryStart;
-    NewBreakPoint.BreakPointType = BreakPointType;
     NewBreakPoint.BreakPointSize = SizeOfMemory;
-    NewBreakPoint.OldProtect = OldProtect;
+    NewBreakPoint.BreakPointType = BreakPointType;
     NewBreakPoint.MemoryBpxRestoreOnHit = (BYTE)RestoreOnHit;
     NewBreakPoint.ExecuteCallBack = (ULONG_PTR)bpxCallBack;
     BreakPointBuffer.push_back(NewBreakPoint);
@@ -506,67 +558,84 @@ __declspec(dllexport) bool TITCALL SetMemoryBPXEx(ULONG_PTR MemoryStart, SIZE_T 
 
 __declspec(dllexport) bool TITCALL RemoveMemoryBPX(ULONG_PTR MemoryStart, SIZE_T SizeOfMemory)
 {
-    if(MemoryStart % TITANENGINE_PAGESIZE || SizeOfMemory % TITANENGINE_PAGESIZE) //ensure the data is aligned with the page size
-        return false;
     CriticalSectionLocker lock(LockBreakPointBuffer);
-    MEMORY_BASIC_INFORMATION MemInfo;
-    ULONG_PTR NumberOfBytesReadWritten = 0;
-    int bpcount = (int)BreakPointBuffer.size();
-    int found = -1;
-    //search for breakpoint
-    for(int i = 0; i < bpcount; i++)
+    bool isSuccess = true;
+
+    // find the breakpoint
+    int nFoundBp = -1;
+    size_t bpcount = BreakPointBuffer.size();
+    for(size_t i = 0; i < bpcount; i++)
     {
-        if(BreakPointBuffer.at(i).BreakPointAddress == MemoryStart &&
-                (BreakPointBuffer.at(i).BreakPointType == UE_MEMORY ||
-                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_READ ||
-                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_WRITE ||
-                 BreakPointBuffer.at(i).BreakPointType == UE_MEMORY_EXECUTE)
-          )
+        auto bpAddr = BreakPointBuffer.at(i).BreakPointAddress;
+        auto bpType = BreakPointBuffer.at(i).BreakPointType;
+        bool isMem = bpType == UE_MEMORY || bpType == UE_MEMORY_READ || bpType == UE_MEMORY_WRITE || bpType == UE_MEMORY_EXECUTE;
+
+        if(isMem && bpAddr == MemoryStart)
         {
-            found = i;
+            nFoundBp = (int)i;
             break;
         }
     }
 
-    if(found == -1) //not found
-        return false;
+    if(nFoundBp == -1)
+        return false; // not found
 
-    if(!SizeOfMemory)
-        SizeOfMemory = BreakPointBuffer.at(found).BreakPointSize;
+    int memBpType = BreakPointBuffer.at(nFoundBp).BreakPointType;
+    SizeOfMemory = BreakPointBuffer.at(nFoundBp).BreakPointSize; // ignore the given size, x64dbg may be lying
 
-    // Revert to the original permission on all the pages in the range
-    size_t pages = SizeOfMemory / TITANENGINE_PAGESIZE;
-
-    for(size_t i = 0; i < pages; i++)
+    //delete the memory breakpoint from the pages
+    auto pageStart = ALIGN_DOWN_BY(MemoryStart, TITANENGINE_PAGESIZE);
+    auto pageEnd = ALIGN_UP_BY(MemoryStart + SizeOfMemory, TITANENGINE_PAGESIZE);
+    for(ULONG_PTR pageAddr = pageStart; pageAddr < pageEnd; pageAddr += TITANENGINE_PAGESIZE)
     {
-        const LPVOID curPage = (LPVOID)(MemoryStart + i * TITANENGINE_PAGESIZE);
+        auto foundPageData = MemoryBreakpointPages.find(pageAddr);
+        if(foundPageData == MemoryBreakpointPages.end())
+            continue; // should not happen
 
-        VirtualQueryEx(dbgProcessInformation.hProcess, curPage, &MemInfo, sizeof(MEMORY_BASIC_INFORMATION));
-
-        // Check if the alternative memory breakpoint method is being used
-        if(engineMembpAlt)
+        // Decrement a BP counter
+        auto & pageData = foundPageData->second;
+        switch(memBpType)
         {
-            if(MemInfo.Protect & PAGE_NOACCESS)
-            {
-                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE,
-                                 BreakPointBuffer.at(found).OldProtect, &MemInfo.Protect);
-            }
+        case UE_MEMORY: // READ + WRITE + EXECUTE
+            pageData.accessBps -= 1;
+            break;
+        case UE_MEMORY_READ:
+            pageData.readBps -= 1;
+            break;
+        case UE_MEMORY_WRITE:
+            pageData.writeBps -= 1;
+            break;
+        case UE_MEMORY_EXECUTE:
+            pageData.executeBps -= 1;
+            break;
+        default:    // unreachable
+            break;
+        }
+
+        DWORD newProtect;
+        const bool noMoreBps = 0 == (pageData.accessBps + pageData.readBps + pageData.writeBps + pageData.executeBps);
+        if(noMoreBps)
+        {
+            // There are no more BPs on this page. Remove the page data.
+            newProtect = pageData.origProtect;
+            MemoryBreakpointPages.erase(foundPageData);
         }
         else
         {
-            if(MemInfo.Protect & PAGE_GUARD)
-            {
-                DWORD NewProtect = MemInfo.Protect ^ PAGE_GUARD;
-
-                VirtualProtectEx(dbgProcessInformation.hProcess, curPage, TITANENGINE_PAGESIZE, NewProtect, &MemInfo.Protect);
-            }
+            // Some BPs are still here. According to their types, reapply page protection.
+            pageData.newProtect = GetPageProtectionForMemoryBreakpoint(pageData);
+            newProtect = pageData.newProtect;
         }
+
+        DWORD oldProtect;
+        if(!VirtualProtectEx(dbgProcessInformation.hProcess, (LPVOID)pageAddr, TITANENGINE_PAGESIZE, newProtect, &oldProtect))
+            isSuccess = false;
     }
 
     //remove breakpoint from list
-    BreakPointBuffer.erase(BreakPointBuffer.begin() + found);
+    BreakPointBuffer.erase(BreakPointBuffer.begin() + nFoundBp);
 
-    return true;
+    return isSuccess;
 }
 
 __declspec(dllexport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex)

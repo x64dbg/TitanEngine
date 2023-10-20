@@ -245,8 +245,16 @@ typedef struct
     int AdvancedBreakPointType;
     int MemoryBpxRestoreOnHit;
     ULONG_PTR ExecuteCallBack;
-    DWORD OldProtect;
 } BreakPointDetail, *PBreakPointDetail;
+
+typedef struct
+{
+    // Numbers of active BPs the page contains for each type
+    uint16_t accessBps, readBps, writeBps, executeBps;
+
+    DWORD origProtect;  // original protection before any BPs were applied
+    DWORD newProtect;   // current protection including all enabled BPs
+} MemoryBreakpointPageDetail;
 
 typedef struct
 {
