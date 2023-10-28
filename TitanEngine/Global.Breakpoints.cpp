@@ -3,6 +3,7 @@
 #include "Global.Breakpoints.h"
 
 std::vector<BreakPointDetail> BreakPointBuffer;
+std::unordered_map<ULONG_PTR, MemoryBreakpointPageDetail> MemoryBreakpointPages;
 
 ULONG_PTR dr7uint(DR7* dr7)
 {
@@ -180,5 +181,110 @@ void BreakPointPostWriteFilter(ULONG_PTR lpBaseAddress, SIZE_T nSize)
                 break;
             }
         }
+    }
+}
+
+bool IsDepEnabled(bool* outPermanent)
+{
+    bool isEnabled = false;
+    bool isPermanent = false;
+
+#ifndef _WIN64
+    ULONG depFlags = 0;
+    NTSTATUS status = NtQueryInformationProcess(dbgProcessInformation.hProcess, ProcessExecuteFlags, &depFlags, sizeof(depFlags), nullptr);
+    if(status == STATUS_SUCCESS)
+    {
+        isEnabled = (depFlags & 0x1) != 0; // 0x1 is MEM_EXECUTE_OPTION_DISABLE
+        isPermanent = (depFlags & 0x8) != 0; // 0x8 is MEM_EXECUTE_OPTION_PERMANENT
+    }
+#else
+    isEnabled = true;
+    isPermanent = true;
+#endif //_WIN64
+
+    if(outPermanent != nullptr)
+        *outPermanent = isPermanent;
+
+    return isEnabled;
+}
+
+DWORD GetPageProtectionForMemoryBreakpoint(const MemoryBreakpointPageDetail & page)
+{
+    // Memory Protection Constants: https://msdn.microsoft.com/en-us/library/windows/desktop/aa366786(v=vs.85).aspx
+
+    // If DEP is disabled or enabled but not permanent (i.e. may be disabled unpredictably in the future),
+    //  we cannot rely on "PAGE_EXECUTE_*" protection options for BPs on execution
+    //  and should use PAGE_GUARD (or PAGE_NOACCESS) instead, a much slower approach:
+    bool isDepPermanent = false;
+    bool isDepPermanentlyEnabled = IsDepEnabled(&isDepPermanent) && isDepPermanent;
+
+    // for ACCESS and READ breakpoints, apply the "lowest" protection: GUARD_PAGE or PAGE_NOACCESS
+    if(page.accessBps > 0 || page.readBps > 0 || (page.executeBps > 0 && !isDepPermanentlyEnabled))
+    {
+        // GUARD_PAGE is incompatible with PAGE_NOACCESS
+        if((page.origProtect & 0xFF) == PAGE_NOACCESS || engineMembpAlt)
+            return (page.origProtect & ~0x7FF) | PAGE_NOACCESS;
+        else
+            // erase PAGE_NOCACHE and PAGE_WRITECOMBINE (cannot be used with the PAGE_GUARD)
+            return (page.origProtect & ~0x700) | PAGE_GUARD;
+    }
+
+    int newProtect = page.origProtect & ~PAGE_GUARD; // erase guard page, just in case
+    if(page.executeBps > 0 && isDepPermanentlyEnabled)
+    {
+        // Remove execute access e.g. PAGE_EXECUTE_READWRITE => PAGE_READWRITE
+        DWORD dwBase = newProtect & 0xFF;
+        DWORD dwHigh = newProtect & 0xFFFFFF00;
+        switch(dwBase)
+        {
+        case PAGE_EXECUTE:
+            newProtect = dwHigh | PAGE_READONLY;
+            break;
+        case PAGE_EXECUTE_READ:
+        case PAGE_EXECUTE_READWRITE:
+        case PAGE_EXECUTE_WRITECOPY:
+            newProtect = dwHigh | (dwBase >> 4);
+            break;
+        }
+    }
+
+    if(page.writeBps > 0)
+    {
+        // Remove write access e.g. PAGE_EXECUTE_READWRITE => PAGE_EXECUTE
+        DWORD dwBase = newProtect & 0xFF;
+        switch(dwBase)
+        {
+        case PAGE_READWRITE:
+        case PAGE_EXECUTE_READWRITE:
+            newProtect = (newProtect & 0xFFFFFF00) | (dwBase >> 1);
+            break;
+        }
+    }
+
+    return newProtect;
+}
+
+bool IsMemoryAccessAllowed(DWORD memProtect, ULONG_PTR accessType /*0 (READ), 1 (WRITE), or 8 (EXECUTE)*/)
+{
+    const bool isRead = accessType == 0;
+    const bool isWrite = accessType == 1;
+    const bool isExecute = accessType == 8;
+
+    switch(memProtect & 0xFF)
+    {
+    case PAGE_EXECUTE:
+    case PAGE_EXECUTE_READ:
+        return isRead || isExecute;
+    case PAGE_EXECUTE_READWRITE:
+    case PAGE_EXECUTE_WRITECOPY:
+        return true;
+    case PAGE_READONLY:
+        return isRead || (isExecute && !IsDepEnabled());
+    case PAGE_READWRITE:
+    case PAGE_WRITECOPY:
+        return isRead || isWrite || (isExecute && !IsDepEnabled());
+    default:
+    case PAGE_NOACCESS:
+        return false;
     }
 }

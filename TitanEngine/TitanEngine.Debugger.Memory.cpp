@@ -400,7 +400,7 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
         pNumBytes = lpNumberOfBytesWritten;
     }
 
-    if(!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes))
+    if(!WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, pNumBytes) || *pNumBytes < nSize)
     {
         if(VirtualProtectEx(hProcess, lpBaseAddress, nSize, PAGE_EXECUTE_READWRITE, &dwProtect))
         {
