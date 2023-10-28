@@ -10,6 +10,7 @@
 enum CriticalSectionLock
 {
     LockBreakPointBuffer,
+    LockMemoryProtection,
     LockLast
 };
 
