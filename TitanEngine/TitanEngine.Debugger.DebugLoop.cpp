@@ -600,7 +600,10 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     {
                         ULONG_PTR exceptionAddress = (ULONG_PTR)DBGEvent.u.Exception.ExceptionRecord.ExceptionAddress;
 
-                        if(recentlyDeletedBpx.find(exceptionAddress) != recentlyDeletedBpx.end())
+                        unsigned char currentByte = 0xCC;
+                        MemoryReadSafe(dbgProcessInformation.hProcess, (void*)exceptionAddress, &currentByte, 1, nullptr);
+
+                        if(currentByte != 0xCC && recentlyDeletedBpx.find(exceptionAddress) != recentlyDeletedBpx.end())
                         {
                             //breakpoint was recently deleted - handle the stale event gracefully
                             hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
