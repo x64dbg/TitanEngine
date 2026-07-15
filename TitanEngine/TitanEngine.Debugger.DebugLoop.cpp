@@ -16,22 +16,28 @@
 static void engineStep()
 {
     EnterCriticalSection(&engineStepActiveCr);
-    if(engineStepActive)
+    // Only deliver the pending single-step to the thread it was armed for. State is
+    // per-thread, so an automatic breakpoint step-over on a different thread cannot
+    // consume this thread's step or fire its callback on the wrong thread.
+    auto it = engineStepThreads.find(DBGEvent.dwThreadId);
+    if(it != engineStepThreads.end())
     {
         DBGCode = DBG_CONTINUE;
-        if(engineStepCount == 0)
+        if(it->second.count == 0)
         {
             typedef void(TITCALL * fCustomBreakPoint)(void);
-            auto cbStep = fCustomBreakPoint(engineStepCallBack);
-            engineStepActive = false;
-            engineStepCallBack = NULL;
+            auto cbStep = fCustomBreakPoint(it->second.callback);
+            engineStepThreads.erase(it);
             LeaveCriticalSection(&engineStepActiveCr);
             cbStep();
         }
         else
         {
-            SingleStep(engineStepCount, engineStepCallBack);
+            auto count = it->second.count;
+            auto callback = it->second.callback;
+            engineStepThreads.erase(it); // SingleStep re-arms this thread's entry
             LeaveCriticalSection(&engineStepActiveCr);
+            SingleStep(count, callback);
         }
     }
     else
@@ -1288,7 +1294,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
             //general unhandled exception callback
             if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
             {
-                engineStepActive = false;
+                // The current thread's pending single-step (if any) did not complete
+                // normally; cancel it. Other threads' steps are unaffected.
+                EnterCriticalSection(&engineStepActiveCr);
+                engineStepThreads.erase(DBGEvent.dwThreadId);
+                LeaveCriticalSection(&engineStepActiveCr);
 
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {

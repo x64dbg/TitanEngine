@@ -2,6 +2,7 @@
 #define _GLOBAL_DEBUGGER_H
 
 #include <vector>
+#include <unordered_map>
 #include <Windows.h>
 
 extern HARDWARE_DATA DebugRegister[4];
@@ -29,9 +30,18 @@ extern DWORD ProcessExitCode;
 extern HANDLE DBGFileHandle;
 extern std::vector<ULONG_PTR> tlsCallBackList;
 extern std::vector<PROCESS_ITEM_DATA> hListProcess;
-extern DWORD engineStepCount;
-extern LPVOID engineStepCallBack;
-extern bool engineStepActive;
+// Per-thread pending single-step state. A single-step (user step or the internal
+// step-over of a breakpoint) is always armed on a specific thread by setting that
+// thread's trap flag, but the resulting STATUS_SINGLE_STEP event can be delivered
+// interleaved with other threads' events. Keying the step state by thread id makes
+// each thread consume only its own step, and allows several threads to be stepped
+// independently (matching GleeBug).
+struct EngineStepThreadState
+{
+    LPVOID callback; // step callback to fire when the step completes
+    DWORD count;     // remaining repeats (0 = fire the callback on the next step)
+};
+extern std::unordered_map<DWORD, EngineStepThreadState> engineStepThreads;
 extern bool engineProcessIsNowDetached;
 extern DWORD DBGCode;
 extern bool engineFileIsBeingDebugged;
