@@ -166,6 +166,36 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                     SuspendedThreads.clear();
                     ThreadBeingProcessed = 0;
+
+                    // The thread was in the middle of a breakpoint step-over (its
+                    // breakpoint was temporarily removed and a restore was pending on its
+                    // next single-step) but it is exiting before that single-step arrives.
+                    // Complete the restore now: otherwise the breakpoint is left removed
+                    // and the next thread's event would consume this dead thread's orphaned
+                    // reset state and be misinterpreted as a step-over reset, producing a
+                    // stray single-step that is passed to (and crashes) the debuggee.
+                    if(ResetBPX)
+                    {
+                        EnableBPX(ResetBPXAddressTo);
+                        ResetBPXAddressTo = 0;
+                        ResetBPX = false;
+                    }
+                    if(ResetHwBPX)
+                    {
+                        SetHardwareBreakPoint(DebugRegisterX.DrxBreakAddress, DebugRegisterXId, DebugRegisterX.DrxBreakPointType, DebugRegisterX.DrxBreakPointSize, (LPVOID)DebugRegisterX.DrxCallBack);
+                        ResetHwBPX = false;
+                    }
+                    if(ResetMemBPX)
+                    {
+                        ResetMemBpxCallback();
+                        if(ResetMemBpxExtraCallback != nullptr)
+                        {
+                            ResetMemBpxExtraCallback();
+                            ResetMemBpxExtraCallback = nullptr;
+                        }
+                        ResetMemBPX = false;
+                    }
+                    PushfBPX = false;
                 }
             }
         }
