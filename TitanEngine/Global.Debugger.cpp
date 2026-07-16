@@ -29,9 +29,7 @@ DWORD ProcessExitCode = 0;
 HANDLE DBGFileHandle;
 std::vector<ULONG_PTR> tlsCallBackList;
 std::vector<PROCESS_ITEM_DATA> hListProcess;
-DWORD engineStepCount = 0;
-LPVOID engineStepCallBack = NULL;
-bool engineStepActive = false;
+std::unordered_map<DWORD, EngineStepThreadState> engineStepThreads;
 bool engineProcessIsNowDetached = false;
 DWORD DBGCode = DBG_CONTINUE;
 bool engineFileIsBeingDebugged = false;
@@ -90,6 +88,7 @@ void DebuggerReset()
     std::vector<BreakPointDetail>().swap(BreakPointBuffer);
     std::unordered_map<ULONG_PTR, MemoryBreakpointPageDetail>().swap(MemoryBreakpointPages);
     recentlyDeletedBpx.clear();
+    engineStepThreads.clear();
 }
 
 void ClearProcessList()

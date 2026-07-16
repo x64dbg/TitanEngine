@@ -38,7 +38,9 @@ __declspec(dllexport) void TITCALL ForceClose()
 __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 {
     EnterCriticalSection(&engineStepActiveCr);
-    if(!engineStepActive)
+    // Arm a single-step for the current event thread only. State is per-thread, so a
+    // step already pending on another thread does not block this one.
+    if(engineStepThreads.find(DBGEvent.dwThreadId) == engineStepThreads.end())
     {
         ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
         unsigned char instr[16];
@@ -60,9 +62,7 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
             myDBGContext.EFlags |= UE_TRAP_FLAG;
             SetThreadContext(hActiveThread, &myDBGContext);
             EngineCloseHandle(hActiveThread);
-            engineStepActive = true;
-            engineStepCallBack = StepCallBack;
-            engineStepCount = 0;
+            engineStepThreads[DBGEvent.dwThreadId] = { StepCallBack, 0 };
         }
     }
     LeaveCriticalSection(&engineStepActiveCr);
@@ -93,7 +93,11 @@ __declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal)
 __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack)
 {
     StepInto(StepCallBack);
-    engineStepCount = StepCount - 1; //We already stepped once
+    EnterCriticalSection(&engineStepActiveCr);
+    auto it = engineStepThreads.find(DBGEvent.dwThreadId);
+    if(it != engineStepThreads.end())
+        it->second.count = StepCount - 1; //We already stepped once
+    LeaveCriticalSection(&engineStepActiveCr);
 }
 
 __declspec(dllexport) void TITCALL SetNextDbgContinueStatus(DWORD SetDbgCode)

@@ -16,22 +16,28 @@
 static void engineStep()
 {
     EnterCriticalSection(&engineStepActiveCr);
-    if(engineStepActive)
+    // Only deliver the pending single-step to the thread it was armed for. State is
+    // per-thread, so an automatic breakpoint step-over on a different thread cannot
+    // consume this thread's step or fire its callback on the wrong thread.
+    auto it = engineStepThreads.find(DBGEvent.dwThreadId);
+    if(it != engineStepThreads.end())
     {
         DBGCode = DBG_CONTINUE;
-        if(engineStepCount == 0)
+        if(it->second.count == 0)
         {
             typedef void(TITCALL * fCustomBreakPoint)(void);
-            auto cbStep = fCustomBreakPoint(engineStepCallBack);
-            engineStepActive = false;
-            engineStepCallBack = NULL;
+            auto cbStep = fCustomBreakPoint(it->second.callback);
+            engineStepThreads.erase(it);
             LeaveCriticalSection(&engineStepActiveCr);
             cbStep();
         }
         else
         {
-            SingleStep(engineStepCount, engineStepCallBack);
+            auto count = it->second.count;
+            auto callback = it->second.callback;
+            engineStepThreads.erase(it); // SingleStep re-arms this thread's entry
             LeaveCriticalSection(&engineStepActiveCr);
+            SingleStep(count, callback);
         }
     }
     else
@@ -154,7 +160,54 @@ __declspec(dllexport) void TITCALL DebugLoop()
             {
                 if(ThreadBeingProcessed != 0 && DBGEvent.dwThreadId == ThreadBeingProcessed)
                 {
-                    // Resume the other threads since the thread being processed is exiting
+                    // The thread was in the middle of a breakpoint step-over (its
+                    // breakpoint was temporarily removed and a restore was pending on its
+                    // next single-step) but it is exiting before that single-step arrives.
+                    // Complete the restore now, while the other threads are still
+                    // suspended - otherwise the breakpoint is left removed and the next
+                    // thread's event would consume this dead thread's orphaned reset state
+                    // and be misinterpreted as a step-over reset, producing a stray
+                    // single-step that is passed to (and crashes) the debuggee.
+                    if(ResetBPX)
+                    {
+                        EnableBPX(ResetBPXAddressTo);
+                        ResetBPXAddressTo = 0;
+                        ResetBPX = false;
+                    }
+                    if(ResetHwBPX)
+                    {
+                        // Re-enable the stepped-over slot in the authoritative DebugRegister[]
+                        // table (DeleteHardwareBreakPoint cleared it when the breakpoint was
+                        // hit), then re-arm every enabled hardware breakpoint on each still-
+                        // suspended thread from that table - exactly as CREATE_THREAD arms a
+                        // new thread. Rebuilding from DebugRegister[] rather than from the
+                        // exiting thread's (gone) context or a live thread's DR7 (which may
+                        // have been cleared) is what keeps the OTHER hardware breakpoints from
+                        // being disabled. This must run before the threads are resumed:
+                        // SetThreadContext does not reliably update a running thread's debug
+                        // registers.
+                        int drIdx = (DebugRegisterXId == UE_DR0) ? 0 : (DebugRegisterXId == UE_DR1) ? 1 : (DebugRegisterXId == UE_DR2) ? 2 : 3;
+                        DebugRegister[drIdx] = DebugRegisterX;
+                        static const DWORD drIds[4] = { UE_DR0, UE_DR1, UE_DR2, UE_DR3 };
+                        for(auto & itr : SuspendedThreads)
+                            for(int s = 0; s < 4; s++)
+                                if(DebugRegister[s].DrxEnabled)
+                                    SetHardwareBreakPointEx(itr.second.hThread, DebugRegister[s].DrxBreakAddress, drIds[s], DebugRegister[s].DrxBreakPointType, DebugRegister[s].DrxBreakPointSize, (LPVOID)DebugRegister[s].DrxCallBack, NULL);
+                        ResetHwBPX = false;
+                    }
+                    if(ResetMemBPX)
+                    {
+                        ResetMemBpxCallback();
+                        if(ResetMemBpxExtraCallback != nullptr)
+                        {
+                            ResetMemBpxExtraCallback();
+                            ResetMemBpxExtraCallback = nullptr;
+                        }
+                        ResetMemBPX = false;
+                    }
+                    PushfBPX = false;
+
+                    // Resume the other threads now that the breakpoint has been restored.
                     for(auto & itr : SuspendedThreads)
                         ResumeThread(itr.second.hThread);
 
@@ -344,6 +397,15 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     break;
                 }
             }
+
+            // Drop any per-thread single-step state for the exiting thread. A thread can
+            // exit after StepInto() armed its step but before the trap event is delivered
+            // (e.g. it is terminated externally); without this, a reused thread id would
+            // inherit the stale entry - StepInto() would decline to arm the trap flag, or
+            // a later single-step could fire the dead thread's callback.
+            EnterCriticalSection(&engineStepActiveCr);
+            engineStepThreads.erase(DBGEvent.dwThreadId);
+            LeaveCriticalSection(&engineStepActiveCr);
         }
         break;
 
@@ -1288,7 +1350,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
             //general unhandled exception callback
             if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
             {
-                engineStepActive = false;
+                // The current thread's pending single-step (if any) did not complete
+                // normally; cancel it. Other threads' steps are unaffected.
+                EnterCriticalSection(&engineStepActiveCr);
+                engineStepThreads.erase(DBGEvent.dwThreadId);
+                LeaveCriticalSection(&engineStepActiveCr);
 
                 if(DBGCustomHandler->chUnhandledException != NULL)
                 {
