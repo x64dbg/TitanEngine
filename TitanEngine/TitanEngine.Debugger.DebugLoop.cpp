@@ -892,6 +892,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
             case STATUS_GUARD_PAGE_VIOLATION:
             case STATUS_ACCESS_VIOLATION:
             {
+                // SetMemoryBPXEx changes page protections before publishing the
+                // matching metadata. Wait for that transaction before inspecting the
+                // memory-breakpoint containers.
+                CriticalSectionLocker breakpointLock(LockBreakPointBuffer);
+
                 //  Plan (making sure the breakpoint is valid):
                 // 1) Check if one of our BPs falls into the access address
                 // 2) Check if this breakpoint is of the right type (READ, WRITE, etc)
@@ -941,6 +946,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 }
 
                 auto hitPage = MemoryBreakpointPages.find(currentPageAddr);
+                const bool hasHitPage = hitPage != MemoryBreakpointPages.end();
+                DWORD originalProtect = 0;
+                if(hasHitPage)
+                    originalProtect = hitPage->second.origProtect;
+
                 if(!bFoundBreakPoint)
                 {
                     // There were no BPs at the accessed address.
@@ -1046,8 +1056,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 // an infinite loop (single-stepping might fail and call this handler, which will try to automatically
                 // single-step again and end up at this exact place, and so on). So if we are sure that resetting the BP is not a good idea,
                 // we just pass the exception on. Or maybe it's better to set PAGE_EXECUTE_READWRITE and simply continue?
-                DWORD originalProtect = hitPage->second.origProtect;
-                if(ResetMemBPX && (bCallUserCallback || IsMemoryAccessAllowed(originalProtect, accessType)))
+                if(hasHitPage && ResetMemBPX && (bCallUserCallback || IsMemoryAccessAllowed(originalProtect, accessType)))
                 {
                     // Mini Plan:
                     // 1) Set a protection option that would allow us to normally execute the instruction that caused this exception
@@ -1058,12 +1067,18 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
                     if(bCallUserCallback)
                     {
+                        // The callback can synchronously add or remove breakpoints.
+                        // All metadata needed below was copied while locked, so release
+                        // the transaction lock before entering x64dbg.
+                        breakpointLock.unlock();
                         myCustomHandler = (fCustomHandler)(foundBreakPoint.ExecuteCallBack);
                         myCustomHandler((void*)accessAddr);
                     }
 
                     ResetMemBpxCallback = [currentPageAddr]
                     {
+                        CriticalSectionLocker breakpointLock(LockBreakPointBuffer);
+
                         // We have successfully executed the instruction!
                         // But by this point the breakpoint could have been removed in a callback.
                         // We should check if it's still here (or some of our other breakpoints),
