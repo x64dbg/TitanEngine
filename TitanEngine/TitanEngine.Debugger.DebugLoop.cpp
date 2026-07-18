@@ -8,6 +8,7 @@
 #include "Global.Librarian.h"
 #include "Global.TLS.h"
 #include <unordered_map>
+#include <unordered_set>
 #include <functional>
 
 #define UE_MODULEx86 0x2000;
@@ -83,6 +84,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
     DWORD ThreadBeingProcessed = 0;
     std::unordered_map<DWORD, THREAD_ITEM_DATA> SuspendedThreads;
+    std::unordered_set<uint64_t> DeferredExceptionThreads;
     bool IsDbgReplyLaterSupported = false;
 
     // Check if DBG_REPLY_LATER is supported based on Windows version (Windows 10, version 1507 or above)
@@ -131,10 +133,12 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
             else
             {
-                // Regular timeout, wait again
-                // After 2 consecutive timeouts, clear recently deleted breakpoints
+                // Do not expire deleted breakpoints while a breakpoint step-over is
+                // still in flight. The stepped instruction can block indefinitely and
+                // breakpoint events from the suspended threads remain pending until its
+                // single-step event arrives.
                 consecutiveTimeouts++;
-                if(consecutiveTimeouts >= 2)
+                if(consecutiveTimeouts >= 2 && ThreadBeingProcessed == 0 && SuspendedThreads.empty() && DeferredExceptionThreads.empty())
                     recentlyDeletedBpx.clear();
                 continue;
             }
@@ -142,6 +146,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
 
         // Event received, reset timeout counter
         consecutiveTimeouts = 0;
+        const uint64_t eventThreadKey = (uint64_t(DBGEvent.dwProcessId) << 32) | DBGEvent.dwThreadId;
+        const bool completingDeferredException = DeferredExceptionThreads.count(eventThreadKey) != 0;
 
         if(IsDbgReplyLaterSupported)
         {
@@ -150,7 +156,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 // Check if there is a thread processing a single step
                 if(ThreadBeingProcessed != 0 && DBGEvent.dwThreadId != ThreadBeingProcessed)
                 {
-                    // Reply to the dbg event later
+                    // Reply to the event later and retain its ownership state until
+                    // the same thread's event is processed normally.
+                    DeferredExceptionThreads.insert(eventThreadKey);
                     DBGCode = DBG_REPLY_LATER;
 
                     goto continue_dbg_event;
@@ -1445,6 +1453,8 @@ continue_dbg_event:
         {
             break;
         }
+        if(DBGCode != DBG_REPLY_LATER && completingDeferredException)
+            DeferredExceptionThreads.erase(eventThreadKey);
         if(engineProcessIsNowDetached)
         {
             DebugActiveProcessStop(dbgProcessInformation.dwProcessId);
