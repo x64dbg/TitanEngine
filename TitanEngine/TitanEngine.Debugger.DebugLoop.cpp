@@ -694,8 +694,22 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         else
                         {
-                            //not a recently deleted breakpoint - pass to debuggee
-                            DBGCode = DBG_EXCEPTION_NOT_HANDLED;
+                            // A program-generated breakpoint exception not raised by a debugger-set
+                            // breakpoint. Distinguish a real single-byte `int 3` instruction
+                            // (DebugBreak()/__debugbreak(): the byte at ExceptionAddress is 0xCC and
+                            // the CPU already advanced RIP past it) from a programmatic exception
+                            // such as RaiseException(STATUS_BREAKPOINT) (no 0xCC at that address).
+                            //
+                            //  - real int 3: consume it (DBG_CONTINUE) like Visual Studio, so the
+                            //    thread resumes at the instruction after the int 3 and execution
+                            //    continues past the program's own DebugBreak.
+                            //  - otherwise: pass it to the debuggee (DBG_EXCEPTION_NOT_HANDLED) so
+                            //    the program's SEH handlers run (e.g. RaiseException+__except).
+                            unsigned char opcode = 0;
+                            bool isInt3 = MemoryReadSafe(dbgProcessInformation.hProcess,
+                                                         (LPVOID)exceptionAddress, &opcode, 1, 0) &&
+                                          opcode == 0xCC;
+                            DBGCode = isInt3 ? DBG_CONTINUE : DBG_EXCEPTION_NOT_HANDLED;
                             if(DBGCustomHandler->chBreakPoint != NULL)
                             {
                                 myCustomHandler = (fCustomHandler)((LPVOID)DBGCustomHandler->chBreakPoint);
