@@ -43,7 +43,12 @@ CRITICAL_SECTION engineStepActiveCr;
 // Workaround for a bug in the kernel with x64 emulation on ARM
 DWORD ContextControlFlags = []
 {
-    DWORD flags = CONTEXT_CONTROL;
+    // CONTEXT_CONTROL alone reads/writes only the control registers. When the
+    // debugger (x64) cross-debugs a 32-bit target under WoW64, a SetThreadContext
+    // issued with plain CONTEXT_CONTROL clobbers the debug registers the user
+    // armed via hbreak (DR0..DR7) — Windows writes back the whole flagged set.
+    // Include CONTEXT_DEBUG_REGISTERS so breakpoint steps never erase them.
+    DWORD flags = CONTEXT_CONTROL | CONTEXT_DEBUG_REGISTERS;
     typedef BOOL(WINAPI * type_IsWow64Process2)(HANDLE, USHORT*, USHORT*);
     auto p_IsWow64Process2 = (type_IsWow64Process2)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "IsWow64Process2");
     if(p_IsWow64Process2)
