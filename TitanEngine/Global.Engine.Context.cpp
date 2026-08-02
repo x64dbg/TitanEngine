@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Engine.Context.h"
+#include "Global.Debugger.h"
+#include "Global.Engine.h"
+#include "Global.Handle.h"
 
 #ifdef _WIN64
 //https://stackoverflow.com/a/869597/1806760
@@ -133,6 +136,51 @@ PINITIALIZECONTEXT _InitializeContext = NULL;
 PGETXSTATEFEATURESMASK _GetXStateFeaturesMask = NULL;
 LOCATEXSTATEFEATURE _LocateXStateFeature = NULL;
 SETXSTATEFEATURESMASK _SetXStateFeaturesMask = NULL;
+
+EngineContextMode EngineGetThreadContextMode(HANDLE hThread)
+{
+#ifndef _WIN64
+    (void)hThread;
+    return EngineContextMode::X86;
+#else
+    if(hThread != NULL)
+    {
+        CONTEXT context = {};
+        context.ContextFlags = CONTEXT_CONTROL;
+        if(GetThreadContext(hThread, &context))
+        {
+            // Windows uses selector 0x23 for 32-bit compatibility mode and
+            // selector 0x33 for 64-bit user mode. Check every time because a
+            // WoW64 thread can transition between the two modes.
+            if(context.SegCs == 0x23)
+                return EngineContextMode::X86;
+            if(context.SegCs == 0x33)
+                return EngineContextMode::X64;
+        }
+    }
+    return EngineContextMode::X64;
+#endif
+}
+
+EngineContextMode EngineGetCurrentContextMode()
+{
+#ifndef _WIN64
+    return EngineContextMode::X86;
+#else
+    HANDLE hThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
+    if(hThread == NULL)
+        return EngineContextMode::X64;
+
+    auto mode = EngineGetThreadContextMode(hThread);
+    EngineCloseHandle(hThread);
+    return mode;
+#endif
+}
+
+SIZE_T EngineGetContextPointerSize(EngineContextMode mode)
+{
+    return mode == EngineContextMode::X86 ? sizeof(DWORD) : sizeof(DWORD64);
+}
 
 bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool AVX_PRIORITY)
 {

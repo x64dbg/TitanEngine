@@ -1,15 +1,31 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Debugger.h"
+#include "Global.Engine.Context.h"
 #include "distorm.h"
 
 static char engineDisassembledInstruction[128];
 
-#if !defined(_WIN64)
-_DecodeType DecodingType = Decode32Bits;
+static bool DefaultIs32Bit()
+{
+#ifndef _WIN64
+    return true;
 #else
-_DecodeType DecodingType = Decode64Bits;
+    return false;
 #endif
+}
+
+static _DecodeType GetDecodingType(bool Is32Bit)
+{
+    return Is32Bit ? Decode32Bits : Decode64Bits;
+}
+
+static bool GetProcessMode(HANDLE hProcess)
+{
+    if(hProcess != NULL && hProcess == dbgProcessInformation.hProcess && DBGEvent.dwThreadId != 0)
+        return EngineGetCurrentContextMode() == EngineContextMode::X86;
+    return DefaultIs32Bit();
+}
 
 
 SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID* lp, SIZE_T length)
@@ -62,7 +78,7 @@ SIZE_T IsBadReadPtrRemote(HANDLE hProcess, const VOID* lp, SIZE_T length)
     return 0;
 }
 
-__declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress)
+void* EngineStaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress, bool Is32Bit)
 {
     _DecodedInst engineDecodedInstructions[1];
     unsigned int DecodedInstructionsCount = 0;
@@ -70,7 +86,7 @@ __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, 
     int MaxDisassmSize = MAXIMUM_INSTRUCTION_SIZE; // (int)IsBadReadPtrRemote(GetCurrentProcess(), DisassmAddress, MAXIMUM_INSTRUCTION_SIZE);
     if(MaxDisassmSize)
     {
-        if(distorm_decode((ULONG_PTR)DisassmStart, (const unsigned char*)DisassmAddress, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
+        if(distorm_decode((ULONG_PTR)DisassmStart, (const unsigned char*)DisassmAddress, MaxDisassmSize, GetDecodingType(Is32Bit), engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
         {
             RtlZeroMemory(engineDisassembledInstruction, sizeof(engineDisassembledInstruction));
 
@@ -87,12 +103,17 @@ __declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, 
     return 0;
 }
 
+__declspec(dllexport) void* TITCALL StaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress)
+{
+    return EngineStaticDisassembleEx(DisassmStart, DisassmAddress, DefaultIs32Bit());
+}
+
 __declspec(dllexport) void* TITCALL StaticDisassemble(LPVOID DisassmAddress)
 {
     return StaticDisassembleEx((ULONG_PTR)DisassmAddress, DisassmAddress);
 }
 
-__declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType)
+void* EngineDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType, bool Is32Bit)
 {
     _DecodedInst engineDecodedInstructions[1];
     unsigned int DecodedInstructionsCount = 0;
@@ -107,7 +128,7 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
             BOOL rpm = MemoryReadSafe(hProcess, DisassmAddress, readBuffer, MaxDisassmSize, 0);
             if(rpm)
             {
-                if(distorm_decode((ULONG_PTR)DisassmAddress, readBuffer, MaxDisassmSize, DecodingType, engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
+                if(distorm_decode((ULONG_PTR)DisassmAddress, readBuffer, MaxDisassmSize, GetDecodingType(Is32Bit), engineDecodedInstructions, _countof(engineDecodedInstructions), &DecodedInstructionsCount) != DECRES_INPUTERR)
                 {
                     RtlZeroMemory(engineDisassembledInstruction, sizeof(engineDisassembledInstruction));
 
@@ -130,17 +151,27 @@ __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID Disass
     return 0;
 }
 
+__declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType)
+{
+    return EngineDisassembleEx(hProcess, DisassmAddress, ReturnInstructionType, GetProcessMode(hProcess));
+}
+
 __declspec(dllexport) void* TITCALL Disassemble(LPVOID DisassmAddress)
 {
-    return(DisassembleEx(dbgProcessInformation.hProcess, DisassmAddress, false));
+    return DisassembleEx(dbgProcessInformation.hProcess, DisassmAddress, false);
+}
+
+long EngineStaticLengthDisassemble(LPVOID DisassmAddress, bool Is32Bit)
+{
+    return EngineLengthDisassembleEx(GetCurrentProcess(), DisassmAddress, Is32Bit);
 }
 
 __declspec(dllexport) long TITCALL StaticLengthDisassemble(LPVOID DisassmAddress)
 {
-    return LengthDisassembleEx(GetCurrentProcess(), DisassmAddress);
+    return EngineStaticLengthDisassemble(DisassmAddress, DefaultIs32Bit());
 }
 
-__declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
+long EngineLengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool Is32Bit)
 {
     unsigned int DecodedInstructionsCount = 0;
     _CodeInfo decomposerCi = {0};
@@ -155,7 +186,7 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
         {
             decomposerCi.code = readBuffer;
             decomposerCi.codeLen = MaxDisassmSize;
-            decomposerCi.dt = DecodingType;
+            decomposerCi.dt = GetDecodingType(Is32Bit);
             decomposerCi.codeOffset = (LONG_PTR)DisassmAddress;
 
             if(distorm_decompose(&decomposerCi, decomposerResult, _countof(decomposerResult), &DecodedInstructionsCount) != DECRES_INPUTERR)
@@ -169,6 +200,11 @@ __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID D
     }
 
     return -1;
+}
+
+__declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
+{
+    return EngineLengthDisassembleEx(hProcess, DisassmAddress, GetProcessMode(hProcess));
 }
 
 __declspec(dllexport) long TITCALL LengthDisassemble(LPVOID DisassmAddress)
