@@ -591,6 +591,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             switch((LONG)DBGEvent.u.Exception.ExceptionRecord.ExceptionCode)
             {
             case STATUS_BREAKPOINT:
+            case STATUS_WX86_BREAKPOINT:
             {
                 bool bFoundBreakPoint = false;
                 BreakPointDetail FoundBreakPoint;
@@ -736,6 +737,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             break;
 
             case STATUS_SINGLE_STEP:
+            case STATUS_WX86_SINGLE_STEP:
             {
                 if(IsDbgReplyLaterSupported)
                 {
