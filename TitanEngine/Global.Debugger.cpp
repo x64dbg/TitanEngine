@@ -43,7 +43,9 @@ CRITICAL_SECTION engineStepActiveCr;
 // Workaround for a bug in the kernel with x64 emulation on ARM
 DWORD ContextControlFlags = []
 {
-    DWORD flags = CONTEXT_CONTROL;
+    // Preserve hardware-breakpoint state whenever a control-context update is
+    // written back. This is especially important across WoW64 mode switches.
+    DWORD flags = CONTEXT_CONTROL | CONTEXT_DEBUG_REGISTERS;
     typedef BOOL(WINAPI * type_IsWow64Process2)(HANDLE, USHORT*, USHORT*);
     auto p_IsWow64Process2 = (type_IsWow64Process2)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "IsWow64Process2");
     if(p_IsWow64Process2)
