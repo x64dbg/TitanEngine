@@ -1193,6 +1193,14 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 // Debuggee generated the GUARD_PAGE or ACCESS_VIOLATION exception
                 if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
                 {
+                    // The AV/GUARD_PAGE handler may block until the debugger resumes
+                    // the target (debuggers pause on the second-chance exception).
+                    // It is called from inside the memory-breakpoint transaction lock
+                    // above, so release it first or any MemoryReadSafe the debugger
+                    // runs while paused (BreakPointPostReadFilter takes this same
+                    // lock) deadlocks on memory inspection after a crash stop.
+                    breakpointLock.unlock();
+
                     if(isAccessViolation)
                     {
                         if(DBGCustomHandler->chAccessViolation != NULL)
