@@ -1193,6 +1193,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 // Debuggee generated the GUARD_PAGE or ACCESS_VIOLATION exception
                 if(DBGCode == DBG_EXCEPTION_NOT_HANDLED)
                 {
+                    // User callbacks may block while another thread calls an API that takes this lock.
+                    breakpointLock.unlock();
+
                     if(isAccessViolation)
                     {
                         if(DBGCustomHandler->chAccessViolation != NULL)
