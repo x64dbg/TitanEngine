@@ -159,13 +159,6 @@ __declspec(dllexport) long TITCALL StaticLengthDisassemble(LPVOID DisassmAddress
 __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress);
 __declspec(dllexport) long TITCALL LengthDisassemble(LPVOID DisassmAddress);
 
-// Internal variants used when the current thread mode is known. The exported
-// static APIs keep their historical build-architecture behavior.
-void* EngineStaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress, bool Is32Bit);
-void* EngineDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType, bool Is32Bit);
-long EngineStaticLengthDisassemble(LPVOID DisassmAddress, bool Is32Bit);
-long EngineLengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool Is32Bit);
-
 __declspec(dllexport) void* TITCALL InitDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder);
 __declspec(dllexport) void* TITCALL InitNativeDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);

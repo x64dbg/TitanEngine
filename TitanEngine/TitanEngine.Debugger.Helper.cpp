@@ -122,7 +122,11 @@ __declspec(dllexport) ULONG_PTR TITCALL GetFunctionParameter(HANDLE hProcess, DW
                                       : x64Registers[ParameterNumber - 1];
                 ULONG_PTR registerValue = (ULONG_PTR)GetContextData(registerIndex);
                 if(!ValueIsPointer)
+                {
+                    if(StackReadSize < sizeof(registerValue))
+                        registerValue &= (ULONG_PTR(1) << (StackReadSize * 8)) - 1;
                     return registerValue;
+                }
                 StackReadAddress = registerValue;
             }
             else

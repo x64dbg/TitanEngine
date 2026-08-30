@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Debugger.h"
-#include "Global.Engine.Context.h"
 #include "distorm.h"
 
 static char engineDisassembledInstruction[128];
@@ -18,13 +17,6 @@ static bool DefaultIs32Bit()
 static _DecodeType GetDecodingType(bool Is32Bit)
 {
     return Is32Bit ? Decode32Bits : Decode64Bits;
-}
-
-static bool GetProcessMode(HANDLE hProcess)
-{
-    if(hProcess != NULL && hProcess == dbgProcessInformation.hProcess && DBGEvent.dwThreadId != 0)
-        return EngineGetCurrentContextMode() == EngineContextMode::X86;
-    return DefaultIs32Bit();
 }
 
 
@@ -153,7 +145,7 @@ void* EngineDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnIns
 
 __declspec(dllexport) void* TITCALL DisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType)
 {
-    return EngineDisassembleEx(hProcess, DisassmAddress, ReturnInstructionType, GetProcessMode(hProcess));
+    return EngineDisassembleEx(hProcess, DisassmAddress, ReturnInstructionType, DefaultIs32Bit());
 }
 
 __declspec(dllexport) void* TITCALL Disassemble(LPVOID DisassmAddress)
@@ -204,7 +196,7 @@ long EngineLengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool Is32
 
 __declspec(dllexport) long TITCALL LengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress)
 {
-    return EngineLengthDisassembleEx(hProcess, DisassmAddress, GetProcessMode(hProcess));
+    return EngineLengthDisassembleEx(hProcess, DisassmAddress, DefaultIs32Bit());
 }
 
 __declspec(dllexport) long TITCALL LengthDisassemble(LPVOID DisassmAddress)

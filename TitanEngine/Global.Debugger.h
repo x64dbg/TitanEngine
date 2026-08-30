@@ -59,5 +59,9 @@ void ClearProcessList();
 void ClearTlsCallBackList();
 void StepOutStepCallBack();
 BOOL WINAPI DebugActiveProcess_(IN DWORD dwProcessId);
+void* EngineStaticDisassembleEx(ULONG_PTR DisassmStart, LPVOID DisassmAddress, bool Is32Bit);
+void* EngineDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool ReturnInstructionType, bool Is32Bit);
+long EngineStaticLengthDisassemble(LPVOID DisassmAddress, bool Is32Bit);
+long EngineLengthDisassembleEx(HANDLE hProcess, LPVOID DisassmAddress, bool Is32Bit);
 
 #endif //_GLOBAL_DEBUGGER_H
