@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "definitions.h"
 #include "Global.Debugger.h"
+#include "Global.Engine.Context.h"
 
 static char szParameterString[512];
 
@@ -51,6 +52,8 @@ __declspec(dllexport) ULONG_PTR TITCALL GetFunctionParameter(HANDLE hProcess, DW
     DWORD StackReadSize = 512;
     DWORD StringReadSize = 512;
     bool ValueIsPointer = false;
+    auto mode = EngineGetCurrentContextMode();
+    SIZE_T pointerSize = EngineGetContextPointerSize(mode);
 
     if(ParameterType == UE_PARAMETER_BYTE)
     {
@@ -94,81 +97,59 @@ __declspec(dllexport) ULONG_PTR TITCALL GetFunctionParameter(HANDLE hProcess, DW
         {
             StackSecondReadSize = 0;
         }
-        StackReadSize = sizeof(ULONG_PTR);
+        StackReadSize = (DWORD)pointerSize;
     }
-    if(FunctionType >= UE_FUNCTION_STDCALL && FunctionType <= UE_FUNCTION_CCALL_CALL && FunctionType != UE_FUNCTION_FASTCALL_RET)
+    if(FunctionType >= UE_FUNCTION_STDCALL && FunctionType <= UE_FUNCTION_FASTCALL_CALL && FunctionType != UE_FUNCTION_FASTCALL_RET)
     {
         StackReadAddress = (ULONG_PTR)GetContextData(UE_CSP);
         if(FunctionType != UE_FUNCTION_FASTCALL_CALL)
         {
-            StackReadAddress = StackReadAddress + (ParameterNumber * sizeof(ULONG_PTR));
+            StackReadAddress = StackReadAddress + (ParameterNumber * pointerSize);
             if(FunctionType >= UE_FUNCTION_STDCALL_CALL)
             {
-                StackReadAddress = StackReadAddress - sizeof(ULONG_PTR);
+                StackReadAddress = StackReadAddress - pointerSize;
             }
         }
         else
         {
-            if(ParameterNumber <= 4)
+            DWORD registerCount = mode == EngineContextMode::X86 ? 2 : 4;
+            if(ParameterNumber <= registerCount)
             {
+                static const DWORD x86Registers[] = { UE_ECX, UE_EDX };
+                static const DWORD x64Registers[] = { UE_RCX, UE_RDX, UE_R8, UE_R9 };
+                DWORD registerIndex = mode == EngineContextMode::X86
+                                      ? x86Registers[ParameterNumber - 1]
+                                      : x64Registers[ParameterNumber - 1];
+                ULONG_PTR registerValue = (ULONG_PTR)GetContextData(registerIndex);
                 if(!ValueIsPointer)
                 {
-                    if(ParameterNumber == 1)
-                    {
-                        return((ULONG_PTR)GetContextData(UE_RCX));
-                    }
-                    else if(ParameterNumber == 2)
-                    {
-                        return((ULONG_PTR)GetContextData(UE_RDX));
-                    }
-                    else if(ParameterNumber == 3)
-                    {
-                        return((ULONG_PTR)GetContextData(UE_R8));
-                    }
-                    else if(ParameterNumber == 4)
-                    {
-                        return((ULONG_PTR)GetContextData(UE_R9));
-                    }
+                    if(StackReadSize < sizeof(registerValue))
+                        registerValue &= (ULONG_PTR(1) << (StackReadSize * 8)) - 1;
+                    return registerValue;
                 }
-                else
-                {
-                    if(ParameterNumber == 1)
-                    {
-                        StackReadAddress = (ULONG_PTR)GetContextData(UE_RCX);
-                    }
-                    else if(ParameterNumber == 2)
-                    {
-                        StackReadAddress = (ULONG_PTR)GetContextData(UE_RDX);
-                    }
-                    else if(ParameterNumber == 3)
-                    {
-                        StackReadAddress = (ULONG_PTR)GetContextData(UE_R8);
-                    }
-                    else if(ParameterNumber == 4)
-                    {
-                        StackReadAddress = (ULONG_PTR)GetContextData(UE_R9);
-                    }
-                }
+                StackReadAddress = registerValue;
             }
             else
             {
-                StackReadAddress = StackReadAddress + 0x20 + ((ParameterNumber - 4) * sizeof(ULONG_PTR)) - sizeof(ULONG_PTR);
+                SIZE_T shadowSpace = mode == EngineContextMode::X86 ? 0 : 0x20;
+                StackReadAddress += shadowSpace + ((ParameterNumber - registerCount) * pointerSize) - pointerSize;
             }
         }
-        if(ReadProcessMemory(hProcess, (LPVOID)StackReadAddress, &StackReadBuffer, sizeof(ULONG_PTR), &ueNumberOfBytesRW))
+        SIZE_T initialReadSize = ValueIsPointer ? pointerSize : (StackReadSize < sizeof(StackReadBuffer) ? StackReadSize : sizeof(StackReadBuffer));
+        if(ReadProcessMemory(hProcess, (LPVOID)StackReadAddress, &StackReadBuffer, initialReadSize, &ueNumberOfBytesRW))
         {
             if(!ValueIsPointer)
             {
-                RtlMoveMemory((LPVOID)((ULONG_PTR)&StackFinalBuffer + sizeof(ULONG_PTR) - StackReadSize), (LPVOID)((ULONG_PTR)&StackReadBuffer + sizeof(ULONG_PTR) - StackReadSize), StackReadSize);
+                RtlMoveMemory(&StackFinalBuffer, &StackReadBuffer, StackReadSize);
             }
             else
             {
                 StackReadAddress = StackReadBuffer;
                 if(StackSecondReadSize > NULL)
                 {
-                    if(ReadProcessMemory(hProcess, (LPVOID)StackReadAddress, &StackReadBuffer, sizeof(ULONG_PTR), &ueNumberOfBytesRW))
+                    if(ReadProcessMemory(hProcess, (LPVOID)StackReadAddress, &StackReadBuffer, StackSecondReadSize, &ueNumberOfBytesRW))
                     {
-                        RtlMoveMemory((LPVOID)((ULONG_PTR)&StackFinalBuffer + sizeof(ULONG_PTR) - StackSecondReadSize), (LPVOID)((ULONG_PTR)&StackReadBuffer + sizeof(ULONG_PTR) - StackSecondReadSize), StackSecondReadSize);
+                        RtlMoveMemory(&StackFinalBuffer, &StackReadBuffer, StackSecondReadSize);
                     }
                     else
                     {
@@ -218,6 +199,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
     DWORD CurrentInstructionSize;
     int ReadMemData = NULL;
     BYTE ReadByteData = NULL;
+    bool is32Bit = EngineGetCurrentContextMode() == EngineContextMode::X86;
 
     if(hProcess != NULL)
     {
@@ -227,7 +209,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
             if(ReadProcessMemory(hProcess, (LPVOID)InstructionAddress, ReadMemory, MAXIMUM_INSTRUCTION_SIZE, &ueNumberOfBytesRead))
             {
                 CompareMemory = (PMEMORY_CMP_HANDLER)ReadMemory;
-                CurrentInstructionSize = StaticLengthDisassemble(ReadMemory);
+                CurrentInstructionSize = EngineStaticLengthDisassemble(ReadMemory, is32Bit);
                 if(CompareMemory->DataByte[0] == 0xE9 && CurrentInstructionSize == 5)
                 {
                     RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)ReadMemory + 1), 4);
@@ -305,7 +287,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
                 {
                     RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)ReadMemory + 2), 4);
                     TargetedAddress = ReadMemData;
-                    if(sizeof(HANDLE) == 8)
+                    if(!is32Bit)
                     {
                         TargetedAddress = TargetedAddress + InstructionAddress;
                     }
@@ -314,7 +296,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
                 {
                     RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)ReadMemory + 2), 4);
                     TargetedAddress = ReadMemData;
-                    if(sizeof(HANDLE) == 8)
+                    if(!is32Bit)
                     {
                         TargetedAddress = TargetedAddress + InstructionAddress;
                     }
@@ -362,7 +344,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
     else
     {
         CompareMemory = (PMEMORY_CMP_HANDLER)InstructionAddress;
-        CurrentInstructionSize = StaticLengthDisassemble((LPVOID)InstructionAddress);
+        CurrentInstructionSize = EngineStaticLengthDisassemble((LPVOID)InstructionAddress, is32Bit);
         if(CompareMemory->DataByte[0] == 0xE9 && CurrentInstructionSize == 5)
         {
             RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)InstructionAddress + 1), 4);
@@ -440,7 +422,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         {
             RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)InstructionAddress + 2), 4);
             TargetedAddress = ReadMemData;
-            if(sizeof(HANDLE) == 8)
+            if(!is32Bit)
             {
                 TargetedAddress = TargetedAddress + InstructionAddress;
             }
@@ -449,7 +431,7 @@ __declspec(dllexport) ULONG_PTR TITCALL GetJumpDestinationEx(HANDLE hProcess, UL
         {
             RtlMoveMemory(&ReadMemData, (LPVOID)((ULONG_PTR)InstructionAddress + 2), 4);
             TargetedAddress = ReadMemData;
-            if(sizeof(HANDLE) == 8)
+            if(!is32Bit)
             {
                 TargetedAddress = TargetedAddress + InstructionAddress;
             }
@@ -530,7 +512,8 @@ __declspec(dllexport) bool TITCALL IsJumpGoingToExecuteEx(HANDLE hProcess, HANDL
         {
             ThreadEflags = (DWORD)RegFlags;
         }
-        DisassembledString = (char*)DisassembleEx(hProcess, (LPVOID)ThreadCIP, true);
+        auto mode = hThread != NULL ? EngineGetThreadContextMode(hThread) : EngineGetCurrentContextMode();
+        DisassembledString = (char*)EngineDisassembleEx(hProcess, (LPVOID)ThreadCIP, true, mode == EngineContextMode::X86);
         if(DisassembledString != NULL)
         {
             if(ThreadEflags & (1 << 0))

@@ -24,6 +24,19 @@ extern PGETXSTATEFEATURESMASK _GetXStateFeaturesMask;
 extern LOCATEXSTATEFEATURE _LocateXStateFeature;
 extern SETXSTATEFEATURESMASK _SetXStateFeaturesMask;
 
+enum class EngineContextMode
+{
+    X86,
+    X64,
+};
+
+// Determine the mode in which a thread is currently executing. A WoW64 thread
+// can switch between 32-bit and 64-bit code, so this deliberately uses CS from
+// the live thread context instead of the process image architecture.
+EngineContextMode EngineGetThreadContextMode(HANDLE hThread);
+EngineContextMode EngineGetCurrentContextMode();
+SIZE_T EngineGetContextPointerSize(EngineContextMode mode);
+
 bool _SetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool AVX_PRIORITY);
 bool _GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext, bool avx);
 bool InitXState(void);

@@ -5,6 +5,7 @@
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
 #include "Global.Engine.h"
+#include "Global.Engine.Context.h"
 
 __declspec(dllexport) void TITCALL ForceClose()
 {
@@ -43,14 +44,15 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
     if(engineStepThreads.find(DBGEvent.dwThreadId) == engineStepThreads.end())
     {
         ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+        bool is32Bit = EngineGetCurrentContextMode() == EngineContextMode::X86;
         unsigned char instr[16];
         MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-        char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+        char* DisassembledString = (char*)EngineStaticDisassembleEx(ueCurrentPosition, (LPVOID)instr, is32Bit);
         if(strstr(DisassembledString, "PUSHF"))
             StepOver(StepCallBack);
         else if(strstr(DisassembledString, "POP SS") || strstr(DisassembledString, "MOV SS"))  //prevent the 'PUSH SS', 'POP SS' step trick
         {
-            ueCurrentPosition += StaticLengthDisassemble((void*)instr);
+            ueCurrentPosition += EngineStaticLengthDisassemble((void*)instr, is32Bit);
             SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
         }
         else
@@ -71,12 +73,13 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 __declspec(dllexport) void TITCALL StepOver(LPVOID StepCallBack)
 {
     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
+    bool is32Bit = EngineGetCurrentContextMode() == EngineContextMode::X86;
     unsigned char instr[16];
     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+    char* DisassembledString = (char*)EngineStaticDisassembleEx(ueCurrentPosition, (LPVOID)instr, is32Bit);
     if(strstr(DisassembledString, "CALL") || strstr(DisassembledString, "REP") || strstr(DisassembledString, "PUSHF"))
     {
-        ueCurrentPosition += StaticLengthDisassemble((void*)instr);
+        ueCurrentPosition += EngineStaticLengthDisassemble((void*)instr, is32Bit);
         SetBPX(ueCurrentPosition, UE_BREAKPOINT_TYPE_INT3 + UE_SINGLESHOOT, StepCallBack);
     }
     else

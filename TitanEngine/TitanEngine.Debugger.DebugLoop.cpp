@@ -7,12 +7,32 @@
 #include "Global.Threader.h"
 #include "Global.Librarian.h"
 #include "Global.TLS.h"
+#include "Global.Engine.Context.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
 
 #define UE_MODULEx86 0x2000;
 #define UE_MODULEx64 0x2000;
+
+static char* DisassembleCurrentInstruction(ULONG_PTR address, void* data)
+{
+    bool is32Bit = EngineGetCurrentContextMode() == EngineContextMode::X86;
+    return (char*)EngineStaticDisassembleEx(address, data, is32Bit);
+}
+
+static void ClearTrapFlagFromStack()
+{
+    auto mode = EngineGetCurrentContextMode();
+    SIZE_T pointerSize = EngineGetContextPointerSize(mode);
+    void* csp = (void*)GetContextData(UE_CSP);
+    DWORD64 data = 0;
+    if(ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, pointerSize, nullptr))
+    {
+        data &= ~DWORD64(UE_TRAP_FLAG);
+        WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, pointerSize, nullptr);
+    }
+}
 
 static void engineStep()
 {
@@ -591,6 +611,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             switch((LONG)DBGEvent.u.Exception.ExceptionRecord.ExceptionCode)
             {
             case STATUS_BREAKPOINT:
+            case STATUS_WX86_BREAKPOINT:
             {
                 bool bFoundBreakPoint = false;
                 BreakPointDetail FoundBreakPoint;
@@ -644,7 +665,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
                             unsigned char instr[16];
                             MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                            char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                            char* DisassembledString = DisassembleCurrentInstruction(ueCurrentPosition, (LPVOID)instr);
                             if(strstr(DisassembledString, "PUSHF"))
                                 PushfBPX = true;
                         }
@@ -736,6 +757,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             break;
 
             case STATUS_SINGLE_STEP:
+            case STATUS_WX86_SINGLE_STEP:
             {
                 if(IsDbgReplyLaterSupported)
                 {
@@ -753,11 +775,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     if(PushfBPX) //remove trap flag from stack
                     {
                         PushfBPX = false;
-                        void* csp = (void*)GetContextData(UE_CSP);
-                        ULONG_PTR data = 0;
-                        ReadProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
-                        data &= ~UE_TRAP_FLAG;
-                        WriteProcessMemory(dbgProcessInformation.hProcess, csp, &data, sizeof(ULONG_PTR), 0);
+                        ClearTrapFlagFromStack();
                     }
                     if(ResetBPX) //restore 'normal' breakpoint
                     {
@@ -945,7 +963,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
                         unsigned char instr[16];
                         MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                        char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                        char* DisassembledString = DisassembleCurrentInstruction(ueCurrentPosition, (LPVOID)instr);
                         if(strstr(DisassembledString, "PUSHF"))
                             PushfBPX = true;
                     }
@@ -1184,7 +1202,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                     ULONG_PTR ueCurrentPosition = GetContextData(UE_CIP);
                     unsigned char instr[16];
                     MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), nullptr);
-                    char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                    char* DisassembledString = DisassembleCurrentInstruction(ueCurrentPosition, (LPVOID)instr);
                     if(strstr(DisassembledString, "PUSHF"))
                         PushfBPX = true;
                 }
@@ -1270,7 +1288,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
                             ULONG_PTR ueCurrentPosition = FoundBreakPoint.BreakPointAddress;
                             unsigned char instr[16];
                             MemoryReadSafe(dbgProcessInformation.hProcess, (void*)ueCurrentPosition, instr, sizeof(instr), 0);
-                            char* DisassembledString = (char*)StaticDisassembleEx(ueCurrentPosition, (LPVOID)instr);
+                            char* DisassembledString = DisassembleCurrentInstruction(ueCurrentPosition, (LPVOID)instr);
                             if(strstr(DisassembledString, "PUSHF"))
                                 PushfBPX = true;
                         }
