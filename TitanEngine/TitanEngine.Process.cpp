@@ -141,3 +141,68 @@ __declspec(dllexport) HANDLE TITCALL TitanOpenThread(DWORD dwDesiredAccess, bool
 {
     return EngineOpenThread(dwDesiredAccess, bInheritHandle, dwThreadId);
 }
+
+__declspec(dllexport) bool TITCALL TitanCloseHandle(HANDLE hEngineHandle)
+{
+    return EngineCloseHandle(hEngineHandle);
+}
+
+__declspec(dllexport) bool TITCALL ProcessIsWow64(HANDLE hProcess, PBOOL isWow64)
+{
+    return !!IsWow64Process(hProcess, isWow64);
+}
+
+__declspec(dllexport) bool TITCALL TitanTerminateProcess(HANDLE hProcess, DWORD exitCode)
+{
+    return !!TerminateProcess(hProcess, exitCode);
+}
+
+__declspec(dllexport) bool TITCALL TitanDebugBreakProcess(HANDLE hProcess)
+{
+    return !!DebugBreakProcess(hProcess);
+}
+
+__declspec(dllexport) HANDLE TITCALL TitanCreateRemoteThread(HANDLE hProcess, LPTHREAD_START_ROUTINE start, LPVOID argument, DWORD creationFlags, LPDWORD threadId)
+{
+    return CreateRemoteThread(hProcess, nullptr, 0, start, argument, creationFlags, threadId);
+}
+
+__declspec(dllexport) DWORD TITCALL TitanSuspendThread(HANDLE hThread)
+{
+    return SuspendThread(hThread);
+}
+
+__declspec(dllexport) DWORD TITCALL TitanResumeThread(HANDLE hThread)
+{
+    return ResumeThread(hThread);
+}
+
+__declspec(dllexport) bool TITCALL TitanTerminateThread(HANDLE hThread, DWORD exitCode)
+{
+    return !!TerminateThread(hThread, exitCode);
+}
+
+__declspec(dllexport) DWORD TITCALL TitanGetThreadId(HANDLE hThread)
+{
+    return GetThreadId(hThread);
+}
+
+__declspec(dllexport) int TITCALL TitanGetThreadPriority(HANDLE hThread)
+{
+    return GetThreadPriority(hThread);
+}
+
+__declspec(dllexport) bool TITCALL TitanSetThreadPriority(HANDLE hThread, int priority)
+{
+    return !!SetThreadPriority(hThread, priority);
+}
+
+__declspec(dllexport) bool TITCALL TitanGetThreadTimes(HANDLE hThread, LPFILETIME creation, LPFILETIME exit, LPFILETIME kernel, LPFILETIME user)
+{
+    return !!GetThreadTimes(hThread, creation, exit, kernel, user);
+}
+
+__declspec(dllexport) bool TITCALL TitanQueryThreadCycleTime(HANDLE hThread, PULONG64 cycleTime)
+{
+    return !!QueryThreadCycleTime(hThread, cycleTime);
+}

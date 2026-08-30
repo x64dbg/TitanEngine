@@ -461,3 +461,23 @@ __declspec(dllexport) bool TITCALL MemoryWriteSafe(HANDLE hProcess, LPVOID lpBas
 
     return retValue;
 }
+
+__declspec(dllexport) SIZE_T TITCALL MemoryQuerySafe(HANDLE hProcess, LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength)
+{
+    return VirtualQueryEx(hProcess, lpAddress, lpBuffer, dwLength);
+}
+
+__declspec(dllexport) LPVOID TITCALL MemoryAllocSafe(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect)
+{
+    return VirtualAllocEx(hProcess, lpAddress, dwSize, flAllocationType, flProtect);
+}
+
+__declspec(dllexport) bool TITCALL MemoryFreeSafe(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType)
+{
+    return !!VirtualFreeEx(hProcess, lpAddress, dwSize, dwFreeType);
+}
+
+__declspec(dllexport) bool TITCALL MemoryProtectSafe(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect)
+{
+    return !!VirtualProtectEx(hProcess, lpAddress, dwSize, flNewProtect, lpflOldProtect);
+}
