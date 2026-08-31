@@ -54,6 +54,7 @@ ConvertVAtoFileOffsetEx
 ConvertFileOffsetToVA
 ConvertFileOffsetToVAEx
 MemoryReadSafe
+MemoryReadUnsafe
 MemoryWriteSafe
 MemoryQuerySafe
 MemoryAllocSafe

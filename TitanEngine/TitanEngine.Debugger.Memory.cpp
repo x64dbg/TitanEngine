@@ -323,6 +323,19 @@ __declspec(dllexport) bool TITCALL Replace(LPVOID MemoryStart, DWORD MemorySize,
     }
 }
 
+__declspec(dllexport) bool TITCALL MemoryReadUnsafe(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T* lpNumberOfBytesRead)
+{
+    SIZE_T bytesRead = 0;
+    auto transferred = lpNumberOfBytesRead ? lpNumberOfBytesRead : &bytesRead;
+    if(!hProcess || !lpBaseAddress || !lpBuffer || !nSize)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        *transferred = 0;
+        return false;
+    }
+    return !!ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, transferred);
+}
+
 //what should this function do:
 //- do all possible effort to read memory
 //- filter out breakpoints
