@@ -87,6 +87,13 @@ FixHeaderCheckSum
 FixHeaderCheckSumW
 InitDebug
 InitDebugW
+InitReplayW
+GetSessionInfo
+ReplayGetPosition
+ReplayGetExtent
+ReplaySetPosition
+ReplayRun
+ReplayStep
 InitNativeDebug
 InitNativeDebugW
 InitDebugEx
@@ -394,6 +401,8 @@ GetActiveProcessId
 GetActiveProcessIdW
 EnumProcessesWithLibrary
 TitanOpenProcess
+TitanGetProcessImagePathW
+TitanGetModulePathW
 TitanCloseHandle
 ProcessIsWow64
 TitanTerminateProcess

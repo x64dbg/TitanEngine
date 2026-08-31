@@ -142,6 +142,27 @@ __declspec(dllexport) HANDLE TITCALL TitanOpenThread(DWORD dwDesiredAccess, bool
     return EngineOpenThread(dwDesiredAccess, bInheritHandle, dwThreadId);
 }
 
+__declspec(dllexport) bool TITCALL TitanGetProcessImagePathW(HANDLE hProcess, LPWSTR szPath, SIZE_T cchPath)
+{
+    if(!hProcess || !szPath || !cchPath || cchPath > MAXDWORD)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+    DWORD length = (DWORD)cchPath;
+    return !!QueryFullProcessImageNameW(hProcess, 0, szPath, &length);
+}
+
+__declspec(dllexport) bool TITCALL TitanGetModulePathW(HANDLE hProcess, ULONG_PTR ModuleBase, LPWSTR szPath, SIZE_T cchPath)
+{
+    if(!hProcess || !ModuleBase || !szPath || !cchPath || cchPath > MAXDWORD)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+    return GetModuleFileNameExW(hProcess, (HMODULE)ModuleBase, szPath, (DWORD)cchPath) != 0;
+}
+
 __declspec(dllexport) bool TITCALL TitanCloseHandle(HANDLE hEngineHandle)
 {
     return EngineCloseHandle(hEngineHandle);

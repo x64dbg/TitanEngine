@@ -33,6 +33,8 @@
 #include <time.h>
 #include <stdint.h>
 
+typedef void(*TITANCBSTEP)();
+
 #ifndef _Out_writes_opt_
 #define _Out_writes_opt_(x)
 #endif
@@ -126,6 +128,51 @@ static inline T ObjectPointerToCallback(LPVOID callbackData)
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
 #endif
+
+enum TitanSessionKind
+{
+    UE_SESSION_NONE = 0,
+    UE_SESSION_LIVE = 1,
+    UE_SESSION_MINIDUMP = 2,
+    UE_SESSION_TTD = 3,
+    UE_SESSION_STATIC = 4,
+};
+
+enum TitanSessionCapability : uint64_t
+{
+    UE_SESSION_CAP_MEMORY_READ = 1ull << 0,
+    UE_SESSION_CAP_MEMORY_QUERY = 1ull << 1,
+    UE_SESSION_CAP_CONTEXT_READ = 1ull << 2,
+    UE_SESSION_CAP_FORWARD_EXECUTION = 1ull << 3,
+    UE_SESSION_CAP_REVERSE_EXECUTION = 1ull << 4,
+    UE_SESSION_CAP_EXACT_POSITION = 1ull << 5,
+    UE_SESSION_CAP_LOGICAL_CODE_BREAKPOINT = 1ull << 6,
+    UE_SESSION_CAP_LOGICAL_DATA_BREAKPOINT = 1ull << 7,
+    UE_SESSION_CAP_MEMORY_WRITE = 1ull << 8,
+    UE_SESSION_CAP_CONTEXT_WRITE = 1ull << 9,
+    UE_SESSION_CAP_PROCESS_CONTROL = 1ull << 10,
+    UE_SESSION_CAP_THREAD_CONTROL = 1ull << 11,
+    UE_SESSION_CAP_NATIVE_HANDLES = 1ull << 12,
+    UE_SESSION_CAP_EXCEPTION_CONTINUE = 1ull << 13,
+    UE_SESSION_CAP_TIMELINE_STATE = 1ull << 14,
+};
+
+typedef struct
+{
+    DWORD structSize;
+    TitanSessionKind kind;
+    uint64_t capabilities;
+    DWORD machineType;
+    DWORD processId;
+    DWORD threadId;
+    DWORD reserved;
+} TITAN_SESSION_INFO;
+
+typedef struct
+{
+    uint64_t sequence;
+    uint64_t steps;
+} TITAN_REPLAY_POSITION;
 
 typedef struct DECLSPEC_ALIGN(16) _XmmRegister_t
 {

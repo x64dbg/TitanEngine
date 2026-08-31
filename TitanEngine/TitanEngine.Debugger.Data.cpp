@@ -159,6 +159,69 @@ __declspec(dllexport) bool TITCALL IsFileBeingDebugged()
     return(engineFileIsBeingDebugged);
 }
 
+__declspec(dllexport) bool TITCALL GetSessionInfo(TITAN_SESSION_INFO* SessionInfo)
+{
+    if(!SessionInfo)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+    RtlZeroMemory(SessionInfo, sizeof(*SessionInfo));
+    SessionInfo->structSize = sizeof(*SessionInfo);
+    if(!engineFileIsBeingDebugged && !dbgProcessInformation.dwProcessId)
+        return true;
+    SessionInfo->kind = UE_SESSION_LIVE;
+    SessionInfo->capabilities = UE_SESSION_CAP_MEMORY_READ | UE_SESSION_CAP_MEMORY_QUERY |
+                                UE_SESSION_CAP_CONTEXT_READ | UE_SESSION_CAP_FORWARD_EXECUTION |
+                                UE_SESSION_CAP_MEMORY_WRITE | UE_SESSION_CAP_CONTEXT_WRITE |
+                                UE_SESSION_CAP_PROCESS_CONTROL | UE_SESSION_CAP_THREAD_CONTROL |
+                                UE_SESSION_CAP_NATIVE_HANDLES | UE_SESSION_CAP_EXCEPTION_CONTINUE;
+#ifdef _WIN64
+    SessionInfo->machineType = IMAGE_FILE_MACHINE_AMD64;
+#else
+    SessionInfo->machineType = IMAGE_FILE_MACHINE_I386;
+#endif
+    SessionInfo->processId = dbgProcessInformation.dwProcessId;
+    SessionInfo->threadId = dbgProcessInformation.dwThreadId;
+    return true;
+}
+
+__declspec(dllexport) bool TITCALL ReplayGetPosition(TITAN_REPLAY_POSITION* Position)
+{
+    if(Position)
+        RtlZeroMemory(Position, sizeof(*Position));
+    SetLastError(ERROR_NOT_SUPPORTED);
+    return false;
+}
+
+__declspec(dllexport) bool TITCALL ReplayGetExtent(TITAN_REPLAY_POSITION* First, TITAN_REPLAY_POSITION* Last)
+{
+    if(First)
+        RtlZeroMemory(First, sizeof(*First));
+    if(Last)
+        RtlZeroMemory(Last, sizeof(*Last));
+    SetLastError(ERROR_NOT_SUPPORTED);
+    return false;
+}
+
+__declspec(dllexport) bool TITCALL ReplaySetPosition(const TITAN_REPLAY_POSITION* Position)
+{
+    SetLastError(Position ? ERROR_NOT_SUPPORTED : ERROR_INVALID_PARAMETER);
+    return false;
+}
+
+__declspec(dllexport) bool TITCALL ReplayRun(bool Reverse)
+{
+    SetLastError(ERROR_NOT_SUPPORTED);
+    return false;
+}
+
+__declspec(dllexport) bool TITCALL ReplayStep(bool Reverse, bool StepOver, TITANCBSTEP StepCallBack)
+{
+    SetLastError(ERROR_NOT_SUPPORTED);
+    return false;
+}
+
 __declspec(dllexport) void TITCALL SetErrorModel(bool DisplayErrorMessages)
 {
 

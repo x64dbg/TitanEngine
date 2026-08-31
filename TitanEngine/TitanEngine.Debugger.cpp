@@ -303,6 +303,12 @@ static bool HollowProcessWithoutASLR(const wchar_t* szFileName, PROCESS_INFORMAT
     return success;
 }
 
+__declspec(dllexport) PROCESS_INFORMATION* TITCALL InitReplayW(const wchar_t* szArtifactPath, TitanSessionKind ExpectedKind)
+{
+    SetLastError(ERROR_NOT_SUPPORTED);
+    return nullptr;
+}
+
 __declspec(dllexport) void* TITCALL InitDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder)
 {
     int creationFlags = DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS;
