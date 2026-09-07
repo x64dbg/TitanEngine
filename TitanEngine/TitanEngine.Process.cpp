@@ -2,6 +2,8 @@
 #include "definitions.h"
 #include "Global.Handle.h"
 #include "Global.Engine.h"
+#include "Global.Debugger.h"
+#include <TlHelp32.h>
 
 // TitanEngine.Process.functions:
 __declspec(dllexport) long TITCALL GetActiveProcessId(char* szImageName)
@@ -178,9 +180,115 @@ __declspec(dllexport) bool TITCALL TitanTerminateProcess(HANDLE hProcess, DWORD 
     return !!TerminateProcess(hProcess, exitCode);
 }
 
-__declspec(dllexport) bool TITCALL TitanDebugBreakProcess(HANDLE hProcess)
+static ULONG_PTR pauseBreakInStartAddress()
 {
-    return !!DebugBreakProcess(hProcess);
+    auto localNtdll = GetModuleHandleW(L"ntdll.dll");
+    auto localStart = localNtdll ? GetProcAddress(localNtdll, "DbgUiRemoteBreakin") : nullptr;
+    if(!localStart || !dbgProcessInformation.dwProcessId)
+        return 0;
+
+    auto snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32,
+                                             dbgProcessInformation.dwProcessId);
+    if(snapshot == INVALID_HANDLE_VALUE)
+        return 0;
+    MODULEENTRY32W module = {};
+    module.dwSize = sizeof(module);
+    ULONG_PTR result = 0;
+    if(Module32FirstW(snapshot, &module))
+    {
+        do
+        {
+            if(!_wcsicmp(module.szModule, L"ntdll.dll"))
+            {
+                result = (ULONG_PTR)module.modBaseAddr +
+                         (ULONG_PTR)localStart - (ULONG_PTR)localNtdll;
+                break;
+            }
+        }
+        while(Module32NextW(snapshot, &module));
+    }
+    CloseHandle(snapshot);
+    return result;
+}
+
+static bool requestPauseBreakIn()
+{
+    auto startAddress = pauseBreakInStartAddress();
+    if(!startAddress)
+    {
+        SetLastError(ERROR_PROC_NOT_FOUND);
+        return false;
+    }
+    EngineExpectPauseBreakIn(startAddress);
+    if(DebugBreakProcess(dbgProcessInformation.hProcess))
+        return true;
+    EngineCancelPauseBreakIn();
+    return false;
+}
+
+__declspec(dllexport) bool TITCALL RequestPause(TitanPausePolicy MaximumPolicy, TITANCBPAUSE PauseCallback)
+{
+    if(MaximumPolicy < UE_PAUSE_POLICY_NONINVASIVE || MaximumPolicy > UE_PAUSE_POLICY_AGGRESSIVE ||
+       !PauseCallback || !engineFileIsBeingDebugged || !dbgProcessInformation.hProcess)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+
+    if(!EngineBeginPause((LPVOID)PauseCallback))
+    {
+        if(EnginePauseShouldEscalate(MaximumPolicy))
+            requestPauseBreakIn(); // The original, less intrusive request remains pending on failure.
+        return true;
+    }
+
+    if(MaximumPolicy == UE_PAUSE_POLICY_NONINVASIVE)
+    {
+        EngineCancelPause();
+        SetLastError(ERROR_NOT_SUPPORTED);
+        return false;
+    }
+
+    auto threadId = DebugAttachedToProcess || !DBGEvent.dwThreadId
+                    ? dbgProcessInformation.dwThreadId
+                    : DBGEvent.dwThreadId;
+    auto thread = EngineOpenThread(THREAD_GETSETSUSPEND, false, threadId);
+    if(!thread)
+    {
+        if(MaximumPolicy == UE_PAUSE_POLICY_AGGRESSIVE && requestPauseBreakIn())
+            return true;
+        EngineCancelPause();
+        return false;
+    }
+
+    auto previousSuspendCount = SuspendThread(thread);
+    if(previousSuspendCount != 0)
+    {
+        if(previousSuspendCount != (DWORD)-1)
+            ResumeThread(thread);
+        EngineCloseHandle(thread);
+        if(MaximumPolicy == UE_PAUSE_POLICY_AGGRESSIVE && requestPauseBreakIn())
+            return true;
+        EngineCancelPause();
+        SetLastError(ERROR_BUSY);
+        return false;
+    }
+
+    auto cip = GetContextDataEx(thread, UE_CIP);
+    auto armed = cip && SetBPX(cip, UE_SINGLESHOOT, (LPVOID)&EngineCompletePause);
+    if(armed)
+        PostThreadMessageW(threadId, WM_NULL, 0, 0);
+    auto resumed = ResumeThread(thread) != (DWORD)-1;
+    EngineCloseHandle(thread);
+    if(armed && resumed)
+        return true;
+    if(armed)
+        DeleteBPX(cip);
+
+    if(MaximumPolicy == UE_PAUSE_POLICY_AGGRESSIVE && requestPauseBreakIn())
+        return true;
+    EngineCancelPause();
+    return false;
 }
 
 __declspec(dllexport) HANDLE TITCALL TitanCreateRemoteThread(HANDLE hProcess, LPTHREAD_START_ROUTINE start, LPVOID argument, DWORD creationFlags, LPDWORD threadId)

@@ -69,6 +69,7 @@ static void engineStep()
 
 __declspec(dllexport) void TITCALL DebugLoop()
 {
+    EngineCancelPause();
     bool FirstBPX = true;
     bool ResetBPX = false;
     bool PushfBPX = false;
@@ -375,6 +376,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
             NewThreadData.ThreadStartAddress = (void*)DBGEvent.u.CreateThread.lpStartAddress;
             NewThreadData.ThreadLocalBase = (void*)DBGEvent.u.CreateThread.lpThreadLocalBase;
             hListThread.push_back(NewThreadData);
+            EngineObservePauseThread(DBGEvent.dwThreadId,
+                                     (ULONG_PTR)DBGEvent.u.CreateThread.lpStartAddress);
 
             //Set hardware breakpoints to all threads
             HANDLE hThread = NewThreadData.hThread;
@@ -587,6 +590,15 @@ __declspec(dllexport) void TITCALL DebugLoop()
         case EXCEPTION_DEBUG_EVENT:
         {
             DBGCode = DBG_EXCEPTION_NOT_HANDLED; //let the debuggee handle exceptions per default
+
+            if((DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_BREAKPOINT ||
+                    DBGEvent.u.Exception.ExceptionRecord.ExceptionCode == STATUS_WX86_BREAKPOINT) &&
+                    EngineIsPauseBreakInEvent(DBGEvent.dwThreadId))
+            {
+                DBGCode = DBG_CONTINUE;
+                EngineCompletePause();
+                break;
+            }
 
             if(DBGCustomHandler->chEverythingElse != NULL)
             {
@@ -1490,6 +1502,7 @@ continue_dbg_event:
     {
         RtlMoveMemory(&TerminateDBGEvent, &DBGEvent, sizeof(DEBUG_EVENT));
     }
+    EngineCancelPause();
     ForceClose();
     engineFileIsBeingDebugged = false;
     DebuggerReset();

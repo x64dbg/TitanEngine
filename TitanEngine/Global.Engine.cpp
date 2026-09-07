@@ -5,6 +5,7 @@
 #include "Global.Mapping.h"
 #include "Global.Engine.Hash.h"
 #include "Global.Debugger.h"
+#include <mutex>
 
 bool engineCheckForwarders = true;
 bool engineAlowModuleLoading = false;
@@ -20,6 +21,7 @@ bool engineSafeAttach = false;
 bool engineMembpAlt = false;
 bool engineDisableAslr = false;
 bool engineSafeStep = true;
+bool engineWow64SingleStepWorkaround = true;
 
 char engineFoundDLLName[512] = {0};
 char engineFoundAPIName[512] = {0};
@@ -29,6 +31,91 @@ LPVOID engineExitThreadOneShootCallBack = NULL;
 LPVOID engineDependencyFiles;
 LPVOID engineDependencyFilesCWP;
 void* EngineStartUnpackingCallBack;
+
+namespace
+{
+std::mutex pauseMutex;
+LPVOID pauseCallback = nullptr;
+ULONGLONG pauseRequestTime = 0;
+ULONG_PTR pauseBreakInStart = 0;
+DWORD pauseBreakInThreadId = 0;
+bool pauseBreakInExpected = false;
+}
+
+bool EngineBeginPause(LPVOID Callback)
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    if(pauseCallback)
+        return false;
+    pauseCallback = Callback;
+    pauseRequestTime = GetTickCount64();
+    pauseBreakInStart = 0;
+    pauseBreakInThreadId = 0;
+    pauseBreakInExpected = false;
+    return true;
+}
+
+bool EnginePauseShouldEscalate(TitanPausePolicy MaximumPolicy)
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    return pauseCallback && !pauseBreakInExpected && MaximumPolicy == UE_PAUSE_POLICY_AGGRESSIVE &&
+           GetTickCount64() - pauseRequestTime >= 2000;
+}
+
+void EngineExpectPauseBreakIn(ULONG_PTR StartAddress)
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    pauseBreakInExpected = true;
+    pauseBreakInStart = StartAddress;
+    pauseBreakInThreadId = 0;
+}
+
+void EngineCancelPauseBreakIn()
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    pauseBreakInExpected = false;
+    pauseBreakInStart = 0;
+    pauseBreakInThreadId = 0;
+}
+
+void EngineObservePauseThread(DWORD ThreadId, ULONG_PTR StartAddress)
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    if(pauseBreakInExpected && pauseBreakInStart && StartAddress == pauseBreakInStart)
+        pauseBreakInThreadId = ThreadId;
+}
+
+bool EngineIsPauseBreakInEvent(DWORD ThreadId)
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    return pauseBreakInExpected && pauseBreakInThreadId && pauseBreakInThreadId == ThreadId;
+}
+
+void EngineCompletePause()
+{
+    LPVOID callback = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(pauseMutex);
+        callback = pauseCallback;
+        pauseCallback = nullptr;
+        pauseRequestTime = 0;
+        pauseBreakInStart = 0;
+        pauseBreakInThreadId = 0;
+        pauseBreakInExpected = false;
+    }
+    if(callback)
+        ((void(TITCALL*)())callback)();
+}
+
+void EngineCancelPause()
+{
+    std::lock_guard<std::mutex> lock(pauseMutex);
+    pauseCallback = nullptr;
+    pauseRequestTime = 0;
+    pauseBreakInStart = 0;
+    pauseBreakInThreadId = 0;
+    pauseBreakInExpected = false;
+}
 
 // Global.Engine.functions:
 void EngineInit()

@@ -175,7 +175,8 @@ __declspec(dllexport) bool TITCALL GetSessionInfo(TITAN_SESSION_INFO* SessionInf
                                 UE_SESSION_CAP_CONTEXT_READ | UE_SESSION_CAP_FORWARD_EXECUTION |
                                 UE_SESSION_CAP_MEMORY_WRITE | UE_SESSION_CAP_CONTEXT_WRITE |
                                 UE_SESSION_CAP_PROCESS_CONTROL | UE_SESSION_CAP_THREAD_CONTROL |
-                                UE_SESSION_CAP_NATIVE_HANDLES | UE_SESSION_CAP_EXCEPTION_CONTINUE;
+                                UE_SESSION_CAP_NATIVE_HANDLES | UE_SESSION_CAP_EXCEPTION_CONTINUE |
+                                UE_SESSION_CAP_PAUSE_EXECUTION;
 #ifdef _WIN64
     SessionInfo->machineType = IMAGE_FILE_MACHINE_AMD64;
 #else
@@ -210,13 +211,13 @@ __declspec(dllexport) bool TITCALL ReplaySetPosition(const TITAN_REPLAY_POSITION
     return false;
 }
 
-__declspec(dllexport) bool TITCALL ReplayRun(bool Reverse)
+__declspec(dllexport) bool TITCALL ReplayRunBack()
 {
     SetLastError(ERROR_NOT_SUPPORTED);
     return false;
 }
 
-__declspec(dllexport) bool TITCALL ReplayStep(bool Reverse, bool StepOver, TITANCBSTEP StepCallBack)
+__declspec(dllexport) bool TITCALL ReplayStepBack(TITANCBSTEP StepCallBack)
 {
     SetLastError(ERROR_NOT_SUPPORTED);
     return false;

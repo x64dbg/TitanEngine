@@ -171,8 +171,8 @@ __declspec(dllexport) bool TITCALL GetSessionInfo(TITAN_SESSION_INFO* SessionInf
 __declspec(dllexport) bool TITCALL ReplayGetPosition(TITAN_REPLAY_POSITION* Position);
 __declspec(dllexport) bool TITCALL ReplayGetExtent(TITAN_REPLAY_POSITION* First, TITAN_REPLAY_POSITION* Last);
 __declspec(dllexport) bool TITCALL ReplaySetPosition(const TITAN_REPLAY_POSITION* Position);
-__declspec(dllexport) bool TITCALL ReplayRun(bool Reverse);
-__declspec(dllexport) bool TITCALL ReplayStep(bool Reverse, bool StepOver, TITANCBSTEP StepCallBack);
+__declspec(dllexport) bool TITCALL ReplayRunBack();
+__declspec(dllexport) bool TITCALL ReplayStepBack(TITANCBSTEP StepCallBack);
 __declspec(dllexport) void* TITCALL InitNativeDebug(char* szFileName, char* szCommandLine, char* szCurrentFolder);
 __declspec(dllexport) void* TITCALL InitNativeDebugW(wchar_t* szFileName, wchar_t* szCommandLine, wchar_t* szCurrentFolder);
 __declspec(dllexport) void* TITCALL InitDebugEx(char* szFileName, char* szCommandLine, char* szCurrentFolder, LPVOID EntryCallBack);
@@ -372,7 +372,7 @@ __declspec(dllexport) bool TITCALL TitanGetModulePathW(HANDLE hProcess, ULONG_PT
 __declspec(dllexport) bool TITCALL TitanCloseHandle(HANDLE hEngineHandle);
 __declspec(dllexport) bool TITCALL ProcessIsWow64(HANDLE hProcess, PBOOL isWow64);
 __declspec(dllexport) bool TITCALL TitanTerminateProcess(HANDLE hProcess, DWORD exitCode);
-__declspec(dllexport) bool TITCALL TitanDebugBreakProcess(HANDLE hProcess);
+__declspec(dllexport) bool TITCALL RequestPause(TitanPausePolicy MaximumPolicy, TITANCBPAUSE PauseCallback);
 __declspec(dllexport) HANDLE TITCALL TitanCreateRemoteThread(HANDLE hProcess, LPTHREAD_START_ROUTINE start, LPVOID argument, DWORD creationFlags, LPDWORD threadId);
 __declspec(dllexport) DWORD TITCALL TitanSuspendThread(HANDLE hThread);
 __declspec(dllexport) DWORD TITCALL TitanResumeThread(HANDLE hThread);

@@ -55,6 +55,10 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     {
         engineSafeStep = VariableSet;
     }
+    else if(VariableId == UE_ENGINE_WOW64_SINGLE_STEP_WORKAROUND)
+    {
+        engineWow64SingleStepWorkaround = VariableSet;
+    }
 }
 
 __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)

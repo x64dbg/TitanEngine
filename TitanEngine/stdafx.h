@@ -34,6 +34,7 @@
 #include <stdint.h>
 
 typedef void(*TITANCBSTEP)();
+typedef void(*TITANCBPAUSE)();
 
 #ifndef _Out_writes_opt_
 #define _Out_writes_opt_(x)
@@ -155,6 +156,8 @@ enum TitanSessionCapability : uint64_t
     UE_SESSION_CAP_NATIVE_HANDLES = 1ull << 12,
     UE_SESSION_CAP_EXCEPTION_CONTINUE = 1ull << 13,
     UE_SESSION_CAP_TIMELINE_STATE = 1ull << 14,
+    UE_SESSION_CAP_PAUSE_EXECUTION = 1ull << 16,
+    UE_SESSION_CAP_NAVIGABLE_PROCESS_EXIT = 1ull << 17,
 };
 
 typedef struct
@@ -559,6 +562,14 @@ typedef struct HOOK_ENTRY
 #define UE_ENGINE_MEMBP_ALT 11
 #define UE_ENGINE_DISABLE_ASLR 12
 #define UE_ENGINE_SAFE_STEP 13
+#define UE_ENGINE_WOW64_SINGLE_STEP_WORKAROUND 14
+
+enum TitanPausePolicy
+{
+    UE_PAUSE_POLICY_NONINVASIVE = 0,
+    UE_PAUSE_POLICY_STANDARD = 1,
+    UE_PAUSE_POLICY_AGGRESSIVE = 2,
+};
 
 #define UE_OPTION_REMOVEALL 1
 #define UE_OPTION_DISABLEALL 2

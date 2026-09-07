@@ -23,10 +23,19 @@ extern bool engineSafeAttach;
 extern bool engineMembpAlt;
 extern bool engineDisableAslr;
 extern bool engineSafeStep;
+extern bool engineWow64SingleStepWorkaround;
 
 //Global.Engine.Functions
 void EngineInit();
 bool EngineIsThereFreeHardwareBreakSlot(LPDWORD FreeRegister);
+bool EngineBeginPause(LPVOID Callback);
+bool EnginePauseShouldEscalate(TitanPausePolicy MaximumPolicy);
+void EngineExpectPauseBreakIn(ULONG_PTR StartAddress);
+void EngineCancelPauseBreakIn();
+void EngineObservePauseThread(DWORD ThreadId, ULONG_PTR StartAddress);
+bool EngineIsPauseBreakInEvent(DWORD ThreadId);
+void EngineCompletePause();
+void EngineCancelPause();
 bool EngineFileExists(char* szFileName);
 void EngineCreatePathForFile(char* szFileName);
 void EngineCreatePathForFileW(wchar_t* szFileName);

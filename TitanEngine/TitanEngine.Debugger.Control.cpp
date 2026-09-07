@@ -38,6 +38,27 @@ __declspec(dllexport) void TITCALL ForceClose()
 
 __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
 {
+#ifndef _WIN64
+    // A WOW64 transition through `ljmp 33h` cannot be completed reliably with
+    // the x86 trap flag. Treat the return address already on the x86 stack as
+    // an engine-owned one-shot step target instead. The frontend only requests
+    // StepInto and does not need to know which execution mechanism is used.
+    if(engineWow64SingleStepWorkaround)
+    {
+        unsigned char data[7] = {};
+        auto cip = GetContextData(UE_CIP);
+        if(MemoryReadSafe(dbgProcessInformation.hProcess, (void*)cip, data, sizeof(data), nullptr) &&
+                data[0] == 0xEA && data[5] == 0x33 && data[6] == 0x00)
+        {
+            ULONG_PTR returnAddress = 0;
+            auto csp = GetContextData(UE_CSP);
+            if(MemoryReadSafe(dbgProcessInformation.hProcess, (void*)csp, &returnAddress,
+                              sizeof(returnAddress), nullptr) &&
+                    SetBPX(returnAddress, UE_SINGLESHOOT, StepCallBack))
+                return;
+        }
+    }
+#endif
     EnterCriticalSection(&engineStepActiveCr);
     // Arm a single-step for the current event thread only. State is per-thread, so a
     // step already pending on another thread does not block this one.

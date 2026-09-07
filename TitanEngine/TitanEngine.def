@@ -92,8 +92,8 @@ GetSessionInfo
 ReplayGetPosition
 ReplayGetExtent
 ReplaySetPosition
-ReplayRun
-ReplayStep
+ReplayRunBack
+ReplayStepBack
 InitNativeDebug
 InitNativeDebugW
 InitDebugEx
@@ -406,7 +406,7 @@ TitanGetModulePathW
 TitanCloseHandle
 ProcessIsWow64
 TitanTerminateProcess
-TitanDebugBreakProcess
+RequestPause
 TitanCreateRemoteThread
 TitanSuspendThread
 TitanResumeThread
