@@ -5,6 +5,7 @@
 #include "Global.Engine.Hook.h"
 #include "Global.Engine.GUI.h"
 #include "Global.Debugger.h"
+#include "Global.Engine.Context.h"
 
 // TitanEngine.Engine.functions:
 __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool VariableSet)
@@ -54,6 +55,12 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
     else if(VariableId == UE_ENGINE_SAFE_STEP)
     {
         engineSafeStep = VariableSet;
+    }
+    else if(VariableId == UE_ENGINE_CONTEXT_CACHE)
+    {
+        engineContextCache = VariableSet;
+        if(!VariableSet)
+            EngineContextCacheEnd();
     }
 }
 

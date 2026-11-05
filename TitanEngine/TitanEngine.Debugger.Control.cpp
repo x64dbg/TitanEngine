@@ -58,12 +58,11 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID StepCallBack)
         else
         {
             CONTEXT myDBGContext;
-            HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
+            EngineEventThread hActiveThread(THREAD_GETSETSUSPEND);
             myDBGContext.ContextFlags = ContextControlFlags;
-            GetThreadContext(hActiveThread, &myDBGContext);
+            GetThreadContext(hActiveThread.get(), &myDBGContext);
             myDBGContext.EFlags |= UE_TRAP_FLAG;
-            SetThreadContext(hActiveThread, &myDBGContext);
-            EngineCloseHandle(hActiveThread);
+            SetThreadContext(hActiveThread.get(), &myDBGContext);
             engineStepThreads[DBGEvent.dwThreadId] = { StepCallBack, 0 };
         }
     }

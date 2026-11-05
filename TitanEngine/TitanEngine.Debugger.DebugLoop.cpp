@@ -164,6 +164,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
             }
         }
 
+        // Event received: the debuggee is frozen until ContinueDebugEvent
+        EngineContextCacheBegin();
+
         // Event received, reset timeout counter
         consecutiveTimeouts = 0;
         const uint64_t eventThreadKey = (uint64_t(DBGEvent.dwProcessId) << 32) | DBGEvent.dwThreadId;
@@ -1432,7 +1435,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
         break;
         }
 
-        if(IsDbgReplyLaterSupported && DBGEvent.dwDebugEventCode != EXIT_THREAD_DEBUG_EVENT)
+        // The handle is only opened to check that the thread still exists before the others are suspended
+        if(IsDbgReplyLaterSupported && synchronizedStep && DBGEvent.dwDebugEventCode != EXIT_THREAD_DEBUG_EVENT)
         {
             hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
             if(hActiveThread != NULL)
@@ -1470,6 +1474,7 @@ continue_dbg_event:
                 ThreaderResumeProcess();
             }
         }
+        EngineContextCacheEnd();
         if(!ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBGCode)) //continue debugging
         {
             break;
@@ -1485,6 +1490,8 @@ continue_dbg_event:
         if(!ThreaderGetThreadInfo(0, DBGEvent.dwThreadId)) //switch thread
             DBGEvent.dwThreadId = dbgProcessInformation.dwThreadId;
     }
+
+    EngineContextCacheEnd();
 
     if(!SecondChance) //debugger didn't close with a second chance exception (normal exit)
     {

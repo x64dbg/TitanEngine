@@ -23,6 +23,7 @@ extern bool engineSafeAttach;
 extern bool engineMembpAlt;
 extern bool engineDisableAslr;
 extern bool engineSafeStep;
+extern bool engineContextCache;
 
 //Global.Engine.Functions
 void EngineInit();
