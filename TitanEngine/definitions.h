@@ -224,6 +224,8 @@ __declspec(dllexport) void TITCALL StepInto(LPVOID traceCallBack);
 __declspec(dllexport) void TITCALL StepOver(LPVOID traceCallBack);
 __declspec(dllexport) void TITCALL StepOut(LPVOID StepOut, bool StepFinal);
 __declspec(dllexport) void TITCALL SingleStep(DWORD StepCount, LPVOID StepCallBack);
+__declspec(dllexport) void TITCALL StepIntoThreads(LPVOID StepCallBack, const DWORD* ExcludedThreads, DWORD ExcludedCount);
+__declspec(dllexport) void TITCALL StepCancelThreads(LPVOID StepCallBack);
 __declspec(dllexport) bool TITCALL GetUnusedHardwareBreakPointRegister(LPDWORD RegisterIndex);
 __declspec(dllexport) bool TITCALL SetHardwareBreakPointEx(HANDLE hActiveThread, ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack, LPDWORD IndexOfSelectedRegister);
 __declspec(dllexport) bool TITCALL SetHardwareBreakPoint(ULONG_PTR bpxAddress, DWORD IndexOfRegister, DWORD bpxType, DWORD bpxSize, LPVOID bpxCallBack);

@@ -139,6 +139,8 @@ DebugLoopEx
 StepInto
 StepOver
 SingleStep
+StepIntoThreads
+StepCancelThreads
 SetHardwareBreakPoint
 SetHardwareBreakPointEx
 GetUnusedHardwareBreakPointRegister

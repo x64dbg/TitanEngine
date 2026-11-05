@@ -80,6 +80,10 @@ __declspec(dllexport) bool TITCALL SetFullContextDataEx(HANDLE hActiveThread, TI
 
 __declspec(dllexport) bool TITCALL GetFullContextDataEx(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
 {
+    // While a debug event is handled the threads are frozen: no need to suspend
+    if(EngineContextCacheActive())
+        return _GetFullContextDataEx(hActiveThread, titcontext, true);
+
     bool returnf;
 
     if(SuspendThread(hActiveThread) == (DWORD) - 1)
@@ -97,17 +101,21 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
     ULONG_PTR retValue = 0;
     TITAN_ENGINE_CONTEXT_t titcontext;
 
-    if(SuspendThread(hActiveThread) == (DWORD) - 1)
+    // While a debug event is handled the threads are frozen: no need to suspend
+    const bool frozen = EngineContextCacheActive();
+    if(!frozen && SuspendThread(hActiveThread) == (DWORD) - 1)
         return false;
 
     memset(&titcontext, 0, sizeof(titcontext));
 
     if(! _GetFullContextDataEx(hActiveThread, & titcontext, false))
     {
-        ResumeThread(hActiveThread);
+        if(!frozen)
+            ResumeThread(hActiveThread);
         return false;
     }
-    ResumeThread(hActiveThread);
+    if(!frozen)
+        ResumeThread(hActiveThread);
 
 #ifdef _WIN64 //x64
     if(IndexOfRegister == UE_EAX)
@@ -349,10 +357,8 @@ __declspec(dllexport) ULONG_PTR TITCALL GetContextDataEx(HANDLE hActiveThread, D
 
 __declspec(dllexport) ULONG_PTR TITCALL GetContextData(DWORD IndexOfRegister)
 {
-    HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
-    ULONG_PTR ContextReturn = GetContextDataEx(hActiveThread, IndexOfRegister);
-    EngineCloseHandle(hActiveThread);
-    return ContextReturn;
+    EngineEventThread hActiveThread(THREAD_GETSETSUSPEND);
+    return GetContextDataEx(hActiveThread.get(), IndexOfRegister);
 }
 
 __declspec(dllexport) bool TITCALL SetContextFPUDataEx(HANDLE hActiveThread, void* FPUSaveArea)
@@ -918,10 +924,8 @@ __declspec(dllexport) bool TITCALL SetContextDataEx(HANDLE hActiveThread, DWORD 
 
 __declspec(dllexport) bool TITCALL SetContextData(DWORD IndexOfRegister, ULONG_PTR NewRegisterValue)
 {
-    HANDLE hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
-    bool ContextReturn = SetContextDataEx(hActiveThread, IndexOfRegister, NewRegisterValue);
-    EngineCloseHandle(hActiveThread);
-    return ContextReturn;
+    EngineEventThread hActiveThread(THREAD_GETSETSUSPEND);
+    return SetContextDataEx(hActiveThread.get(), IndexOfRegister, NewRegisterValue);
 }
 
 __declspec(dllexport) bool TITCALL SetAVXContext(HANDLE hActiveThread, TITAN_ENGINE_CONTEXT_t* titcontext)
@@ -989,6 +993,10 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
     if(InitXState() == false)
         return false;
 
+    uint64_t generation;
+    if(EngineContextCacheLoad(hActiveThread, ContextCacheAvx, titcontext->YmmRegisters, sizeof(titcontext->YmmRegisters), generation))
+        return true;
+
     DWORD ContextSize = 0;
     BOOL Success = _InitializeContext(NULL,
                                       CONTEXT_ALL | CONTEXT_XSTATE,
@@ -1040,6 +1048,15 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
         for(int i = 0; i < NumberOfRegisters; i++)
             titcontext->YmmRegisters[i].High = Avx[i];
     }
+
+    if(Sse != NULL && Avx != NULL)
+        EngineContextCacheStore(hActiveThread, ContextCacheAvx, titcontext->YmmRegisters, sizeof(titcontext->YmmRegisters), generation);
+
+    // The legacy part of the context is the one of CONTEXT_ALL: one system call fills both caches
+    CONTEXT full;
+    memcpy(&full, Context, sizeof(full));
+    full.ContextFlags = EngineContextCacheFlags;
+    EngineContextCacheStore(hActiveThread, ContextCacheFull, &full, sizeof(full), generation);
 
     return true;
 }
@@ -1178,6 +1195,10 @@ __declspec(dllexport) bool TITCALL GetAVX512Context(HANDLE hActiveThread, TITAN_
     if((FeatureMask & XSTATE_MASK_AVX512) == 0)  //XSTATE_MASK_AVX512
         return GetAVX512ContextFallbackToAVX(hActiveThread, titcontext);
 
+    uint64_t generation;
+    if(EngineContextCacheLoad(hActiveThread, ContextCacheAvx512, titcontext, sizeof(*titcontext), generation))
+        return true;
+
     DWORD ContextSize = 0;
     BOOL Success = _InitializeContext(NULL,
                                       CONTEXT_ALL | CONTEXT_XSTATE,
@@ -1251,6 +1272,9 @@ __declspec(dllexport) bool TITCALL GetAVX512Context(HANDLE hActiveThread, TITAN_
         for(int i = 0; i < MIN(FeatureLengthAvx512_KMASK / sizeof(ULONGLONG), _countof(titcontext->Opmask)); i++)
             titcontext->Opmask[i] = Avx512_KMASK[i];
     }
+
+    if(Sse != NULL && Avx != NULL && Avx512_KMASK != NULL && Avx512_ZMM_H != NULL)
+        EngineContextCacheStore(hActiveThread, ContextCacheAvx512, titcontext, sizeof(*titcontext), generation);
 
     return true;
 }

@@ -4,6 +4,8 @@
 #include "Global.Debugger.h"
 #include "Global.Engine.h"
 #include "Global.Handle.h"
+#include "Global.Threader.h"
+#include <unordered_map>
 
 #ifdef _WIN64
 //https://stackoverflow.com/a/869597/1806760
@@ -167,13 +169,11 @@ EngineContextMode EngineGetCurrentContextMode()
 #ifndef _WIN64
     return EngineContextMode::X86;
 #else
-    HANDLE hThread = EngineOpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, false, DBGEvent.dwThreadId);
-    if(hThread == NULL)
+    EngineEventThread hThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION);
+    if(hThread.get() == NULL)
         return EngineContextMode::X64;
 
-    auto mode = EngineGetThreadContextMode(hThread);
-    EngineCloseHandle(hThread);
-    return mode;
+    return EngineGetThreadContextMode(hThread.get());
 #endif
 }
 
@@ -408,3 +408,200 @@ bool InitXState()
             _LocateXStateFeature != NULL &&
             _SetXStateFeaturesMask != NULL);
 }
+// Thread context cache
+static SRWLOCK contextCacheLock = SRWLOCK_INIT;
+static bool contextCacheActive = false;
+static DWORD contextCacheOwner = 0; // debug loop thread
+static uint64_t contextCacheGeneration = 0;
+static std::unordered_map<uint64_t, std::vector<uint8_t>> contextCache;
+
+static uint64_t ContextCacheKey(DWORD ThreadId, EngineContextCacheKind kind)
+{
+    return (uint64_t(ThreadId) << 8) | kind;
+}
+
+static bool ContextCacheIsOwner()
+{
+    AcquireSRWLockShared(&contextCacheLock);
+    bool owner = contextCacheActive && contextCacheOwner == GetCurrentThreadId();
+    ReleaseSRWLockShared(&contextCacheLock);
+    return owner;
+}
+
+static DWORD ContextCacheThreadId(HANDLE hThread)
+{
+    // The handles of hListThread (only modified by the debug loop thread) stay valid until the
+    // exit of their thread is continued: no system call for them
+    if(ContextCacheIsOwner())
+    {
+        for(auto & thread : hListThread)
+            if(thread.hThread == hThread)
+                return thread.dwThreadId;
+    }
+    return GetThreadId(hThread);
+}
+
+static void ContextCacheReset(bool active)
+{
+    AcquireSRWLockExclusive(&contextCacheLock);
+    contextCache.clear();
+    contextCacheActive = active;
+    contextCacheOwner = active ? GetCurrentThreadId() : 0;
+    contextCacheGeneration++;
+    ReleaseSRWLockExclusive(&contextCacheLock);
+}
+
+void EngineContextCacheBegin()
+{
+    ContextCacheReset(engineContextCache);
+}
+
+void EngineContextCacheEnd()
+{
+    ContextCacheReset(false);
+}
+
+bool EngineContextCacheActive()
+{
+    AcquireSRWLockShared(&contextCacheLock);
+    bool active = contextCacheActive;
+    ReleaseSRWLockShared(&contextCacheLock);
+    return active;
+}
+
+EngineEventThread::EngineEventThread(DWORD dwDesiredAccess)
+{
+    // hListThread is only modified by the debug loop thread
+    if(ContextCacheIsOwner())
+    {
+        for(auto & thread : hListThread)
+        {
+            if(thread.dwThreadId == DBGEvent.dwThreadId && thread.hThread != NULL && thread.hThread != INVALID_HANDLE_VALUE)
+            {
+                mHandle = thread.hThread;
+                return;
+            }
+        }
+    }
+    mHandle = EngineOpenThread(dwDesiredAccess, false, DBGEvent.dwThreadId);
+    mOwned = true;
+}
+
+EngineEventThread::~EngineEventThread()
+{
+    if(mOwned && mHandle != NULL)
+        EngineCloseHandle(mHandle);
+}
+
+void EngineContextCacheInvalidate(HANDLE hThread)
+{
+    DWORD ThreadId = ContextCacheThreadId(hThread);
+    AcquireSRWLockExclusive(&contextCacheLock);
+    if(contextCacheActive)
+    {
+        if(ThreadId == 0)
+            contextCache.clear();
+        else
+        {
+            contextCache.erase(ContextCacheKey(ThreadId, ContextCacheFull));
+            contextCache.erase(ContextCacheKey(ThreadId, ContextCacheAvx));
+            contextCache.erase(ContextCacheKey(ThreadId, ContextCacheAvx512));
+        }
+        contextCacheGeneration++;
+    }
+    ReleaseSRWLockExclusive(&contextCacheLock);
+}
+
+bool EngineContextCacheLoad(HANDLE hThread, EngineContextCacheKind kind, void* data, size_t size, uint64_t & generation)
+{
+    DWORD ThreadId = ContextCacheThreadId(hThread);
+    bool hit = false;
+    AcquireSRWLockShared(&contextCacheLock);
+    generation = contextCacheActive && ThreadId != 0 ? contextCacheGeneration : 0;
+    if(generation != 0)
+    {
+        auto found = contextCache.find(ContextCacheKey(ThreadId, kind));
+        if(found != contextCache.end() && found->second.size() == size)
+        {
+            memcpy(data, found->second.data(), size);
+            hit = true;
+        }
+    }
+    ReleaseSRWLockShared(&contextCacheLock);
+    return hit;
+}
+
+void EngineContextCacheStore(HANDLE hThread, EngineContextCacheKind kind, const void* data, size_t size, uint64_t generation)
+{
+    if(generation == 0)
+        return;
+    DWORD ThreadId = ContextCacheThreadId(hThread);
+    if(ThreadId == 0)
+        return;
+    AcquireSRWLockExclusive(&contextCacheLock);
+    // A write or the end of the event since the load makes the data stale
+    if(contextCacheActive && generation == contextCacheGeneration)
+    {
+        auto p = (const uint8_t*)data;
+        contextCache[ContextCacheKey(ThreadId, kind)].assign(p, p + size);
+    }
+    ReleaseSRWLockExclusive(&contextCacheLock);
+}
+
+#pragma push_macro("GetThreadContext")
+#pragma push_macro("SetThreadContext")
+#undef GetThreadContext
+#undef SetThreadContext
+
+BOOL WINAPI EngineCacheGetThreadContext(HANDLE hThread, LPCONTEXT lpContext)
+{
+    const DWORD cachedFlags = EngineContextCacheFlags;
+    const DWORD flags = lpContext->ContextFlags;
+    // XSTATE contexts have a variable layout: GetAVXContext/GetAVX512Context cache their result
+    if((flags & ~cachedFlags) != 0 || !EngineContextCacheActive())
+        return GetThreadContext(hThread, lpContext);
+
+    CONTEXT full;
+    uint64_t generation;
+    // When the AVX registers are read at every event (trace recording), GetAVXContext gets them
+    // with the rest of the context in the same system call and fills both caches
+    TITAN_ENGINE_CONTEXT_t avx;
+    if(!EngineContextCacheLoad(hThread, ContextCacheFull, &full, sizeof(full), generation)
+            && !(engineContextCacheAvx && GetAVXContext(hThread, &avx) && EngineContextCacheLoad(hThread, ContextCacheFull, &full, sizeof(full), generation)))
+    {
+        memset(&full, 0, sizeof(full));
+        full.ContextFlags = cachedFlags;
+        if(!GetThreadContext(hThread, &full))
+            return GetThreadContext(hThread, lpContext);
+        EngineContextCacheStore(hThread, ContextCacheFull, &full, sizeof(full), generation);
+    }
+    memcpy(lpContext, &full, sizeof(CONTEXT));
+    lpContext->ContextFlags = flags;
+    return TRUE;
+}
+
+BOOL WINAPI EngineCacheSetThreadContext(HANDLE hThread, const CONTEXT* lpContext)
+{
+    EngineContextCacheInvalidate(hThread);
+    BOOL result = SetThreadContext(hThread, lpContext);
+    EngineContextCacheInvalidate(hThread);
+    return result;
+}
+
+#pragma pop_macro("SetThreadContext")
+#pragma pop_macro("GetThreadContext")
+
+#ifdef _WIN64
+#pragma push_macro("Wow64SetThreadContext")
+#undef Wow64SetThreadContext
+
+BOOL WINAPI EngineCacheWow64SetThreadContext(HANDLE hThread, const WOW64_CONTEXT* lpContext)
+{
+    EngineContextCacheInvalidate(hThread);
+    BOOL result = Wow64SetThreadContext(hThread, lpContext);
+    EngineContextCacheInvalidate(hThread);
+    return result;
+}
+
+#pragma pop_macro("Wow64SetThreadContext")
+#endif //_WIN64

@@ -34,6 +34,16 @@ static void ClearTrapFlagFromStack()
     }
 }
 
+// StepIntoThreads may set the trap flag of a thread whose step is already pending (it cannot see the
+// queued event): clear it before the callback, which arms the next step if it wants one
+static void engineClearEventTrapFlag()
+{
+    EngineEventThread hThread(THREAD_GETSETSUSPEND);
+    ULONG_PTR flags = GetContextDataEx(hThread.get(), UE_EFLAGS);
+    if(flags & UE_TRAP_FLAG)
+        SetContextDataEx(hThread.get(), UE_EFLAGS, flags & ~UE_TRAP_FLAG);
+}
+
 static void engineStep()
 {
     EnterCriticalSection(&engineStepActiveCr);
@@ -50,6 +60,8 @@ static void engineStep()
             auto cbStep = fCustomBreakPoint(it->second.callback);
             engineStepThreads.erase(it);
             LeaveCriticalSection(&engineStepActiveCr);
+            if(engineStepThreadsActive)
+                engineClearEventTrapFlag();
             cbStep();
         }
         else
@@ -65,6 +77,24 @@ static void engineStep()
     {
         LeaveCriticalSection(&engineStepActiveCr);
     }
+}
+
+// True when the single-step of the current event belongs to a step cancelled by StepCancelThreads
+static bool engineTakeStaleStep()
+{
+    EnterCriticalSection(&engineStepActiveCr);
+    bool stale = engineStepThreads.count(DBGEvent.dwThreadId) == 0 && engineStaleSteps.count(DBGEvent.dwThreadId) != 0;
+    LeaveCriticalSection(&engineStepActiveCr);
+    if(!stale)
+        return false;
+    // never a hardware breakpoint
+    EngineEventThread hThread(THREAD_GETSETSUSPEND);
+    if(GetContextDataEx(hThread.get(), UE_DR6) & 0xF)
+        return false;
+    EnterCriticalSection(&engineStepActiveCr);
+    engineStaleSteps.erase(DBGEvent.dwThreadId);
+    LeaveCriticalSection(&engineStepActiveCr);
+    return true;
 }
 
 __declspec(dllexport) void TITCALL DebugLoop()
@@ -163,6 +193,9 @@ __declspec(dllexport) void TITCALL DebugLoop()
                 continue;
             }
         }
+
+        // Event received: the debuggee is frozen until ContinueDebugEvent
+        EngineContextCacheBegin();
 
         // Event received, reset timeout counter
         consecutiveTimeouts = 0;
@@ -433,6 +466,7 @@ __declspec(dllexport) void TITCALL DebugLoop()
             // a later single-step could fire the dead thread's callback.
             EnterCriticalSection(&engineStepActiveCr);
             engineStepThreads.erase(DBGEvent.dwThreadId);
+            engineStaleSteps.erase(DBGEvent.dwThreadId);
             LeaveCriticalSection(&engineStepActiveCr);
         }
         break;
@@ -817,6 +851,11 @@ __declspec(dllexport) void TITCALL DebugLoop()
                         }
                         engineStep();
                     }
+                }
+                else if(engineTakeStaleStep())
+                {
+                    //single-step of a thread whose step was cancelled by StepCancelThreads
+                    DBGCode = DBG_CONTINUE;
                 }
                 else //no resetting needed (debugger reached hardware breakpoint or the user stepped)
                 {
@@ -1432,7 +1471,8 @@ __declspec(dllexport) void TITCALL DebugLoop()
         break;
         }
 
-        if(IsDbgReplyLaterSupported && DBGEvent.dwDebugEventCode != EXIT_THREAD_DEBUG_EVENT)
+        // The handle is only opened to check that the thread still exists before the others are suspended
+        if(IsDbgReplyLaterSupported && synchronizedStep && DBGEvent.dwDebugEventCode != EXIT_THREAD_DEBUG_EVENT)
         {
             hActiveThread = EngineOpenThread(THREAD_GETSETSUSPEND, false, DBGEvent.dwThreadId);
             if(hActiveThread != NULL)
@@ -1470,6 +1510,7 @@ continue_dbg_event:
                 ThreaderResumeProcess();
             }
         }
+        EngineContextCacheEnd();
         if(!ContinueDebugEvent(DBGEvent.dwProcessId, DBGEvent.dwThreadId, DBGCode)) //continue debugging
         {
             break;
@@ -1485,6 +1526,8 @@ continue_dbg_event:
         if(!ThreaderGetThreadInfo(0, DBGEvent.dwThreadId)) //switch thread
             DBGEvent.dwThreadId = dbgProcessInformation.dwThreadId;
     }
+
+    EngineContextCacheEnd();
 
     if(!SecondChance) //debugger didn't close with a second chance exception (normal exit)
     {

@@ -26,6 +26,17 @@
 #include <shellapi.h>
 #include <tlhelp32.h>
 
+// Thread context cache (Global.Engine.Context.cpp): every context read and write of the engine
+// goes through it. Reads are served from the cache while a debug event is being handled.
+BOOL WINAPI EngineCacheGetThreadContext(HANDLE hThread, LPCONTEXT lpContext);
+BOOL WINAPI EngineCacheSetThreadContext(HANDLE hThread, const CONTEXT* lpContext);
+#define GetThreadContext EngineCacheGetThreadContext
+#define SetThreadContext EngineCacheSetThreadContext
+#ifdef _WIN64
+BOOL WINAPI EngineCacheWow64SetThreadContext(HANDLE hThread, const WOW64_CONTEXT* lpContext);
+#define Wow64SetThreadContext EngineCacheWow64SetThreadContext
+#endif //_WIN64
+
 
 //stl/crt
 #include <vector>
@@ -512,6 +523,8 @@ typedef struct HOOK_ENTRY
 #define UE_ENGINE_MEMBP_ALT 11
 #define UE_ENGINE_DISABLE_ASLR 12
 #define UE_ENGINE_SAFE_STEP 13
+#define UE_ENGINE_CONTEXT_CACHE 14
+#define UE_ENGINE_CONTEXT_CACHE_AVX 15
 
 #define UE_OPTION_REMOVEALL 1
 #define UE_OPTION_DISABLEALL 2
