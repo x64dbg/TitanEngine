@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <Windows.h>
 
 extern HARDWARE_DATA DebugRegister[4];
@@ -42,6 +43,11 @@ struct EngineStepThreadState
     DWORD count;     // remaining repeats (0 = fire the callback on the next step)
 };
 extern std::unordered_map<DWORD, EngineStepThreadState> engineStepThreads;
+// Threads whose single-step was cancelled by StepCancelThreads after they executed their
+// instruction: the pending STATUS_SINGLE_STEP event is swallowed when it arrives
+extern std::unordered_set<DWORD> engineStaleSteps;
+// StepIntoThreads is in use: a thread may have its trap flag set again while its step is pending
+extern bool engineStepThreadsActive;
 extern bool engineProcessIsNowDetached;
 extern DWORD DBGCode;
 extern bool engineFileIsBeingDebugged;

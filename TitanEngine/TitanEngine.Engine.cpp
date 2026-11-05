@@ -62,6 +62,10 @@ __declspec(dllexport) void TITCALL SetEngineVariable(DWORD VariableId, bool Vari
         if(!VariableSet)
             EngineContextCacheEnd();
     }
+    else if(VariableId == UE_ENGINE_CONTEXT_CACHE_AVX)
+    {
+        engineContextCacheAvx = VariableSet;
+    }
 }
 
 __declspec(dllexport) bool TITCALL EngineCreateMissingDependencies(char* szFileName, char* szOutputFolder, bool LogCreatedFiles)

@@ -555,7 +555,7 @@ void EngineContextCacheStore(HANDLE hThread, EngineContextCacheKind kind, const 
 
 BOOL WINAPI EngineCacheGetThreadContext(HANDLE hThread, LPCONTEXT lpContext)
 {
-    const DWORD cachedFlags = CONTEXT_ALL | CONTEXT_FLOATING_POINT | CONTEXT_EXTENDED_REGISTERS;
+    const DWORD cachedFlags = EngineContextCacheFlags;
     const DWORD flags = lpContext->ContextFlags;
     // XSTATE contexts have a variable layout: GetAVXContext/GetAVX512Context cache their result
     if((flags & ~cachedFlags) != 0 || !EngineContextCacheActive())
@@ -563,7 +563,11 @@ BOOL WINAPI EngineCacheGetThreadContext(HANDLE hThread, LPCONTEXT lpContext)
 
     CONTEXT full;
     uint64_t generation;
-    if(!EngineContextCacheLoad(hThread, ContextCacheFull, &full, sizeof(full), generation))
+    // When the AVX registers are read at every event (trace recording), GetAVXContext gets them
+    // with the rest of the context in the same system call and fills both caches
+    TITAN_ENGINE_CONTEXT_t avx;
+    if(!EngineContextCacheLoad(hThread, ContextCacheFull, &full, sizeof(full), generation)
+            && !(engineContextCacheAvx && GetAVXContext(hThread, &avx) && EngineContextCacheLoad(hThread, ContextCacheFull, &full, sizeof(full), generation)))
     {
         memset(&full, 0, sizeof(full));
         full.ContextFlags = cachedFlags;

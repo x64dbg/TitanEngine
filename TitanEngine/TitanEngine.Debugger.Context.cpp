@@ -1052,6 +1052,12 @@ __declspec(dllexport) bool TITCALL GetAVXContext(HANDLE hActiveThread, TITAN_ENG
     if(Sse != NULL && Avx != NULL)
         EngineContextCacheStore(hActiveThread, ContextCacheAvx, titcontext->YmmRegisters, sizeof(titcontext->YmmRegisters), generation);
 
+    // The legacy part of the context is the one of CONTEXT_ALL: one system call fills both caches
+    CONTEXT full;
+    memcpy(&full, Context, sizeof(full));
+    full.ContextFlags = EngineContextCacheFlags;
+    EngineContextCacheStore(hActiveThread, ContextCacheFull, &full, sizeof(full), generation);
+
     return true;
 }
 

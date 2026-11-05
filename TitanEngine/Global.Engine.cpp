@@ -21,6 +21,7 @@ bool engineMembpAlt = false;
 bool engineDisableAslr = false;
 bool engineSafeStep = true;
 bool engineContextCache = true;
+bool engineContextCacheAvx = false;
 
 char engineFoundDLLName[512] = {0};
 char engineFoundAPIName[512] = {0};

@@ -24,6 +24,7 @@ extern bool engineMembpAlt;
 extern bool engineDisableAslr;
 extern bool engineSafeStep;
 extern bool engineContextCache;
+extern bool engineContextCacheAvx; // read the AVX registers with the rest of the context
 
 //Global.Engine.Functions
 void EngineInit();

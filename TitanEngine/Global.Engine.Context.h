@@ -47,6 +47,9 @@ enum EngineContextCacheKind
     ContextCacheAvx512 = 2, // TITAN_ENGINE_CONTEXT_AVX512_t
 };
 
+// ContextFlags of the ContextCacheFull entries
+const DWORD EngineContextCacheFlags = CONTEXT_ALL | CONTEXT_FLOATING_POINT | CONTEXT_EXTENDED_REGISTERS;
+
 void EngineContextCacheBegin();
 void EngineContextCacheEnd();
 bool EngineContextCacheActive();
